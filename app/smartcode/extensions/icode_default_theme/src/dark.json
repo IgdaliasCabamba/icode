@@ -1,0 +1,237 @@
+{
+    "global-styles":{
+        "drop-shadow-color":"#000000"
+    },
+    "pyconsole-styles":{
+        "keyword":["#c683f2"],
+        "operator":["#f283a8"],
+        "brace":["darkGray"],
+        "defclass":["#f7ffad"],
+        "string":["#d9715d"],
+        "string2":["#d9715d"],
+        "comment":["#69b562"],
+        "self":["#469afa"],
+        "numbers":["#afe37b"],
+        "inprompt":["darkBlue"],
+        "outprompt":["darkRed"]
+    },
+    "terminal-styles":{
+        "fg":{    
+            "0": "#000",
+            "1": "#b00",
+            "2": "#3bb860",
+            "3": "#eded53",
+            "4": "#698cf5",
+            "5": "#f760f7",
+            "6": "#6af7f7",
+            "7": "#bbb",
+            "8": "#666",
+            "9": "#ff5454",
+            "10": "#72f772",
+            "11": "#f7f74f",
+            "12": "#5784f7",
+            "13": "#f760f7",
+            "14": "#000",
+            "15": "#fff"
+        },
+        "bg":{
+            "0": "transparent",
+            "1": "transparent",
+            "2": "transparent",
+            "3": "transparent",
+            "4": "transparent",
+            "5": "transparent",
+            "6": "transparent",
+            "7": "transparent",
+            "12": "transparent",
+            "14": "transparent",  
+            "15": "#fff"  
+        }
+    },
+    "lexer-styles":{
+        "DefaultColor":"#ffffff",
+        "DefaultPaper":"#1e1e1e",
+
+        "Default":{
+            "fg":"#ffffff",
+            "bg":"#1e1e1e"
+        },
+        "Comment":{
+            "fg":"#69b562",
+            "bg":"#1e1e1e"
+        },
+        "Number":{
+            "fg":"#afe37b",
+            "bg":"#1e1e1e"
+        },
+        "DoubleQuotedString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "SingleQuotedString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "Keyword":{
+            "fg":"#c683f2",
+            "bg":"#1e1e1e"
+        },
+        "TripleSingleQuotedString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "TripleDoubleQuotedString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "ClassName":{
+            "fg":"#499c44",
+            "bg":"#1e1e1e"
+        },
+        "FunctionMethodName":{
+            "fg":"#f7ffad",
+            "bg":"#1e1e1e"
+        },
+        "Operator":{
+            "fg":"#f283a8",
+            "bg":"#1e1e1e"
+        },
+        "Identifier":{
+            "fg":"#dddddd",
+            "bg":"#1e1e1e"
+        },
+        "CommentBlock":{
+            "fg":"#69b562",
+            "bg":"#1e1e1e"
+        },
+        "UnclosedString":{
+            "fg":"red",
+            "bg":"#1e1e1e"
+        },
+        "HighlightedIdentifier":{
+            "fg":"#469afa",
+            "bg":"#1e1e1e"
+        },
+        "Decorator":{
+            "fg":"#457340",
+            "bg":"#1e1e1e"
+        },
+        "DoubleQuotedFString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "SingleQuotedFString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "TripleSingleQuotedFString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "TripleDoubleQuotedFString":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "Property":{
+            "fg":"#469afa",
+            "bg":"#1e1e1e"
+        },
+        "KeywordLD":{
+            "fg":"#c683f2",
+            "bg":"#1e1e1e"
+        },
+        "IRI":{
+            "fg":"#f7ffad",
+            "bg":"#1e1e1e"
+        },
+        "IRICompact":{
+            "fg":"#f7ffad",
+            "bg":"#1e1e1e"
+        },
+        "EscapeSequence":{
+            "fg":"#f7ffad",
+            "bg":"#1e1e1e"
+        },
+        "Error":{
+            "fg":"yellow",
+            "bg":"red"
+        },
+        "String":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "CommentDoc":{
+            "fg":"#d9715d",
+            "bg":"#1e1e1e"
+        },
+        "UUID":{
+            "fg":"red",
+            "bg":"white"
+        },
+        "PreProcessor":{
+            "fg":"blue",
+            "bg":"white"
+        },
+        "VerbatimString":{
+            "fg":"brown",
+            "bg":"white"
+        },
+        "Regex":{
+            "fg":"green",
+            "bg":"white"
+        },
+        "CommentLine":{
+            "fg":"#69b562",
+            "bg":"#1e1e1e"
+        },
+        "CommentLineDoc":{
+            "fg":"pink",
+            "bg":"white"
+        },
+        "KeywordSet2":{
+            "fg":"yellow",
+            "bg":"white"
+        },
+        "CommentDocKeyword":{
+            "fg":"balck",
+            "bg":"white"
+        },
+        "CommentDocKeywordError":{
+            "fg":"gray",
+            "bg":"white"
+        },
+        "GlobalClass":{
+            "fg":"#499c44",
+            "bg":"#1e1e1e"
+        },
+        "RawString":{
+            "fg":"red",
+            "bg":"#1e1e1e"
+        },
+        "TripleQuotedVerbatimString":{
+            "fg":"blue",
+            "bg":"#1e1e1e"
+        },
+        "HashQuotedString":{
+            "fg":"green",
+            "bg":"#1e1e1e"
+        },
+        "PreProcessorComment":{
+            "fg":"brown",
+            "bg":"#1e1e1e"
+        },
+        "PreProcessorCommentLineDoc":{
+            "fg":"pink",
+            "bg":"#1e1e1e"
+        },
+        "UserLiteral":{
+            "fg":"pink",
+            "bg":"#1e1e1e"
+        },
+        "TaskMarker":{
+            "fg":"violet",
+            "bg":"#1e1e1e"
+        }
+    }
+    
+}

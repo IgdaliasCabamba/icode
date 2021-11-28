@@ -1,0 +1,20 @@
+{
+    //Application Language
+    "lang":"en",
+    
+    //Icons Package and Theme
+    "icons-package":"icode-icons",
+    "icons-theme":"light",
+    
+    //QApplication Palette and Theme
+    "palette":"dark",
+    "qt-theme":null,
+    
+    //App Theme and Window Style
+    "theme":"icode_default_theme",
+    "window-style":"custom",
+
+    //Extensions
+    "extensions":["icode_sky_view"]
+    
+}

@@ -1,0 +1,7 @@
+build/
+commits/
+dist/
+smartenv/
+app/.cache/
+tests/local/
+

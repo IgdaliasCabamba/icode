@@ -1,0 +1,12 @@
+{
+    "widget-colors":{
+        "*":{
+            "fg":"#111111",
+            "bg":"#c5c5c6"
+        }
+    },
+    "lexer-colors":{
+        "keyword":"#c683f2"
+    }
+    
+}
