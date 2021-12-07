@@ -8,6 +8,7 @@ from functions import getfn, filefn
 import textwrap
 import re
 import jedi
+from . import iconsts
 
 FUNCTION_REGEX = re.compile(r"(def)\s([_a-zA-Z0-9-]*)")
 CLASS_REGEX = re.compile(r"(class)\s([_a-zA-Z0-9-]*)")
@@ -151,10 +152,10 @@ class IdeTools(QObject):
         
         if len(jedi_help.docstring()) > 2 and jedi_help.docstring() not in {""," "}:
             
-            wrapper = textwrap.TextWrapper(width=50)  
+            wrapper = textwrap.TextWrapper(width=iconsts.JEDI_TEXT_WRAP_WIDTH)  
             dedented_text = textwrap.dedent(text=jedi_help.docstring())
             original = wrapper.fill(text=dedented_text)
-            shortened = textwrap.shorten(text=original, width=400)
+            shortened = textwrap.shorten(text=original, width=iconsts.JEDI_HELP_SHORTEN_WIDTH)
             shortened_wrapped = wrapper.fill(text=shortened)
 
             ihelp_string += f"<hr><span><h4>Doc:</h4><p style = 'color:{self.colors['TripleSingleQuotedFString']['fg']}'>{shortened_wrapped}</p></span>"
@@ -459,7 +460,7 @@ class Autocompletions(QObject):
                                     params_str+=", "
                                 params_str+=")"
                                 
-                                wrapper = textwrap.TextWrapper(width=90)  
+                                wrapper = textwrap.TextWrapper(width=iconsts.JEDI_SIGNATURES_WRAP_WIDTH)
                                 dedented_text = textwrap.dedent(text=params_str)
                                 params_wrapped = wrapper.fill(text=dedented_text)
 

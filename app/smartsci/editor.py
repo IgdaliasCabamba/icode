@@ -15,6 +15,7 @@ from .codesmart import Editor
 from .minimap import MiniMapBox
 from .editor_core import IFile
 from functions import filefn, getfn
+from . import iconsts
 
 class FileMenu(QMenu):
     def __init__(self, parent=None):
@@ -61,7 +62,7 @@ class EditorView(QFrame):
     
     def init_ui(self) -> None:        
         self.layout=QVBoxLayout(self)
-        self.layout.setSpacing(0)
+        self.layout.setSpacing(iconsts.EDITOR_LAYOUT_SPACING)
         self.setLayout(self.layout)                
         self.layout.setContentsMargins(0,0,0,0)
 
@@ -106,9 +107,9 @@ class EditorView(QFrame):
         self.div_mirror.addWidget(self.minimap_mirror)
 
         self.div.addWidget(self.div_mirror)
-        self.div.setSizes([100,100])
+        self.div.setSizes(iconsts.EDITOR_DIV_SIZES)
         
-        self.setMinimumWidth(200)
+        self.setMinimumWidth(iconsts.EDITOR_MIN_WIDTH)
 
         self.editor_main.update_document()
         self.editor_mirror.update_document()
@@ -120,6 +121,7 @@ class EditorView(QFrame):
         self.join_in_group()
         
         self.hbox = QHBoxLayout()
+        self.hbox.setSpacing(0)
         
         self.up_map = QFrame(self)
         self.up_map.setObjectName("up-map")
@@ -211,11 +213,11 @@ class EditorView(QFrame):
         self.hbox.addWidget(self.warnings_info)
         self.hbox.addWidget(self.errors_info)
         
-        self.up_map.setFixedHeight(24)
+        self.up_map.setFixedHeight(iconsts.UP_MAP_FIXED_HEIGHT)
         
         self.drop_shadow = QGraphicsDropShadowEffect(self)
-        self.drop_shadow.setBlurRadius(2)
-        self.drop_shadow.setOffset(0, 0)
+        self.drop_shadow.setBlurRadius(iconsts.UP_MAP_SHADOW_BLURRADIUS_STATE0)
+        self.drop_shadow.setOffset(iconsts.UP_MAP_SHADOW_Y_OFFSET_STATE0, iconsts.UP_MAP_SHADOW_X_OFFSET_STATE0)
         self.drop_shadow.setColor(QColor(0,0,0))
         self.up_map.setGraphicsEffect(self.drop_shadow)
     
@@ -253,8 +255,6 @@ class EditorView(QFrame):
             if not text and not icon:
                 widget.setVisible(False)
                 
-        
-            
     def split_horizontally(self):
         self.div.setOrientation(Qt.Vertical)
         self.div_mirror.show()
@@ -277,13 +277,13 @@ class EditorView(QFrame):
     
     def update_shadow(self, value):
         if value > 2:
-            self.drop_shadow.setBlurRadius(10)
-            self.drop_shadow.setOffset(0, 3)
+            self.drop_shadow.setBlurRadius(iconsts.UP_MAP_SHADOW_BLURRADIUS_STATE1)
+            self.drop_shadow.setOffset(iconsts.UP_MAP_SHADOW_Y_OFFSET_STATE1, iconsts.UP_MAP_SHADOW_X_OFFSET_STATE1)
         else:
             w = self.editor.minimap.size().width()
-            x_offset = self.size().width() - w - 200
-            self.drop_shadow.setBlurRadius(2)
-            self.drop_shadow.setOffset(x_offset, 0)
+            y_offset = self.size().width() - w - 200
+            self.drop_shadow.setBlurRadius(iconsts.UP_MAP_SHADOW_BLURRADIUS_STATE0)
+            self.drop_shadow.setOffset(y_offset, iconsts.UP_MAP_SHADOW_X_OFFSET_STATE0)
 
     @property
     def editor(self):

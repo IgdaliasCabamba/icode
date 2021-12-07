@@ -2,6 +2,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QFileSystemWatcher, QFile
 from functions import filefn
 from PyQt5.Qsci import QsciScintilla
 import pathlib
+from . import iconsts
 
 class Connector(QObject):
     
@@ -29,22 +30,22 @@ class Connector(QObject):
         code_page=self.editor.SendScintilla(QsciScintilla.SCI_GETCODEPAGE)
         eol_mode=self.editor.eolMode()
         
-        if eol_mode == 0:
+        if eol_mode == iconsts.EOL_WINDOWS:
             eol_name = "CRLF"
-        elif self.editor.eolMode() == 1:
+        elif eol_mode == iconsts.EOL_MAC:
             eol_name = "CR"
         else:
             eol_name = "LF"
 
-        if code_page == 932:
+        if code_page == iconsts.CODE_PAGE_JAPANESE:
             code_name = "Japanese Shift-JIS"
-        elif code_page == 936:
+        elif code_page == iconsts.CODE_PAGE_SIMPLIFIED_CHINESE:
             code_name = "Simplified Chinese GBK"
-        elif code_page == 949:
+        elif code_page == iconsts.CODE_PAGE_KOREAN_UNIFIED:
             code_name = "Korean Unified Hangul Code"
-        elif code_page == 950:
+        elif code_page == iconsts.CODE_PAGE_TRADITIONAL_CHINESE:
             code_name = "Traditional Chinese Big5"
-        elif code_page == 1361:
+        elif code_page == iconsts.CODE_PAGE_KOREAN_JOHAB:
             code_name = "Korean Johab"
         else:
             code_name = "UTF-8"

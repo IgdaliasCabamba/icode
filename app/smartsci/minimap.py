@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt, QPropertyAnimation
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QSplitter, QScrollBar, QGraphicsDropShadowEffect
 from PyQt5.QtGui import QColor
 from PyQt5.Qsci import *
+from . import iconsts
 
 class MiniMap(QsciScintilla):
     def __init__(self, editor, parent) -> None:
@@ -19,12 +20,12 @@ class MiniMap(QsciScintilla):
         self.SendScintilla(QsciScintilla.SCI_SETBUFFEREDDRAW, False)
         self.SendScintilla(QsciScintilla.SCI_SETHSCROLLBAR, False)
         self.SendScintilla(QsciScintilla.SCI_SETVSCROLLBAR, False)
-        self.zoomTo(-10)
+        self.zoomTo(iconsts.MINIMAP_MINIMUM_ZOOM)
         self.SendScintilla(QsciScintilla.SCI_SETREADONLY, True)
         self.SendScintilla(QsciScintilla.SCI_HIDESELECTION, True)
-        self.SendScintilla(QsciScintilla.SCI_SETCURSOR, 8)
-        self.setExtraAscent (-1)
-        self.setExtraDescent (-1)
+        self.SendScintilla(QsciScintilla.SCI_SETCURSOR, iconsts.MINIMAP_CURSOR)
+        self.setExtraAscent(iconsts.MINIMAP_EXTRA_ASCENT)
+        self.setExtraDescent(iconsts.MINIMAP_EXTRA_DESCENT)
         
         self.indicatorDefine(QsciScintilla.FullBoxIndicator, 1)
         self.setIndicatorForegroundColor(QColor("red"), 1)
@@ -40,16 +41,16 @@ class MiniMap(QsciScintilla):
         self.slider = SliderArea(self)
         self.slider.show()
 
-        self.setFixedWidth(160)
+        self.setFixedWidth(iconsts.MINIMAP_FIXED_WIDTH)
     
     def update_scrollbar_value(self, value):
         self.verticalScrollBar().setValue(value)
         
     def on_mouse_enter(self):
-        self.slider.change_transparency(15)
+        self.slider.change_transparency(iconsts.MINIMAP_SLIDER_OPACITY_MID)
 
     def on_mouse_leave(self):
-        self.slider.change_transparency(0)
+        self.slider.change_transparency(iconsts.MINIMAP_SLIDER_OPACITY_MIN)
 
     def line_from_position(self, point):
         position = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT,
@@ -136,10 +137,10 @@ class MiniMapBox(QFrame):
         self.layout.addWidget(self.minimap)
         self.layout.addWidget(self.scrollbar)
     
-        self.setFixedWidth(160)
+        self.setFixedWidth(iconsts.MINIMAP_BOX_FIXED_WIDTH)
         self.drop_shadow = QGraphicsDropShadowEffect(self)
-        self.drop_shadow.setBlurRadius(12)
-        self.drop_shadow.setOffset(-3, 0)
+        self.drop_shadow.setBlurRadius(iconsts.MINIMAP_BOX_SHADOW_BLURRADIUS)
+        self.drop_shadow.setOffset(iconsts.MINIMAP_BOX_SHADOW_Y_OFFSET, iconsts.MINIMAP_BOX_SHADOW_X_OFFSET)
         self.drop_shadow.setColor(QColor(0,0,0))
         self.drop_shadow.setEnabled(False)
         self.minimap.setGraphicsEffect(self.drop_shadow)
@@ -165,7 +166,7 @@ class MiniMapBox(QFrame):
     def update_lines(self):
         row, col = self.editor.getCursorPosition()
         width = self.editor.fontMetrics().boundingRect(self.editor.text(row)).width()
-        if (width-self.editor.geometry().width())*-1 < 50:
+        if (width-self.editor.geometry().width())*-1 < iconsts.MINIMAP_SHADOW_MIN_TEXT_WIDTH:
             self.drop_shadow.setEnabled(True)
             self.can_shadow = True
 
@@ -175,7 +176,7 @@ class MiniMapBox(QFrame):
 
             for row in range(self.editor.lines()):
                 width = self.editor.fontMetrics().boundingRect(self.editor.text(row)).width()
-                if (width-self.editor.geometry().width())*-1 < 50:
+                if (width-self.editor.geometry().width())*-1 < iconsts.MINIMAP_SHADOW_MIN_TEXT_WIDTH:
                     self.drop_shadow.setEnabled(True)
                     self.can_shadow = True
                     break
@@ -199,7 +200,7 @@ class ScrollBar(QScrollBar):
     
     def update_position(self):
         self.setValue(self.editor.verticalScrollBar().value())
-        self.setRange(0,self.editor.verticalScrollBar().maximum())
+        self.setRange(0, self.editor.verticalScrollBar().maximum())
         
 
 class SliderArea(QFrame):
@@ -211,8 +212,8 @@ class SliderArea(QFrame):
         self.pressed = False
         self.setMouseTracking(True)
         self.setCursor(Qt.OpenHandCursor)
-        self.change_transparency(0)
-        self.setFixedSize(160,80)
+        self.change_transparency(iconsts.MINIMAP_SLIDER_OPACITY_MIN)
+        self.setFixedSize(iconsts.MINIMAP_SLIDER_AREA_FIXED_SIZE)
     
     def change_transparency(self, bg:int):
         self.setStyleSheet("#minimap-slider{background-color:rgba(255,255,255,%d)}"%bg)
@@ -240,8 +241,8 @@ class SliderArea(QFrame):
     
     def leaveEvent(self, event):
         super().leaveEvent(event)
-        self.change_transparency(15)
+        self.change_transparency(iconsts.MINIMAP_SLIDER_OPACITY_MID)
 
     def enterEvent(self, event):
         super().enterEvent(event)
-        self.change_transparency(30)
+        self.change_transparency(iconsts.MINIMAP_SLIDER_OPACITY_MAX)

@@ -25,6 +25,8 @@ from gui.iterminals import PyConsole, Terminal
 from .igui import HeaderPushButton
 from data import note_file_path
 
+from functools import partial
+
 
 class ToolsMenu(QMenu):
     """
@@ -57,8 +59,21 @@ class OpenRecentSubMenu(QMenu):
         self.addAction(self.open_last_closed_tab)
 
         self.addSeparator()
+    
+    def set_recent_files(self, files, method):
+        added = []
+        max = len(files)
+        if max > 100:
+            max =  100
 
-
+        for i in range(max):
+            file = files[i]
+            if file not in added:
+                act = QAction(file, self)
+                act.triggered.connect(partial(method, file))
+                self.addAction(act)
+                added.append(file)
+            
 class HelpMenu(QMenu):
     """
     HelpMenu: a menu for help actions such as useful links

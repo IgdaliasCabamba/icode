@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, QSettings
 import smartlibs.jedit2 as ijson
 from system import BASE_PATH, SYS_SEP
+import components.consts as iconsts
 
 DATA_FILE=f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.json"
 CACHE_FILE = QSettings(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.ini", QSettings.IniFormat)
@@ -54,9 +55,6 @@ def save_window(window):
             CACHE_FILE.setValue("toolbar_action", i)
             break
             
-        
-    
-
 def restore_window(window):
     window_geometry = CACHE_FILE.value("window_geometry")
     window_state = CACHE_FILE.value("window_state")
@@ -75,18 +73,19 @@ def restore_window(window):
         window_object.setGeometry(window_geometry)
         window_object.center()
     else:
-        window_object.setGeometry(0, 0, 1000, 600)
+        window_object.setGeometry(iconsts.MAINWINDOW_BASE_GEOMETRY)
         window_object.center()
     
     if window_state is not None:
         state = int(window_state)
-        if state == 0:
+    
+        if state == iconsts.WINDOW_NO_STATE:
             window_object.setWindowState(Qt.WindowNoState)
-        elif state == 1:
+        elif state == iconsts.WINDOW_MINIMIZED:
             window_object.setWindowState(Qt.WindowMaximized)
-        elif state == 2:
+        elif state == iconsts.WINDOW_MAXIMIZED:
             window_object.setWindowState(Qt.WindowMaximized)
-        elif state == 4:
+        elif state == iconsts.WINDOW_FULLSCREEN:
             window_object.setWindowState(Qt.WindowFullScreen)
         else:
             window_object.setWindowState(Qt.WindowActive)

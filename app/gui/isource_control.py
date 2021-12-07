@@ -18,6 +18,11 @@ class GitMenu(QMenu):
         self.clone_repository = QAction("Clone Repository", self)
         self.addAction(self.clone_repository)
         self.addSeparator()
+        self.add_all = QAction("Add All", self)
+        self.addAction(self.add_all)
+        self.commit = QAction("Commit", self)
+        self.addAction(self.commit)
+        
 
 class StatusTree(QTreeView):
     
@@ -95,7 +100,7 @@ class StatusTree(QTreeView):
         
         for key, value in status_data.items():
             row = IStandardItem(self.icons.get_icon("file"), key, None, None, 0)
-            if value == 1:
+            if value in {1, 2}:
                 self.unmodified.appendRow(row)
                 row.setForeground(QColor(63, 242, 105))
                 unmodified_count += 1
@@ -105,7 +110,7 @@ class StatusTree(QTreeView):
                 self.untracked.appendRow(row)
                 total_count += 1
             
-            elif value == 257:
+            elif value in {256,257,258}:
                 self.modified.appendRow(row)
                 row.setForeground(QColor(212, 242, 63))
                 modified_count += 1
@@ -119,7 +124,7 @@ class StatusTree(QTreeView):
                 self.ignored.appendRow(row)
                 total_count += 1
 
-            if value not in {1,128,257,513,16384}:
+            if value not in {1,2,128,257,256,258,513,16384}:
                 print(key, value)
             else:
                 pass

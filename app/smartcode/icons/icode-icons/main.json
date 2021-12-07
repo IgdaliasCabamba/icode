@@ -1,7 +1,9 @@
 {   
     //menubar icons 
     "window-menubar-menu":"app/menu.png",
-
+	
+	"assistant-loading":"animations/loading.gif",
+	
     //toolbar icons 
     "toolbar-explorer":"app/file.png",
     "toolbar-search":"app/search.png",
@@ -33,6 +35,7 @@
 	//search icons
 	"search-reload":"app/reboot.png",
 	"search-options":"app/expand-arrow.png",
+	"search-loading":"animations/loading.gif",
 
     //extensions icons
     "extensions-installed":"app/installer.png",

@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
     QStackedLayout, QVBoxLayout,
     QGraphicsDropShadowEffect, QSizePolicy)
     
-from data import TerminalWidget
+from smartlibs.iterm import TerminalWidget
 from .igui import TerminalListWidgetItem
 from functions import getfn
 from smartlibs.pyqtconsole.console import PythonConsole

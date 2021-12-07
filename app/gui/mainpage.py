@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 from functions import getfn
 from .models import *
 from .igui import ScrollLabel
+from components.cache_manager import CacheManager
 
 icons=getfn.get_application_icons("index")
 
@@ -33,7 +34,7 @@ class QuickActions(QFrame):
 
         self.label=QLabel(self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setText(hello_msg)
+        self.label.setText(hello_msg())
         self.layout.addWidget(self.label)
         self.label.linkActivated.connect(self.option_clicked)
     
@@ -75,6 +76,7 @@ class Index(QFrame):
 
 class WelcomeActions(QFrame):
     
+    on_open_recent_file = pyqtSignal(str)
     on_new_clicked=pyqtSignal()
     on_open_file_clicked=pyqtSignal()
     on_open_folder_clicked = pyqtSignal()
@@ -101,13 +103,13 @@ class WelcomeActions(QFrame):
         self.side_left=QLabel(self)
         self.side_left.setWordWrap(True)
         self.side_left.setAlignment(Qt.AlignLeft)
-        self.side_left.setText(welcome_msg_left)
+        self.side_left.setText(welcome_msg_left([]))
         self.side_left.setMinimumSize(100,100)
         
         self.side_right=QLabel(self)
         self.side_right.setWordWrap(True)
         self.side_right.setAlignment(Qt.AlignLeft)
-        self.side_right.setText(welcome_msg_right)
+        self.side_right.setText(welcome_msg_right())
         self.side_right.setMinimumSize(100,100)
         
         self.layout.addWidget(self.side_left)
@@ -118,19 +120,24 @@ class WelcomeActions(QFrame):
         self.side_left.linkActivated.connect(self.option_clicked)
     
     def option_clicked(self, link):
-        try:
+        if link in self.index_events.keys():
             self.index_events[link].emit()
-        except KeyError:
-            pass
-
-
+        else:
+            if pathlib.Path(link).is_file() and pathlib.Path(link).exists:
+                self.on_open_recent_file.emit(link)
+    
+    
+    def rebuild(self, files:list = []):
+        self.side_left.setText(welcome_msg_left(files))
+    
 class Welcome(QFrame):
 
-    def __init__(self, parent) -> None :
+    def __init__(self, parent, files:list = []) -> None :
         super().__init__(parent)
         self.setObjectName("welcome")
         self.parent=parent
         self.setMouseTracking(True)
+        self.files = files
         self.init_ui()
     
     def init_ui(self) -> None:
@@ -151,3 +158,7 @@ class Welcome(QFrame):
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         self.setFocus()
+    
+    def set_recent_files(self, files:list):
+        self.files = files
+        self.actions.rebuild(self.files)

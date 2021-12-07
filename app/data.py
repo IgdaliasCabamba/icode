@@ -1,8 +1,14 @@
 from system import SYS_SEP, BASE_PATH, SYS_NAME, os, Path
 import json
 from smartlibs import jedit2 as ijson
-from smartlibs.iterm import TerminalWidget
+from components.cache_manager import CacheManager
 import jedi
+
+user_cache = CacheManager(
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user")
+
+editor_cache = CacheManager(
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}editors{SYS_SEP}cache")
 
 cache_directorys = [
     os.path.join(BASE_PATH, '.cache', 'jedi'),
@@ -12,36 +18,42 @@ cache_directorys = [
     os.path.join(BASE_PATH, 'data', 'user', 'envs')
 ]
 
-for cache_directory in cache_directorys:
-    if not os.path.exists(cache_directory):
-        os.makedirs(cache_directory)
-
 note_file_path = f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}labs{SYS_SEP}notes.txt"
-
 note_file_path_obj = Path(note_file_path)
-
-if not note_file_path_obj.exists() or not note_file_path_obj.is_file():
-    with open(note_file_path, "x") as file:
-        pass
 
 python_envs = []
 
-env = jedi.get_default_environment()
-python_envs.append(env)
+def build_app_dirs():
+    for cache_directory in cache_directorys:
+        if not os.path.exists(cache_directory):
+            os.makedirs(cache_directory)    
 
-if 'PYTHONPATH' in os.environ:
-    envs = os.environ['PYTHONPATH'].split(os.pathsep)
-    if envs:
-        for env in envs:
-            python_envs.append(jedi.create_environment(str(env)))
+def build_notes_file():
+    if not note_file_path_obj.exists() or not note_file_path_obj.is_file():
+        with open(note_file_path, "x") as file:
+            pass
+    
+def build_envs():
+    env = jedi.get_default_environment()
+    python_envs.append(env)
 
-if SYS_NAME == "linux":
-    try:
-        python_envs.append(jedi.create_environment("/usr/bin/python3"))
-        python_envs.append(jedi.create_environment("/bin/python3"))
-    except Exception as e:
-        print(e)
-        pass
+    if 'PYTHONPATH' in os.environ:
+        envs = os.environ['PYTHONPATH'].split(os.pathsep)
+        if envs:
+            for env in envs:
+                python_envs.append(jedi.create_environment(str(env)))
+
+    if SYS_NAME == "linux":
+        try:
+            python_envs.append(jedi.create_environment("/usr/bin/python3"))
+            python_envs.append(jedi.create_environment("/bin/python3"))
+        except Exception as e:
+            print(e)
+            pass
+
+build_app_dirs()
+build_notes_file()
+build_envs()
 
 app_icon_path = f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}icons{SYS_SEP}"
 smartcode_directory = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}"

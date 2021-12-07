@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QLineEdit, QPushBu
 from PyQt5.QtCore import Qt, pyqtSignal, QThread
 from PyQt5.QtGui import QColor
 import pyperclip as pc
+from functions import getfn
 
-from .igui import InputHistory
+from .igui import InputHistory, Animator
 from components.april_brain import *
     
 class Card(QFrame):
@@ -81,8 +82,8 @@ class AprilFace(QFrame):
         super().__init__(parent)
         self.setObjectName("april-ui")
         self.parent=parent
-        self.commands_list = []
-        self.current_command_index = 0
+        self.icons = getfn.get_application_icons("assistant")
+        self._work_count = 0
         
         self.thread=QThread()
         self.brain=Brain(self)
@@ -123,8 +124,17 @@ class AprilFace(QFrame):
 
         self.top_info=QLabel("<small>APRIL</small>")
         self.top_info.setWordWrap(True)
+        self.animation = Animator(self, self.icons.get_path("loading"))
+        self.animation.setMaximumHeight(16)
+        self.animation.set_scaled_size(64, 16)
+        self.animation.stop(False)
+        
+        self.header_layout = QHBoxLayout()
+        self.header_layout.addWidget(self.top_info)
+        self.header_layout.addWidget(self.animation)
+        self.header_layout.setAlignment(self.animation, Qt.AlignLeft)
 
-        self.layout.addWidget(self.top_info)
+        self.layout.addLayout(self.header_layout)
         self.layout.addWidget(self.scroll)
         self.layout.addWidget(self.input)
     
@@ -137,9 +147,14 @@ class AprilFace(QFrame):
 
         self.vbox.addWidget(Card(self, text, "Me" ,1))
         self.on_asked.emit(text)
+        self._work_count += 1
+        self.animation.play(True)
+        
         return 
     
-    def display_result(self, res):
+    def display_result(self, res, fifo_stack=None):
         res=res
         self.vbox.addWidget(Card(self, res, "April" ,0))
-    
+        self._work_count -= 1
+        if self._work_count < 1:
+            self.animation.stop(False)

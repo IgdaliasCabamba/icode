@@ -1,9 +1,12 @@
 from functions import getfn
+import pathlib
 
 icons=getfn.get_application_icons("index")
 
 logo=f'image: url("{icons["logo"]}")'
-hello_msg=f"""
+
+def hello_msg():
+    return f"""
     <div>
         <p>
             <a href='#show-commands' style='text-decoration:none;'>Show Command Palette</a>
@@ -33,63 +36,89 @@ hello_msg=f"""
     
 """
 
-welcome_msg_left = f"""
-<p>
-    <span>
-        <h1>Intelligent code</h1>
-        <img src="{icons["python"]}"/>
-        <h2><nobr>Editing evolved with a new perspective</nobr></h2>
-    </span>
-</p>
+def welcome_msg_left(files:list):
+    enough_files_count = 4
+    recent_files = ["#", "#", "#"]
+    tmp_recent_files = []
+    recent_files_names = ["./", "./", "./"]
+    
+    if files is not None: 
+        if len(files) > 3:
+            for i in range(1, 4):
+                tmp_recent_files.append(files[i*-1])
+            
+            recent_files = tmp_recent_files
+        else:
+            for i in range((len(files)-enough_files_count)*-1):
+                files.append("#")
+        
+            recent_files = files
+            
+        recent_files_names = []
+        for file in recent_files:
+            if file == "#":
+                recent_files_names.append("...")
+            else:
+                recent_files_names.append(pathlib.Path(file).name)
+        
+    return f"""
+    <p>
+        <span>
+            <h1>Intelligent code</h1>
+            <img src="{icons["python"]}"/>
+            <h2><nobr>Editing evolved with a new perspective</nobr></h2>
+        </span>
+    </p>
 
-<br>
+    <br>
 
-<p>
-    <h4>
-        Start:
-    </h4>
     <p>
-        <a href='#new' style='text-decoration:none;'>New File</a>
+        <h4>
+            Start:
+        </h4>
+        <p>
+            <a href='#new' style='text-decoration:none;'>New File</a>
+        </p>
+        <p>
+            <a href='#open-file' style='text-decoration:none;'>Open File</a>
+        </p>
+        <p>
+            <a href='#open-folder' style='text-decoration:none;'>Open Folder</a>
+        </p>
     </p>
-    <p>
-        <a href='#open-file' style='text-decoration:none;'>Open File</a>
-    </p>
-    <p>
-        <a href='#open-folder' style='text-decoration:none;'>Open Folder</a>
-    </p>
-</p>
 
-<p>
-    <h4>
-        Recents:
-    </h4>
-    <p> 
-        Example
-    </p>
     <p>
-        Example
+        <h4>
+            Recents:
+        </h4>
+        <p> 
+            <a href='{recent_files[0]}' style='text-decoration:none;'>{recent_files_names[0]}</a>
+        </p>
+        <p>
+            <a href='{recent_files[1]}' style='text-decoration:none;'>{recent_files_names[1]}</a>
+        </p>
+        <p>
+            <a href='{recent_files[2]}' style='text-decoration:none;'>{recent_files_names[2]}</a>
+        </p>
     </p>
-    <p>
-        Example
-    </p>
-</p>
-<br>
-<br>
-"""
+    <br>
+    <br>
+    """
 
-welcome_msg_right = """
-<h3>Useful links</h3>
-<p>
-    <a href='#show-commands' style='text-decoration:none;'>Read The Docs</a>
-</p>
-<p>
-    <a href='#show-commands' style='text-decoration:none;'>Get Started</a>
-</p>
-<p>
-    <a href='#show-commands' style='text-decoration:none;'>YouTube Chanel</a>
-</p>
-<p>
-    <a href='#show-commands' style='text-decoration:none;'>Tips and Tricks</a>
-</p>
-<br>
-"""
+def welcome_msg_right():
+   return """
+    <h3>Useful links</h3>
+    <p>
+        <a href='#show-commands' style='text-decoration:none;'>Read The Docs</a>
+    </p>
+    <p>
+        <a href='#show-commands' style='text-decoration:none;'>Get Started</a>
+    </p>
+    <p>
+        <a href='#show-commands' style='text-decoration:none;'>YouTube Chanel</a>
+    </p>
+    <p>
+        <a href='#show-commands' style='text-decoration:none;'>Tips and Tricks</a>
+    </p>
+    <br>
+    """
