@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.Qsci import *
 from PyQt5.QtGui import QColor
 from pathlib import Path
-from .codesmart import Editor
+from .codesmart import Editor, EditorBase
 from .minimap import MiniMapBox
 from .editor_core import IFile
 from functions import filefn, getfn
@@ -28,8 +28,17 @@ class FileMenu(QMenu):
         self.addAction(self.reload_file)
         self.addAction(self.save_file)
         self.addAction(self.open_folder)
-        
 
+class SourceMenu(QMenu):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        
+        self.add_file = QAction("Add This File", self)
+        self.remove_file = QAction("Remove This File", self)
+    
+        self.addAction(self.add_file)
+        self.addAction(self.remove_file)
+        
 class EditorView(QFrame):
     
     on_tab_content_changed = pyqtSignal(dict)
@@ -292,6 +301,9 @@ class EditorView(QFrame):
     @property
     def editors(self):
         return self._editors
+    
+    def get_editors(self):
+        return self.editor_main, self.editor_mirror
 
     @property
     def title(self):

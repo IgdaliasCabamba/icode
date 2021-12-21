@@ -7,6 +7,7 @@ import os
 import os.path
 import pathlib
 import re
+import sys
 
 import autopep8
 import isort
@@ -25,6 +26,7 @@ import config
 import smartlibs.jedit2 as ijson
 from components.extension_manager import Ext
 from smartsci.lexers import *
+from shamanld import Shaman
 
 
 class IO:
@@ -322,6 +324,13 @@ class Get:
     def update_apis(self):
         self.theme = f"{config.get_icons_package()}{SYS_SEP}{config.get_icons_theme()}"
         self.icon_path = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{self.theme}{SYS_SEP}"
+    
+    def get_env(self, path:str):
+        try:
+            return jedi.create_environment(path)
+        except:
+            return None
+        return None
 
     def get_adjusted_path(self, path):
         try:
@@ -354,6 +363,9 @@ class Get:
         elif SYS_NAME.startswith("win"):
             font = QFont('Consolas', iconsts.APP_BASE_FONT_SIZE)
         return font
+    
+    def get_python_version(self):
+        return f"Python{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
 
     def get_line_indentation(self, line):
         indentation = 0
@@ -480,8 +492,28 @@ class Get:
 
     def get_sorted_imports(self, code):
         return isort.code(code)
+    
+    def get_lexer_from_code(self, code:str) -> object:
+        langs = Shaman.default().detect(code)
+        if langs:
+            lang = langs[0][0].lower()
+            return self.get_lexer_from_name(lang)
+    
+    def get_lexer_from_name(self, lang_name:str) -> object:
+        if lang_name == "python":
+            return PythonLexer
+        elif lang_name == "c":
+            return CLexer
+        elif lang_name == "javascript":
+            return JavaScriptLexer
+        elif lang_name == "html":
+            return HTMLLexer
+        elif lang_name == "css":
+            return CSSLexer
+        else:
+            return NoneLexer
 
-    def get_lexer_from_extension(self, file):
+    def get_lexer_from_extension(self, file) -> object:
         file_extension = pathlib.Path(file).suffix
         file_extension = file_extension.lower()
 
@@ -650,21 +682,44 @@ class Get:
         ext = config.get_theme()
         palette = config.get_palette()
         if ext:
-            return ijson.load(
-                f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{ext}{SYS_SEP}src{SYS_SEP}{palette}.json"
-            )
+            try:
+                return ijson.load(
+                    f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{ext}{SYS_SEP}src{SYS_SEP}{palette}.json"
+                )
+            except Exception as e:
+                print(e)
+            
+        return None
 
     def get_terminal_color_map(self):
-        return self.get_theme_in_json()["terminal-styles"]
-
+        data = self.get_theme_in_json()
+        if data:
+            return data["terminal-styles"]
+        
     def get_drop_shadow_color(self):
-        return self.get_theme_in_json()["global-styles"]["drop-shadow-color"]
+        data = self.get_theme_in_json()
+        if data:
+            return data["global-styles"]["drop-shadow-color"]
 
     def get_lexer_colors(self):
-        return self.get_theme_in_json()["lexer-styles"]
+        data = self.get_theme_in_json()
+        if data:
+            return data["lexer-styles"]
 
     def get_pyconsole_color_map(self):
-        return self.get_theme_in_json()["pyconsole-styles"]
+        data = self.get_theme_in_json()
+        if data:
+            return data["pyconsole-styles"]
+    
+    def get_pyconsole_color_map(self):
+        data = self.get_theme_in_json()
+        if data:
+            return data["pyconsole-styles"]
+    
+    def get_editor_styles(self):
+        data = self.get_theme_in_json()
+        if data:
+            return data["editor-styles"]
 
     def get_python_node_tree(self, python_code, sort_way="name"):
         try:

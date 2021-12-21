@@ -23,6 +23,7 @@ class App(Base):
         self.side_left = self.ui.side_left
         self.side_right = self.ui.side_right
         self.editor_widgets = self.ui.editor_widgets
+        self.april = self.ui.april
         self.ui.set_controller(self)
         self.run()
         self.run_api()
@@ -103,10 +104,12 @@ class App(Base):
         if file_with_path:
             code_file = Path(file_with_path)
             duplicate = self.is_duplicated_file(file_with_path, self.ui.notebook)
-            if code_file.is_file() and not duplicate:
-                self.create_editor_from_file(code_file)
-            else:
-                duplicate["notebook"].setCurrentWidget(duplicate["widget"])
+            if code_file.is_file():
+                if duplicate:
+                    duplicate["notebook"].setCurrentWidget(duplicate["widget"])
+                else:
+                    self.create_editor_from_file(code_file)
+                
         else:
             if self.files_opened:
                 home_dir = ""
@@ -158,6 +161,13 @@ class App(Base):
     def save_file(self):
         if isinstance(self.ui.notebook.currentWidget(), EditorView):
             self.ui.notebook.currentWidget().save_file()
+    
+    def save_all(self):
+        for notebook in self.ui.notebooks:
+            for i in range(notebook.count()):
+                editor = notebook.widget(i)
+                if isinstance(editor, EditorView):
+                    editor.save_file()
 
     def close_editor(self):
         self.ui.notebook.close_tab()
@@ -195,6 +205,12 @@ class App(Base):
             else:
                 self.ui.notebook.setTabIcon(
                     index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
+    
+    def change_ide_mode(self, mode:int) -> None:
+        print(mode)
+    
+    def call_april(self):
+        self.ui.april.appear()
 
     def show_goto_line(self):
         self.editor_widgets.do_goto_line()
@@ -398,7 +414,7 @@ class App(Base):
         Make the application create the enviroment for source control,
         change visual aspects and save the repository in cache
         """
-        repo_path = getattr(repository, "workdir")
+        repo_path = getattr(repository, "workdir", None)
         if repo_path is not None:
             repo_branch = ""
             try:

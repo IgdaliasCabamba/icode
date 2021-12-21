@@ -3,12 +3,26 @@ import json
 from smartlibs import jedit2 as ijson
 from components.cache_manager import CacheManager
 import jedi
+from components.python_api import PythonApi
 
+python_api = PythonApi(
+    f"{BASE_PATH}{SYS_SEP}.data{SYS_SEP}user{SYS_SEP}envs{SYS_SEP}envs.idt")
+    
 user_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user")
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user.idt")
 
 editor_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}editors{SYS_SEP}cache")
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}editors{SYS_SEP}cache.idt")
+
+april_cache = CacheManager(
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}cache.idt")
+
+assistant_cache = CacheManager(
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}bot.idt")
+
+DATA_FILE = f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.json"
+app_settings = CacheManager(f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.idt")
+qt_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.idt")
 
 cache_directorys = [
     os.path.join(BASE_PATH, '.cache', 'jedi'),
@@ -57,6 +71,10 @@ build_envs()
 
 app_icon_path = f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}icons{SYS_SEP}"
 smartcode_directory = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}"
+
+def save_data():
+    pass
+    
 
 ext_python              = {".py", ".pyw", ".pyi", ".scons"}
 ext_cython              = {".pyx", ".pxd", ".pxi"}

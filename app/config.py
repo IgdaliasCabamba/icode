@@ -1,10 +1,8 @@
-from PyQt5.QtCore import Qt, QSettings
+from PyQt5.QtCore import Qt
 import smartlibs.jedit2 as ijson
 from system import BASE_PATH, SYS_SEP
 import components.consts as iconsts
-
-DATA_FILE=f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.json"
-CACHE_FILE = QSettings(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.ini", QSettings.IniFormat)
+from data import qt_cache, DATA_FILE
 
 def get_all() -> dict:
 
@@ -44,25 +42,25 @@ def save_window(window):
     else:
         window_object = window
         
-    CACHE_FILE.setValue("window_geometry", window_object.geometry())
-    CACHE_FILE.setValue("window_state", window_object.windowState())
-    CACHE_FILE.setValue("div_main_state", window.div_main.saveState())
-    CACHE_FILE.setValue("div_child_state", window.div_child.saveState())
-    CACHE_FILE.setValue("side_right_visiblity", window.side_right.isVisible())
-    CACHE_FILE.setValue("side_right_size", window.side_right.size())
+    qt_cache.setValue("window_geometry", window_object.geometry())
+    qt_cache.setValue("window_state", window_object.windowState())
+    qt_cache.setValue("div_main_state", window.div_main.saveState())
+    qt_cache.setValue("div_child_state", window.div_child.saveState())
+    qt_cache.setValue("side_right_visiblity", window.side_right.isVisible())
+    qt_cache.setValue("side_right_size", window.side_right.size())
     for i, action in enumerate(window.tool_bar.actions_list):
         if action.isChecked():
-            CACHE_FILE.setValue("toolbar_action", i)
+            qt_cache.setValue("toolbar_action", i)
             break
             
 def restore_window(window):
-    window_geometry = CACHE_FILE.value("window_geometry")
-    window_state = CACHE_FILE.value("window_state")
-    side_right_visiblity = CACHE_FILE.value("side_right_visiblity")
-    side_right_size = CACHE_FILE.value("side_right_size")
-    div_main_state = CACHE_FILE.value("div_main_state")
-    div_child_state = CACHE_FILE.value("div_child_state")
-    toolbar_action=CACHE_FILE.value("toolbar_action")
+    window_geometry = qt_cache.value("window_geometry")
+    window_state = qt_cache.value("window_state")
+    side_right_visiblity = qt_cache.value("side_right_visiblity")
+    side_right_size = qt_cache.value("side_right_size")
+    div_main_state = qt_cache.value("div_main_state")
+    div_child_state = qt_cache.value("div_child_state")
+    toolbar_action=qt_cache.value("toolbar_action")
     
     if window.frame:
         window_object = window.frame

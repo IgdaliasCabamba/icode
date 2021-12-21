@@ -16,8 +16,7 @@ class NoneLexer(QsciLexerCustom):
     def styleText(self, start, end):
         pass
 
-    def set_style_api(self, api):
-        style = api["lexer-styles"]
+    def set_style_api(self, style):
         self.setDefaultColor(QColor(style["DefaultColor"]))
         self.setDefaultPaper(QColor(style["DefaultPaper"]))
     

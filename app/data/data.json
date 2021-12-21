@@ -15,6 +15,6 @@
     "window-style":"custom",
 
     //Extensions
-    "extensions":["icode_sky_view"]
+    "extensions":["icode_sky_view", "smart_python"]
     
 }

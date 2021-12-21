@@ -6,10 +6,11 @@ import textwrap
 
 from april_models import *
 from april import ask
+from . import consts
 
 class Brain(QObject):
     
-    on_answered=pyqtSignal(str)
+    on_answered=pyqtSignal(str, int)
 
     def __init__(self, parent):
         super().__init__()
@@ -20,7 +21,8 @@ class Brain(QObject):
     
     def format_answer(self, value, code=False, line_width=80):
         if code:
-            return f"```{value}```"
+            # TODO > format code
+            return value
 
         return value
 
@@ -43,24 +45,32 @@ class Brain(QObject):
     def get_answer(self, text):
         if text.startswith("wiki:"):
             answer=self.get_wiki_answer(self.remove_commands(text, "wiki:"))
+            type = 0
         elif text.startswith("april:"):
             answer=self.get_april_answer(self.remove_commands(text, "april:"))
+            type = 1
         elif text.startswith("code:"):
             answer=self.get_code_snippets(self.remove_commands(text, "code:"))
+            type = 2
         else:
-            if text.lower() in ask_list:
-                answer=self.get_april_answer(text)
-            elif not " " in text and not "_" in text:
+            if not " " in text and not "_" in text:
                 answer=self.get_wiki_answer(text)
+                type = 0
+            
+            elif text.lower() in ask_list:
+                answer=self.get_april_answer(text)
+                type = 1
+            
             else:
                 answer=self.get_code_snippets(text)
+                type = 2
         
         # TODO > Return multiples answers
         #answers=ask(args)
         #for answer in answers:
             #self.on_answered.emit(answer)
 
-        self.on_answered.emit(answer)
+        self.on_answered.emit(answer, type)
 
     
     def get_april_answer(self, text):

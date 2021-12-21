@@ -6,14 +6,16 @@ from functions import getfn
 
 from .igui import InputHistory, Animator
 from components.april_brain import *
+from gui.generic_editor import Editor
     
 class Card(QFrame):
-    def __init__(self, parent, text:str, title:str, pos:int):
+    def __init__(self, parent, text:str, title:str, pos:int, type:str="text"):
         super().__init__(parent)
         self.setObjectName("card-message")
         self.parent=parent
         self.text=text
         self.title=title
+        self.type = type
         self.pos=pos
         self.init_ui()
     
@@ -24,19 +26,12 @@ class Card(QFrame):
         self.lbl_title=QLabel(self)
         self.layout.addWidget(self.lbl_title)
         self.lbl_title.setText(f"<h4>{self.title}</h4>")
+        
+        self.editor = self.get_text_editor()
+        self.editor.setMinimumHeight(self.msg_size)
+        self.layout.addWidget(self.editor)
 
-        self.text=f"{self.text}"
-
-        self.msg=QTextEdit(self)
-        self.msg.setObjectName("msg")
-        self.msg.setText(self.text)
-        self.markdown=self.msg.toMarkdown()
-        self.msg.setMarkdown(self.markdown)
-        self.msg.setMinimumHeight(self.msg_size)
-        self.msg.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.layout.addWidget(self.msg)
-
-        self.drop_shadow = QGraphicsDropShadowEffect(self.msg)
+        self.drop_shadow = QGraphicsDropShadowEffect(self.editor)
         self.drop_shadow.setBlurRadius(10)
         self.drop_shadow.setColor(QColor(30,30,30))
 
@@ -47,19 +42,19 @@ class Card(QFrame):
             self.btn_copy.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
             self.layout.setAlignment(self.lbl_title, Qt.AlignLeft) 
-            self.layout.setAlignment(self.msg, Qt.AlignLeft) 
+            self.layout.setAlignment(self.editor, Qt.AlignLeft) 
             self.layout.addWidget(self.btn_copy, Qt.AlignLeft)
             self.drop_shadow.setOffset(-4, -4)
         else:
             self.layout.setAlignment(self.lbl_title, Qt.AlignRight)
-            self.layout.setAlignment(self.msg, Qt.AlignRight)    
+            self.layout.setAlignment(self.editor, Qt.AlignRight)    
             self.drop_shadow.setOffset(4, 4)
             self.set_read_only(True)
     
-        self.msg.setGraphicsEffect(self.drop_shadow)
+        self.editor.setGraphicsEffect(self.drop_shadow)
     
     def set_read_only(self, arg):
-        self.msg.setReadOnly(arg)
+        self.editor.setReadOnly(arg)
     
     def copy_to_clipboard(self):
         wrapper = textwrap.TextWrapper(width=80)
@@ -71,8 +66,34 @@ class Card(QFrame):
     def msg_size(self):
         text_height=len(self.text.splitlines())
         text_height = text_height if text_height >= 2 else 2
-        size = text_height*self.msg.font().pointSize()*2
+        size = text_height*self.editor.font().pointSize()*2
         return size
+    
+    def get_text_editor(self):
+        if self.type == "text":
+            content=QTextEdit()
+            content.setObjectName("msg")
+            content.setText(self.text)
+            markdown=content.toMarkdown()
+            content.setMarkdown(markdown)
+            content.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        
+        elif self.type == "code":
+            content = QFrame()
+            content.setObjectName("msg")
+            vbox = QVBoxLayout()
+            vbox.setContentsMargins(5,5,5,5)
+            content.setLayout(vbox)
+            
+            lexer = getfn.get_lexer_from_code(self.text)()
+            editor = Editor()
+            editor.setText(self.text)
+            editor.set_lexer(lexer)
+            
+            vbox.addWidget(editor)
+            
+        return content
+        
 
 class AprilFace(QFrame):
     
@@ -152,9 +173,14 @@ class AprilFace(QFrame):
         
         return 
     
-    def display_result(self, res, fifo_stack=None):
+    def display_result(self, res:str, type:int):
         res=res
-        self.vbox.addWidget(Card(self, res, "April" ,0))
+        if type in {0,1}:
+            type = "text"
+        elif type == 2:
+            type = "code"
+            
+        self.vbox.addWidget(Card(self, res, "April", 0, type))
         self._work_count -= 1
         if self._work_count < 1:
             self.animation.stop(False)

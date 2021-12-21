@@ -1,71 +1,45 @@
-import pathlib
-from PyQt5.QtCore import QObject
-from PyQt5.QtGui import QColor
-from system import BASE_PATH, SYS_SEP
-from config import get_palette, get_icons_package, get_icons_theme
-from functions import getfn
-from data import ijson
+from extension_api import *
 
-SOURCE_PATH=f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}icode_default_theme{SYS_SEP}src{SYS_SEP}"
-
-class Init(QObject):
+class Init(ModelUi):
     def __init__(self, data) -> None:
-        super().__init__(data["app"])
-        self.app=data["app"]
-        self.qapp=data["qt_app"]
-
-        self.ui=self.app.ui
-        self.qpalette = get_palette()
-
+        super().__init__(data, "icode_default_theme")        
         self.listen_slots()
         self.apply_style()
 
-    def listen_notbook_slots(self, notebook):
+    def listen_notebook_slots(self, notebook):
         notebook.widget_added.connect(self.apply_style_in_editor)
 
     def listen_slots(self):
-        self.ui.notebook.widget_added.connect(self.apply_style_in_editor)
-        self.app.on_new_notebook.connect(self.listen_notbook_slots)
+        self.add_event("ui.notebook.widget_added", self.apply_style_in_editor)
+        self.add_event("app.on_new_notebook", self.listen_notebook_slots)
 
     def apply_style(self):
-        style_sheet=pathlib.Path(f"{SOURCE_PATH}dark.qss")
-
-        if self.qpalette in {"light","white",1,"day"}:
-            style_sheet=pathlib.Path(f"{SOURCE_PATH}light.qss")
-
-        app_style_sheet=style_sheet.read_text("utf-8")
-        app_style_sheet=app_style_sheet.replace(
-            "<get_resources_path>",
-            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}icode_default_theme{SYS_SEP}res{SYS_SEP}"
-            )
-        app_style_sheet=app_style_sheet.replace(
-            "<get_app_icons_path>",
-            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{get_icons_package()}{SYS_SEP}{get_icons_theme()}{SYS_SEP}app{SYS_SEP}"
-            )
-
-        self.qapp.setStyleSheet(app_style_sheet)
-        self.ui.setStyleSheet(app_style_sheet)
+        style_sheet = self.palette_to_styles(
+            dark="dark.qss",
+            light="light.qss"
+        ) 
+        style_sheet.format_style(
+            ["<get_resources_path>", "<get_app_icons_path>"],
+            [self.path_to("res"), self.icons_path_to("app")]
+        )
+        style_sheet.apply()
     
-    def apply_style_in_editor(self, widget):
-        if widget.objectName()=="editor-frame":            
-            for editor in widget.editors:
-                editor.on_style_changed.connect(self.beautify_editor)
-                self.beautify_editor(editor)
+    def apply_style_in_editor(self, editor):
+        self.paint_editor(widget=editor, painter=self.beautify_editor)
 
     def beautify_editor(self, editor):
         margin_font=editor.font()
         margin_font.setPointSize(10)
         editor.setMarginsFont(margin_font)
-        lexer = editor.lexer()
-        if lexer is not None:
-            self.apply_styles_in_lexer(lexer)
-
-        if self.qpalette in {"light","white",1,"day"}:
-            self.apply_light_theme_in_editor(editor)
-        else:
-            self.apply_dark_theme_in_editor(editor)
     
-    def apply_light_theme_in_editor(self, editor):
+        self.set_code_style(
+            editor=editor,
+            editor_dark=self.editor_dark,
+            editor_light=self.editor_light,
+            lexer_styler=self.lexer_styler
+        )
+    
+    def editor_light(self, editor):
         editor.setColor(QColor(255,255,255))
         editor.setPaper(QColor(30, 30, 30))
         editor.minimap.setColor(QColor(255,255,255))
@@ -89,7 +63,7 @@ class Init(QObject):
         editor.setCallTipsForegroundColor(QColor("#c683f2"))
         editor.setCallTipsHighlightColor(QColor("#ffffff"))
 
-    def apply_dark_theme_in_editor(self, editor):
+    def editor_dark(self, editor):
         editor.setColor(QColor(255,255,255))
         editor.setPaper(QColor(30, 30, 30))
         editor.minimap.setColor(QColor(255,255,255))
@@ -114,21 +88,14 @@ class Init(QObject):
         editor.setCallTipsHighlightColor(QColor("#c683f2"))
 
 
-    def apply_styles_in_lexer(self, lexer):
+    def lexer_styler(self, lexer):
         if lexer is not None:
-            if self.qpalette in {"light","white",1,"day"}:
-                lexer.set_style_api(
-                    ijson.load(
-                        f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}icode_default_theme{SYS_SEP}src{SYS_SEP}light.json"
-                    )
-                )
-            else:
-                lexer.set_style_api(
-                    ijson.load(
-                        f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}icode_default_theme{SYS_SEP}src{SYS_SEP}dark.json"
-                    )
-                )
-
+            self.set_lexer_style(
+                lexer = lexer,
+                key = "lexer-styles",
+                dark = "dark.json",
+                light = "light.json"
+            )
             font=getfn.get_native_font()
             font.setPixelSize(1)
             font.setPointSizeF(10.5)

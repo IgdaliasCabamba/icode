@@ -1,16 +1,15 @@
 from PyQt5.QtCore import QObject, pyqtSignal, QSettings
+from PyQt5.QtGui import QKeySequence
+from PyQt5.QtWidgets import QShortcut
 
 from components.system import *
 from functions import *
 import config
 from config import DATA_FILE
 from ui import *
-from data import editor_cache
+from data import editor_cache, python_api
 from components.extension_manager import Plugin
-from components.python_api import PythonApi
 
-python_api = PythonApi(
-    f"{BASE_PATH}{SYS_SEP}.data{SYS_SEP}user{SYS_SEP}envs{SYS_SEP}envs")
 plugin = Plugin()
 
 class Core(object):
@@ -28,6 +27,7 @@ class Core(object):
         self.menu.file.new_file.triggered.connect(self.new_file)
         self.menu.file.open_file.triggered.connect(self.open_file)
         self.menu.file.save_file.triggered.connect(self.save_file)
+        self.menu.file.save_all.triggered.connect(self.save_all)
         self.menu.file.open_folder.triggered.connect(self.open_folder)
         self.menu.file.close_editor.triggered.connect(self.close_editor)
         self.menu.file.open_recent_menu.open_last_closed_tab.triggered.connect(self.reopen_editor)
@@ -54,7 +54,7 @@ class Core(object):
         self.status_bar.interpreter.clicked.connect(self.show_envs)
         self.status_bar.lang.clicked.connect(self.show_langs)
         self.status_bar.line_col.clicked.connect(self.show_goto_line)
-        self.status_bar.april.clicked.connect(lambda: print("April"))
+        self.status_bar.april.clicked.connect(self.call_april)
 
         self.ui.index.on_double_clicked.connect(self.new_file)
         self.ui.index.actions.on_new_clicked.connect(self.new_file)
@@ -93,6 +93,8 @@ class Core(object):
 
         self.side_left.explorer.on_path_changed.connect(
             self.explorer_path_changed)
+        
+        self.april.on_mode_changed.connect(self.change_ide_mode)
 
         self.configure_notebook(self.ui.notebook)
 
@@ -129,11 +131,12 @@ class Base(QObject, Core):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self._parent = parent
-        self.api_lexers_list: list = getfn.get_all_lexers_objects_api()
+        self.api_lexers_list = getfn.get_all_lexers_objects_api()
         self.api_envs_list = python_api.get_default_envs()
         self._current_env = None
         self.api_commands_list = self.get_api_commands_list(self)
 
+    # TODO
     def run_api(self):
         self.editor_widgets.set_api(self)
 
@@ -154,13 +157,13 @@ class Base(QObject, Core):
         return self._current_env
 
     def add_lexer(self, lexer: object) -> None:
-        self.lexer_list.append(lexer)
+        self.api_lexer_list.append(lexer)
 
     def add_env(self, interpreter) -> None:
-        self._env_list.append(interpreter)
+        self.api_envs_list.append(interpreter)
 
     def add_command(self, command) -> None:
-        self._env_list.append(command)
+        self.api_commands_list.append(command)
 
     def set_current_env(self, env: object) -> None:
         self._current_env = env

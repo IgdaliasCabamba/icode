@@ -105,17 +105,18 @@ class BottomTabCorner(QFrame):
     
     def change_view(self, index):
         widget=self.parent.widget(index)
-        if widget.objectName() == "problems":
+        name = widget.objectName()
+        if name == "problems":
             self.change_to_problems()
-        elif widget.objectName() == "terminal-view":
+        elif name == "terminal-view":
             self.change_to_terminal()
-        elif widget.objectName() == "debug":
-            self.change_to_debug()
-        elif widget.objectName() == "pyconsole-view":
+        #elif name == "debug":
+            #self.change_to_debug()
+        elif name == "pyconsole-view":
             self.change_to_pyconsole()
         else:
-            print(widget)
-            self.set_visiblity(["debug", "terminal", "problems", "pyconsole"], False)
+            self.change_to(name)
+            #self.set_visiblity(["debug", "terminal", "problems", "pyconsole"], False)
         return
     
     def init_ui(self) -> None:
@@ -178,7 +179,7 @@ class BottomTabCorner(QFrame):
         self.widget_dict = {
             "terminal":[self.btn_new_terminal, self.btn_remove_terminal],
             "problems":[self.btn_clear_problems],
-            "debug":[self.btn_clear_debug, self.btn_stop_debug, self.btn_start_debug],
+            #"debug":[self.btn_clear_debug, self.btn_stop_debug, self.btn_start_debug],
             "pyconsole":[self.btn_add_pycell]
         }
     
@@ -197,11 +198,18 @@ class BottomTabCorner(QFrame):
         self.set_visiblity(["debug", "problems", "pyconsole"], False)
         self.set_visiblity(["terminal"], True)
     
-    def change_to_debug(self):
-        self.set_visiblity(["problems", "terminal", "pyconsole"], False)
-        self.set_visiblity(["debug"], True)
-    
+    #def change_to_debug(self):
+        #self.set_visiblity(["problems", "terminal", "pyconsole"], False)
+        #self.set_visiblity(["debug"], True)
     
     def change_to_pyconsole(self):
         self.set_visiblity(["debug", "problems", "terminal"], False)
         self.set_visiblity(["pyconsole"], True)
+    
+    def change_to(self, name:str) -> None:
+        self.set_visiblity([widget for widget in self.widget_dict.keys()], False)
+        if name in self.widget_dict.key():
+            self.set_visiblity([name], True)
+    
+    def add_widget(self, name:str, components:list):
+        self.widget_dict[name]=components

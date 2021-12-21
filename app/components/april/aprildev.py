@@ -1,12 +1,3 @@
-#!/usr/bin/env python
-
-######################################################
-#
-# howdoi - instant coding answers via the command line
-# written by Benjamin Gleitzman (gleitz@mit.edu)
-# inspired by Rich Jones (rich@anomos.info)
-#
-######################################################
 __version__ = '0.0.0'
 
 import gc
@@ -470,7 +461,7 @@ def _clear_cache():
 def _is_help_query(query):
     return any(query.lower() == help_query for help_query in SUPPORTED_HELP_QUERIES)
 
-
+# TODO
 def _format_answers(args, res):
     if "error" in res:
         return f'ERROR: {RED}{res["error"]}{END_FORMAT}'

@@ -4,7 +4,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtGui import QColor
 from pathlib import Path
 from system import SYS_NAME
-from .ide import *
+from .coeditor import *
 from .editor_core import Connector, IFile
 from .idocument import IDocument
 from .imagesci import ImageScintilla
@@ -238,6 +238,7 @@ class Editor(EditorBase):
     on_focused = pyqtSignal(object, object)
     on_resized = pyqtSignal(object)
     on_style_changed = pyqtSignal(object)
+    on_lexer_changed = pyqtSignal(object)
     on_word_added = pyqtSignal()
     on_modify_key = pyqtSignal()
     on_text_changed = pyqtSignal()
@@ -245,9 +246,11 @@ class Editor(EditorBase):
     on_document_changed = pyqtSignal(object)
     on_saved = pyqtSignal(str)
     on_abcd_added = pyqtSignal()
+    on_env_changed = pyqtSignal(object)
     
     def __init__(self, parent, file=None) -> None:
         super().__init__(parent)
+        self.setObjectName("codesmart")
         self.parent=parent
         self.file_watcher = self.parent.file_watcher
         self.editor_view_parent = parent
@@ -263,6 +266,8 @@ class Editor(EditorBase):
         self.saved = None
         self.saved_text = None
         self.all_cursors_pos = []
+        self.code_completers = []
+        self.development_environment_components = []
         self.annotations = {
             "on_text_changed":[],
             "on_lines_changed":[],
@@ -273,20 +278,17 @@ class Editor(EditorBase):
             "image_id":[],
         }
         
-        self.jedi_thread=QThread(self)
-        self.autocomplete=Autocompletions(self)
-        self.autocomplete.moveToThread(self.jedi_thread)
-        self.jedi_thread.started.connect(self.run_jedi)
+        self.intellisense_thread=QThread(self)
+        self.intellisense_thread.start()
 
-        self.thread_ide=QThread(self)
-        self.live_tips=LiveEdition(self)
-        self.connector=Connector(self)
-        self.ide_tools=IdeTools(self)
+        self.development_environment_thread = QThread(self)
+        self.coeditor = CoEditor(self)
+        self.connector = Connector(self)
         self.connector.update_all()
-        self.live_tips.moveToThread(self.thread_ide)
-        self.connector.moveToThread(self.thread_ide)
-        self.ide_tools.moveToThread(self.thread_ide)
-        self.thread_ide.started.connect(self.run_tasks)
+        self.connector.moveToThread(self.development_environment_thread)
+        self.coeditor.moveToThread(self.development_environment_thread)
+        self.development_environment_thread.started.connect(self.run_schedule)
+        
         self.editor_timer = QTimer(self)
 
         self.start()
@@ -301,31 +303,30 @@ class Editor(EditorBase):
             self.saved = False
         
         self.update_document()
-
         self.listen_sci_events()
-        self.live_tips.on_annotation_request.connect(self.display_annotation)
-        self.live_tips.on_add_indicator_range.connect(self.add_indicator_range)
-        self.live_tips.on_clear_indicator_range.connect(self.clear_indicator_range)
-        self.live_tips.on_update_header.connect(self.update_header)
-        self.ide_tools.on_update_header.connect(self.update_header)
-        self.ide_tools.on_tooltip_request.connect(self.display_tooltip)
-        self.thread_ide.start()
+        self.coeditor.on_update_header.connect(self.update_header)
+        self.development_environment_thread.start()
 
     @property
-    def ide_mode(self):
+    def ide_mode(self) -> bool:
         return self._ide_mode
-
-    def build_ide(self):
-        self.jedi_thread.start()
-        self.setIndentationsUseTabs(False)
     
-    def run_jedi(self):
-        self.autocomplete.run()
+    def add_code_completer(self, completer:object, run:object):
+        self.code_completers.append(completer)
+        completer.moveToThread(self.intellisense_thread)
+        if self.intellisense_thread.isRunning():
+            run()
+    
+    def add_development_environment_component(self, component, run):
+        self._ide_mode = True
+        self.development_environment_components.append(component)
+        component.moveToThread(self.development_environment_thread)
+        if self.development_environment_thread.isRunning():
+            run()
 
-    def run_tasks(self):
-        self.live_tips.run()
+    def run_schedule(self):
         self.connector.run()
-        self.ide_tools.run()
+        self.coeditor.run()
     
     def define_lexer(self, lexer=None):
         if self.file_path != None:
@@ -353,11 +354,9 @@ class Editor(EditorBase):
     
         if self.minimap:
             self.minimap.setLexer(self.lexer())
-    
-        if self.lexer_name == "python" and not self.ide_mode:
-            self.build_ide()
-
+            
         self.on_style_changed.emit(self)
+        self.on_lexer_changed.emit(self)
         self.update_status_bar()
         self.update_document()
 
@@ -371,15 +370,8 @@ class Editor(EditorBase):
         self.define_lexer()
     
     def set_env(self, env):
-        if self.autocomplete.env != env:
-            self.autocomplete.set_env(env)
+        self.on_env_changed.emit(env)
         
-        if self.live_tips.env != env:
-            self.live_tips.set_env(env)
-        
-        if self.ide_tools.env != env:
-            self.ide_tools.set_env(env)
-    
     def save_file(self, file_path):
         self.file_path = file_path
         self.saved = True
@@ -555,7 +547,7 @@ class Editor(EditorBase):
             self.on_modify_key.emit()
         
         if string in self.closable_key_map.keys():
-            self.live_tips.close_char(string)
+            self.coeditor.close_char(string)
             
     def mouse_move_event(self, event):
         self.on_mouse_moved.emit(event)

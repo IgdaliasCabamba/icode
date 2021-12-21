@@ -17,6 +17,7 @@ from gui.editor_widgets import EditorWidgets
 from gui.inotebook import NoteBookEditor
 from gui.isplitter import ISplitter
 from gui.mainpage import Index, Welcome
+from gui.april import April
 from smartlibs.icodeframe import iwindow
 from smartsci.editor import *
 
@@ -39,6 +40,8 @@ class MainWindow(QMainWindow):
         self.frame = False
         self.parent = parent
         self.last_focus = None
+        self.editor_widgets = None
+        self.april = None
 
         self.qapp = qapp
         self.qapp.focusChanged.connect(self._app_focus_changed)
@@ -88,7 +91,7 @@ class MainWindow(QMainWindow):
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.isplitter)
-
+        
     def _init_ui(self) -> None:
         self.div_child = QSplitter(self)
         self.div_child.setObjectName("div-child")
@@ -134,6 +137,7 @@ class MainWindow(QMainWindow):
 
     def _add_extra_widgets(self) -> None:
         self.editor_widgets = EditorWidgets(self)
+        self.april = April(self)
 
     def center(self) -> None:
         app_geo = self.frameGeometry()
@@ -146,7 +150,6 @@ class MainWindow(QMainWindow):
         self.frame.setWindowMenu(self.menu_bar)
         self.frame.setMenuIcon(self.icons.get_icon("menubar-menu"))
         self.frame.setWindowTitle("Icode")
-        self.frame.build_window(style)
 
     def _native_window(self) -> None:
         self.setWindowTitle("Icode")

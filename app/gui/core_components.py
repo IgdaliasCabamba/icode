@@ -60,19 +60,21 @@ class OpenRecentSubMenu(QMenu):
 
         self.addSeparator()
     
-    def set_recent_files(self, files, method):
-        added = []
-        max = len(files)
-        if max > 100:
-            max =  100
+    def set_recent_files(self, files:list, method:object):
+        if isinstance(files, list):
+            files.reverse()
+            added = []
+            max = len(files)
+            if max > 20:
+                max =  20
 
-        for i in range(max):
-            file = files[i]
-            if file not in added:
-                act = QAction(file, self)
-                act.triggered.connect(partial(method, file))
-                self.addAction(act)
-                added.append(file)
+            for i in range(max):
+                file = files[i]
+                if file not in added:
+                    act = QAction(file, self)
+                    act.triggered.connect(partial(method, file))
+                    self.addAction(act)
+                    added.append(file)
             
 class HelpMenu(QMenu):
     """
@@ -450,18 +452,17 @@ class StatusBar(QStatusBar):
         self.errors = QPushButton(self)
         self.errors.setIcon(self.icons.get_icon("errors"))
         self.interpreter = QPushButton(self)
-        self.interpreter.setText('"SmartEnv"')
+        self.interpreter.setText(f"(smartenv) {getfn.get_python_version()}")
         self.source_control = QPushButton(self)
         self.source_control.setIcon(self.icons.get_icon("source_control"))
-        self.source_control.setText("-")
         
         self.april = QPushButton(self)
         self.april.setIcon(self.icons.get_icon("april"))
 
+        self.add_status_widget(self.source_control)
         self.add_status_widget(self.errors)
         self.add_status_widget(self.warnings)
         self.add_status_widget(self.interpreter)
-        self.add_status_widget(self.source_control)
         
         self.add_widget(self.april)
 

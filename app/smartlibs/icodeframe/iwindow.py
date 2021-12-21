@@ -43,15 +43,17 @@ class WindowDragger(QWidget):
 
 class ModernWindow(QWidget):
 
-    def __init__(self, w, windows_style, parent=None):
+    def __init__(self, w:object, window_style:str, window_type:str = "window", parent=None):
         super().__init__(parent)
         self.setObjectName("modern-window")
         
         self.icon=None
         self._w = w
-        self.windows_style=windows_style
+        self.window_style = window_style.lower()
+        self.window_type = window_type.lower()
         self.main_h_is_pressed=False
         self.main_w_is_pressed=False
+        self.allowed_buttons = []
         self.setupUi()
 
         contentLayout = QHBoxLayout()
@@ -147,13 +149,18 @@ class ModernWindow(QWidget):
 
         self.setStyleSheet(_FL_STYLESHEET)
         
-        if self.windows_style == "icode":
+        if self.window_style == "icode":
             self.setAttribute(Qt.WA_TranslucentBackground)
 
         # automatically connect slots
         QMetaObject.connectSlotsByName(self)
+        self.build_window(self.window_style)
+        self.allowed_buttons.append(self.btnClose)
+        self.allowed_buttons.append(self.btnMaximize)
+        self.allowed_buttons.append(self.btnMinimize)
+        self.allowed_buttons.append(self.btnRestore)
     
-    def update_window_borders(self, state:str) -> bool:
+    def update_window_borders(self, state:str):
         if self.border_radius:
             if state == "max":
                 self._w.status_bar.setStyleSheet("#status-bar {border-radius:0}")
@@ -164,19 +171,16 @@ class ModernWindow(QWidget):
                 self._w.status_bar.setStyleSheet("#status-bar {border-bottom-left-radius:7px; border-bottom-right-radius:7px}")
                 self.titleBar.setStyleSheet("#titleBar {border-top-left-radius:7px; border-top-right-radius:7px}")
                 self.windowFrame.setStyleSheet("#windowFrame {border-radius: 7px 7px 7px 7px}")
-            return True
-        return False
     
-    def build_window(self, windows_style) -> None:
-        if windows_style == "icode":
+    def build_window(self, window_style) -> None:
+        if window_style == "icode":
             self.border_radius=True
             self._w.setStyleSheet("#main-window {background-color: transparent;}")
             self.windowFrame.setStyleSheet("#windowFrame {border-radius: 7px 7px 7px 7px}")
             self.titleBar.setStyleSheet("#titleBar {border-top-left-radius:7px; border-top-right-radius:7px}")
             self._w.status_bar.setStyleSheet("#status-bar {border-bottom-left-radius:7px; border-bottom-right-radius:7px}")
-        elif windows_style == "custom":
+        elif window_style == "custom":
             self.border_radius=False
-        return
 
     def __child_was_closed(self) -> None:
         self._w = None  # The child was deleted, remove the reference to it and close the parent window
@@ -196,6 +200,23 @@ class ModernWindow(QWidget):
         app_geo.moveCenter(screen_center)
         self.move(app_geo.topLeft())
     
+    def set_allowed_buttons(self, buttons_set:set):
+        self.allowed_buttons.clear()
+        if "close" in buttons_set:
+            self.allowed_buttons.append(self.btnClose)
+        else:
+            self.btnClose.hide()
+        if "min" in buttons_set:
+            self.allowed_buttons.append(self.btnMinimize)
+        else:
+            self.btnMinimize.hide()
+        if "max" in buttons_set or "restore" in buttons_set:
+            self.allowed_buttons.append(self.btnMaximize)
+            self.allowed_buttons.append(self.btnRestore)
+        else:pass
+        # TODO
+        
+            
     def set_window_title(self, title:str) -> None:
         self.lblTitle.setText(title)
         
@@ -293,7 +314,12 @@ class ModernWindow(QWidget):
 
     @Slot()
     def on_btnClose_clicked(self):
-        self.close()
+        if self.window_type == "window":
+            self.close()
+        elif self.window_type == "dialog":
+            self.hide()
+        else:
+            self.close()
 
     @Slot()
     def on_titleBar_doubleClicked(self):

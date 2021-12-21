@@ -423,8 +423,6 @@ class EditorWidgets(QObject):
             self.close_widget(self.language_mode_selection)
             self.close_widget(self.symbol_navigator)
                     
-            
-    
     def run_widget(self, widget:object):
         if widget in self.widgets_without_focus:
             if widget.isVisible():
@@ -456,7 +454,6 @@ class EditorWidgets(QObject):
     def close_widget(self, widget):
         widget.setVisible(False)
     
-
     def do_commands(self):
         self.command_palette.set_commands(self.get_all_commands())
         self.run_widget(self.command_palette)
@@ -483,7 +480,7 @@ class EditorWidgets(QObject):
     
     def do_clone_repo(self):
         self.run_widget(self.clone_repo)
-
+    
     def get_all_commands(self):
         if self.api is not None:
             return self.api.commands_list
@@ -509,9 +506,12 @@ class EditorWidgets(QObject):
         if self.api is not None:
             self.api.set_current_env(env)
     
-
+    def add_env(self, env):
+        if self.api is not None:
+            self.api.add_env(env)
+        self.python_envs.set_envs(self.get_all_envs())
+    
     def run_by_id(self, widget, text):
-        
         if text.startswith(":"):
             self.do_goto_line()
             widget.hide()

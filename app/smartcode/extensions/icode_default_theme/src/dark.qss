@@ -331,6 +331,11 @@ QStatusBar QSizeGrip,
 	background:transparent
 }
 
+#April{
+	background:#222222;
+	border-radius:5px
+}
+
 #april-ui, #april-ui #main-area, #april-ui #main-frame {
     border: none;
     background-color: transparent;
@@ -410,4 +415,8 @@ QStatusBar QSizeGrip,
 #editor-frame QsciScintilla,
 #editor-frame QListView:focus {
     border: none;
+}
+
+#editor-frame #up-map QPushButton{
+	font-size:10.5pt;
 }

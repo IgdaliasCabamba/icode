@@ -45,7 +45,11 @@ class StatusTree(QTreeView):
         unmodified_count = 0
         modified_count = 0
         
-        repo_name = pathlib.Path(repository.workdir).name
+        repo_path = getattr(repository, "workdir", None)
+        repo_name = ""
+        if repo_path is not None:
+            repo_name = pathlib.Path(repo_path).name
+            
         status_data = repository.status()
         
         repo_branch = "No commits yet"

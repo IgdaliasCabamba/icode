@@ -11,8 +11,7 @@ class CSSLexer(QsciLexerCSS):
     def language(self):
         return "css"
     
-    def set_style_api(self, api):
-        style = api["lexer-styles"]
+    def set_style_api(self, style):
         self.setDefaultColor(QColor(style["DefaultColor"]))
         self.setDefaultPaper(QColor(style["DefaultPaper"]))
     

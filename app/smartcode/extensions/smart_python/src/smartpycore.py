@@ -1,20 +1,10 @@
-import os
-import pathlib
-from system import BASE_PATH
-from PyQt5.Qsci import *
-from PyQt5.QtCore import QObject, pyqtSignal, QPoint, QTimer
-from data import builtin_functions, builtin_classes, primitive_types
-from functions import getfn, filefn
-import textwrap
-import re
-import jedi
-from . import iconsts
+from extension_api import *
 
 FUNCTION_REGEX = re.compile(r"(def)\s([_a-zA-Z0-9-]*)")
 CLASS_REGEX = re.compile(r"(class)\s([_a-zA-Z0-9-]*)")
 BAD_IF_COMPARATION_BOOL_REGEX = re.compile(r"(if|elif)\s([_a-zA-Z0-9-.]*)\s(==|!=)\s(True|False|None)")
 
-class IdeTools(QObject):
+class Pyntellisense(QObject):
     on_update_header = pyqtSignal(dict)
     on_tooltip_request=pyqtSignal(dict)
 
@@ -33,41 +23,11 @@ class IdeTools(QObject):
         self._env = env
     
     def run(self):
-        self.configure_headers()
-        self.configure_inline_tree()
+        self.make_inline_tree()
         self.editor.on_mouse_stoped.connect(self.build_tooltip)
-        self.editor.idocument.on_changed.connect(self.configure_headers)
-        self.editor.cursorPositionChanged.connect(self.configure_inline_tree)
+        self.editor.cursorPositionChanged.connect(self.make_inline_tree)
     
-    def configure_headers(self):
-        if self.editor.file_path is None:
-            self.on_update_header.emit({"text":" Unsaved >", "widget":self.editor.parent.up_info0})
-        else:
-            widgets = [
-                self.editor.parent.up_info0,
-                self.editor.parent.up_info1,
-                self.editor.parent.up_info2,
-                self.editor.parent.up_info3,
-                self.editor.parent.up_info4,
-                self.editor.parent.up_info5,
-                self.editor.parent.up_info6,
-                self.editor.parent.up_info7
-                ]
-            path_levels = getfn.get_path_splited(self.editor.idocument.file)
-            i = 0
-            for path in path_levels:
-                if path.replace(" ", "") == "":
-                    continue
-                if i < len(widgets):
-                    self.on_update_header.emit({"text":" "+str(path)+" >", "widget":widgets[i]})
-                else:
-                    break
-                    self.on_update_header.emit({"text":" "+str(self.editor.idocument.file_name)+" >", "widget":widgets[i]})
-                i+=1
-            #self.on_update_header.emit({"text":" "+str(self.editor.idocument.file_name)+" >", "widget":self.editor.parent.up_info7})
-        self.on_update_header.emit({"widget":self.editor.parent.up_info0, "icon":self.editor.idocument.icon})
-    
-    def configure_inline_tree(self):
+    def make_inline_tree(self):
         color_main = color_main = self.colors['Default']['fg']
         color_child = color_main = self.colors['Default']['fg']
         name = "..."
@@ -206,7 +166,7 @@ class IdeTools(QObject):
         except:
             return False, False
 
-class LiveEdition(QObject):
+class PyntellisenseEdition(QObject):
     
     on_update_header = pyqtSignal(dict)
     on_annotation_request = pyqtSignal(int, str, int, str)
@@ -230,25 +190,11 @@ class LiveEdition(QObject):
         self.editor.on_text_changed.connect(self.text_changed)
         self.editor.on_modify_key.connect(self.modifiers_keys)
         self.editor.on_saved.connect(self.editor_saved)
-        self.editor.file_watcher.on_file_deleted.connect(self.file_deleted)
-        self.editor.file_watcher.on_file_modified.connect(self.file_modified)
-    
-    def file_deleted(self, file):
-        self.on_update_header.emit({"text":"D", "widget":self.editor.parent.file_info, "type":"red"})
-    
-    def file_modified(self, file):
-        if filefn.read_file(file) != self.editor.text():
-            self.on_update_header.emit({"text":"M", "widget":self.editor.parent.file_info, "type":"red"})
     
     def text_changed(self):
         if self.editor.lexer_name=="python":
             self.do_live_tips()
-        
-        if self.editor.file_path is not None:
-            self.on_update_header.emit({"text":"M", "widget":self.editor.parent.file_info, "type":"orange"})
-        else:
-            self.on_update_header.emit({"text":"U", "widget":self.editor.parent.file_info, "type":"orange"})
-    
+            
     def modifiers_keys(self):
         if self.editor.lexer_name=="python":
             self.do_error_finder()
@@ -256,8 +202,6 @@ class LiveEdition(QObject):
     def editor_saved(self):
         if self.editor.lexer_name=="python":
             self.do_error_finder()
-        
-        self.on_update_header.emit({"text":"S", "widget":self.editor.parent.file_info, "type":"green"})
         
     def do_error_finder(self):
             try:
@@ -343,15 +287,8 @@ class LiveEdition(QObject):
             
             if condition[3] == "None":
                 return f"> Anti-pattern: '{condition[2]}'\n Comparisons to the singleton objects, like True, False, and None\nshould be done with identity, not equality. Use “is” or “is not”\n> SUGGESTION: '{condition[0]} {condition[1]} is {condition[3]}' or '{condition[0]} is not {condition[1]}'"
-    
-    def close_char(self, char):
-        row, col = self.editor.getCursorPosition()
-        char_to_close = self.editor.closable_key_map[char]
-        can_close = getfn.get_char_is_closable(col, self.editor.text(row))
-        if not can_close:
-            self.editor.insertAt(char_to_close, row, col)
 
-class Autocompletions(QObject):
+class PyntellisenseCompletions(QObject):
     
     on_error = pyqtSignal(str)
     

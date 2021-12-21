@@ -48,6 +48,16 @@
             "15": "#fff"  
         }
     },
+	"editor-styles":{
+		"color":"#ffffff",
+		"paper":"#1e1e1e",
+        "margin-background":"#1e1e1e",
+		"margin-foreround":"#aaaaaa",
+        "selection-foreground":"#ffffff",
+		"whitespace-background":"#1e1e1e",
+		"whitespace-foreground":"#999999"        
+	},
+	
     "lexer-styles":{
         "DefaultColor":"#ffffff",
         "DefaultPaper":"#1e1e1e",
