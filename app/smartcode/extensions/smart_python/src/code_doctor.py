@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
-from ..igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
 
 class CodeDoctorCore(QObject):
     
@@ -112,10 +112,13 @@ class CodeDoctor(QFrame):
         self.parent=parent
         self.icons = getfn.get_application_icons("code")
         
+        self.thread_lab = QThread(self)
+        
         self.brain = CodeDoctorCore(self)
         self.brain.on_diagnosis_loaded.connect(self.display_diagnosis)
-        self.brain.moveToThread(parent.thread_lab)
-        parent.thread_lab.started.connect(self.run_tasks)
+        self.brain.moveToThread(self.thread_lab)
+        self.thread_lab.started.connect(self.run_tasks)
+        self.thread_lab.start()
         self.init_ui()
     
     def run_tasks(self):

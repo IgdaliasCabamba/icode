@@ -7,7 +7,7 @@ from functions import *
 import config
 from config import DATA_FILE
 from ui import *
-from data import editor_cache, python_api
+from data import editor_cache
 from components.extension_manager import Plugin
 
 plugin = Plugin()
@@ -34,14 +34,10 @@ class Core(object):
 
         self.menu.edit.find.triggered.connect(self.find_in_editor)
         self.menu.edit.replace_.triggered.connect(self.replace_in_editor)
-        self.menu.edit.straighten_code.triggered.connect(self.adjust_code)
-        self.menu.edit.sort_imports.triggered.connect(self.adjust_imports)
 
         self.menu.view.command_palette.triggered.connect(self.show_command_palette)
-        self.menu.view.python_env.triggered.connect(self.show_envs)
         self.menu.view.languages.triggered.connect(self.show_langs)
 
-        self.menu.go.goto_symbol.triggered.connect(self.show_goto_symbol)
         self.menu.go.goto_line.triggered.connect(self.show_goto_line)
 
         self.tool_bar.explorer.triggered.connect(self.side_left.do_files)
@@ -51,7 +47,6 @@ class Core(object):
         self.tool_bar.ilab.triggered.connect(self.side_left.do_icode_labs)
         self.tool_bar.igit.triggered.connect(self.side_left.do_igit)
 
-        self.status_bar.interpreter.clicked.connect(self.show_envs)
         self.status_bar.lang.clicked.connect(self.show_langs)
         self.status_bar.line_col.clicked.connect(self.show_goto_line)
         self.status_bar.april.clicked.connect(self.call_april)
@@ -70,18 +65,11 @@ class Core(object):
         self.side_left.explorer.on_file_clicked.connect(self.open_file_from_explorer)
         self.side_left.explorer.btn_open_dir.clicked.connect(self.open_folder)
         self.side_left.explorer.btn_close_folder.clicked.connect(self.close_folder)
-        self.side_left.labs.btn_notes.clicked.connect(self.run_user_notes)
-        self.side_left.labs.btn_warnings.clicked.connect(self.run_code_warnings)
-        self.side_left.labs.btn_analizys.clicked.connect(self.run_code_doctor)
-        self.side_left.labs.btn_tree.clicked.connect(self.run_code_tree)
-
         self.side_left.searcher.display.on_open_file_request.connect(self.open_file_from_search)
         self.side_left.git.btn_open_repository.clicked.connect(self.open_repository)
         self.side_left.git.repository_menu.open_repository.triggered.connect(self.open_repository)
+        self.side_left.labs.on_open_workspace.connect(self.open_research_space)
         
-        self.side_right.code_doctor.btn_get_diagnosis.clicked.connect(self.run_code_doctor)
-        self.side_right.code_warnings.btn_get_warnings.clicked.connect(self.run_code_warnings)
-        self.side_right.code_warnings.on_fix_bugs_clicked.connect(self.fix_bugs)
         self.side_right.btn_close_lab.clicked.connect(self.close_lab)
 
         self.ui.isplitter.on_last_tab_closed.connect(self.last_tab_closed)
@@ -89,7 +77,6 @@ class Core(object):
         self.ui.on_tab_buffer_focused.connect(self.tab_buffer_focused)
 
         self.on_new_notebook.connect(self.configure_notebook)
-        self.on_env_changed.connect(self.update_statusbar_env)
 
         self.side_left.explorer.on_path_changed.connect(
             self.explorer_path_changed)
@@ -132,8 +119,6 @@ class Base(QObject, Core):
         super().__init__(parent)
         self._parent = parent
         self.api_lexers_list = getfn.get_all_lexers_objects_api()
-        self.api_envs_list = python_api.get_default_envs()
-        self._current_env = None
         self.api_commands_list = self.get_api_commands_list(self)
 
     # TODO
@@ -148,26 +133,11 @@ class Base(QObject, Core):
     def lexers_list(self) -> list:
         return self.api_lexers_list
 
-    @property
-    def envs_list(self) -> list:
-        return self.api_envs_list
-
-    @property
-    def current_env(self):
-        return self._current_env
-
     def add_lexer(self, lexer: object) -> None:
         self.api_lexer_list.append(lexer)
-
-    def add_env(self, interpreter) -> None:
-        self.api_envs_list.append(interpreter)
-
+    
     def add_command(self, command) -> None:
         self.api_commands_list.append(command)
-
-    def set_current_env(self, env: object) -> None:
-        self._current_env = env
-        self.on_env_changed.emit(env)
 
     def load_plugins(self):
         data = {"app": self, "qt_app": self.qt_app}
@@ -194,13 +164,12 @@ class Base(QObject, Core):
         if not self.notebooks_is_empty():
             if notebook is None:
                 widget = self.ui.notebook.currentWidget()
-                
             else:
                 widget = notebook.currentWidget()
-                if widget is not None:
-                    if widget.objectName() == "editor-frame":
-                        if widget.editor.lexer_name == "python":
-                            return widget.editor
+            if widget is not None:
+                if widget.objectName() == "editor-frame":
+                    if widget.editor.lexer_name == "python":
+                        return widget.editor
 
         return False
 
@@ -261,35 +230,15 @@ class Base(QObject, Core):
                 "command": app.close_editor
             },
             {
-                "name": "Get Code Tree",
-                "command": app.run_code_tree
-            },
-            {
-                "name": "Get Code Warnings",
-                "command": app.run_code_warnings
-            },
-            {
-                "name": "Get Code Doctor Analyze",
-                "command": app.run_code_doctor
-            },
-            {
-                "name": "Show Notes",
-                "command": app.run_user_notes
-            },
-            {
-                "name": "Adjust this Code",
-                "command": app.adjust_code
-            },
-            {
-                "name": "Split in group Horizontal",
+                "name": "Split In Group Horizontal",
                 "command": app.split_in_group_hor
             },
             {
-                "name": "Split in group Vertical",
+                "name": "Split In Group Vertical",
                 "command": app.split_in_group_ver
             },
             {
-                "name": "Split in group Horizontal",
-                "command": app.split_in_group_hor
+                "name": "Join In Group",
+                "command": app.join_in_group
             },
         ]

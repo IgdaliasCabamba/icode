@@ -23,7 +23,6 @@ class GitMenu(QMenu):
         self.commit = QAction("Commit", self)
         self.addAction(self.commit)
         
-
 class StatusTree(QTreeView):
     
     on_count_changed = pyqtSignal(int, int, int)
@@ -110,6 +109,10 @@ class StatusTree(QTreeView):
                 unmodified_count += 1
                 total_count += 1
             
+            elif value == 4:
+                self.renamed.appendRow(row)
+                total_count += 1
+            
             elif value == 128:
                 self.untracked.appendRow(row)
                 total_count += 1
@@ -120,7 +123,7 @@ class StatusTree(QTreeView):
                 modified_count += 1
                 total_count += 1
             
-            elif value == 513:
+            elif value in {512, 513}:
                 self.deleted.appendRow(row)
                 total_count += 1
             
@@ -128,11 +131,9 @@ class StatusTree(QTreeView):
                 self.ignored.appendRow(row)
                 total_count += 1
 
-            if value not in {1,2,128,257,256,258,513,16384}:
-                print(key, value)
             else:
-                pass
-        
+                print(key, value)
+    
         repo_data = f"""
         <p>Name: {repo_name}</p>
         <p>Path: {repository.workdir}</p> 

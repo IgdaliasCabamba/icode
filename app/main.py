@@ -215,14 +215,8 @@ class App(Base):
     def show_goto_line(self):
         self.editor_widgets.do_goto_line()
 
-    def show_goto_symbol(self):
-        self.editor_widgets.do_goto_symbol()
-
     def show_langs(self):
         self.editor_widgets.do_languages()
-
-    def show_envs(self):
-        self.editor_widgets.do_pyenvs()
 
     def show_command_palette(self):
         self.editor_widgets.do_commands()
@@ -284,11 +278,6 @@ class App(Base):
 
         self.ui.set_window_title(f"{tab_text}Intelligent Code")
 
-    def update_statusbar_env(self, env):
-        self.status_bar.interpreter.setText(
-            f"Python {env.version_info.major}.{env.version_info.minor}.{env.version_info.micro}"
-        )
-
     def toggle_main_views(self):
         """toggle beetwen initial screen and editor screen"""
         if self.notebooks_is_empty():
@@ -325,60 +314,13 @@ class App(Base):
         """When some tabbar close the last tab"""
         self.ui.isplitter.notebook_last_tab_closed()
 
-    def prepare_lab(self, area: int) -> None:
-        """Turn visible the side right(labs) and change current tab of notebooks"""
-        self.side_right.set_notebook_index(area)
+    def open_research_space(self, area:str) -> None:
+        """Turn visible the side right(labs) and change current workspace"""
+        self.side_right.set_space(area)
         self.side_right.setVisible(True)
         sizes = self.ui.div_main.sizes()
         sizes[2] = iconsts.LAB_BASE_SIZE
         self.ui.div_main.setSizes(sizes)
-
-    def run_user_notes(self):
-        self.prepare_lab(self.side_right.notes)
-
-    def run_code_warnings(self):
-        self.prepare_lab(self.side_right.code_warnings)
-        editor = self.notebook_have_editor_with_python()
-        if editor:
-            self.side_right.code_warnings.get_warnings(editor)
-
-    def run_code_tree(self):
-        self.prepare_lab(self.side_right.code_tree)
-        editor = self.notebook_have_editor_with_python()
-        if editor:
-            self.side_right.code_tree.build_tree(editor)
-
-    def run_code_doctor(self):
-        self.prepare_lab(self.side_right.code_doctor)
-        editor = self.notebook_have_editor_with_python()
-        if editor:
-            self.side_right.code_doctor.do_analyze(editor.text(), editor)
-
-    def adjust_code(self, editor=None) -> None:
-        """Straighten the Python code """
-        if editor is None or isinstance(editor, bool):
-            editor = self.notebook_have_editor_with_python(self.ui.notebook)
-
-        if editor is None or isinstance(editor, bool):
-            return
-            
-        code_smell = editor.text()
-        nice_code = getfn.get_straighten_code(code_smell)
-        editor.set_text(nice_code)
-
-    def adjust_imports(self):
-        """Sort the imported Python libs in code by name"""
-        editor = self.notebook_have_editor_with_python(self.ui.notebook)
-        if editor is None or isinstance(editor, bool):
-            return
-        code_smell = editor.text()
-        nice_code = getfn.get_sorted_imports(code_smell)
-        editor.set_text(nice_code)
-
-    def fix_bugs(self, editor):
-        """Call method to fix some pep-8 issues and remake the analyze"""
-        self.adjust_code(editor)
-        self.run_code_warnings()
 
     def close_lab(self):
         self.side_right.setVisible(False)
@@ -446,7 +388,6 @@ def run(args=False) -> None:
     config.restore_window(exe)
     exe.show_()
     sys.exit(qapp.exec_())
-
 
 if __name__ == '__main__':
     run()

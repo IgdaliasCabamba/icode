@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QLabel, QFileDialog
 )
 
-from ..igui import EditorListWidgetItem, InputHistory
+from igui import EditorListWidgetItem, InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn

@@ -3,11 +3,7 @@ import json
 from smartlibs import jedit2 as ijson
 from components.cache_manager import CacheManager
 import jedi
-from components.python_api import PythonApi
 
-python_api = PythonApi(
-    f"{BASE_PATH}{SYS_SEP}.data{SYS_SEP}user{SYS_SEP}envs{SYS_SEP}envs.idt")
-    
 user_cache = CacheManager(
     f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user.idt")
 
@@ -35,7 +31,6 @@ cache_directorys = [
 note_file_path = f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}labs{SYS_SEP}notes.txt"
 note_file_path_obj = Path(note_file_path)
 
-python_envs = []
 
 def build_app_dirs():
     for cache_directory in cache_directorys:
@@ -47,27 +42,9 @@ def build_notes_file():
         with open(note_file_path, "x") as file:
             pass
     
-def build_envs():
-    env = jedi.get_default_environment()
-    python_envs.append(env)
-
-    if 'PYTHONPATH' in os.environ:
-        envs = os.environ['PYTHONPATH'].split(os.pathsep)
-        if envs:
-            for env in envs:
-                python_envs.append(jedi.create_environment(str(env)))
-
-    if SYS_NAME == "linux":
-        try:
-            python_envs.append(jedi.create_environment("/usr/bin/python3"))
-            python_envs.append(jedi.create_environment("/bin/python3"))
-        except Exception as e:
-            print(e)
-            pass
 
 build_app_dirs()
 build_notes_file()
-build_envs()
 
 app_icon_path = f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}icons{SYS_SEP}"
 smartcode_directory = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}"

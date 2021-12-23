@@ -63,12 +63,7 @@ class EditorView(QFrame):
             self.file_watcher.start_monitoring(str(self.file))
             
         self.init_ui()
-        self.run()
-    
-    def run(self) -> None:
-        self.api.on_env_changed.connect(self.update_env)
-        self.update_env(self.api.current_env)
-    
+
     def init_ui(self) -> None:        
         self.layout=QVBoxLayout(self)
         self.layout.setSpacing(iconsts.EDITOR_LAYOUT_SPACING)
@@ -317,10 +312,6 @@ class EditorView(QFrame):
 
     def update_code(self, data):
         self.on_tab_content_changed.emit({"widget":self, "data":data})
-    
-    def update_env(self, env):
-        for editor in self._editors:
-            editor.set_env(env)
     
     def save_file(self):
         if self.file is None:

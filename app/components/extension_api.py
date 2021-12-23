@@ -10,7 +10,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtCore import QObject, QPoint, QTimer, pyqtSignal
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from system import BASE_PATH, SYS_SEP, add_path
+from system import *
 
 from config import get_icons_package, get_icons_theme, get_palette
 from data import builtin_classes, builtin_functions, ijson, primitive_types

@@ -124,14 +124,13 @@ class AprilFace(QFrame):
         
         self.widget = QFrame(self)
         self.widget.setObjectName("main-frame")
-        self.vbox = QVBoxLayout(self.widget) 
+        self.vbox = QVBoxLayout(self.widget)
+        self.widget.setLayout(self.vbox)
 
         self.hello_msg=Card(self, hello_msg, "April", 0)
         self.hello_msg.set_read_only(True)
 
         self.vbox.addWidget(self.hello_msg)
-
-        self.widget.setLayout(self.vbox)
 
         self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

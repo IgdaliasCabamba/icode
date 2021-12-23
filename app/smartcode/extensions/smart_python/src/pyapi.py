@@ -1,5 +1,4 @@
 from PyQt5.QtCore import QSettings
-import data
 import pathlib
 
 class PythonApi(QSettings):
@@ -14,7 +13,7 @@ class PythonApi(QSettings):
             self.setValue(key, value)
 
     def get_default_envs(self):
-        return data.python_envs
+        return []
 
     def create_env(self, env_path):
         try:

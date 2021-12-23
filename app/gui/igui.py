@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QLabel, QListWidgetItem, QPushButton, QScrollArea,
 
 from functions import getfn
 
-from .base import CategoryMixin, TabData
+from base import CategoryMixin, TabData
 
 class Animator(QLabel):
     def __init__(self, parent, animation=None) -> None:

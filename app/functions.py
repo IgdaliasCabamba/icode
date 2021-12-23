@@ -329,7 +329,7 @@ class Get:
         try:
             return jedi.create_environment(path)
         except:
-            return None
+            pass
         return None
 
     def get_adjusted_path(self, path):

@@ -103,64 +103,16 @@ class BottomTabCorner(QFrame):
         self.parent.currentChanged.connect(self.change_view)
         self.init_ui()
     
-    def change_view(self, index):
+    def change_view(self, index) -> None:
         widget=self.parent.widget(index)
-        name = widget.objectName()
-        if name == "problems":
-            self.change_to_problems()
-        elif name == "terminal-view":
-            self.change_to_terminal()
-        #elif name == "debug":
-            #self.change_to_debug()
-        elif name == "pyconsole-view":
-            self.change_to_pyconsole()
-        else:
-            self.change_to(name)
-            #self.set_visiblity(["debug", "terminal", "problems", "pyconsole"], False)
-        return
+        if widget in self.widget_dict.keys():
+            self.change_to(widget)
     
     def init_ui(self) -> None:
 
         self.layout=QHBoxLayout(self)
         self.setLayout(self.layout)
 
-        # Terminal Buttons
-        self.btn_new_terminal=QPushButton(self)
-        self.btn_new_terminal.setIcon(self.icons.get_icon("add"))
-
-        self.btn_remove_terminal=QPushButton(self)
-        self.btn_remove_terminal.setIcon(self.icons.get_icon("remove"))
-
-        self.layout.addWidget(self.btn_new_terminal)
-        self.layout.addWidget(self.btn_remove_terminal)
-
-        #PyConsole Buttons
-        self.btn_add_pycell = QPushButton(self)
-        self.btn_add_pycell.setIcon(self.icons.get_icon("add"))
-
-        self.layout.addWidget(self.btn_add_pycell)
-
-        # Problems Buttons
-        self.btn_clear_problems=QPushButton(self)
-        self.btn_clear_problems.setIcon(self.icons.get_icon("clear"))
-
-        self.layout.addWidget(self.btn_clear_problems)
-
-        # Debug Buttons
-        self.btn_clear_debug=QPushButton(self)
-        self.btn_clear_debug.setIcon(self.icons.get_icon("clear"))
-
-        self.btn_start_debug=QPushButton(self)
-        self.btn_start_debug.setIcon(self.icons.get_icon("start"))
-
-        self.btn_stop_debug=QPushButton(self)
-        self.btn_stop_debug.setIcon(self.icons.get_icon("stop"))
-
-        self.layout.addWidget(self.btn_start_debug)
-        self.layout.addWidget(self.btn_stop_debug)
-        self.layout.addWidget(self.btn_clear_debug)
-
-        # Base Buttons
         self.btn_close=QPushButton(self)
         self.btn_close.setIcon(self.icons.get_icon("close"))
 
@@ -176,12 +128,7 @@ class BottomTabCorner(QFrame):
         self.layout.addWidget(self.btn_minimize)
         self.layout.addWidget(self.btn_close)
 
-        self.widget_dict = {
-            "terminal":[self.btn_new_terminal, self.btn_remove_terminal],
-            "problems":[self.btn_clear_problems],
-            #"debug":[self.btn_clear_debug, self.btn_stop_debug, self.btn_start_debug],
-            "pyconsole":[self.btn_add_pycell]
-        }
+        self.widget_dict = {}
     
     def set_visiblity(self, items:list, flag:bool):
         for item in items:
@@ -189,27 +136,16 @@ class BottomTabCorner(QFrame):
                 for widget in self.widget_dict[item]:
                     widget.setVisible(flag)
             continue
-
-    def change_to_problems(self):
-        self.set_visiblity(["debug", "terminal", "pyconsole"], False)
-        self.set_visiblity(["problems"], True)
     
-    def change_to_terminal(self):
-        self.set_visiblity(["debug", "problems", "pyconsole"], False)
-        self.set_visiblity(["terminal"], True)
-    
-    #def change_to_debug(self):
-        #self.set_visiblity(["problems", "terminal", "pyconsole"], False)
-        #self.set_visiblity(["debug"], True)
-    
-    def change_to_pyconsole(self):
-        self.set_visiblity(["debug", "problems", "terminal"], False)
-        self.set_visiblity(["pyconsole"], True)
-    
-    def change_to(self, name:str) -> None:
+    def change_to(self, name:object) -> None:
         self.set_visiblity([widget for widget in self.widget_dict.keys()], False)
-        if name in self.widget_dict.key():
+        if name in self.widget_dict.keys():
             self.set_visiblity([name], True)
     
-    def add_widget(self, name:str, components:list):
+    def add_widget(self, name:object, components:list, goto:bool=False):
+        components = list(reversed(components))
         self.widget_dict[name]=components
+        for widget in components:
+            self.layout.insertWidget(0, widget)
+        if goto:
+            self.change_to(name)

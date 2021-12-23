@@ -322,18 +322,14 @@ class EditorWidgets(QObject):
         self.build()
     
     def build(self):
-        self.python_envs = PythonEnvs(self, self.view)
         self.command_palette = ApplicationCommandPalette(self, self.view)
         self.language_mode_selection = LexerMode(self, self.view)
         self.go_to = GotoLine(self, self.view)
-        self.symbol_navigator = SymbolExplorer(self, self.view)
         self.clone_repo = CloneRepo(self, self.view)
 
-        self.widget_list.append(self.python_envs)
         self.widget_list.append(self.command_palette)
         self.widget_list.append(self.language_mode_selection)
         self.widget_list.append(self.go_to)
-        self.widget_list.append(self.symbol_navigator)
         self.widget_list.append(self.clone_repo)
         
         for widget in self.widget_list:
@@ -359,7 +355,9 @@ class EditorWidgets(QObject):
         return self._editor_widget
 
     def addWidgetObject(self, widget:object) -> None:
-        self.addWidget(widget(self.view, self._parent))
+        called_widget = widget(self, self.view)
+        self.addWidget(called_widget)
+        return called_widget
     
     def addWidget(self, widget:object) -> None:
         self.widget_list.append(widget)
@@ -367,6 +365,8 @@ class EditorWidgets(QObject):
     
     def configure_widget(self, widget):
         self.update_gde()
+        self.update_all_sizes()
+        self.update_ui()
 
         if hasattr(widget, "focus_out"):
             if widget.focus_out not in {None, True, False}:
@@ -421,7 +421,6 @@ class EditorWidgets(QObject):
             self.close_widget(self.command_palette)
             self.close_widget(self.go_to)
             self.close_widget(self.language_mode_selection)
-            self.close_widget(self.symbol_navigator)
                     
     def run_widget(self, widget:object):
         if widget in self.widgets_without_focus:
@@ -458,10 +457,6 @@ class EditorWidgets(QObject):
         self.command_palette.set_commands(self.get_all_commands())
         self.run_widget(self.command_palette)
     
-    def do_pyenvs(self):
-        self.python_envs.set_envs(self.get_all_envs())
-        self.run_widget(self.python_envs)
-    
     def do_languages(self):
         self.language_mode_selection.set_langs(self.get_all_languages())
         self.run_widget(self.language_mode_selection)
@@ -471,45 +466,20 @@ class EditorWidgets(QObject):
             if self.api.notebook_have_editor():
                 self.run_widget(self.go_to)
     
-    def do_goto_symbol(self):
-        if self.api is not None:
-            editor = self.api.notebook_have_editor_with_python()
-            if editor:
-                self.symbol_navigator.set_symbols(self.get_code_tree(editor))
-                self.run_widget(self.symbol_navigator)
-    
     def do_clone_repo(self):
         self.run_widget(self.clone_repo)
     
     def get_all_commands(self):
         if self.api is not None:
             return self.api.commands_list
-
-    def get_all_envs(self):
-        if self.api is not None:
-            return self.api.envs_list
     
     def get_all_languages(self):
         if self.api is not None:
             if self.api.notebook_have_editor():
                 return self.api.lexers_list
     
-    def get_code_tree(self, editor):
-        if self.api is not None:
-            if self.api.notebook_have_editor():
-                return getfn.get_python_node_tree(editor.text())
-    
     def get_current_editor(self):
         return self._editor_widget.editor
-    
-    def set_current_env(self, env):
-        if self.api is not None:
-            self.api.set_current_env(env)
-    
-    def add_env(self, env):
-        if self.api is not None:
-            self.api.add_env(env)
-        self.python_envs.set_envs(self.get_all_envs())
     
     def run_by_id(self, widget, text):
         if text.startswith(":"):
@@ -518,8 +488,4 @@ class EditorWidgets(QObject):
         
         elif text.startswith(">"):
             self.do_commands()
-            widget.hide()
-        
-        elif text.startswith("@"):
-            self.do_goto_symbol()
             widget.hide()

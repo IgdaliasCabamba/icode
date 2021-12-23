@@ -14,13 +14,13 @@ from gui.explorer import FileExplorer
 from gui.extensions import ExtensionsUi
 from gui.idebug import Debug
 from gui.ilabs import Labs
-from gui.widgets import (CodeDoctor, CodeTree, CodeWarnings, DeepAnalyze,
-                       Notes, Refactor)
 from gui.inotebook import SideBottomNotebook
 from gui.iproblems import ProblemLogs
 from gui.isearch import Searcher
 from gui.isource_control import IGit
-from gui.iterminals import PyConsole, Terminal
+from gui.iterminals import Terminal
+from gui.widgets import Notes
+from gui.laboratory_table import WorkSpace, Table
 
 from .igui import HeaderPushButton
 from data import note_file_path
@@ -140,11 +140,7 @@ class GoMenu(QMenu):
 
     def build(self) -> None:
         self.setTitle("Go")
-
-        self.goto_symbol = QAction("Goto Symbol in Editor\tCtrl+Shift+O", self)
-        self.goto_symbol.setShortcut("Ctrl+Shift+O")
-        self.addAction(self.goto_symbol)
-
+        
         self.addSeparator()
 
         self.goto_file = QAction("Goto File\tCtrl+P", self)
@@ -171,10 +167,6 @@ class ViewMenu(QMenu):
         self.command_palette = QAction("Command Palette\tCtrl+Shift+P", self)
         self.command_palette.setShortcut("Ctrl+Shift+P")
         self.addAction(self.command_palette)
-
-        self.python_env = QAction("Python Interpreter\tCtrl+Alt+E", self)
-        self.python_env.setShortcut("Ctrl+Alt+E")
-        self.addAction(self.python_env)
 
         self.languages = QAction("Select Langauge Mode\tCtrl+Alt+L", self)
         self.languages.setShortcut("Ctrl+Alt+L")
@@ -241,13 +233,7 @@ class EditMenu(QMenu):
         self.replace_ = QAction("Replace", self)
         self.replace_.setShortcut("Ctrl+H")
         self.addAction(self.replace_)
-        self.addSeparator()
-        self.straighten_code = QAction("Straighten Code", self)
-        self.addAction(self.straighten_code)
-        self.sort_imports = QAction("Sort Imports", self)
-        self.addAction(self.sort_imports)
-
-
+        
 class FileMenu(QMenu):
     """
     SelectionMenu: a menu for file actions such as open, close, save, and create
@@ -451,8 +437,6 @@ class StatusBar(QStatusBar):
         self.warnings.setIcon(self.icons.get_icon("warnings"))
         self.errors = QPushButton(self)
         self.errors.setIcon(self.icons.get_icon("errors"))
-        self.interpreter = QPushButton(self)
-        self.interpreter.setText(f"(smartenv) {getfn.get_python_version()}")
         self.source_control = QPushButton(self)
         self.source_control.setIcon(self.icons.get_icon("source_control"))
         
@@ -462,7 +446,6 @@ class StatusBar(QStatusBar):
         self.add_status_widget(self.source_control)
         self.add_status_widget(self.errors)
         self.add_status_widget(self.warnings)
-        self.add_status_widget(self.interpreter)
         
         self.add_widget(self.april)
 
@@ -514,6 +497,7 @@ class SideBottom(QFrame):
         super().__init__(parent)
         self.parent = parent
         self.setObjectName("side-bottom")
+        self.icons=getfn.get_application_icons("tab-corner")
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -522,16 +506,36 @@ class SideBottom(QFrame):
         self.setMinimumHeight(100)
 
         self.notebook = SideBottomNotebook(self)
+        
+        # Terminal Buttons
+        self.btn_new_terminal=QPushButton()
+        self.btn_new_terminal.setIcon(self.icons.get_icon("add"))
 
-        self.py_console = PyConsole(self)
+        self.btn_remove_terminal=QPushButton()
+        self.btn_remove_terminal.setIcon(self.icons.get_icon("remove"))
+
+        # Problems Buttons
+        self.btn_clear_problems=QPushButton()
+        self.btn_clear_problems.setIcon(self.icons.get_icon("clear"))
+        
+        # Debug Buttons
+        self.btn_clear_debug=QPushButton(self)
+        self.btn_clear_debug.setIcon(self.icons.get_icon("clear"))
+
+        self.btn_start_debug=QPushButton(self)
+        self.btn_start_debug.setIcon(self.icons.get_icon("start"))
+
+        self.btn_stop_debug=QPushButton(self)
+        self.btn_stop_debug.setIcon(self.icons.get_icon("stop"))
+
+        # Widgets
         self.problem_logs = ProblemLogs(self)
         self.debug = Debug(self)
         self.terminal = Terminal(self)
 
-        self.notebook.addTab(self.problem_logs, "PROBLEMS")
-        self.notebook.addTab(self.py_console, "PYCONSOLE")
-        self.notebook.addTab(self.debug, "DEBUG")
-        self.notebook.addTab(self.terminal, "TERMINAL")
+        self.add_widget(self.problem_logs, "PROBLEMS", [self.btn_clear_problems])
+        self.add_widget(self.debug, "DEBUG", [self.btn_start_debug, self.btn_stop_debug, self.btn_clear_debug])
+        self.add_widget(self.terminal, "TERMINAL", [self.btn_new_terminal, self.btn_remove_terminal])
 
         self.notebook.cornerWidget().btn_close.clicked.connect(
             self.close_panel)
@@ -541,6 +545,24 @@ class SideBottom(QFrame):
             self.minimize)
 
         self.layout.addWidget(self.notebook)
+    
+    def insert_widget(self, pos:int, widget:object, name:str, components:list=[], goto:bool=False) -> None:
+        current_widget = None
+        if self.notebook.count() > 0:
+            current_widget = self.notebook.currentWidget()
+        self.notebook.cornerWidget().add_widget(widget, components, goto)
+        self.notebook.insertTab(pos, widget, name)
+        if not goto and current_widget is not None:
+            self.notebook.setCurrentWidget(current_widget)
+    
+    def add_widget(self, widget:object, name:str, components:list=[], goto:bool=True):
+        current_widget = None
+        if self.notebook.count() > 0:
+            current_widget = self.notebook.currentWidget()
+        self.notebook.cornerWidget().add_widget(widget, components, goto)
+        self.notebook.addTab(widget, name)
+        if not goto and current_widget is not None:
+            self.notebook.setCurrentWidget(current_widget)
 
     def close_panel(self):
         index = self.parent.div_child.indexOf(self)
@@ -657,13 +679,13 @@ class SideRight(QFrame):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setObjectName("side-right")
-        self.thread_lab = QThread(self)
         self.icons = getfn.get_application_icons("ilab")
+        self.spaces = {}
         self.init_ui()
 
     def init_ui(self) -> None:
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setContentsMargins(5, 5, 5, 5)
         self.setLayout(self.layout)
 
         self.top_info = QLabel("<small>ICODE LABS</small>")
@@ -675,44 +697,45 @@ class SideRight(QFrame):
         self.header_layout = QHBoxLayout()
         self.header_layout.addWidget(self.top_info)
         self.header_layout.addWidget(self.btn_close_lab)
+        
+        self.scroll=QScrollArea(self)
+        self.scroll.setObjectName("scroll-area")
+        
+        self.spaces_content = QFrame(self)
+        self.spaces_manager = QStackedLayout()
+        self.spaces_manager.setContentsMargins(0,0,0,0)
+        self.spaces_content.setLayout(self.spaces_manager)
 
-        self.div = QSplitter(self)
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setWidget(self.spaces_content)
 
         self.notes = Notes(self, note_file_path)
-        self.code_tree = CodeTree(self)
-        self.code_doctor = CodeDoctor(self)
-        self.code_warnings = CodeWarnings(self)
-        self.refactor = Refactor(self)
-        self.deep_analyze = DeepAnalyze(self)
-
-        self.notebook_top = QTabWidget(self)
-        self.notebook_top.addTab(self.notes, "Notes")
-        self.notebook_top.addTab(self.code_tree, "Tree")
-        self.notebook_top.addTab(self.refactor, "Refactor")
-
-        self.notebook_bottom = QTabWidget(self)
-        self.notebook_bottom.addTab(self.code_doctor, "Code Doctor")
-        self.notebook_bottom.addTab(self.code_warnings, "Warnings")
-        self.notebook_bottom.addTab(self.deep_analyze, "Deep Analyze")
-
-        self.div.addWidget(self.notebook_top)
-        self.div.addWidget(self.notebook_bottom)
-        self.div.setOrientation(Qt.Vertical)
-        self.div.setSizes([1000, 1000])
+        self.table_notes = Table(self, "Notes")
+        self.table_notes.add_widget(self.notes)
+        self.notes_work_space = WorkSpace("inotes", self)
+        self.notes_work_space.add_table(self.table_notes, 0, 0)
+        self.add_space("inotes", self.notes_work_space)
 
         self.layout.addLayout(self.header_layout)
-        self.layout.addWidget(self.div)
+        self.layout.addWidget(self.scroll)
 
         self.setVisible(False)
-        self.thread_lab.start()
-
-    def set_notebook_index(self, widget):
-        for i in range(self.notebook_top.count()):
-            if widget == self.notebook_top.widget(i):
-                self.notebook_top.setCurrentWidget(widget)
-                return
-
-        for i in range(self.notebook_bottom.count()):
-            if widget == self.notebook_bottom.widget(i):
-                self.notebook_bottom.setCurrentWidget(widget)
-                return
+    
+    def set_space(self, name:str) -> None:
+        self.spaces_manager.setCurrentWidget(self.spaces[name])
+    
+    def add_space(self, name:str, widget:object) -> None:
+        self.spaces[name] = widget
+        self.spaces_manager.addWidget(widget)
+    
+    def new_table(self, title:str, widget):
+        new_table = Table(self, title)
+        new_table.add_widget(widget)
+        return new_table
+    
+    def new_space(self, name_id:str) -> object:
+        new_research_space = WorkSpace(name_id, self)
+        self.add_space(name_id, new_research_space)
+        return new_research_space

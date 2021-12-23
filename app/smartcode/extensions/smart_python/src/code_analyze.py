@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
-from ..igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
 
 class DeepAnalyze(QFrame):
     def __init__(self, parent):

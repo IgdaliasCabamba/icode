@@ -246,7 +246,6 @@ class Editor(EditorBase):
     on_document_changed = pyqtSignal(object)
     on_saved = pyqtSignal(str)
     on_abcd_added = pyqtSignal()
-    on_env_changed = pyqtSignal(object)
     
     def __init__(self, parent, file=None) -> None:
         super().__init__(parent)
@@ -369,9 +368,6 @@ class Editor(EditorBase):
         self.update_lines()
         self.define_lexer()
     
-    def set_env(self, env):
-        self.on_env_changed.emit(env)
-        
     def save_file(self, file_path):
         self.file_path = file_path
         self.saved = True

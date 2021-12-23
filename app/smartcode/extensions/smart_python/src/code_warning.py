@@ -4,12 +4,12 @@ from PyQt5.QtWidgets import (
     QTextEdit, QTreeView,
     QListWidget, QHBoxLayout
     )
-    
+from itertools import zip_longest
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
-from ..igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
 
 class CodeWarningsCore(QObject):
     
@@ -53,10 +53,13 @@ class CodeWarnings(QFrame):
         self.parent=parent
         self.icons = getfn.get_application_icons("code")
         
+        self.thread_lab = QThread(self)
+        
         self.brain = CodeWarningsCore(self)
         self.brain.on_warnings_loaded.connect(self.display_warnings)
-        self.brain.moveToThread(parent.thread_lab)
-        parent.thread_lab.started.connect(self.run_tasks)
+        self.brain.moveToThread(self.thread_lab)
+        self.thread_lab.started.connect(self.run_tasks)
+        self.thread_lab.start()
         self.init_ui()
     
     def run_tasks(self):

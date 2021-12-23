@@ -64,8 +64,8 @@ class MainWindow(QMainWindow):
         self.setStatusBar(self.status_bar)
 
         self.side_bottom = SideBottom(self)
-        self.side_left = SideLeft(self)
         self.side_right = SideRight(self)
+        self.side_left = SideLeft(self)
 
         self.isplitter = ISplitter(self)
 
