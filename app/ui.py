@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.isplitter)
-        
+
     def _init_ui(self) -> None:
         self.div_child = QSplitter(self)
         self.div_child.setObjectName("div-child")

@@ -2,11 +2,11 @@
     "global-styles":{
         "drop-shadow-color":"#000000"
     },
-    "pyconsole-styles":{
+    "generic-lexer-styles":{
         "keyword":["#c683f2"],
         "operator":["#f283a8"],
         "brace":["darkGray"],
-        "defclass":["#f7ffad"],
+        "class-function":["#f7ffad"],
         "string":["#d9715d"],
         "string2":["#d9715d"],
         "comment":["#69b562"],

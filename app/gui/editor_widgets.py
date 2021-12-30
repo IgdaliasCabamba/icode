@@ -11,7 +11,6 @@ from .igui import EditorListWidgetItem, InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn
-from smartlibs.jedit2 import edit
 from .widgets import *
 
 class FindOptions(QMenu):

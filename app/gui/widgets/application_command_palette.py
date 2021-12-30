@@ -11,7 +11,6 @@ from ..igui import EditorListWidgetItem, InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn
-from smartlibs.jedit2 import edit
 
 class ApplicationCommandPalette(QFrame):
     
@@ -35,7 +34,7 @@ class ApplicationCommandPalette(QFrame):
         self.input_edit.setObjectName("child")
         self.input_edit.textChanged.connect(self.search_command)
         self.input_edit.returnPressed.connect(self.execute_selected_command)
-        self.input_edit.setMinimumHeight(30)
+        self.input_edit.setMinimumHeight(24)
 
         self.command_list = QListWidget(self)
         self.command_list.setObjectName("child")

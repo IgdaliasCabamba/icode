@@ -1,9 +1,12 @@
 from . import *
 from system import SYS_NAME
 
+python_key_list=['and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'super', 'try', 'while', 'with', 'yield']
+python_extra_key_list=['False','True', 'None', 'self', 'int', 'str', 'object', 'list', 'set', 'dict', 'tuple', 'float', 'bool', 'byte']
+
 class PythonLexer(QsciLexerPython):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
         self.parent=parent
         self.python_extra_key_list=python_extra_key_list
         self.python_key_list=python_key_list

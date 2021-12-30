@@ -1,51 +1,43 @@
 from extension_api import *
+
+need_dirs = [os.path.join(BASE_PATH, '.cache', 'jedi'), os.path.join(BASE_PATH, 'data', 'user', 'envs')]
+make_dirs(need_dirs)
+
 export(path="smart_python.src")
-from smartpycore import *
-from pyterms import *
-from symbol_navigator import *
-from pyenvs import *
-from pyapi import *
-from code_tree import *
-from code_doctor import *
-from code_analyze import *
-from refactor import *
-from code_warning import *
+export(path="smart_python.src.vendor")
+export(path="smart_python.src.resourcelibs")
+export(path="smart_python.src.resourcelibs.jedi")
 
-python_api = PythonApi(
-    f"{BASE_PATH}{SYS_SEP}.data{SYS_SEP}user{SYS_SEP}envs{SYS_SEP}envs.idt")
-
-python_envs = []
-
-def build_envs():
-    env = jedi.get_default_environment()
-    python_envs.append(env)
-
-    if 'PYTHONPATH' in os.environ:
-        envs = os.environ['PYTHONPATH'].split(os.pathsep)
-        if envs:
-            for env in envs:
-                python_envs.append(jedi.create_environment(str(env)))
-
-    if SYS_NAME == "linux":
-        try:
-            python_envs.append(jedi.create_environment("/usr/bin/python3"))
-            python_envs.append(jedi.create_environment("/bin/python3"))
-        except Exception as e:
-            print(e)
-            pass
-
-build_envs()
+from smartpy_core import *
+from smartpy_consoles import *
+from smartcode_navigator import *
+from smartpy_envs import *
+from smartpy_api import *
+from smartcode_tree import *
+from smartcode_doctor import *
+from smartcode_analyze import *
+from smart_refactor import *
+from smartcode_warning import *
+from smartpy_debug import *
 
 class Init(ModelApp):
+    
     on_env_changed = pyqtSignal(object)
+    
     def __init__(self, data) -> None:
         super().__init__(data, "smart_python")
-        self.create_components()
+        self.build_ui()
         self.listen_slots()
         self._current_env = None
-        self.api_envs_list = python_api.get_default_envs()
+        self.api_envs_list = envs_api.python_envs
+        self.objects_mem = {
+            "editors":[],
+            "autocompleters":[],
+            "live_tipers":[],
+            "ide_utils":[]            
+        }
         
-    def create_components(self):
+    def build_ui(self):
         # Menu
         self.menu = QMenu("Smart Python")
         
@@ -91,37 +83,91 @@ class Init(ModelApp):
         
         self.btn_open_pylab=QPushButton("Open")
         self.btn_open_pylab.setObjectName("btn-open-pylab")
-        self.btn_open_pylab.clicked.connect(lambda: self.app.open_research_space("smart_python"))
         self.ui.side_left.labs.new_work_space("Python", "smart_python", self.btn_open_pylab)
         
         self.code_tree = CodeTree(None)
+        self.btn_run_tree = QPushButton()
+        self.btn_run_tree.setObjectName("Button")
+        self.btn_run_tree.setProperty("style-bg","transparent")
+        self.btn_run_tree.setIcon(corner_icons.get_icon("start"))
         table1 = self.ui.side_right.new_table("Code Tree", self.code_tree)
+        table1.setMinimumSize(250,300)
+        table1.add_header_widget(self.btn_run_tree)
         
         self.code_doctor = CodeDoctor(None)
+        self.btn_run_doctor = QPushButton()
+        self.btn_run_doctor.setObjectName("Button")
+        self.btn_run_doctor.setProperty("style-bg","transparent")
+        self.btn_run_doctor.setIcon(corner_icons.get_icon("start"))
         table2 = self.ui.side_right.new_table("Code Doctor", self.code_doctor)
+        table2.add_header_widget(self.btn_run_doctor)
+        table2.setMinimumSize(250,300)
         
         self.code_warnings = CodeWarnings(None)
+        self.btn_run_warnings = QPushButton()
+        self.btn_run_warnings.setObjectName("Button")
+        self.btn_run_warnings.setProperty("style-bg", "transparent")
+        self.btn_run_warnings.setIcon(corner_icons.get_icon("start"))
         table3 = self.ui.side_right.new_table("Code Warnings", self.code_warnings)
+        table3.add_header_widget(self.btn_run_warnings)
+        table3.setMinimumSize(250,300)
         
         self.refactor = Refactor(None)
         table4 = self.ui.side_right.new_table("Code Refactor", self.refactor)
+        table4.setMinimumSize(250,300)
         
         self.deep_analyze = DeepAnalyze(None)
+        self.btn_run_analyze = QPushButton()
+        self.btn_run_analyze.setObjectName("Button")
+        self.btn_run_analyze.setProperty("style-bg","transparent")
+        self.btn_run_analyze.setIcon(corner_icons.get_icon("start"))
         table5 = self.ui.side_right.new_table("Deep Analyze", self.deep_analyze)
+        table5.add_header_widget(self.btn_run_analyze)
+        table5.setMinimumSize(200,200)
+        
+        self.debug = Debug(None)
+        self.btn_clear_debug=QPushButton()
+        self.btn_clear_debug.setObjectName("Button")
+        self.btn_clear_debug.setProperty("style-bg","transparent")
+        self.btn_clear_debug.setIcon(corner_icons.get_icon("clear"))
+        self.btn_start_debug=QPushButton()
+        self.btn_start_debug.setObjectName("Button")
+        self.btn_start_debug.setProperty("style-bg","transparent")
+        self.btn_start_debug.setIcon(corner_icons.get_icon("start"))
+        self.btn_stop_debug=QPushButton()
+        self.btn_stop_debug.setObjectName("Button")
+        self.btn_stop_debug.setProperty("style-bg","transparent")
+        self.btn_stop_debug.setIcon(corner_icons.get_icon("stop"))
+        table6 = self.ui.side_right.new_table("Debug", self.debug)
+        table6.add_header_widget(self.btn_start_debug)
+        table6.add_header_widget(self.btn_stop_debug)
+        table6.add_header_widget(self.btn_clear_debug)
+        table6.setMinimumSize(200,300)
         
         space.add_table(table1, 0, 0)
         space.add_table(table2, 0, 1)
         space.add_table(table3, 1, 0)
         space.add_table(table4, 1, 1)
         space.add_table(table5, 2, 0, 2, 2)
-        
+        space.add_table(table6, 4, 0, 4, 2)
+    
+    def add_env(self, env:object) -> None:
+        self.api_envs_list.append(env)
+        self.python_envs.set_envs(self.api_envs_list)
         
     def set_current_env(self, env: object) -> None:
         self._current_env = env
         self.on_env_changed.emit(env)
+        l = []
+        l.extend(self.objects_mem["autocompleters"])
+        l.extend(self.objects_mem["ide_utils"])
+        l.extend(self.objects_mem["live_tipers"])
+        for x in l:
+            if hasattr(x, "set_env"):
+                x.set_env(self._current_env)
     
     def show_envs(self):
-        self.python_envs.set_envs([])
+        self.python_envs.set_envs(self.api_envs_list)
         self.ui.editor_widgets.run_widget(self.python_envs)
     
     def show_goto_symbol(self):
@@ -131,12 +177,10 @@ class Init(ModelApp):
             self.ui.editor_widgets.run_widget(self.symbol_navigator)
     
     def get_code_tree(self, editor):
-        return getfn.get_python_node_tree(editor.text())
+        return python_api.get_python_node_tree(editor.text())
         
     def update_statusbar_env(self, env):
-        self.status_bar.interpreter.setText(
-            f"Python {env.version_info.major}.{env.version_info.minor}.{env.version_info.micro}"
-        )
+        self.interpreter.setText(f"Python {env.version_info.major}.{env.version_info.minor}.{env.version_info.micro}")
         
     def listen_notebook_slots(self, notebook):
         notebook.widget_added.connect(self.take_editor)
@@ -144,12 +188,21 @@ class Init(ModelApp):
     def listen_slots(self):
         self.add_event("ui.notebook.widget_added", self.take_editor)
         self.add_event("app.on_new_notebook", self.listen_notebook_slots)
-        self.on_env_changed.connect(self.update_statusbar_env)
-        self.straighten_code.triggered.connect(self.adjust_code)
-        self.sort_imports.triggered.connect(self.adjust_imports)
-        self.interpreter.clicked.connect(self.show_envs)
-        self.python_env.triggered.connect(self.show_envs)
-        self.goto_symbol.triggered.connect(self.show_goto_symbol)
+        self.add_event("on_env_changed", self.update_statusbar_env)
+        self.add_event("straighten_code.triggered", self.adjust_code)
+        self.add_event("sort_imports.triggered", self.adjust_imports)
+        self.add_event("interpreter.clicked", self.show_envs)
+        self.add_event("python_env.triggered", self.show_envs)
+        self.add_event("goto_symbol.triggered", self.show_goto_symbol)
+        self.add_event("btn_open_pylab.clicked", lambda: self.app.open_research_space("smart_python"))        
+        self.add_event("btn_run_tree.clicked", self.run_code_tree)
+        self.add_event("btn_run_doctor.clicked", self.run_code_doctor)
+        self.add_event("btn_run_warnings.clicked", self.run_code_warnings)
+        self.add_event("code_doctor.btn_get_diagnosis.clicked", self.run_code_doctor)
+        self.add_event("code_warnings.btn_get_warnings.clicked", self.run_code_warnings)
+        self.add_event("code_warnings.on_fix_bugs_clicked", self.fix_bugs)
+        self.add_event("python_envs.on_env_added", self.add_env)
+        self.add_event("python_envs.on_current_env", self.set_current_env)
     
     def take_editor(self, widget):
         if self.object_is(widget, "editor-frame"):
@@ -171,6 +224,10 @@ class Init(ModelApp):
             if editor.lexer_name.lower() == "python" and not status:
                 self.make_smart(editor)
                 editor.smartpy = True
+            
+            elif editor.lexer_name.lower() != "python" and status:
+                editor.smartpy = False
+                
         else:
             if editor.lexer_name.lower() == "python":
                 self.make_smart(editor)
@@ -178,35 +235,50 @@ class Init(ModelApp):
     
     def make_smart(self, editor) -> None:
         editor.setIndentationsUseTabs(False)
+        editor.lexer().setFoldComments(True)
+        editor.lexer().setFoldQuotes(True)
         
         autocomplete=PyntellisenseCompletions(editor)        
-        ide_tools=Pyntellisense(editor)
+        ide_utils=Pyntellisense(editor)
         live_tips=PyntellisenseEdition(editor)
+        
         live_tips.on_annotation_request.connect(editor.display_annotation)
         live_tips.on_add_indicator_range.connect(editor.add_indicator_range)
         live_tips.on_clear_indicator_range.connect(editor.clear_indicator_range)
         live_tips.on_update_header.connect(editor.update_header)
-        ide_tools.on_update_header.connect(editor.update_header)
-        ide_tools.on_tooltip_request.connect(editor.display_tooltip)
+        ide_utils.on_update_header.connect(editor.update_header)
+        ide_utils.on_tooltip_request.connect(editor.display_tooltip)
         
         editor.add_code_completer(autocomplete, autocomplete.run)
-        editor.add_development_environment_component(ide_tools, ide_tools.run)
+        editor.add_development_environment_component(ide_utils, ide_utils.run)
         editor.add_development_environment_component(live_tips, live_tips.run)
+        
+        if editor not in self.objects_mem["editors"]:
+            self.objects_mem["editors"].append(editor)
+        
+        if autocomplete not in self.objects_mem["autocompleters"]:
+            self.objects_mem["autocompleters"].append(autocomplete)
+        
+        if ide_utils not in self.objects_mem["ide_utils"]:
+            self.objects_mem["ide_utils"].append(ide_utils)
+        
+        if live_tips not in self.objects_mem["live_tipers"]:
+            self.objects_mem["live_tipers"].append(live_tips)
     
     def run_code_warnings(self):
         editor = self.app.notebook_have_editor_with_python()
         if editor:
-            self.ui.side_right.code_warnings.get_warnings(editor)
+            self.code_warnings.get_warnings(editor)
 
     def run_code_tree(self):
         editor = self.app.notebook_have_editor_with_python()
         if editor:
-            self.ui.side_right.code_tree.build_tree(editor)
+            self.code_tree.build_tree(editor)
 
     def run_code_doctor(self):
         editor = self.app.notebook_have_editor_with_python()
         if editor:
-            self.ui.side_right.code_doctor.do_analyze(editor.text(), editor)
+            self.code_doctor.do_analyze(editor.text(), editor)
 
     def adjust_code(self, editor=None) -> None:
         """Straighten the Python code """
@@ -217,7 +289,7 @@ class Init(ModelApp):
             return
             
         code_smell = editor.text()
-        nice_code = getfn.get_straighten_code(code_smell)
+        nice_code = python_api.get_straighten_code(code_smell)
         editor.set_text(nice_code)
 
     def adjust_imports(self):
@@ -226,7 +298,7 @@ class Init(ModelApp):
         if editor is None or isinstance(editor, bool):
             return
         code_smell = editor.text()
-        nice_code = getfn.get_sorted_imports(code_smell)
+        nice_code = python_api.get_sorted_imports(code_smell)
         editor.set_text(nice_code)
 
     def fix_bugs(self, editor):

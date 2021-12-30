@@ -1,6 +1,6 @@
 from system import SYS_NAME, end
 from PyQt5.QtGui import QFontMetrics
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtWidgets import (
     QFrame, QHBoxLayout,
     QListWidget, QPushButton,
@@ -35,6 +35,7 @@ class Terminal(QFrame):
         self.icons=getfn.get_application_icons("terminal")
         self.parent.btn_new_terminal.clicked.connect(lambda: self.add_terminal())
         self.parent.btn_remove_terminal.clicked.connect(lambda: self.remove_terminal())
+        self.start_timer = QTimer(self)
         self.init_ui()
     
     def init_ui(self):
@@ -62,7 +63,8 @@ class Terminal(QFrame):
         self.div.setStretchFactor(1, 0)
 
         self.layout.addWidget(self.div)
-        self.add_terminal()
+        
+        self.start_timer.singleShot(3600, self.add_terminal)
     
     def change_to_terminal_from_row(self, row):
         item = self.term_header.item(row)

@@ -22,7 +22,8 @@ class Ext:
                 
             return extension
         
-        except ModuleNotFoundError:
+        except ModuleNotFoundError as e:
+            print(e)
             return False
     
     def get_plugin_list(self) -> list:

@@ -1,5 +1,3 @@
-from data import python_key_list, python_extra_key_list
-
 from PyQt5.Qsci import *
 from PyQt5.QtGui import *
 

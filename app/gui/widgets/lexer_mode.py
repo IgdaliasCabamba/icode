@@ -35,13 +35,12 @@ class LexerMode(QFrame):
         self.lang_input.setObjectName("child")
         self.lang_input.textChanged.connect(self.search_lang)
         self.lang_input.returnPressed.connect(self.select_language)
-        self.lang_input.setMinimumHeight(30)
+        self.lang_input.setMinimumHeight(24)
 
         self.lang_list = QListWidget(self)
         self.lang_list.setObjectName("child")
         self.lang_list.setIconSize(QSize(16,16))
         self.lang_list.itemActivated.connect(self.mirror_in_editor)
-        self.lang_list.setMinimumHeight(30)
 
         self.layout.addWidget(self.lang_input)
         self.layout.addWidget(self.lang_list)

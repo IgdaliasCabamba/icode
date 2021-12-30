@@ -9,6 +9,7 @@ from .editor_core import Connector, IFile
 from .idocument import IDocument
 from .imagesci import ImageScintilla
 from functions import filefn, getfn
+from .lexers import *
 
 class EditorBase(ImageScintilla):
     abcd = {"a","b","c","d","e","f","g","h","i","j","k","m","n","l","o","p","q","r","s","t","u","v","w","x","y","z"}
@@ -340,24 +341,36 @@ class Editor(EditorBase):
         
         self.update_status_bar()
         self.update_document()
-    
+
+    def clear_lexer(self):
+        if self.lexer() != None:
+            self.lexer().deleteLater()
+            self.lexer().setParent(None)
+            self.setLexer(None)
+            self.clearFolds()
+            self.clearAnnotations()
+            self.SendScintilla(QsciScintilla.SCI_CLEARDOCUMENTSTYLE)
+        self._lexer = None
+
     def jump_to_line(self, lineno=None):
         self.go_to_line(lineno)
 
     def set_lexer(self, lexer):
-        self._lexer = lexer(self)
-        self.lexer_name = str(self._lexer.language())
-        self.setLexer(self._lexer)
+        if not isinstance(self.lexer(), lexer):
+            self.clear_lexer()
+            self._lexer = lexer(self)
+            self.lexer_name = str(self._lexer.language())
+            self.setLexer(self._lexer)
 
-        self.lexer_api = QsciAPIs(self.lexer())
-    
-        if self.minimap:
-            self.minimap.setLexer(self.lexer())
-            
-        self.on_style_changed.emit(self)
-        self.on_lexer_changed.emit(self)
-        self.update_status_bar()
-        self.update_document()
+            self.lexer_api = QsciAPIs(self.lexer())
+        
+            if self.minimap:
+                self.minimap.set_lexer(self.lexer())
+                
+            self.on_style_changed.emit(self)
+            self.on_lexer_changed.emit(self)
+            self.update_status_bar()
+            self.update_document()
 
     def set_text_from_file(self, file_path = None):
         if file_path is None:
@@ -514,14 +527,6 @@ class Editor(EditorBase):
     def mouse_release_event(self, event):
         self.on_mouse_released.emit(event)
         
-        """for line in self.contractedFolds():
-            self.fold_indicators["image_id"].append(
-                self.add_image(
-                    "/home/igdalias/IcodeProject/IcodeApp/tests/icode/editor/logo.svg",
-                    (len(self.text(line)), line) (20, 20)
-                )
-            )"""
-    
     def mouse_press_event(self, event):
         self.on_mouse_pressed.emit(event)
     

@@ -36,6 +36,9 @@ class CoEditor(QObject):
                 self.editor.parent.up_info7
                 ]
             path_levels = getfn.get_path_splited(self.editor.idocument.file)
+            while len(path_levels) > len(widgets):
+                path_levels.pop(0)
+                
             i = 0
             for path in path_levels:
                 if path.replace(" ", "") == "":

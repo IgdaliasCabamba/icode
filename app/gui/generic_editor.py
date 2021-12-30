@@ -2,7 +2,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtGui import QColor
 from functions import getfn
 
-class Editor(QsciScintilla):
+class GenericEditor(QsciScintilla):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setUtf8(True)
@@ -11,7 +11,6 @@ class Editor(QsciScintilla):
         self.setTabIndents(False)
         self.apply_styles(getfn.get_editor_styles())
         
-    
     def set_text(self, text:str) -> None:
         self.setText(text)
     

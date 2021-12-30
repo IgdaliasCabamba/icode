@@ -1,6 +1,17 @@
 from extension_api import *
 
 class Init(ModelUi):
+    
+    dark_vars = {
+        "mid":"#222222",
+        "base":"#1e1e1e",
+        "border":"#007acc",
+        "base2":"#252526",
+        "contrast":"#3c3c3c",
+        "contrast2":"#333333"
+    }
+    light_vars = {}
+    
     def __init__(self, data) -> None:
         super().__init__(data, "icode_default_theme")        
         self.listen_slots()
@@ -8,6 +19,7 @@ class Init(ModelUi):
 
     def listen_notebook_slots(self, notebook):
         notebook.widget_added.connect(self.apply_style_in_editor)
+        pass
 
     def listen_slots(self):
         self.add_event("ui.notebook.widget_added", self.apply_style_in_editor)
@@ -15,8 +27,8 @@ class Init(ModelUi):
 
     def apply_style(self):
         style_sheet = self.palette_to_styles(
-            dark="dark.qss",
-            light="light.qss"
+            dark={"styles":"dark.qss", "vars":self.dark_vars},
+            light={"styles":"light.qss", "vars":self.light_vars}
         ) 
         style_sheet.format_style(
             ["<get_resources_path>", "<get_app_icons_path>"],
@@ -28,9 +40,13 @@ class Init(ModelUi):
         self.paint_editor(widget=editor, painter=self.beautify_editor)
 
     def beautify_editor(self, editor):
-        margin_font=editor.font()
-        margin_font.setPointSize(10)
-        editor.setMarginsFont(margin_font)
+        font=getfn.get_native_font()
+        font.setPixelSize(1)
+        font.setBold(False)
+        font.setFixedPitch(True)
+        font.setPointSize(10)
+        editor.setMarginsFont(font)
+        editor.setFont(font)
     
         self.set_code_style(
             editor=editor,
@@ -98,6 +114,7 @@ class Init(ModelUi):
             )
             font=getfn.get_native_font()
             font.setPixelSize(1)
+            font.setFixedPitch(True)
             font.setPointSizeF(10.5)
             font.setBold(False)
             lexer.setDefaultFont(font)
@@ -106,7 +123,3 @@ class Init(ModelUi):
             
             for i in range(0, end_styles):
                 lexer.setFont(font, i)
-            
-            if lexer.language() == "python":
-                lexer.setFoldComments(True)
-                lexer.setFoldQuotes(True)

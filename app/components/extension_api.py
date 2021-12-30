@@ -3,7 +3,6 @@ import pathlib
 import re
 import textwrap
 
-import jedi
 from cache_manager import *
 from PyQt5.Qsci import *
 from PyQt5.QtCore import *
@@ -11,12 +10,18 @@ from PyQt5.QtCore import QObject, QPoint, QTimer, pyqtSignal
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from system import *
+from data import ijson
 
 from config import get_icons_package, get_icons_theme, get_palette
-from data import builtin_classes, builtin_functions, ijson, primitive_types
 from functions import filefn, getfn
 import consts as iconsts
 import importlib
+import glob
+
+def make_dirs(dirs:list):
+    for dir in dirs:
+        if not os.path.exists(dir):
+            os.makedirs(dir)    
 
 def export(type:str="extension", path:str=""):
     if path != "":
@@ -78,10 +83,13 @@ class BaseApi:
             
 
 class StyleMaker:
-    def __init__(self, main, path:object) -> None:
+    def __init__(self, main, path:object, vars:dict={}) -> None:
         self._sheet_object = pathlib.Path(path)
         self._text = self.get_content()
         self.main = main
+        self.vars = vars
+        if self.vars:
+            self.compile_qsass()
     
     @property
     def text(self):
@@ -98,6 +106,11 @@ class StyleMaker:
 
         if isinstance(to_replace, str) and isinstance(to_place, str):
             self._text = self._text.replace(to_replace, to_place)
+    
+    def compile_qsass(self):
+        for key,value in self.vars.items():
+            key = re.sub(r"\W", "", key)
+            self._text = re.sub(fr"[$]\b{key}\b", value, self._text)
     
     def apply(self):
         self.main.qapp.setStyleSheet(self.text)
@@ -140,15 +153,15 @@ class ModelUi(QObject, BaseApi):
                 editor.on_style_changed.connect(painter)
                 painter(editor)
 
-    def palette_to_styles(self, dark: str, light: str):
+    def palette_to_styles(self, dark:dict, light:dict):
         if self.is_dark():
-            return StyleMaker(self, self.path_to("src", dark))
+            return StyleMaker(self, self.path_to("src", dark["styles"]), dark["vars"])
 
         elif self.is_light():
-            return StyleMaker(self, self.path_to("src", light))
+            return StyleMaker(self, self.path_to("src", light["styles"]), light["vars"])
         
         else:
-            return StyleMaker(self, self.path_to("src", dark))
+            return StyleMaker(self, self.path_to("src", dark["styles"]), dark["vars"])
     
     def set_lexer_style(self, lexer:object, key:str, dark:str, light:str):
         if self.is_light():

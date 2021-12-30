@@ -14,6 +14,7 @@ from .widgets import *
 class CardLab(QFrame):
     def __init__(self, parent=None, title:str="Untitled", name_id:str=None):
         super().__init__(parent)
+        self.setObjectName("card-lab")
         self.parent = parent
         self.title = title
         self.association = name_id
@@ -71,9 +72,8 @@ class Labs(QFrame):
         self.btn_notes=QPushButton("Open", self)
         self.btn_notes.setObjectName("btn-get-notes")
         self.btn_notes.clicked.connect(lambda: self.on_open_workspace.emit("inotes"))
-        self.new_work_space("Notes", "inotes", self.btn_notes)
+        self.new_work_space("Notes and Tasks", "inotes", self.btn_notes)
     
-    # TODO
     def new_work_space(self, title:str, name_id:str, widget:object):
         card = CardLab(self, title, name_id)
         card.add_widget(widget)

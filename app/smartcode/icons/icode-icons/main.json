@@ -68,10 +68,10 @@
     "tab-corner-restart":"app/restart.png",
 	"tab-corner-split":"app/split-files.png",
 
-    //pyconsole icons
-    "pyconsole-remove":"app/trash.png",
-    "pyconsole-clear":"app/erase.png",
-    "pyconsole-start":"app/play.png",
+    //console icons
+    "console-remove":"app/trash.png",
+    "console-clear":"app/erase.png",
+    "console-start":"app/play.png",
 
     //editor widgets icons
     "finder_replacer-collapse":"app/forward.png",

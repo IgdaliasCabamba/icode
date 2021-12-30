@@ -6,7 +6,7 @@ from functions import getfn
 
 from .igui import InputHistory, Animator
 from components.april_brain import *
-from gui.generic_editor import Editor
+from gui.generic_editor import GenericEditor
     
 class Card(QFrame):
     def __init__(self, parent, text:str, title:str, pos:int, type:str="text"):
@@ -85,10 +85,12 @@ class Card(QFrame):
             vbox.setContentsMargins(5,5,5,5)
             content.setLayout(vbox)
             
-            lexer = getfn.get_lexer_from_code(self.text)()
-            editor = Editor()
+            lexer = getfn.get_lexer_from_code(self.text)
+            editor = GenericEditor()
             editor.setText(self.text)
-            editor.set_lexer(lexer)
+            if lexer is not None:
+                lexer = lexer()
+                editor.set_lexer(lexer)
             
             vbox.addWidget(editor)
             

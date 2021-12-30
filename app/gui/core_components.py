@@ -12,15 +12,13 @@ from functions import getfn
 from gui.assistant import AprilFace
 from gui.explorer import FileExplorer
 from gui.extensions import ExtensionsUi
-from gui.idebug import Debug
 from gui.ilabs import Labs
 from gui.inotebook import SideBottomNotebook
 from gui.iproblems import ProblemLogs
 from gui.isearch import Searcher
 from gui.isource_control import IGit
 from gui.iterminals import Terminal
-from gui.widgets import Notes
-from gui.laboratory_table import WorkSpace, Table
+from gui.widgets import Notes, WorkSpace, Table
 
 from .igui import HeaderPushButton
 from data import note_file_path
@@ -518,23 +516,11 @@ class SideBottom(QFrame):
         self.btn_clear_problems=QPushButton()
         self.btn_clear_problems.setIcon(self.icons.get_icon("clear"))
         
-        # Debug Buttons
-        self.btn_clear_debug=QPushButton(self)
-        self.btn_clear_debug.setIcon(self.icons.get_icon("clear"))
-
-        self.btn_start_debug=QPushButton(self)
-        self.btn_start_debug.setIcon(self.icons.get_icon("start"))
-
-        self.btn_stop_debug=QPushButton(self)
-        self.btn_stop_debug.setIcon(self.icons.get_icon("stop"))
-
         # Widgets
         self.problem_logs = ProblemLogs(self)
-        self.debug = Debug(self)
         self.terminal = Terminal(self)
 
         self.add_widget(self.problem_logs, "PROBLEMS", [self.btn_clear_problems])
-        self.add_widget(self.debug, "DEBUG", [self.btn_start_debug, self.btn_stop_debug, self.btn_clear_debug])
         self.add_widget(self.terminal, "TERMINAL", [self.btn_new_terminal, self.btn_remove_terminal])
 
         self.notebook.cornerWidget().btn_close.clicked.connect(
@@ -698,28 +684,18 @@ class SideRight(QFrame):
         self.header_layout.addWidget(self.top_info)
         self.header_layout.addWidget(self.btn_close_lab)
         
-        self.scroll=QScrollArea(self)
-        self.scroll.setObjectName("scroll-area")
-        
-        self.spaces_content = QFrame(self)
         self.spaces_manager = QStackedLayout()
         self.spaces_manager.setContentsMargins(0,0,0,0)
-        self.spaces_content.setLayout(self.spaces_manager)
-
-        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scroll.setWidgetResizable(True)
-        self.scroll.setWidget(self.spaces_content)
-
+    
         self.notes = Notes(self, note_file_path)
-        self.table_notes = Table(self, "Notes")
+        self.table_notes = Table(self, "Notes and Tasks")
         self.table_notes.add_widget(self.notes)
         self.notes_work_space = WorkSpace("inotes", self)
         self.notes_work_space.add_table(self.table_notes, 0, 0)
         self.add_space("inotes", self.notes_work_space)
 
         self.layout.addLayout(self.header_layout)
-        self.layout.addWidget(self.scroll)
+        self.layout.addLayout(self.spaces_manager)
 
         self.setVisible(False)
     

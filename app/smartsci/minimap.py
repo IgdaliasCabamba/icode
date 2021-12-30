@@ -43,6 +43,19 @@ class MiniMap(QsciScintilla):
 
         self.setFixedWidth(iconsts.MINIMAP_FIXED_WIDTH)
     
+    def clear_lexer(self):
+        if self.lexer() != None:
+            self.lexer().deleteLater()
+            self.lexer().setParent(None)
+            self.setLexer(None)
+            self.clearFolds()
+            self.clearAnnotations()
+            self.SendScintilla(QsciScintilla.SCI_CLEARDOCUMENTSTYLE)
+    
+    def set_lexer(self, lexer):
+        self.clear_lexer()
+        self.setLexer(lexer)
+    
     def update_scrollbar_value(self, value):
         self.verticalScrollBar().setValue(value)
         

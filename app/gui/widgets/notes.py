@@ -10,15 +10,16 @@ from pathlib import Path
 class NotesCore(QObject):
     def __init__(self, editor):
         super().__init__()
-        self.editor=editor
+        self.parent = editor
+        self.editor=editor.text_editor
     
     def run(self):
         self.editor.textChanged.connect(self.save_data)
     
     def save_data(self):
-        self.editor.file.write_text(self.editor.toPlainText())
+        self.parent.file.write_text(self.editor.toPlainText())
 
-class Notes(QTextEdit):
+class Notes(QFrame):
     def __init__(self, parent, file):
         super().__init__()
         self.setObjectName("ilabs-notes")
@@ -27,17 +28,24 @@ class Notes(QTextEdit):
         self.build()
     
     def build(self):
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self.layout)
+        
+        self.text_editor = QTextEdit(self)
         self.thread_text=QThread(self)
         self.text_object=NotesCore(self)
         self.text_object.moveToThread(self.thread_text)
         self.thread_text.started.connect(self.run_tasks)
         self.thread_text.start()
-
-        self.setAcceptRichText(True)
-        self.setPlaceholderText("Make your notes here, they are automatically saved")
+        
+        self.text_editor.setAcceptRichText(True)
+        self.text_editor.setPlaceholderText("Make your notes here, they are automatically saved")
+        
+        self.layout.addWidget(self.text_editor)
         
         if self.file.exists():
-            self.setText(self.file.read_text())
+            self.text_editor.setText(self.file.read_text())
         else:
             file = open(self.file, "w")
             file.close()
