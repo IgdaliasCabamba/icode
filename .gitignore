@@ -1,6 +1,9 @@
-build/
+build/builder/
 dist/
+get-icode/
 smartenv/
-app/.cache/
+icode/.cache/
 tests/local/
-
+**/__pycache__
+*.pyi
+*.pyc
