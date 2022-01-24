@@ -37,6 +37,7 @@ class ApplicationCommandPalette(QFrame):
         self.input_edit.setMinimumHeight(24)
 
         self.command_list = QListWidget(self)
+        self.command_list.setIconSize(QSize(16, 16))
         self.command_list.setObjectName("child")
         self.command_list.itemActivated.connect(self.execute_command)
         self.command_list.setMinimumHeight(30)
@@ -107,6 +108,7 @@ class ApplicationCommandPalette(QFrame):
             for item in data:
                 row = EditorListWidgetItem()
                 row.setText(item["name"])
+                row.setIcon(item["icon"])
                 row.set_data({"command":item["command"]})
                 self.command_list.addItem(row)
             self.command_list.setCurrentRow(0)

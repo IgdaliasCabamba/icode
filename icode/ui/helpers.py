@@ -21,7 +21,7 @@ class ToolBar(QToolBar):
         self.setFloatable(False)
         self.setMovable(False)
         self.setOrientation(Qt.Vertical)
-        self.icons = getfn.get_application_icons("toolbar")
+        self.icons = getfn.get_smartcode_icons("toolbar")
 
         self.spacing = QWidget(self)
         self.spacing.setSizePolicy(QSizePolicy.Expanding,
@@ -83,7 +83,7 @@ class StatusBar(QStatusBar):
         self.editor_widgets = []
         self.app_widgets = []
         self.widgets = {}
-        self.icons = getfn.get_application_icons("statusbar")
+        self.icons = getfn.get_smartcode_icons("statusbar")
         self.setObjectName("status-bar")
         self.setProperty("folder_open", False)
         self.init_ui()

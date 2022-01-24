@@ -11,6 +11,7 @@ from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api
 from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from frameworks.qroundprogressbar import QRoundProgressBar
 
 class DeepAnalyze(QFrame):
     def __init__(self, parent):
@@ -47,7 +48,16 @@ class DeepAnalyze(QFrame):
         
         self.btn_get_diagnosis = QPushButton("Get Diagnosis", self)
         
+        self.status = QRoundProgressBar(self)
+        self.status.setMinimumSize(100,100)
+        self.status.setBarStyle(QRoundProgressBar.BarStyle.LINE)
+        self.status.setRange(0,100)
+        self.status.setValue(30)
+        
+        
+        
         self.layout.addWidget(self.readme)
+        self.layout.addWidget(self.status)
         self.layout.addWidget(self.btn_get_diagnosis)
         self.layout.setAlignment(self.readme, Qt.AlignTop)
         self.layout.setAlignment(self.btn_get_diagnosis, Qt.AlignTop)

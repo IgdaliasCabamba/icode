@@ -1,13 +1,31 @@
-from PyQt5.QtWidgets import QListWidget, QFrame, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QToolBox
+from PyQt5.QtWidgets import QListWidget, QFrame, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QSplitter, QToolBox
 from functions import getfn        
 from .igui import InputHistory
+
+class Installed(QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.init_ui()
+    
+    def init_ui(self) -> None:
+        self.layout = QVBoxLayout(self)
+        self.setLayout(self.layout)
+
+class Recommended(QListWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.init_ui()
+    
+    def init_ui(self) -> None:
+        self.layout = QVBoxLayout(self)
+        self.setLayout(self.layout)
 
 class ExtensionsUi(QFrame):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent=parent
         self.setObjectName("extensions")
-        self.icons = getfn.get_application_icons("extensions")
+        self.icons = getfn.get_smartcode_icons("extensions")
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -24,16 +42,15 @@ class ExtensionsUi(QFrame):
         self.input_name = InputHistory(self)
         self.input_name.setPlaceholderText("Search for Extensions")
 
-        self.installed=QListWidget(self)
+        self.installed = Installed(self)
         self.toolbox.addItem(self.installed, "INSTALLED")
 
-        self.recommended = QListWidget(self)
+        self.recommended = Recommended(self)
         self.toolbox.addItem(self.recommended, "RECOMMENDED")
 
         self.layout.addLayout(self.header_layout)
         self.layout.addWidget(self.input_name)
         self.layout.addWidget(self.toolbox)
         
-
         self.toolbox.setItemIcon(0, self.icons.get_icon("installed"))
         self.toolbox.setItemIcon(1, self.icons.get_icon("recommended"))

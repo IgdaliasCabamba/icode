@@ -1,12 +1,12 @@
 from typing import Union
 from PyQt5.QtCore import QTimer, Qt, QThread, pyqtSignal, QSize
-from PyQt5.QtWidgets import QToolTip, QShortcut, QFrame
+from PyQt5.QtWidgets import QToolTip, QShortcut, QFrame, QMenu
 from PyQt5.Qsci import *
 from PyQt5.QtGui import QColor
 from pathlib import Path
 from base.system import SYS_NAME
 from .coeditor import *
-from .editor_core import Connector
+from .editor_core import Connector, KeyBoard
 from .idocument import IDocument
 from .imagesci import ImageScintilla
 from functions import filefn, getfn
@@ -27,12 +27,14 @@ class EditorBase(ImageScintilla):
         '"':'"',
         "'":"'"
     }
+    on_key_pressed = pyqtSignal(object)
     
     def __init__(self, parent:object) -> None:
         super().__init__(parent)
         self.idocument = IDocument(self)
         self.parent=parent
-        self.icons = getfn.get_application_icons("smartsci")
+        self.icons = getfn.get_smartcode_icons("smartsci")
+        self.keyboard = KeyBoard(self)
         self.build()
     
     def build(self) -> None:
@@ -111,15 +113,8 @@ class EditorBase(ImageScintilla):
         mark_folderopenmind = self.icons.get_image("expand-arrow").scaled(QSize(12, 12))
         mark_folderend = self.icons.get_image("forward").scaled(QSize(12, 12))
         
-        sym_0 = self.icons.get_image("book-mark").scaled(QSize(16, 16))
-        sym_1 = self.icons.get_image("breakpoint").scaled(QSize(16, 16))
-        sym_2 = self.icons.get_image("log-point").scaled(QSize(16, 16))
-        sym_3 = self.icons.get_image("log-point").scaled(QSize(16, 16))
-
-        mark0 = self.markerDefine(sym_0, 0)
-        mark1 = self.markerDefine(sym_1, 1)
-        mark2 = self.markerDefine(sym_2, 2)
-        mark3 = self.markerDefine(sym_3, 3)
+        sym_1 = self.icons.get_image("debug-mark").scaled(QSize(12, 12))
+        self.mark1 = self.markerDefine(sym_1, 1)
 
         self.markerDefine(mark_folderopen, QsciScintilla.SC_MARKNUM_FOLDEROPEN)
         self.markerDefine(mark_folder, QsciScintilla.SC_MARKNUM_FOLDER)
@@ -153,7 +148,7 @@ class EditorBase(ImageScintilla):
     def build_autocompletion(self) -> None:
         self.setAutoCompletionWordSeparators(["(",".","="])
         self.setAutoCompletionThreshold(1)
-        self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
+        self.setAutoCompletionSource(QsciScintilla.AcsDocument)
         self.setAutoCompletionCaseSensitivity(False)
 
         self.registerImage(1, self.icons.get_pixmap("function"))
@@ -241,10 +236,14 @@ class EditorBase(ImageScintilla):
         self.fillIndicatorRange(line, column, until_line, until_column, indicator_id)
         if minimap and self.minimap is not None:
             self.minimap.fillIndicatorRange(line, column, until_line, until_column, indicator_id)
-            
+    
+    def mouseDoubleClickEvent(self, event:QMouseEvent) -> None:
+        super().mouseDoubleClickEvent(event)
+        # TODO
+    
     def keyPressEvent(self, event:QKeyEvent) -> None:
         super().keyPressEvent(event)
-        self.key_press_event(event)
+        self.on_key_pressed.emit(event)
     
     def mouseReleaseEvent(self, event:QMouseEvent) -> None:
         super().mouseReleaseEvent(event)
@@ -269,7 +268,11 @@ class EditorBase(ImageScintilla):
     
     def focusInEvent(self, event:QFocusEvent) -> None:
         super().focusInEvent(event)
-        self.focus_event(event)
+        self.focus_in_event(event)
+    
+    def focusOutEvent(self, event:QFocusEvent) -> None:
+        super().focusOutEvent(event)
+        self.focus_out_event(event)
     
     def resizeEvent(self, event:QResizeEvent) -> None:
         super().resizeEvent(event)
@@ -288,6 +291,8 @@ class Editor(EditorBase):
     on_cursor_pos_chnaged = pyqtSignal(int, int)
     on_lines_changed = pyqtSignal(int)
     on_selected = pyqtSignal(int, int, int, int)
+    on_highlight_sel_request = pyqtSignal(int, int, int, int, bool, str, int, str)
+    on_highlight_match_request = pyqtSignal(int, int, bool, str, int, str)
     on_focused = pyqtSignal(object, object)
     on_resized = pyqtSignal(object)
     on_style_changed = pyqtSignal(object)
@@ -295,7 +300,7 @@ class Editor(EditorBase):
     on_word_added = pyqtSignal()
     on_modify_key = pyqtSignal()
     on_text_changed = pyqtSignal()
-    on_update_completions = pyqtSignal()
+    on_update_completions = pyqtSignal(dict)
     on_document_changed = pyqtSignal(object)
     on_saved = pyqtSignal(str)
     on_abcd_added = pyqtSignal()
@@ -317,10 +322,12 @@ class Editor(EditorBase):
         self.edited = False
         self.saved = None
         self.saved_text = None
+        self.folded_lines = []
         self.all_cursors_pos = []
         self.code_completers = []
         self.development_environment_components = []
         self.annotations_data = {
+            "on_fold":[],
             "on_text_changed":[],
             "on_lines_changed":[],
             "on_cursor_pos_changed":[],
@@ -331,9 +338,15 @@ class Editor(EditorBase):
             "lines":[],
             "image_id":[],
         }
+        self.book_marks = {
+            "book-mark":[],
+            "break-point":[],
+            "log-point":[]
+        }
         
         self.intellisense_thread=QThread(self)
         self.intellisense_thread.start()
+        self.intellisense_thread.setPriority(QThread.LowestPriority)
 
         self.development_environment_thread = QThread(self)
         self.coeditor = CoEditor(self)
@@ -362,11 +375,22 @@ class Editor(EditorBase):
         self.coeditor.on_change_lexer.connect(self.set_lexer)
         self.coeditor.on_highlight_selection.connect(self.add_indicator_range)
         self.coeditor.on_highlight_text.connect(self.add_indicator_range)
+        self.coeditor.on_clear_indicator_range.connect(self.clear_indicator_range)
+        self.on_key_pressed.connect(self.key_press_event)
         self.development_environment_thread.start()
+        self.development_environment_thread.setPriority(QThread.LowestPriority)
 
     @property
     def ide_mode(self) -> bool:
         return self._ide_mode
+    
+    def set_ide_mode(self, ide_mode:bool) -> None:
+        if ide_mode:
+            self._ide_mode = True
+            self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
+        else:
+            self._ide_mode = False
+            self.setAutoCompletionSource(QsciScintilla.AcsDocument)
     
     def add_code_completer(self, completer:object, run:callable)  -> None:
         self.code_completers.append(completer)
@@ -375,7 +399,6 @@ class Editor(EditorBase):
             run()
     
     def add_development_environment_component(self, component:object, run:callable)  -> None:
-        self._ide_mode = True
         self.development_environment_components.append(component)
         component.moveToThread(self.development_environment_thread)
         if self.development_environment_thread.isRunning():
@@ -447,16 +470,10 @@ class Editor(EditorBase):
         self.update_document()
         
     def _margin_left_clicked(self, margin_nr:int, line_nr:int, state:object) -> None:
-        if state == Qt.ControlModifier:
-            self.markerAdd(line_nr, 1)
-
-        elif state == Qt.ShiftModifier:
-            self.markerAdd(line_nr, 2)
-
-        elif state == Qt.AltModifier:
-            self.markerAdd(line_nr, 3)
+        if self.markersAtLine(line_nr) == 0:        
+            self.markerAdd(line_nr, self.mark1)
         else:
-            self.markerAdd(line_nr, 0)
+            self.markerDelete(line_nr)
 
     def _margin_right_clicked(self, margin_nr:int, line_nr:int, state:object) -> None:
         pass
@@ -479,6 +496,7 @@ class Editor(EditorBase):
         self.update_status_bar_cursor_pos()
         self.clear_annotations_by_type("on_cursor_pos_changed")
         self.on_cursor_pos_chnaged.emit(index, line)
+        self.on_highlight_match_request.emit(index, line, self.hasSelectedText(), self.wordAtLineIndex(index, line), self.lines(), self.text())
         
     def add_cursors(self, point:object, last_row:int, last_col:int) -> None:
             
@@ -505,12 +523,21 @@ class Editor(EditorBase):
     def clear_annotations_by_type(self, type:str) -> None:
         if type in self.annotations_data.keys():
             for i in self.annotations_data[type]:
+                self.annotations_data[type].remove(i)
                 self.clearAnnotations(i)
+    
+    def clear_annotations_by_id(self, type:str, id:object) -> None:
+        if type in self.annotations_data.keys():
+            for i in self.annotations_data[type]:
+                if id == i:
+                    self.annotations_data[type].remove(i)
+                    self.clearAnnotations(i)
     
     def selection_event(self) -> None:
         row_from, col_from, row_to, col_to = self.getSelection()
         self.clear_annotations_by_type("on_selection_changed")
         self.on_selected.emit(row_from, col_from, row_to, col_to)
+        self.on_highlight_sel_request.emit(row_from, col_from, row_to, col_to, self.hasSelectedText(), self.selectedText(), self.lines(), self.text())
         self.clear_indicator_range(0, 0, -1, -1, 2, False)
         if row_from+col_from+row_to+col_to > 0:
             self.show_white_spaces()
@@ -527,8 +554,10 @@ class Editor(EditorBase):
             self.annotate(row, note, type)
             
         if not event_to_remove in self.annotations_data.keys():
-            self.annotations_data[event_to_remove] = []    
-        self.annotations_data[event_to_remove].append(row)
+            self.annotations_data[event_to_remove] = []
+        
+        if not row in self.annotations_data[event_to_remove]:
+            self.annotations_data[event_to_remove].append(row)
     
     def update_header(self, data:dict) -> None:
         self.editor_view_parent.set_info(data)
@@ -588,22 +617,46 @@ class Editor(EditorBase):
             self.minimap.setDocument(self.document())
             self.minimap.setLexer(self.lexer())
     
+    def mark_fold(self, line, mark, id):
+        if line not in self.folded_lines:
+            self.folded_lines.append(line)
+        self.display_annotation(line, mark, id, "on_fold")
+    
     def mouse_release_event(self, event:QMouseEvent) -> None:
         self.on_mouse_released.emit(event)
+        for line in self.contractedFolds():
+            self.mark_fold(line, "...", 5)
+        
+        for line in self.folded_lines:
+            if not line in self.contractedFolds():
+                self.folded_lines.remove(line)
+                self.clear_annotations_by_id("on_fold", line)
         
     def mouse_press_event(self, event:QMouseEvent) -> None:
         self.on_mouse_pressed.emit(event)
+        
+        #cmenu = QMenu(self)
+        #newAct = cmenu.addAction("Meu")
+        #openAct = cmenu.addAction("Rabo")
+        #action = cmenu.exec_(self.mapToGlobal(event.pos()))
     
     def key_press_event(self, event:QKeyEvent) -> None:
         key=event.key()
         string = str(event.text())
         
         if key in range(65, 90):
-            self.on_update_completions.emit()
             self.on_abcd_added.emit()
         
-        if string in self.pre_complete_keys:
-            self.on_update_completions.emit()
+        if string in self.pre_complete_keys or key in range(65, 90):
+            self.on_update_completions.emit(
+                {
+                    "code":self.text(),
+                    "file":self.file_path,
+                    "cursor-pos":self.getCursorPosition(),
+                    "lexer-api":self.lexer_api,
+                    "lexer-name":self.lexer_name
+                }
+            )
         
         if key in {32, 16777220}:
             self.on_word_added.emit()
@@ -617,8 +670,11 @@ class Editor(EditorBase):
     def mouse_move_event(self, event:QMouseEvent) -> None:
         self.on_mouse_moved.emit(event)
     
-    def focus_event(self, event:QFocusEvent) -> None:
+    def focus_in_event(self, event:QFocusEvent) -> None:
         self.on_focused.emit(event, self)
+    
+    def focus_out_event(self, event:QFocusEvent) -> None:
+        QToolTip.hideText()
     
     def resize_event(self, event:QResizeEvent) -> None:
         self.on_resized.emit(event)

@@ -16,6 +16,7 @@ from .code_notebook import NoteBookEditor
 from .splitter import ISplitter
 from .index import Index, Welcome
 from .April import April
+from .notificator import Notificator
 from frameworks.icodeframe import iwindow
 from smartsci.editor import *
 
@@ -34,7 +35,7 @@ class MainWindow(QMainWindow):
         self.__style = style
         self._controller = None
         self._current_notebook = None
-        self.icons = getfn.get_application_icons("window")
+        self.icons = getfn.get_smartcode_icons("window")
         self.frame = False
         self.parent = parent
         self.last_focus = None
@@ -136,6 +137,7 @@ class MainWindow(QMainWindow):
     def _add_extra_widgets(self) -> None:
         self.editor_widgets = EditorWidgets(self)
         self.april = April(self)
+        self.notificator = Notificator(self)
 
     def center(self) -> None:
         app_geo = self.frameGeometry()

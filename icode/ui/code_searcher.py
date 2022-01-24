@@ -50,7 +50,7 @@ class FindPanel(QFrame):
         self.setObjectName("finder")
         self.parent = parent
         self.options_menu = FindOptions(self)
-        self.icons = getfn.get_application_icons("finder")
+        self.icons = getfn.get_smartcode_icons("finder")
         self.init_ui()
     
     def init_ui(self):
@@ -85,6 +85,7 @@ class FindPanel(QFrame):
 class ReplacePanel(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
+        self.icons = getfn.get_smartcode_icons("replacer")
         self.setObjectName("replacer")
         self.init_ui()
     
@@ -97,8 +98,10 @@ class ReplacePanel(QFrame):
         self.input_edit.setMaximumHeight(30)
         self.input_edit.setPlaceholderText("Replace...")
         
-        self.btn_replace = QPushButton("R", self)
-        self.btn_replace_all = QPushButton("RA", self)
+        self.btn_replace = QPushButton(self)
+        self.btn_replace.setIcon(self.icons.get_icon("replace"))
+        self.btn_replace_all = QPushButton(self)
+        self.btn_replace_all.setIcon(self.icons.get_icon("replace-all"))
         
         self.layout.addWidget(self.input_edit)
         self.layout.addWidget(self.btn_replace)
@@ -116,7 +119,7 @@ class FindReplace(QFrame):
         self.parent = parent
         self.find_query = ""
         self.replace_query = ""
-        self.icons = getfn.get_application_icons("finder_replacer")
+        self.icons = getfn.get_smartcode_icons("finder_replacer")
         self.parent.on_resized.connect(self.update_ui)
         
         self.layout = QHBoxLayout(self)
@@ -235,8 +238,9 @@ class FindReplace(QFrame):
     
     def replace(self):
         self.replace_query = self.input_replace.text()
-        self.find()
-        self.current_editor.editor.replace(self.replace_query)
+        if self.current_editor.editor.hasSelectedText():
+            self.current_editor.editor.replace(self.replace_query)
+            self.find_next()
     
     def replace_all(self):
         self.find_query = self.input_find.text()

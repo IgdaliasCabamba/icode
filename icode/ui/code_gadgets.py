@@ -34,6 +34,7 @@ class EditorWidgets(QObject):
         self.clone_repo = CloneRepo(self, self.view)
         self.space_mode = SpaceMode(self, self.view)
         self.eol_mode = EOLMode(self, self.view)
+        self.tab_browser = TabBrowser(self, self.view)
 
         self.widget_list.append(self.command_palette)
         self.widget_list.append(self.language_mode_selection)
@@ -41,6 +42,7 @@ class EditorWidgets(QObject):
         self.widget_list.append(self.clone_repo)
         self.widget_list.append(self.space_mode)
         self.widget_list.append(self.eol_mode)
+        self.widget_list.append(self.tab_browser)
         
         for widget in self.widget_list:
             self.configure_widget(widget)
@@ -88,6 +90,11 @@ class EditorWidgets(QObject):
     def hide_widget(self, widget, event):
         widget.setVisible(False)
     
+    def is_runing(self, widget) -> bool:
+        if widget.isVisible() and widget in self.widget_list:
+            return True
+        return False
+    
     def set_current_editor(self, editor_widget:object) -> None:
         self._editor_widget = editor_widget
         self._editor = editor_widget.editor
@@ -129,8 +136,11 @@ class EditorWidgets(QObject):
                     return
             
             self.close_widget(self.command_palette)
-            self.close_widget(self.go_to)
             self.close_widget(self.language_mode_selection)
+            self.close_widget(self.go_to)
+            self.close_widget(self.clone_repo)
+            self.close_widget(self.space_mode)
+            self.close_widget(self.eol_mode)
                     
     def run_widget(self, widget:object):
         if widget in self.widgets_without_focus:
@@ -185,6 +195,14 @@ class EditorWidgets(QObject):
         if self.api is not None:
             if self.api.notebook_have_editor():
                 self.run_widget(self.go_to)
+    
+    def do_goto_tab(self):
+        if self.api is not None:
+            if self.is_runing(self.tab_browser):
+                self.tab_browser.next_item()
+            else:
+                self.tab_browser.set_navigation(self.api.get_tabs_navigation())
+                self.run_widget(self.tab_browser)
     
     def do_clone_repo(self):
         self.run_widget(self.clone_repo)

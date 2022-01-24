@@ -1,11 +1,35 @@
 from PyQt5.QtCore import QMimeData, QPoint, Qt, pyqtSignal, QSize
-from PyQt5.QtGui import QCursor, QDrag, QPixmap, QRegion, QStandardItem, QMovie
-from PyQt5.QtWidgets import (QLabel, QListWidgetItem, QPushButton, QScrollArea,
-                             QTabWidget, QToolButton, QSizePolicy, QLineEdit)
+from PyQt5.QtGui import QCursor, QDrag, QPixmap, QRegion, QStandardItem, QMovie, QIcon
+from PyQt5.QtWidgets import (QLabel, QListWidgetItem, QPushButton, QScrollArea, QFrame,
+                             QTabWidget, QToolButton, QSizePolicy, QLineEdit, QHBoxLayout)
 
 from functions import getfn
 
 from .root import CategoryMixin, TabData
+
+class QComboButton(QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.btn = None
+        self.box = None
+        self.size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.size_policy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setSizePolicy(self.size_policy)
+        
+        self.layout = QHBoxLayout(self)
+        self.layout.setSpacing(0)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self.layout)
+    
+    def set_button(self, btn):
+        self.btn = btn
+        self.layout.addWidget(self.btn)
+    
+    def set_combobox(self, box):
+        self.box = box
+        self.box.setSizePolicy(self.size_policy2)
+        self.layout.addWidget(self.box)
 
 class Animator(QLabel):
     def __init__(self, parent, animation=None) -> None:
@@ -144,8 +168,11 @@ class TerminalListWidgetItem(QListWidgetItem):
             self.setIcon(icon)
         self.setToolTip(tooltip)
         
+        font = self.font()
+        font.setPointSizeF(10.5)
+        self.setFont(font)
+        
         self.item_data=item_data
-
 
 class IListWidgetItem(QListWidgetItem):
     def __init__(self, icon, text, tooltip=None, item_data=None) -> None:
@@ -198,7 +225,7 @@ class ITabWidget(QTabWidget, CategoryMixin):
     
     tab_closed = pyqtSignal(object)
     last_tab_closed = pyqtSignal(object)
-    on_tab_added=pyqtSignal()
+    on_tab_added=pyqtSignal(int)
     widget_added=pyqtSignal(object)
     on_resized = pyqtSignal()
     on_user_event = pyqtSignal(object)
@@ -305,7 +332,7 @@ class ITabWidget(QTabWidget, CategoryMixin):
     def tabInserted(self, index):
         super().tabInserted(index)
         self.setCurrentIndex(index)
-        self.on_tab_added.emit()
+        self.on_tab_added.emit(index)
         widget_object=self.widget(index)
         self.widget_added.emit(widget_object)
         self.on_user_event.emit(self)
@@ -313,3 +340,15 @@ class ITabWidget(QTabWidget, CategoryMixin):
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
         self.on_resized.emit()
+
+class IListItem(QListWidgetItem):
+    def __init__(self, name, tip, item_data:dict):
+        super().__init__()
+        self.icon=QIcon(getfn.get_icon_from_ext(name))
+        self.title=name
+        self.tip=tip
+        self.item_data=item_data
+
+        self.setText(self.title)
+        self.setIcon(self.icon)
+        self.setToolTip(self.tip)

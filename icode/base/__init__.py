@@ -9,3 +9,4 @@ from .server import *
 from .isetting import *
 from .styler import *
 from .system import *
+from .memory import *

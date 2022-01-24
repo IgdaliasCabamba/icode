@@ -29,8 +29,10 @@ class MiniMap(QsciScintilla):
         
         self.indicatorDefine(QsciScintilla.StraightBoxIndicator, 1)
         self.indicatorDefine(QsciScintilla.FullBoxIndicator, 2)
+        self.indicatorDefine(QsciScintilla.FullBoxIndicator, 3)
         self.setIndicatorForegroundColor(QColor("red"), 1)
         self.setIndicatorForegroundColor(QColor(52, 143, 235, 150), 2)
+        self.setIndicatorForegroundColor(QColor(52, 143, 235, 25), 3)
 
         for i in range(1, 5):
             self.SendScintilla(

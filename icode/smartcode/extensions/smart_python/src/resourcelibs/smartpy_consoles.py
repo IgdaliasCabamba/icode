@@ -18,7 +18,7 @@ class SmartPythonConsole(QFrame):
         self.parent = parent
         self.setObjectName("Frame")
         self.color_map = getfn.get_generic_lexer_styles()
-        self.icons=getfn.get_application_icons("console")
+        self.icons=getfn.get_smartcode_icons("console")
         self.init_ui()
     
     def init_ui(self):

@@ -3,6 +3,14 @@ import frameworks.jedit2 as ijson
 from base.system import BASE_PATH, SYS_SEP
 from data import qt_cache, DATA_FILE
 import base.consts as iconsts
+from base.memory import *
+
+ORIENTATIONS = {
+    0: Qt.Vertical,
+    1: Qt.Vertical,
+    2: Qt.Horizontal,
+    3: Qt.Horizontal
+}
 
 def get_all() -> dict:
 
@@ -36,7 +44,7 @@ def get_extensions():
     
     return ijson.load(DATA_FILE)["extensions"]
 
-def save_window(window):
+def save_window(window, app):
     if window.frame:
         window_object = window.frame
     else:
@@ -48,12 +56,66 @@ def save_window(window):
     qt_cache.setValue("div_child_state", window.div_child.saveState())
     qt_cache.setValue("side_right_visiblity", window.side_right.isVisible())
     qt_cache.setValue("side_right_size", window.side_right.size())
+    
     for i, action in enumerate(window.tool_bar.actions_list):
         if action.isChecked():
             qt_cache.setValue("toolbar_action", i)
             break
+    
+    #--------------------------------------
+    
+    def get_direction(dir):
+        return ORIENTATIONS[dir]
             
-def restore_window(window):
+    data = []
+    for notebook in window.isplitter.splited_widgets:
+        childs = []
+        for i in range(notebook["widget"].count()):
+            widget = notebook["widget"].widget(i)
+            if app.widget_is_code_editor(widget):
+                
+                content_path = str(widget.file)    
+                content = widget.editor.text()
+                selection = widget.editor.getSelection()
+                cursor_pos = widget.editor.getCursorPosition()
+                lexer = widget.editor.lexer_name
+                vbar = widget.editor.verticalScrollBar().value()
+                hbar = widget.editor.horizontalScrollBar().value()
+                if widget.file is None:
+                    content_path = None
+                
+                tab_data = notebook["widget"].get_tab_data(i)
+                
+                childs.append({
+                    "editor":{
+                        "path":content_path,
+                        "text":content,
+                        "selection":selection,
+                        "cursor":cursor_pos,
+                        "lexer":lexer,
+                        "hbar":hbar,
+                        "vbar":vbar
+                        },
+                    "notebook":{
+                        "title":tab_data.title,
+                        "tooltip":tab_data.tooltip,
+                        "whatsthis":tab_data.whatsthis,
+                        "index":i
+                        }
+                    })
+        
+        data.append({
+            "id":notebook["id"],
+            "ref":notebook["ref"],
+            "direction":get_direction(notebook["direction"]),
+            "childs":childs
+            })
+                    
+                    
+    MEMORY["icode"]["editing"] = data
+    save_memory()
+            
+def restore_window(window, app, getfn):
     window_geometry = qt_cache.value("window_geometry")
     window_state = qt_cache.value("window_state")
     side_right_visiblity = qt_cache.value("side_right_visiblity")
@@ -105,3 +167,50 @@ def restore_window(window):
     
     if toolbar_action is not None:
        window.tool_bar.actions_list[int(toolbar_action)].trigger()
+    
+    #--------------------------------------
+    
+    for item in MEMORY["icode"]["editing"]:
+        id = item["id"]
+        ref = item["ref"]
+        direction = item["direction"]
+        childs = item["childs"]
+        
+        if id == 1:
+            notebook = app.ui.notebook
+        else:
+            if ref is None:
+                notebook_parent = None
+            else:
+                notebook_parent = app.ui.notebooks[ref]
+            
+            if childs:    
+                notebook = app.create_new_notebook(direction, notebook_parent, False)
+            else:
+                continue
+            
+                
+        for child in childs:
+            
+            lexer_name = child["editor"]["lexer"]
+            file = child["editor"]["path"]
+            code = child["editor"]["text"]
+            cursor = child["editor"]["cursor"]
+            selection = child["editor"]["selection"]
+            scroll_v = child["editor"]["hbar"]
+            scroll_h = child["editor"]["vbar"]
+            title = child["notebook"]["title"]
+            icon = getfn.get_icon_from_lexer(lexer_name)
+            
+            editor = app.get_new_editor(notebook, file)
+            index = notebook.add_tab_and_get_index(editor, title)
+            notebook.setTabIcon(index, icon)
+            
+            for code_editor in editor.editors:
+                code_editor.set_lexer(getfn.get_lexer_from_name(lexer_name))
+                code_editor.setCursorPosition(cursor[0], cursor[1])
+                code_editor.verticalScrollBar().setValue(scroll_v)
+                code_editor.horizontalScrollBar().setValue(scroll_h)
+                code_editor.setSelection(selection[0], selection[1], selection[2], selection[3])
+                
+            app.on_new_editor.emit(editor)

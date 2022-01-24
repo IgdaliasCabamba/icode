@@ -106,7 +106,7 @@ class CodeTree(QTreeView):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent=parent
-        self.icons = getfn.get_application_icons("code")
+        self.icons = getfn.get_smartcode_icons("code")
         self.code=None
         self.file=None
         

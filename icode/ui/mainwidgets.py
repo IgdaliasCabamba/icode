@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel,QPushButton,QStackedLayout, QVBoxLayout)
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel,QPushButton,QStackedLayout, QVBoxLayout, QComboBox, QSizePolicy)
 
 from functions import getfn
 from .assistant import AprilFace
@@ -12,7 +12,7 @@ from .source_control import IGit
 from .terminals import Terminal 
 from .widgets import Notes, WorkSpace, Table
 
-from .igui import HeaderPushButton
+from .igui import HeaderPushButton, QComboButton
 from data import note_file_path
 
 class SideBottom(QFrame):
@@ -20,7 +20,7 @@ class SideBottom(QFrame):
         super().__init__(parent)
         self.parent = parent
         self.setObjectName("side-bottom")
-        self.icons=getfn.get_application_icons("tab-corner")
+        self.icons=getfn.get_smartcode_icons("tab-corner")
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -30,9 +30,17 @@ class SideBottom(QFrame):
 
         self.notebook = SideBottomNotebook(self)
         
-        # Terminal Buttons
+        # Terminal Widgets
+        self.terminal_pick_area = QComboButton(self)
+        
+        self.term_picker = QComboBox(self)
+        self.term_picker.setMaximumSize(self.term_picker.minimumSizeHint())
+        
         self.btn_new_terminal=QPushButton()
         self.btn_new_terminal.setIcon(self.icons.get_icon("add"))
+        
+        self.terminal_pick_area.set_button(self.btn_new_terminal)
+        self.terminal_pick_area.set_combobox(self.term_picker)
 
         self.btn_remove_terminal=QPushButton()
         self.btn_remove_terminal.setIcon(self.icons.get_icon("remove"))
@@ -46,7 +54,7 @@ class SideBottom(QFrame):
         self.terminal = Terminal(self)
 
         self.add_widget(self.problem_logs, "PROBLEMS", [self.btn_clear_problems])
-        self.add_widget(self.terminal, "TERMINAL", [self.btn_new_terminal, self.btn_remove_terminal])
+        self.add_widget(self.terminal, "TERMINAL", [self.terminal_pick_area, self.btn_remove_terminal])
 
         self.notebook.cornerWidget().btn_close.clicked.connect(
             self.close_panel)
@@ -191,7 +199,7 @@ class SideRight(QFrame):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setObjectName("side-right")
-        self.icons = getfn.get_application_icons("ilab")
+        self.icons = getfn.get_smartcode_icons("ilab")
         self.spaces = {}
         self.init_ui()
 

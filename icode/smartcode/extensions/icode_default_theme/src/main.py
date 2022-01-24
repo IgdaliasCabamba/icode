@@ -113,14 +113,3 @@ class Init(ModelUi):
                 dark = "dark.json",
                 light = "light.json"
             )
-            font=getfn.get_native_font()
-            font.setPixelSize(1)
-            font.setFixedPitch(True)
-            font.setPointSizeF(10.5)
-            font.setBold(False)
-            lexer.setDefaultFont(font)
-            
-            end_styles = lexer.styles_num
-            
-            for i in range(0, end_styles):
-                lexer.setFont(font, i)

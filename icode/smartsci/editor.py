@@ -54,7 +54,7 @@ class EditorView(QFrame):
         self.file=file
         self._editor = None
         self._editors = []
-        self.icons = getfn.get_application_icons("editor")
+        self.icons = getfn.get_smartcode_icons("editor")
         self.file_watcher = IFile(self)
         self.file_menu = FileMenu(self)
         self.file_menu.save_file.triggered.connect(self.save_file)

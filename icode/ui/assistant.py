@@ -18,7 +18,7 @@ class AprilFace(QFrame):
         super().__init__(parent)
         self.setObjectName("april-ui")
         self.parent=parent
-        self.icons = getfn.get_application_icons("assistant")
+        self.icons = getfn.get_smartcode_icons("assistant")
         self._work_count = 0
         
         self.thread=QThread()

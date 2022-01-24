@@ -19,7 +19,7 @@ class SymbolExplorer(QFrame):
         super().__init__(parent)
         self.api = api
         self._parent = parent
-        self.icons = getfn.get_application_icons("code")
+        self.icons = getfn.get_smartcode_icons("code")
         self.setParent(parent)
         self.setObjectName("editor-widget")
         self.init_ui()

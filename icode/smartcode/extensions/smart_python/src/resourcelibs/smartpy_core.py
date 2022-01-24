@@ -3,6 +3,7 @@ from smartpy_api import python_api
 import jedi
 from smart_ide_core import builtin_classes, builtin_functions, primitive_types
 from PyQt5.Qsci import QsciStyledText, QsciStyle
+from PyQt5.QtCore import QTimer
 
 JEDI_TEXT_WRAP_WIDTH = 50
 JEDI_HELP_SHORTEN_WIDTH = 400
@@ -303,17 +304,15 @@ class PyntellisenseEdition(QObject):
                     QsciStyledText("PEP-8 recommendation: Use a lowercase word or words!\n", 1),
                     QsciStyledText("Separate words by underscores to improve readability.\n",1),
                     QsciStyledText("SUGGESTION: ",7),
-                    QsciStyledText(function_name.lower(),9),
+                    QsciStyledText(function_name.lower(),9)
                 ]
                 #return f"> PEP-8 recommendation: Use a lowercase word or words.\nSeparate words by underscores to improve readability.\n> SUGGESTION: {function_name.lower()}"
             elif function_name in builtin_functions:
                 return [
-                    QsciStyledText("\n===========================================================\n", 0),
                     QsciStyledText(f"WARNING: {function_name} it's an integrated function!\n", 1),
                     QsciStyledText("This could cause future errors.\n",1),
                     QsciStyledText("SUGGESTION: ",7),
-                    QsciStyledText({function_name.lower()}+"_",9),
-                    QsciStyledText("\n===========================================================\n", 0),
+                    QsciStyledText(f"{function_name.lower()}_", 9)
                 ]
                 #return f"> WARNING: {function_name} it's an integrated function\nThis could cause future errors.\n> SUGGESTION: {function_name.lower()}_"
         return False
@@ -337,7 +336,9 @@ class PyntellisenseCompletions(QObject):
         self._runing = False
         self._env = None
         self.editor=parent
+        self.completions = []
         self.configure_jedi()
+        self.timer = QTimer(self)
     
     @property
     def env(self):
@@ -364,7 +365,6 @@ class PyntellisenseCompletions(QObject):
         jedi.settings.case_insensitive_completion = False
         
     def run(self):
-        self.update_api()
         self.editor.on_update_completions.connect(self.update_api)
     
     def is_builtin(self, dict, key):      
@@ -395,71 +395,77 @@ class PyntellisenseCompletions(QObject):
             print(completion)
             return "?10"
 
-    def update_api(self):
-        if self.editor.lexer_name=="python" and not self._runing:
+    def update_api(self, data):
+        lexer_name = data["lexer-name"]
+        source_code = data["code"]
+        file_code = data["file"]
+        row, col = data["cursor-pos"]
+        lexer_api = data["lexer-api"]
+        if lexer_name=="python" and not self._runing:
+            self._runing = True
             try:
-                self.__api=self.editor.lexer_api
+                self.__api=lexer_api
                 if self.__api is not None:
+                    self.completions.clear()
                     self.__api.apiPreparationStarted.connect(lambda: self.runing(True))
                     self.__api.apiPreparationFinished.connect(lambda: self.runing(False))
-                    self.__api.clear()
                     import jedi
-                            
-                    source_code=self.editor.text()
-                    file_code=self.editor.file_path
-
-                    row, col = self.editor.getCursorPosition()
-
                     if not col:
                         return
                     
                     script = jedi.Script(code=source_code, path=file_code, environment=self._env)
-                    completions=script.complete(row+1, col)
-                    signatures = script.get_signatures(row+1, col)
+                    completers=script.complete(row+1, col)
+                    #signatures = script.get_signatures(row+1, col)
                     
-                    for completion in completions:
+                    for completion in completers:
                         
                         ref = self.get_ref(completion.type)
 
                         if self.is_builtin(builtin_functions, completion.name):
-                            self.__api.add(f"{completion.name}{ref}{builtin_functions[completion.name]}")
+                            self.completions.append(f"{completion.name}{ref}{builtin_functions[completion.name]}")
                             if not completion.name in self.names_list or not completion.name_with_symbols in self.names_list:
                                 self.names_list.append(completion.name)
                             continue
                         
-                        if completion.type == "class" or completion.type == "function":
+                        #if completion.type == "class" or completion.type == "function":
 
-                            if signatures:
-                                params_str = "("
-                                call_tip = signatures[-1]
+                            #if signatures:
+                                #print(signatures)
+                                #params_str = "("
+                                #call_tip = signatures[-1]
 
-                                for param in call_tip.params:
-                                    params_str+=param.to_string()
-                                    params_str+=", "
-                                params_str+=")"
+                                #for param in call_tip.params:
+                                    #params_str+=param.to_string()
+                                    #params_str+=", "
+                                #params_str+=")"
                                 
-                                wrapper = textwrap.TextWrapper(width=JEDI_SIGNATURES_WRAP_WIDTH)
-                                dedented_text = textwrap.dedent(text=params_str)
-                                params_wrapped = wrapper.fill(text=dedented_text)
+                                #wrapper = textwrap.TextWrapper(width=JEDI_SIGNATURES_WRAP_WIDTH)
+                                #dedented_text = textwrap.dedent(text=params_str)
+                                #params_wrapped = wrapper.fill(text=dedented_text)
 
-                                self.__api.add(f"{completion.name}{ref}{params_wrapped}")
-                                if not completion.name in self.names_list or not completion.name_with_symbols in self.names_list:
-                                    self.names_list.append(completion.name)
+                                #self.completions.append(f"{completion.name}{ref}{params_wrapped}")
+                                #if not completion.name in self.names_list or not completion.name_with_symbols in self.names_list:
+                                    #self.names_list.append(completion.name)
                             
-                            else:
-                                self.__api.add(f"{completion.name}{ref}")
-                                if not completion.name in self.names_list or not completion.name_with_symbols in self.names_list:
-                                    self.names_list.append(completion.name)
+                            #else:
+                                #self.completions.append(f"{completion.name}{ref}")
+                                #if not completion.name in self.names_list or not completion.name_with_symbols in self.names_list:
+                                    #self.names_list.append(completion.name)
 
-                            continue
+                            #continue
 
-                        self.__api.add(f"{completion.name_with_symbols}{ref}")
+                        self.completions.append(f"{completion.name_with_symbols}{ref}")
                         if not completion.name in self.names_list or not completion.name_with_symbols in self.names_list:
                             self.names_list.append(completion.name_with_symbols)
-
+                
+                self.__api.clear()
+                for completion in self.completions:
+                    self.__api.add(completion)    
                 self.__api.prepare()
+                self._runing = False
+                
             except Exception as e:
-                print(e)
+                print("Completions: Python: jedi: ", e)
                 self.on_error.emit(str(e))
                 return
         else:

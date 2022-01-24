@@ -30,6 +30,7 @@ class Core(object):
         self.menu.file.open_folder.triggered.connect(self.open_folder)
         self.menu.file.close_editor.triggered.connect(self.close_editor)
         self.menu.file.open_recent_menu.open_last_closed_tab.triggered.connect(self.reopen_editor)
+        self.menu.file.open_recent_menu.open_last_closed_tabs.triggered.connect(self.reopen_editors)
 
         self.menu.edit.find.triggered.connect(self.find_in_editor)
         self.menu.edit.replace_.triggered.connect(self.replace_in_editor)
@@ -38,6 +39,7 @@ class Core(object):
         self.menu.view.languages.triggered.connect(self.show_langs)
 
         self.menu.go.goto_line.triggered.connect(self.show_goto_line)
+        self.menu.go.goto_tab.triggered.connect(self.show_goto_tab)
 
         self.tool_bar.explorer.triggered.connect(self.side_left.do_files)
         self.tool_bar.search.triggered.connect(self.side_left.do_searchs)
@@ -51,6 +53,7 @@ class Core(object):
         self.status_bar.indentation.clicked.connect(self.show_space_mode)
         self.status_bar.end_line_seq.clicked.connect(self.show_eol_mode)
         self.status_bar.april.clicked.connect(self.call_april)
+        self.status_bar.notify.clicked.connect(self.show_notifications)
 
         self.ui.index.on_double_clicked.connect(self.new_file)
         self.ui.index.actions.on_new_clicked.connect(self.new_file)
@@ -58,13 +61,13 @@ class Core(object):
         self.ui.index.actions.on_open_folder_clicked.connect(self.open_folder)
         self.ui.index.actions.on_show_commands_clicked.connect(self.show_command_palette)
 
-        self.ui.welcome.actions.on_open_recent_file.connect(self.open_file)
+        self.ui.welcome.actions.on_open_recent_folder.connect(self.open_dir)
         self.ui.welcome.actions.on_new_clicked.connect(self.new_file)
         self.ui.welcome.actions.on_open_file_clicked.connect(self.open_file)
         self.ui.welcome.actions.on_open_folder_clicked.connect(self.open_folder)
 
         self.side_left.explorer.on_file_clicked.connect(self.open_file_from_explorer)
-        self.side_left.explorer.btn_open_dir.clicked.connect(self.open_folder)
+        self.side_left.explorer.on_open_folder_request.connect(self.open_folder)
         self.side_left.explorer.btn_close_folder.clicked.connect(self.close_folder)
         self.side_left.searcher.display.on_open_file_request.connect(self.open_file_from_search)
         self.side_left.git.btn_open_repository.clicked.connect(self.open_repository)
@@ -90,7 +93,7 @@ class Core(object):
     def configure_notebook(self, notebook):
         notebook.last_tab_closed.connect(self.tabbar_last_closed)
         notebook.on_user_event.connect(self.ui.set_notebook)
-        notebook.currentChanged.connect(self.notebook_tab_changed)
+        notebook.on_tab_changed.connect(self.notebook_tab_changed)
         notebook.tabBarDoubleClicked.connect(lambda: self.new_file(notebook))
         notebook.tab_closed.connect(self.notebook_tab_closed)
         notebook.on_tab_added.connect(self.toggle_main_views)
@@ -113,19 +116,21 @@ class Core(object):
         if self.last_folder is not None:
             self.restore_folder(self.last_folder)
         
-        self.welcome_widget.set_recent_files(self.last_files)
+        self.welcome_widget.set_last_folders(self.last_folders)
         self.menu.file.open_recent_menu.set_recent_files(self.last_files, self.open_file)
             
 class Base(QObject, Core):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self._parent = parent
-        self.api_lexers_list = getfn.get_all_lexers_objects_api()
-        self.api_commands_list = self.get_api_commands_list(self)
-        self.logo_icons = getfn.get_application_icons("logo")
+        
+        self.logo_icons = getfn.get_smartcode_icons("logo")
+        self.command_icons = getfn.get_smartcode_icons("action")
+        
+        self.api_lexers_list = self.get_all_lexers_objects_api()
         self.eol_list = self.get_eol_list()
         self.space_list = self.get_space_list()
-        
+        self.api_commands_list = self.get_api_commands_list(self)
 
     # TODO
     def run_api(self):
@@ -150,8 +155,12 @@ class Base(QObject, Core):
         plugin.run_ui_plugin(DATA_FILE, data)
         plugin.run_app_plugin(DATA_FILE, data)
 
-    def get_new_editor(self, notebook):
-        editor = EditorView(self, self.ui, notebook)
+    def get_new_editor(self, notebook, file=None):
+        if file is None:
+            editor = EditorView(self, self.ui, notebook)
+        else:
+            editor = EditorView(self, self.ui, notebook, file)
+        
         editor.on_tab_content_changed.connect(self.update_tab)
         return editor
 
@@ -213,38 +222,57 @@ class Base(QObject, Core):
         return [
             {
                 "name": "New File\t\tCtrl+N",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.new_file
             },
             {
                 "name": "Open File\t\tCtrl+O",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.open_file
             },
             {
                 "name": "Save File\t\tCtrl+S",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.save_file
             },
             {
                 "name": "Open Folder\tCtrl+K",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.open_folder
             },
             {
                 "name": "Open Repository\t",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.open_repository
             },
             {
                 "name": "Close File\t\tCtrl+W",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.close_editor
             },
             {
+                "name": "Reopen Last Closed Editor\tCtrl+Shift+T",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": app.reopen_editor
+            },
+            {
+                "name": "Reopen Last Closed Editors",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": app.reopen_editors
+            },
+            {
                 "name": "Split In Group Horizontal",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.split_in_group_hor
             },
             {
                 "name": "Split In Group Vertical",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.split_in_group_ver
             },
             {
                 "name": "Join In Group",
+                "icon": self.command_icons.get_icon("run-command"),
                 "command": app.join_in_group
             },
         ]
@@ -263,6 +291,13 @@ class Base(QObject, Core):
             "mode": 1,
             "icon": self.logo_icons.get_icon("macos")
         }]
+    
+    def get_tabs_navigation(self):
+        notebook = self.ui.notebook
+        return {
+            "notebook":notebook,
+            "tabs":notebook.get_navigation()
+        }
     
     def get_space_list(self):
         return [{
@@ -285,4 +320,39 @@ class Base(QObject, Core):
             "name": "Convert Indentation to Spaces",
             "action": 1,
             "icon": self.logo_icons.get_icon("macos")
+        }]
+    
+    def get_all_lexers_objects_api(self) -> dict:
+        return [{
+            "name": "python",
+            "lexer": PythonLexer,
+            "icon": getfn.get_lexer_icon_by_name("python")
+        }, {
+            "name": "c",
+            "lexer": CLexer,
+            "icon": getfn.get_lexer_icon_by_name("c")
+        }, {
+            "name": "c++",
+            "lexer": CPPLexer,
+            "icon": getfn.get_lexer_icon_by_name("c++")
+        }, {
+            "name": "css",
+            "lexer": CSSLexer,
+            "icon": getfn.get_lexer_icon_by_name("css")
+        }, {
+            "name": "html",
+            "lexer": HTMLLexer,
+            "icon": getfn.get_lexer_icon_by_name("html")
+        }, {
+            "name": "javaScript",
+            "lexer": JavaScriptLexer,
+            "icon": getfn.get_lexer_icon_by_name("javascript")
+        }, {
+            "name": "json",
+            "lexer": JSONLexer,
+            "icon": getfn.get_lexer_icon_by_name("json")
+        }, {
+            "name": "text",
+            "lexer": NoneLexer,
+            "icon": getfn.get_lexer_icon_by_name("text")
         }]

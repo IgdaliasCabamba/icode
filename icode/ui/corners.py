@@ -10,7 +10,7 @@ class SplitButton(QToolButton):
         super().__init__(parent)
         self.parent = parent
         self.notebook = notebook
-        self.icons=getfn.get_application_icons("tab-corner")
+        self.icons=getfn.get_smartcode_icons("tab-corner")
 
         self.setIcon(self.icons.get_icon("split"))
 
@@ -76,7 +76,7 @@ class MainTabCorner(QFrame):
         super().__init__(parent)
         self.setObjectName("tab-corner-widget-editor")
         self.parent=parent
-        self.icons=getfn.get_application_icons("tab-corner")
+        self.icons=getfn.get_smartcode_icons("tab-corner")
         self.init_ui()
     
     def init_ui(self) -> None:
@@ -99,7 +99,7 @@ class BottomTabCorner(QFrame):
         super().__init__(parent)
         self.parent=parent
         self.setObjectName("tab-corner-widget-bottom")
-        self.icons=getfn.get_application_icons("tab-corner")
+        self.icons=getfn.get_smartcode_icons("tab-corner")
         self.parent.currentChanged.connect(self.change_view)
         self.init_ui()
     

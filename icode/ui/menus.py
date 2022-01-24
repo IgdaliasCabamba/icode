@@ -54,7 +54,12 @@ class OpenRecentSubMenu(QMenu):
         self.open_last_closed_tab = QAction(
             "Reopen Closed Editor\tCtrl+Shift+T")
         self.open_last_closed_tab.setShortcut("Ctrl+Shift+T")
+        
+        self.open_last_closed_tabs = QAction(
+            "Reopen Closed Editors")
+        
         self.addAction(self.open_last_closed_tab)
+        self.addAction(self.open_last_closed_tabs)
 
         self.addSeparator()
     
@@ -148,6 +153,10 @@ class GoMenu(QMenu):
         self.goto_line = QAction("Goto Line\tCtrl+G", self)
         self.goto_line.setShortcut("Ctrl+G")
         self.addAction(self.goto_line)
+        
+        self.goto_tab = QAction("Goto Tab\tCtrl+Tab", self)
+        self.goto_tab.setShortcut("Ctrl+Tab")
+        self.addAction(self.goto_tab)
 
 
 class ViewMenu(QMenu):

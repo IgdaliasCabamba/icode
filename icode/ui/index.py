@@ -5,7 +5,7 @@ from .templates import *
 from .igui import ScrollLabel
 from base.icache import CacheManager
 
-icons=getfn.get_application_icons("index")
+icons=getfn.get_smartcode_icons("index")
 
 class QuickActions(QFrame):
     
@@ -76,7 +76,7 @@ class Index(QFrame):
 
 class WelcomeActions(QFrame):
     
-    on_open_recent_file = pyqtSignal(str)
+    on_open_recent_folder = pyqtSignal(str)
     on_new_clicked=pyqtSignal()
     on_open_file_clicked=pyqtSignal()
     on_open_folder_clicked = pyqtSignal()
@@ -123,8 +123,8 @@ class WelcomeActions(QFrame):
         if link in self.index_events.keys():
             self.index_events[link].emit()
         else:
-            if pathlib.Path(link).is_file() and pathlib.Path(link).exists:
-                self.on_open_recent_file.emit(link)
+            if pathlib.Path(link).is_dir() and pathlib.Path(link).exists:
+                self.on_open_recent_folder.emit(link)
     
     
     def rebuild(self, files:list = []):
@@ -132,12 +132,12 @@ class WelcomeActions(QFrame):
     
 class Welcome(QFrame):
 
-    def __init__(self, parent, files:list = []) -> None :
+    def __init__(self, parent, folders:list = []) -> None :
         super().__init__(parent)
         self.setObjectName("welcome")
         self.parent=parent
         self.setMouseTracking(True)
-        self.files = files
+        self.folders = folders
         self.init_ui()
     
     def init_ui(self) -> None:
@@ -164,6 +164,6 @@ class Welcome(QFrame):
         super().mousePressEvent(event)
         self.setFocus()
     
-    def set_recent_files(self, files:list):
-        self.files = files
-        self.actions.rebuild(self.files)
+    def set_last_folders(self, folders:list):
+        self.folders = folders
+        self.actions.rebuild(self.folders)

@@ -1,4 +1,7 @@
 {   
+	//April icons
+	"April-produtivity":"images/undraw_to_the_stars_qhyy.svg",
+	
     //menubar icons 
     "window-menubar-menu":"app/menu.png",
 	"assistant-loading":"animations/loading.gif",
@@ -26,15 +29,18 @@
     "terminal-bash":"app/console.png",
 	
 	//file explorer icons
+	"explorer-open":"app/folder.png",
 	"explorer-close":"app/delete.png",
 	"explorer-reload":"app/restart.png",
-	"explorer-expand_all":"app/expand-arrow.png",
-	"explorer-collapse_all":"app/collapse-arrow.png",
+	"explorer-expand":"app/expand-arrow.png",
+	"explorer-collapse":"app/collapse-arrow.png",
 	
 	//search icons
 	"search-reload":"app/reboot.png",
 	"search-options":"app/expand-arrow.png",
 	"search-loading":"animations/loading.gif",
+    "search-collapse":"app/forward.png",
+    "search-expand":"app/expand-arrow.png",
 
     //extensions icons
     "extensions-installed":"app/installer.png",
@@ -44,6 +50,8 @@
 	"source_control-repository":"app/repository.png",
 	"source_control-reload":"app/reboot.png",
 	"source_control-file":"app/file.png",
+	"source_control-folder":"app/folder.png",
+	"source_control-log":"app/log.png",
 	"source_control-added":"app/added.png",
 	"source_control-ignored":"app/ignored.png",
 	"source_control-copied":"app/copied.png",
@@ -72,20 +80,25 @@
     "console-clear":"app/erase.png",
     "console-start":"app/play.png",
 
-    //editor widgets icons
+    //search widgets icons
     "finder_replacer-collapse":"app/forward.png",
     "finder_replacer-expand":"app/expand-arrow.png",
     "finder-next":"app/down-arrow.png",
     "finder-prev":"app/up-arrow.png",
     "finder-close":"app/delete.png",
 	"finder-menu":"app/ellipsis.png",
+	"replacer-replace-all":"app/replace-all.png",
+	"replacer-replace":"app/replace.png",
+	
+	//notificator icons
+	"notificator-clear":"app/trash.png",
+    "notificator-hide":"app/expand-arrow.png",
 	
 	//editor icons
 	"editor-source_control":"app/code-fork.png",
 	"editor-file":"app/file.png",
 	"editor-warnings":"app/alert.png",
     "editor-errors":"app/cancel.png",
-	
 
     //lexers
     "lexer-python":"languages/python.png",
@@ -131,12 +144,34 @@
 	"smartsci-*":"code/poligon.png",
 	"smartsci-expand-arrow":"code/expand-arrow.png",
 	"smartsci-forward":"code/forward.png",
-    "smartsci-log-point":"code/logpoint.png",
-    "smartsci-book-mark":"code/bookmark.png",
-    "smartsci-breakpoint":"code/breakpoint.png",
+    "smartsci-debug-mark":"code/breakpoint.png",
 	
 	//brands logos
 	"logo-windows":"app/windows.png",
 	"logo-linux":"app/linux.png",
-	"logo-macos":"app/macos.png"
+	"logo-macos":"app/macos.png",
+	
+	//actions
+	"action-run-command":"app/run-command.png",
+	"action-play":"app/play.png",
+	
+	//*(general) icons
+	"*-remove":"app/trash.png",
+	"*-play":"app/play.png",
+	"*-stop":"app/stop.png",
+	"*-close":"app/delete.png",
+	"*-cancel":"app/cancel.png",
+	"*-delete":"app/delete.png",
+	"*-add":"app/add.png",
+	"*-folder":"app/folder.png",
+	"*-forward":"app/right-arrow.png",
+	"*-backward":"app/left-arrow.png",
+	"*-menu":"app/menu.png",
+	"*-copy":"app/copy.png",
+	
+	"*-windows":"app/windows.png",
+	"*-linux":"app/linux.png",
+	"*-macos":"app/macos.png",
+	
+	"*-python":"languages/python.png",
 }

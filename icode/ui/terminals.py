@@ -18,19 +18,22 @@ class TerminalBase(TerminalWidget):
                 font_name="Monospace",
                 font_size=16
                 )
-        self.setFocus()
+        #self.setFocus()
         self.setObjectName("terminal")
         self.header_item = None
+
     
 class Terminal(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
         self.setObjectName("terminal-view")
+        self.setStyleSheet("font-size:11pt")
         self.term_index = 0
-        self.icons=getfn.get_application_icons("terminal")
+        self.icons=getfn.get_smartcode_icons("terminal")
         self.parent.btn_new_terminal.clicked.connect(lambda: self.add_terminal())
         self.parent.btn_remove_terminal.clicked.connect(lambda: self.remove_terminal())
+        self.parent.term_picker.addItems(["py","sh","cmd","ps"])
         self.start_timer = QTimer(self)
         self.init_ui()
     

@@ -65,7 +65,7 @@ class Init(ModelApp):
         self.ui.status_bar.add_status_widget(self.interpreter)
         
         # Side Bottom
-        corner_icons=getfn.get_application_icons("tab-corner")
+        corner_icons=getfn.get_smartcode_icons("tab-corner")
         
         self.py_console = PyConsole(self.ui.side_bottom)
         self.btn_add_pycell = QPushButton()
@@ -84,7 +84,12 @@ class Init(ModelApp):
         self.btn_open_pylab=QPushButton("Open")
         self.btn_open_pylab.setObjectName("btn-open-pylab")
         self.pylab_desc = """
-            <h5>Icode Python Labs</h5>
+            <ul>
+                <li>Tree, Doctor</li>
+                <li>Warnings, Analyzes</li>
+                <li>Debug, Tests</li>
+                <li>Refactor</li>
+            </ul>
         """
         self.ui.side_left.labs.new_work_space("Python", "smart_python", self.pylab_desc, self.btn_open_pylab)
         
@@ -267,6 +272,8 @@ class Init(ModelApp):
         
         if live_tips not in self.objects_mem["live_tipers"]:
             self.objects_mem["live_tipers"].append(live_tips)
+        
+        editor.set_ide_mode(True)
     
     def run_code_warnings(self):
         editor = self.app.notebook_have_editor_with_python()

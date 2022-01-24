@@ -7,7 +7,7 @@ I didn't find results!:
 
 """
 hello_msg="""
-### hello i'm april! :)
+### hello i'm April!
 
 ***
 

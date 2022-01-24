@@ -1,7 +1,7 @@
 from functions import getfn
 import pathlib
 
-icons=getfn.get_application_icons("index")
+icons=getfn.get_smartcode_icons("index")
 
 logo=f'image: url("{icons["logo"]}")'
 
@@ -34,39 +34,39 @@ def hello_msg():
         </p>
     </div>
     
-"""
+"""  
 
-def welcome_msg_left(files:list):
-    enough_files_count = 4
-    recent_files = ["#", "#", "#"]
-    tmp_recent_files = []
-    recent_files_names = ["./", "./", "./"]
+def welcome_msg_left(files:list=[]):
+    if not isinstance(files, list):
+        files = []
     
-    if files is not None: 
-        if len(files) > 3:
-            for i in range(1, 4):
-                tmp_recent_files.append(files[i*-1])
+    files = getfn.get_list_without_duplicates(files)
+    recent_files_names = []
+    recent_files = []
+    
+    for i in range(6):
+        files.insert(0, "#")
+    
+    for i in range(1, 6):
+        file = files[i*-1]
+        path_obj = pathlib.Path(file)
+        parent = f"~{path_obj.parent}"
+        name = path_obj.name
+        if file == "#":
+            file = ""
+            parent = ""
+            name = ""
             
-            recent_files = tmp_recent_files
-        else:
-            for i in range((len(files)-enough_files_count)*-1):
-                files.append("#")
-        
-            recent_files = files
-            
-        recent_files_names = []
-        for file in recent_files:
-            if file == "#":
-                recent_files_names.append("...")
-            else:
-                recent_files_names.append(pathlib.Path(file).name)
+        recent_files.append(file)
+        recent_files_names.append(f"<small>{name}<span style='color:gray'>&nbsp;&nbsp;&nbsp;{parent}</span></small>")
         
     return f"""
     <p>
         <span>
             <h1>Intelligent code</h1>
             <img src="{icons["python"]}"/>
-            <h2><nobr>Editing evolved with a new perspective</nobr></h2>
+            <h2><nobr>Editing evolved with a new <span style="color:#11f2c8">p</span><span style="color:#48cdd0">e</span><span style="color:#74afd6">r</span><span style="color:#9897db">s</span><span style="color:#c876e2">p</span><span style="color:#f458e8">e</span><span style="color:#eb58eb">c</span><span style="color:#e158ed">t</span><span style="color:#db58ef">i</span><span style="color:#d458f1">v</span><span style="color:#c958f4">e</span>
+            </nobr></h2>
         </span>
     </p>
 
@@ -99,6 +99,12 @@ def welcome_msg_left(files:list):
         </p>
         <p>
             <a href='{recent_files[2]}' style='text-decoration:none;'>{recent_files_names[2]}</a>
+        </p>
+        <p>
+            <a href='{recent_files[3]}' style='text-decoration:none;'>{recent_files_names[3]}</a>
+        </p>
+        <p>
+            <a href='{recent_files[4]}' style='text-decoration:none;'>{recent_files_names[4]}</a>
         </p>
     </p>
     <br>

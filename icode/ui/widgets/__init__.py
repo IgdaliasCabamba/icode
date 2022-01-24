@@ -7,3 +7,4 @@ from .laboratory import WorkSpace, Table
 from .eol_mode import EOLMode
 from .indentation import SpaceMode
 from .cards import CardLab, CardApril
+from .tabs import TabBrowser

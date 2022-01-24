@@ -19,7 +19,6 @@ import frameworks.jedit2 as ijson
 from base.extender import Ext
 from smartsci.lexers import *
 
-
 class IO:
     """
     IO functions to control tasks related to data input and output in the operating system
@@ -366,7 +365,14 @@ class Get:
     
     @staticmethod
     def get_char_is_closable(col: int, text: str) -> bool:
-        return len(text) > col + 1
+        if len(text) > col + 1:
+            return True
+        else:
+            # TODO
+            #a = re.finditer()
+            return False
+            
+            
 
     @staticmethod
     def get_text_without(text: str, old_char: str, new_char: str) -> str:
@@ -390,14 +396,20 @@ class Get:
                 out.append(line)
         return "\n".join(out)
 
+    @staticmethod
     def get_code_with_identation(code: str, old_char: str,
                                  new_char: str) -> str:
         return re.sub(old_char, new_char, code)
-
+    
+    @staticmethod
     def get_file_with_identation(file: str, old_char: str,
                                  new_char: str) -> str:
         pass
     
+    @staticmethod
+    def get_list_without_duplicates(x):
+        return list(dict.fromkeys(x))
+        
     @staticmethod
     def get_root_path():
         return BASE_PATH
@@ -435,6 +447,8 @@ class Get:
             return PythonLexer
         elif lang_name == "c":
             return CLexer
+        elif lang_name == "c++":
+            return CPPLexer
         elif lang_name == "javascript":
             return JavaScriptLexer
         elif lang_name == "html" or lang_name == "xml":
@@ -474,42 +488,6 @@ class Get:
         for lexer in lexers:
             if isinstance(lexer_instance, lexer):
                 return lexer
-        
-
-    def get_all_lexers_objects_api(self) -> dict:
-        return [{
-            "name": "python",
-            "lexer": PythonLexer,
-            "icon": self.get_lexer_icon_by_name("python")
-        }, {
-            "name": "c",
-            "lexer": CLexer,
-            "icon": self.get_lexer_icon_by_name("c")
-        }, {
-            "name": "c++",
-            "lexer": CPPLexer,
-            "icon": self.get_lexer_icon_by_name("c++")
-        }, {
-            "name": "css",
-            "lexer": CSSLexer,
-            "icon": self.get_lexer_icon_by_name("css")
-        }, {
-            "name": "html",
-            "lexer": HTMLLexer,
-            "icon": self.get_lexer_icon_by_name("html")
-        }, {
-            "name": "javaScript",
-            "lexer": JavaScriptLexer,
-            "icon": self.get_lexer_icon_by_name("javascript")
-        }, {
-            "name": "json",
-            "lexer": JSONLexer,
-            "icon": self.get_lexer_icon_by_name("json")
-        }, {
-            "name": "text",
-            "lexer": NoneLexer,
-            "icon": self.get_lexer_icon_by_name("text")
-        }]
 
     @staticmethod
     def get_qcolor(color):
@@ -580,7 +558,7 @@ class Get:
             f"smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}logo-min.svg")
 
     # TODO
-    def get_application_icons(self, area: str = "-") -> dict:
+    def get_smartcode_icons(self, area: str = "-") -> dict:
         class IconMaker:
             def __init__(self, icon_path: str, api: dict, area: str):
                 self.icon_path = icon_path
@@ -623,7 +601,19 @@ class Get:
             }
 
         return IconMaker(self.icon_path, api, area)
+    
+    def get_terminals():
+        path = settings.get_terminals()
+        if path:
+            try:
+                return ijson.load(
+                    f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{ext}{SYS_SEP}src{SYS_SEP}{palette}.json"
+                )
+            except Exception as e:
+                print(e)
 
+        return None
+        
     @staticmethod
     def get_theme_in_json():
         ext = settings.get_theme()

@@ -8,6 +8,7 @@ from base.april_brain import *
 
 from ui.chelly import GenericEditor
 import pyperclip as pc
+import textwrap
 import commonmark
 from functions import getfn
 
@@ -46,7 +47,6 @@ class CardLab(QFrame):
         self.drop_shadow.setOffset(0, 0)
         self.setGraphicsEffect(self.drop_shadow)
         
-        self.setStyleSheet("QFrame{background:#333; border-radius:5px}")
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
     
     def add_widget(self, widget:object):
@@ -56,6 +56,7 @@ class CardLab(QFrame):
 class CardApril(QFrame):
     def __init__(self, parent, text:str, title:str, pos:int, type:str="text"):
         super().__init__(parent)
+        self.icons = getfn.get_smartcode_icons("*")
         self.setObjectName("card-message")
         self.parent=parent
         self.text=text
@@ -83,6 +84,7 @@ class CardApril(QFrame):
         if self.pos==0:
             self.btn_copy = QPushButton("Copy", self)
             self.btn_copy.setObjectName("btn-copy")
+            self.btn_copy.setIcon(self.icons.get_icon("copy"))
             self.btn_copy.clicked.connect(self.copy_to_clipboard)
             self.btn_copy.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 

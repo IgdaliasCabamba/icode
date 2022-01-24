@@ -12,6 +12,7 @@ class App(Base):
         self.qt_app = qt_app
         self.ui = ui
         self.last_files = editor_cache.get_all_from_list("files")
+        self.last_folders = editor_cache.get_all_from_list("folders")
         self.last_folder = editor_cache.restore_from_list("folders", -1)
         self.last_repository = editor_cache.restore_from_list("repositorys", -1)
         self.files_opened = []
@@ -30,6 +31,7 @@ class App(Base):
         self.init_ui()
         self.load_plugins()
         self.build_components()
+        self.open_app()
 
     def init_ui(self):
         self.welcome_widget = self.ui.welcome
@@ -49,7 +51,7 @@ class App(Base):
         self.files_opened.append(code_file)
         return editor
 
-    def create_new_notebook(self, orientation, widget=None):
+    def create_new_notebook(self, orientation, widget=None, copy:bool=True):
         if widget is None:
             widget = self.ui.notebook
         parent_notebook = parent_tab_widget(widget)
@@ -62,17 +64,19 @@ class App(Base):
 
         self.on_new_notebook.emit(notebook)
         self.ui.set_notebook(notebook)
-
-        editor = self.get_new_editor(notebook)
-        editor.make_deep_copy(tab_data.widget)
-        index = notebook.add_tab_and_get_index(editor, tab_data.title)
-        notebook.setTabToolTip(index, tab_data.tooltip)
-        notebook.setTabIcon(index, tab_data.icon)
+        
+        if copy:
+            editor = self.get_new_editor(notebook)
+            editor.make_deep_copy(tab_data.widget)
+            index = notebook.add_tab_and_get_index(editor, tab_data.title)
+            notebook.setTabToolTip(index, tab_data.tooltip)
+            notebook.setTabIcon(index, tab_data.icon)
 
         DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
 
         self.ui.isplitter.add_notebook(notebook)
         self.ui.isplitter.splitAt(parent_notebook, DIRS[orientation], notebook)
+        return notebook
 
     def new_file(self, notebook=False):
         if isinstance(notebook, bool):
@@ -109,6 +113,7 @@ class App(Base):
                     duplicate["notebook"].setCurrentWidget(duplicate["widget"])
                 else:
                     self.create_editor_from_file(code_file)
+                    editor_cache.save_to_list(str(file_with_path), "files")
                 
         else:
             if self.files_opened:
@@ -120,11 +125,19 @@ class App(Base):
                     duplicate = self.is_duplicated_file(file_with_path, self.ui.notebook)
                     if code_file.is_file() and not duplicate:
                         self.create_editor_from_file(code_file)
+                        editor_cache.save_to_list(str(file_with_path), "files")
                     else:
                         duplicate["notebook"].setCurrentWidget(duplicate["widget"])
             else:
                 return
-
+    
+    def open_dir(self, dir=None):
+        if dir is not None:
+            folder = self.ui.side_left.explorer.open_folder(dir)
+            if not self.ui.side_left.explorer.isVisible():
+                self.tool_bar.explorer.trigger()
+            self.status_bar.open_folder_mode()
+    
     def explorer_path_changed(self, folder_with_path):
         editor_cache.save_to_list(str(folder_with_path), "folders")
 
@@ -135,8 +148,9 @@ class App(Base):
                 self.tool_bar.explorer.trigger()
             self.status_bar.open_folder_mode()
     
-    def open_repository(self):
-        repository = self.ui.side_left.git.open_repository()
+    def open_repository(self, repository=None):
+        if not isinstance(repository, str) or repository is None:
+            repository = self.ui.side_left.git.open_repository()
         self.enter_repository(repository)
 
     def close_folder(self):
@@ -154,9 +168,12 @@ class App(Base):
             repository = self.ui.side_left.git.open_repository(path)
             self.enter_repository(repository)
 
-    def reopen_editor(self):
+    def reopen_editors(self):
         for notebook in self.ui.notebooks:
             notebook.open_last_closed_tab()
+    
+    def reopen_editor(self):
+        self.ui.notebook.open_last_closed_tab()
 
     def save_file(self):
         if isinstance(self.ui.notebook.currentWidget(), EditorView):
@@ -211,7 +228,13 @@ class App(Base):
     
     def call_april(self):
         self.ui.april.appear()
-
+    
+    def show_notifications(self):
+        self.ui.notificator.appear()
+    
+    def show_goto_tab(self):
+        self.editor_widgets.do_goto_tab()
+    
     def show_goto_line(self):
         self.editor_widgets.do_goto_line()
 
@@ -258,10 +281,7 @@ class App(Base):
         self.toggle_main_views()
 
     def notebook_tab_closed(self, widget):
-        if self.widget_is_code_editor(widget):
-            file = widget.editor.file_path
-            if file is not None:
-                editor_cache.save_to_list(str(file), "files")
+        pass    
 
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""
@@ -380,11 +400,16 @@ class App(Base):
                         self.tool_bar.igit.trigger()
                     editor_cache.save_to_list(str(repo_path), "repositorys")
     
+    def open_app(self):
+        print("SUCESS:TRUE")
+    
     def quit_app(self, window):
-        settings.save_window(window)
+        settings.save_window(window, self)
 
 
 def run(args=False) -> None:
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     qapp = QApplication(sys.argv)
     qapp.setDesktopFileName("Icode")
     qapp.setApplicationVersion("0.0.1")
@@ -394,7 +419,7 @@ def run(args=False) -> None:
     styler.beautify(qapp)
     exe = MainWindow(None, styler.windows_style, qapp)
     app = App(exe, qapp)
-    settings.restore_window(exe)
+    settings.restore_window(exe, app, getfn)
     exe.show_()
     sys.exit(qapp.exec_())
 

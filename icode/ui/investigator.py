@@ -1,13 +1,13 @@
 from PyQt5.QtCore import QSize, Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit,
-                             QListWidget, QListWidgetItem, QMenu, QPushButton,
+from PyQt5.QtWidgets import (QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+                             QListWidget, QSizePolicy, QMenu, QPushButton,
                              QVBoxLayout, QAction)
 
 from base.searcher import *
 from data import user_cache
 from functions import getfn, pathlib
-from .igui import HeaderPushButton, InputHistory, Animator
+from .igui import HeaderPushButton, InputHistory, Animator, IListItem
 
 class FindOptions(QMenu):
     def __init__(self, parent=None):
@@ -48,19 +48,59 @@ class FindOptions(QMenu):
             self.search_subdirs.setChecked(ss)
         if isinstance(bf, bool):
             self.break_on_find.setChecked(bf)
-        
-        
-class IListItem(QListWidgetItem):
-    def __init__(self, name, tip, item_data:dict):
-        super().__init__()
-        self.icon=QIcon(getfn.get_icon_from_ext(name))
-        self.title=name
-        self.tip=tip
-        self.item_data=item_data
 
-        self.setText(self.title)
-        self.setIcon(self.icon)
-        self.setToolTip(self.tip)
+class FindPanel(QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setObjectName("finder")
+        self.parent = parent
+        self.options_menu = FindOptions(self)
+        self.icons = getfn.get_smartcode_icons("finder")
+        self.init_ui()
+    
+    def init_ui(self):
+        self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.layout)
+
+        self.input_edit = InputHistory(self)
+        self.input_edit.setMaximumHeight(32)
+        self.input_edit.setPlaceholderText("Find...")
+
+        self.btn_find_next = QPushButton(self)
+        self.btn_find_next.setIcon(self.icons.get_icon("next"))
+    
+        self.btn_find_prev = QPushButton(self)
+        self.btn_find_prev.setIcon(self.icons.get_icon("prev"))
+
+        self.layout.addWidget(self.input_edit)
+        self.layout.addWidget(self.btn_find_next)
+        self.layout.addWidget(self.btn_find_prev)
+        
+
+class ReplacePanel(QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.icons = getfn.get_smartcode_icons("replacer")
+        self.setObjectName("replacer")
+        self.init_ui()
+    
+    def init_ui(self):
+        self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(self.layout)
+        
+        self.input_edit = InputHistory(self)
+        self.input_edit.setMaximumHeight(30)
+        self.input_edit.setPlaceholderText("Replace...")
+        
+        self.btn_replace_all = QPushButton(self)
+        self.btn_replace_all.setIcon(self.icons.get_icon("replace-all"))
+        
+        self.layout.addWidget(self.input_edit)
+        self.layout.addWidget(self.btn_replace_all)
+        
+        self.setVisible(False)
 
 class Results(QFrame):
     on_open_file_request=pyqtSignal(str, str)
@@ -125,10 +165,11 @@ class Searcher(QFrame):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.setObjectName("search-panel")
         self.parent=parent
         self.explorer=parent.explorer
         self.folder = self.explorer.folder
-        self.icons = getfn.get_application_icons("search")
+        self.icons = getfn.get_smartcode_icons("search")
         self.search_options_menu = FindOptions(self)
         self.query_history = []
         self._work_count = 0
@@ -142,18 +183,30 @@ class Searcher(QFrame):
     
         self.init_ui()
         
-    
     def init_ui(self):
         self.layout=QVBoxLayout(self)
         self.setLayout(self.layout)
         self.layout.setAlignment(Qt.AlignTop)
         
-        self.input_find=InputHistory(self)
+        self.panel_layout = QHBoxLayout()
+        self.panel_layout.setContentsMargins(0,0,0,0)
+
+        sub_layout = QGridLayout()
+        sub_layout.setContentsMargins(2,2,2,2)
+
+        self.finder = FindPanel(self)
+        self.replacer = ReplacePanel(self)
+
+        self.btn_mode = QPushButton(self)
+        self.btn_mode.setIcon(self.icons.get_icon("collapse"))
+        self.btn_mode.setObjectName("btn-expand-collapse")
+        self.btn_mode.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        self.btn_mode.clicked.connect(self.change_mode)
+        
+        self.input_find=self.finder.input_edit
         self.input_find.returnPressed.connect(lambda: self.do_search(0))
-        self.input_find.setPlaceholderText("Find")
-        self.input_replace=InputHistory(self)
+        self.input_replace=self.replacer.input_edit
         self.input_replace.returnPressed.connect(lambda: self.do_search(1))
-        self.input_replace.setPlaceholderText("Replace")
 
         self.display=Results(self)
 
@@ -183,29 +236,35 @@ class Searcher(QFrame):
         self.header_layout.setAlignment(self.animation, Qt.AlignLeft)
         
         self.layout.addLayout(self.header_layout)
-        self.layout.addWidget(self.input_find)
-        self.layout.addWidget(self.input_replace)
+        self.layout.addLayout(self.panel_layout)
+        sub_layout.addWidget(self.finder, 1,1)
+        sub_layout.addWidget(self.replacer, 2,1)
+        self.panel_layout.addWidget(self.btn_mode)
+        self.panel_layout.addLayout(sub_layout)
         self.layout.addWidget(self.display)
 
     def do_search(self, event):
         find_text=self.input_find.text()
-        replace_text=self.input_replace.text()
-        self.folder = self.explorer.folder
-        
-        if self.folder is None:
-            self.display.show_open_folder()
-            return
-        
-        args={
-            "cs":self.search_options_menu.case_sensitive.isChecked(),
-            "ss":self.search_options_menu.search_subdirs.isChecked(),
-            "bf":self.search_options_menu.break_on_find.isChecked()
-        }
-        
-        self.on_searched.emit(find_text, replace_text, self.folder, event, args)
-        self.query_history.append(find_text)
-        self._work_count += 1
-        self.animation.play(True)
+        if self.validate(find_text):
+            replace_text=self.input_replace.text()
+            self.folder = self.explorer.folder
+            
+            if self.folder is None:
+                self.display.show_open_folder()
+                return
+            
+            args={
+                "cs":self.search_options_menu.case_sensitive.isChecked(),
+                "ss":self.search_options_menu.search_subdirs.isChecked(),
+                "bf":self.search_options_menu.break_on_find.isChecked()
+            }
+            
+            self.on_searched.emit(find_text, replace_text, self.folder, event, args)
+            self.query_history.append(find_text)
+            self._work_count += 1
+            self.animation.play(True)
+        else:
+            self.display.show_text("<p style='color:yellow'>Please Type Some Thing to Search</p>")        
     
     def display_results(self, results, query):
         if results:
@@ -221,7 +280,22 @@ class Searcher(QFrame):
         self.engine.run()
     
     def validate(self, text):        
-        if text.replace(" ", "") == "":
+        if len(text.replace(" ", "")) <=0:
             return False
 
         return True
+    
+    def change_mode(self):
+        self.replacer.setVisible( not self.replacer.isVisible())
+        if self.replacer.isVisible():
+            self.expand()
+        else:
+            self.collapse()
+    
+    def expand(self):
+        self.btn_mode.setIcon(self.icons.get_icon("expand"))
+        self.replacer.setVisible(True)
+    
+    def collapse(self):
+        self.btn_mode.setIcon(self.icons.get_icon("collapse"))
+        self.replacer.setVisible(False)

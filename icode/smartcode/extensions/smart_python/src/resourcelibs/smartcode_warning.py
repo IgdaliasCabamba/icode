@@ -52,7 +52,7 @@ class CodeWarnings(QFrame):
         super().__init__(parent)
         self.setObjectName("ilab-warnings")
         self.parent=parent
-        self.icons = getfn.get_application_icons("code")
+        self.icons = getfn.get_smartcode_icons("code")
         
         self.thread_lab = QThread(self)
         

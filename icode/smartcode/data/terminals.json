@@ -1,0 +1,6 @@
+{
+    "bash":"/bin/bash",
+    "icon":null,
+    "run_on_startup":true,
+    "name":"Bash"
+}

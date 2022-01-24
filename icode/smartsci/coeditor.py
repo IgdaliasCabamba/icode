@@ -13,6 +13,7 @@ class CoEditor(QObject):
     on_change_lexer = pyqtSignal(object)
     on_highlight_text = pyqtSignal(int, int, int, int, int, bool)
     on_highlight_selection = pyqtSignal(int, int, int, int, int, bool)
+    on_clear_indicator_range = pyqtSignal(int, int, int, int, int, bool)
 
     def __init__(self, parent):
         super().__init__()
@@ -25,8 +26,8 @@ class CoEditor(QObject):
         self.editor.idocument.on_changed.connect(self.make_headers)
         self.editor.on_text_changed.connect(self.text_changed)
         self.editor.on_saved.connect(self.editor_saved)
-        self.editor.on_selected.connect(self.highlight_selection)
-        self.editor.on_cursor_pos_chnaged.connect(self.highlight_match)
+        self.editor.on_highlight_sel_request.connect(self.highlight_selection)
+        self.editor.on_highlight_match_request.connect(self.highlight_match)
         self.editor.file_watcher.on_file_deleted.connect(self.file_deleted)
         self.editor.file_watcher.on_file_modified.connect(self.file_modified)
         self.editor.on_word_added.connect(lambda: self.timer.singleShot(500, self.set_lexer_from_code))
@@ -91,14 +92,14 @@ class CoEditor(QObject):
             if lexer is not None and callable(lexer):
                 self.on_change_lexer.emit(lexer)
     
-    def highlight_selection(self, row_from:int, col_from:int, row_to:int, col_to:int):
-        if self.editor.hasSelectedText():
+    def highlight_selection(self, row_from:int, col_from:int, row_to:int, col_to:int, has_selection:bool, selected_text:str, lines:int, all_text:str):
+        if has_selection:
             ocurs = {}
-            sel_text = self.editor.selectedText()
+            text = all_text.splitlines()
+            val = re.escape(selected_text)
             try:
-                for line in range(self.editor.lines()):
-                    val = re.escape(sel_text)
-                    for match in re.finditer(val, self.editor.text(line)):
+                for line in range(len(text)):
+                    for match in re.finditer(val, text[line]):
                         if not line in ocurs.keys():
                             ocurs[line]=[]
                         ocurs[line].append(match.span())
@@ -112,17 +113,17 @@ class CoEditor(QObject):
             except Exception as e:
                 print("highlight_selection Exception: ", e)
     
-    def highlight_match(self, index, line):
-        if not self.editor.hasSelectedText():
-            word = self.editor.wordAtLineIndex(index, line)
+    def highlight_match(self, index:int, line:int, has_selection:bool, word:str, lines:int, all_text:str):
+        if not has_selection:
             if self.last_highlight_word != word:
-                self.editor.clear_indicator_range(0, 0, -1, -1, 3, False)
+                self.on_clear_indicator_range.emit(0, 0, -1, -1, 3, False)
                 ocurs = {}
+                text = all_text.splitlines()
                 self.last_highlight_word = word
+                val = re.escape(word)
                 try:
-                    for line in range(self.editor.lines()):
-                        val = re.escape(word)
-                        for match in re.finditer(val, self.editor.text(line)):
+                    for line in range(len(text)):
+                        for match in re.finditer(val, text[line]):
                             if not line in ocurs.keys():
                                 ocurs[line]=[]
                             ocurs[line].append(match.span())

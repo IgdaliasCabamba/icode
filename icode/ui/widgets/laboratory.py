@@ -38,8 +38,6 @@ class Table(QFrame):
         self.layout.addLayout(self.header_layout)
         self.layout.addWidget(self.scroll)
         
-        self.setStyleSheet("QFrame{background:#333; border-radius:5px}")
-        
         self.drop_shadow = QGraphicsDropShadowEffect(self)
         self.drop_shadow.setBlurRadius(10)
         self.drop_shadow.setColor(QColor(30,30,30))
