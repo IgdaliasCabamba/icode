@@ -2,7 +2,7 @@ build/builder/
 dist/
 get-icode/
 smartenv/
-icode/.cache/
+icode/src/.cache/
 tests/local/
 **/__pycache__
 *.pyi

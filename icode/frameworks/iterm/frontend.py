@@ -4,7 +4,7 @@
 # Added a simple toolbar and customizable color_map
 
 from PyQt5.QtWidgets import QApplication, QWidget, QGraphicsItem, QScrollBar, QShortcut
-from PyQt5.QtCore import  QRect, Qt, pyqtSignal
+from PyQt5.QtCore import QRect, Qt, pyqtSignal
 from PyQt5.QtGui import (QClipboard, QPainter, QFont, QBrush, QColor,
                             QPen, QContextMenuEvent)
 from .backend import Session
@@ -186,7 +186,7 @@ class TerminalWidget(QWidget):
                 return
             if self._timer_id is not None:
                 self.killTimer(self._timer_id)
-            self._timer_id = self.startTimer(250)
+            self._timer_id = self.startTimer(0)#250
             self.update_screen()
         except Exception as e:
             print("TerminalWidget: ", e)
@@ -200,7 +200,7 @@ class TerminalWidget(QWidget):
             # -> but less load on main app which results in better responsiveness
             if self._timer_id is not None:
                 self.killTimer(self._timer_id)
-            self._timer_id = self.startTimer(750)
+            self._timer_id = self.startTimer(500)#750
         except Exception as e:
             print("TerminalWidget: ", e)
 
@@ -266,8 +266,9 @@ class TerminalWidget(QWidget):
                     self._dirty = True
                     if old_cursor_row != self._cursor_row:
                         self.store_history(old_cursor_row, old_screen)
-                    
-            if self.hasFocus():
+            
+            # TODO: Nice cursor animations
+            if not self.hasFocus():
                 self._blink = not self._blink
             self.update()
         except Exception as e:
@@ -333,10 +334,11 @@ class TerminalWidget(QWidget):
 
     def _paint_cursor(self, painter):
         try:
-            if self._blink:
+            if self._blink and not self.hasFocus():
                 color = "#aaa"
             else:
                 color = "#fff"
+                
             if painter != None:
                 painter.setPen(QPen(QColor(color)))
                 painter.drawRect(self._cursor_rect)
