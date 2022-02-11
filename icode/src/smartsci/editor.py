@@ -17,6 +17,7 @@ from .minimap import MiniMapBox
 from .editor_core import IFile
 from functions import filefn, getfn
 from . import iconsts
+import settings
 
 class FileMenu(QMenu):
     def __init__(self, parent=None):
@@ -316,10 +317,11 @@ class EditorView(QFrame):
     
     def save_file(self):
         if self.file is None:
-            home_dir = str(Path.home())
+            home_dir = settings.ipwd()
             file = QFileDialog.getSaveFileName(None, 'Open file', home_dir)
             if file[0]:
                 self.file=file[0]
+                settings.icwd(Path(self.file).parent)
                 
                 filefn.write_to_file(self.editor_main.text(), file[0])
                 self.editor_main.save_file(self.file)

@@ -101,6 +101,6 @@ class TabBrowser(QFrame):
         self.change_tab(self.tab_list.item(self.index))
         
     def run(self):
-        self.index = 0
-        self.tab_list.setCurrentRow(0)
+        self.index = 1
+        self.tab_list.setCurrentRow(1)
         self.tab_list.setFocus()

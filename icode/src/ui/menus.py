@@ -25,7 +25,6 @@ from data import note_file_path
 
 from functools import partial
 
-
 class ToolsMenu(QMenu):
     """
     ToolsMenu: a menu for external tools menus, such as extensions menus

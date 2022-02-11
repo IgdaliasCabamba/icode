@@ -1,6 +1,7 @@
 import pickle
 import os
 from .system import BASE_PATH, SYS_SEP, make_dirs
+import pathlib
 
 icode_data_file = f'{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}memory{SYS_SEP}data.idt'
 need_dirs = [os.path.join(BASE_PATH, 'smartcode', 'data'), os.path.join(BASE_PATH, 'smartcode', 'data', 'memory')]
@@ -15,7 +16,7 @@ MEMORY = {
     "icode":{
         "editing":[],
         "paths":{
-            "current-path":""
+            "current-path":str(pathlib.Path.home())
         }
     }
 }

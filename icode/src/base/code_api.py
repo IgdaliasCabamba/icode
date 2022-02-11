@@ -21,16 +21,10 @@ class Code:
         return None
     
     def get_terminals(self):
-        path = settings.get_terminals()
-        if path:
-            try:
-                return ijson.load(
-                    f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{ext}{SYS_SEP}src{SYS_SEP}{palette}.json"
-                )
-            except Exception as e:
-                print(e)
-
-        return None
+        return ijson.load(settings.TERMINALS_FILE)
+    
+    def get_terminal_emulators(self):
+        return ijson.load(settings.TERMINALS_FILE)["emulators"]
 
     def get_terminal_color_map(self):
         data = self.get_theme_in_json()
@@ -56,6 +50,5 @@ class Code:
         data = self.get_theme_in_json()
         if data:
             return data["editor-styles"]
-    
 
 icode_api = Code()

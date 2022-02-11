@@ -1,3 +1,9 @@
+import faulthandler
+import sys
+
+sys.dont_write_bytecode = True
+faulthandler.enable()
+
 from base import *
 
 class App(Base):
@@ -116,8 +122,7 @@ class App(Base):
                     editor_cache.save_to_list(str(file_with_path), "files")
                 
         else:
-            if self.files_opened:
-                home_dir = ""
+            home_dir = settings.ipwd()
             files = QFileDialog.getOpenFileNames(None, 'Open File', home_dir)
             if files[0]:
                 for file in files[0]:
@@ -139,6 +144,7 @@ class App(Base):
             if not self.ui.side_left.explorer.isVisible():
                 self.tool_bar.explorer.trigger()
             self.status_bar.open_folder_mode()
+            settings.icwd(folder)
     
     def explorer_path_changed(self, folder_with_path):
         editor_cache.save_to_list(str(folder_with_path), "folders")
@@ -150,6 +156,7 @@ class App(Base):
                 self.tool_bar.explorer.trigger()
             self.status_bar.open_folder_mode()
         self.on_commit_app.emit(0)
+        settings.icwd(folder)
     
     def open_repository(self, repository=None):
         if not isinstance(repository, str) or repository is None:
@@ -305,6 +312,8 @@ class App(Base):
         file = widget.file
         if file is not None and isinstance(file, str):
             settings.icwd(pathlib.Path(file).parent)
+            print("DONE")
+        print("OK")
 
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""

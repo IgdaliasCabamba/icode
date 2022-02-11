@@ -1,3 +1,4 @@
+from .version import version
 from .april_brain import *
 from .april_templates import *
 from .icache import *

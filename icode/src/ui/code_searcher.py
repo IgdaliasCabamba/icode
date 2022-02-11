@@ -115,6 +115,7 @@ class FindReplace(QFrame):
     def __init__(self, view, parent):
         super().__init__(parent)
         self.setObjectName("finder_replacer")
+        self.mode = 0
         self.view = view
         self.parent = parent
         self.find_query = ""
@@ -225,11 +226,13 @@ class FindReplace(QFrame):
         self.setVisible(True)
         self.collapse()
         self.animate()
+        self.mode = 1
     
     def do_replace(self):
         self.setVisible(True)
         self.expand()
         self.animate()
+        self.mode = 2
     
     def find(self, query=None):
         self.find_query = query
@@ -279,7 +282,8 @@ class FindReplace(QFrame):
         self.setVisible(False)
     
     def close_all(self):
-        self.hide_all()        
+        self.hide_all()
+        self.mode = 0       
     
     def regex_mode(self):
         self.options.case_sensitive.setChecked(False)
@@ -309,10 +313,11 @@ class FindReplace(QFrame):
         self.wrap = state
     
     def animate(self):
-        x = self.geometry().x()
-        y = self.geometry().y()
-        self.anim.setStartValue(QPoint(x, -y))
-        self.anim.setEasingCurve(QEasingCurve.InOutCubic)
-        self.anim.setEndValue(QPoint(x, y))
-        self.anim.setDuration(600)
-        self.anim.start()
+        if self.mode == 0:
+            x = self.geometry().x()
+            y = self.geometry().y()
+            self.anim.setStartValue(QPoint(x, -y))
+            self.anim.setEasingCurve(QEasingCurve.InOutCubic)
+            self.anim.setEndValue(QPoint(x, y))
+            self.anim.setDuration(600)
+            self.anim.start()

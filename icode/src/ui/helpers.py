@@ -2,7 +2,7 @@ from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
-                             QFileDialog, QFrame, QHBoxLayout, QLabel,
+                             QFrame, QHBoxLayout, QLabel,
                              QMainWindow, QMenu, QMenuBar, QPushButton,
                              QScrollArea, QSizePolicy, QSplitter,
                              QStackedLayout, QStatusBar, QTabWidget, QToolBar,
@@ -99,14 +99,14 @@ class StatusBar(QStatusBar):
         self.end_line_seq = QPushButton(self.eol_box)
         self.eol_visiblity = QPushButton(self.eol_box)
         self.eol_visiblity.setIcon(self.icons.get_icon("show"))
-        self.eol_box.set_button_primary(self.end_line_seq)
-        self.eol_box.set_button_secondary(self.eol_visiblity)
+        self.eol_box.set_widget_primary(self.end_line_seq)
+        self.eol_box.set_widget_secondary(self.eol_visiblity)
         
         self.indentation_box = QGithubButton(self)
         self.indentation = QPushButton(self.indentation_box)
         self.indentation_size = QPushButton(self.indentation_box)
-        self.indentation_box.set_button_primary(self.indentation)
-        self.indentation_box.set_button_secondary(self.indentation_size)
+        self.indentation_box.set_widget_primary(self.indentation)
+        self.indentation_box.set_widget_secondary(self.indentation_size)
         
         self.line_col = QPushButton(self)
 

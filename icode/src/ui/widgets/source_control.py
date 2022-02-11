@@ -105,7 +105,8 @@ class CloneRepo(QFrame):
             self.focus_out.emit(self, event)
     
     def clone_repo(self, url:str):
-        folder = QFileDialog.getExistingDirectory(None, 'Select Location', "~")
+        home_dir = settings.ipwd()
+        folder = QFileDialog.getExistingDirectory(None, 'Select Location', home_dir)
         if folder is not None:
             self.on_clone_request.emit(url, folder)
         

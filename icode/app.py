@@ -1,10 +1,13 @@
 import faulthandler
 import sys
-import os
-import importlib
 
 sys.dont_write_bytecode = True
 faulthandler.enable()
+
+import os
+import importlib
+from bin import update, upgrade, utils
+
 src_path = "src"
 root_path = os.getcwd()
 
@@ -25,4 +28,7 @@ sys.path.append(root_path)
 sys.path.append(main_path)
 
 main = importlib.import_module("main", "src")
+
+update.make(utils.kernel_version, utils.bin_version, utils.frameworks_version, main.version)
+
 main.run()

@@ -9,6 +9,7 @@ import pathlib
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
 from .igui import HeaderPushButton, IStandardItem, HeaderLabel, InputHistory
 import re
+import settings
 
 class GitMenu(QMenu):
     def __init__(self, parent):
@@ -23,6 +24,9 @@ class GitMenu(QMenu):
         self.addAction(self.add_all)
         self.commit = QAction("Commit", self)
         self.addAction(self.commit)
+        self.addSeparator()
+        self.see_diff = QAction("Diff", self)
+        self.addAction(self.see_diff)
 
 class CommitTree(QTreeView):
     
@@ -257,6 +261,13 @@ class IGit(QFrame):
         self.set_page(0)
         try:
             self.repository = repository
+            
+            t0=repository.revparse_single('HEAD')
+            t1=repository.revparse_single('HEAD^')
+
+            out=repository.diff(t0,t1)
+            #print(dir(out))
+            
             self.btn_clone_repository.setVisible(False)
             self.btn_open_repository.setVisible(False)
             self.input_commit_log.setVisible(True)
@@ -268,7 +279,8 @@ class IGit(QFrame):
     
     def open_repository(self, repo_path = None):
         if repo_path is None:
-            path = QFileDialog.getExistingDirectory(None, 'Open Folder', "", QFileDialog.ShowDirsOnly)
+            home_dir = settings.ipwd()
+            path = QFileDialog.getExistingDirectory(None, 'Open Folder', home_dir, QFileDialog.ShowDirsOnly)
             
             if path == "":
                 return None
@@ -307,6 +319,7 @@ class IGit(QFrame):
         if page_id == 0:
             self.status_tree.setVisible(True)
             self.commit_tree.setVisible(False)
+        
         elif page_id == 1:
             self.status_tree.setVisible(False)
             self.commit_tree.setVisible(True)

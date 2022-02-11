@@ -36,6 +36,7 @@ class EditorBase(ImageScintilla):
         self.icons = getfn.get_smartcode_icons("smartsci")
         self.keyboard = KeyBoard(self)
         self.editable = True
+        self.info_image = False
         self.build()
     
     def build(self) -> None:
@@ -98,6 +99,8 @@ class EditorBase(ImageScintilla):
         else:
             self.editable = True
             self.setReadOnly(False)
+            if self.info_image:
+                self.delete_image(self.info_image)
         
     def update_editor_ui(self) -> None:
         self.scrollbar.update_position()
@@ -479,14 +482,12 @@ class Editor(EditorBase):
             self.update_lines()
             self.define_lexer()
         except FileNotFoundError as e:
-            self.info_image = self.add_image("/home/igdalias/SmartCode/icode/src/smartcode/icons/icode-icons/nf.svg", (20, 5),  (500, 500))
+            self.info_image = self.add_image(self.icons.get_path("no-data"), (20, 5),  (500, 500))
             self.set_mode(0)
             
-            message = "The file dont exist, recreate by clik here"
+            message = "File does not exist try to recreate or recover here"
             self.insertAt(message, 0, 0)
             self.add_indicator_range(0, len(message)-4, 0, len(message), 4, False)
-            #self.delete_image(self.info_image)
-            
     
     def save_file(self, file_path:str):
         self.file_path = file_path
@@ -497,7 +498,7 @@ class Editor(EditorBase):
         self.update_document()
         
     def _margin_left_clicked(self, margin_nr:int, line_nr:int, state:object) -> None:
-        if self.markersAtLine(line_nr) == 0:        
+        if self.markersAtLine(line_nr) == 0:
             self.markerAdd(line_nr, self.mark1)
         else:
             self.markerDelete(line_nr)
@@ -574,7 +575,10 @@ class Editor(EditorBase):
     def display_tooltip(self, data:dict) -> None:
         QToolTip.showText(self.mapToGlobal(data["pos"]), data["text"], self.viewport())
     
-    def display_annotation(self, row:int, note:Union[str, list], type:int, event_to_remove:str):
+    def display_annotation(self, row:int, note:Union[str, list], type:int, event_to_remove:str, priority:int=0):
+        if priority > 0 and len(self.annotation(row)) > 0:
+            return
+        
         if isinstance(note, list) or isinstance(note, QsciStyledText):
             self.annotate(row, note)
         else:

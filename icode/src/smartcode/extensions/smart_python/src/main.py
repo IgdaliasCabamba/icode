@@ -11,15 +11,29 @@ export(path="smart_python.src.resourcelibs.jedi")
 
 from smartpy_core import *
 from smartpy_consoles import *
-from smartcode_navigator import *
+from smartpy_navigator import *
 from smartpy_envs import *
 from smartpy_api import *
-from smartcode_tree import *
-from smartcode_doctor import *
-from smartcode_analyze import *
-from smart_refactor import *
-from smartcode_warning import *
+from smartpy_tree import *
+from smartpy_doctor import *
+from smartpy_analyze import *
+from smartpy_refactor import *
+from smartpy_warning import *
 from smartpy_debug import *
+from smartpy_server import *
+
+lang_server_data = run_lang_server()
+SERVER_NAME = "smartpy_language_server"
+
+py_server = langserver.icenter.run_new_server(
+    lang_server_data["run"],
+    {   "name":SERVER_NAME,
+        "mode":"TCP4",
+        "service":lang_server_data["service"],
+        "host":lang_server_data["host"],
+        "port":lang_server_data["port"],
+    }
+)
 
 class Init(ModelApp):
     
@@ -29,8 +43,9 @@ class Init(ModelApp):
         super().__init__(data, "smart_python")
         self.build_ui()
         self.listen_slots()
-        self._current_env = None
         self.api_envs_list = envs_api.python_envs
+        self._current_env = self.api_envs_list[0]
+        print(self._current_env)
         self.objects_mem = {
             "editors":[],
             "autocompleters":[],
@@ -161,8 +176,9 @@ class Init(ModelApp):
         space.add_table(table6, 4, 0, 4, 2)
     
     def add_env(self, env:object) -> None:
-        self.api_envs_list.append(env)
+        envs_api.add_env(env.executable)
         self.python_envs.set_envs(self.api_envs_list)
+        self.api_envs_list = envs_api.python_envs
         
     def set_current_env(self, env: object) -> None:
         self._current_env = env
@@ -247,12 +263,14 @@ class Init(ModelApp):
         editor.lexer().setFoldComments(True)
         editor.lexer().setFoldQuotes(True)
         
-        autocomplete=PyntellisenseCompletions(editor)        
-        ide_utils=Pyntellisense(editor)
-        live_tips=PyntellisenseEdition(editor)
+        autocomplete=PyntellisenseCompletions(editor, SERVER_NAME)
+        ide_utils=Pyntellisense(editor, SERVER_NAME)
+        live_tips=PyntellisenseEdition(editor, SERVER_NAME)
         
+        autocomplete.on_error.connect(self.repair)
         autocomplete.on_load_completions.connect(self.add_completions)
         autocomplete.on_show_help.connect(self.show_help)
+        autocomplete.on_remove_dead_completion.connect(self.remove_completion_entry)
         live_tips.on_annotation_request.connect(editor.display_annotation)
         live_tips.on_add_indicator_range.connect(editor.add_indicator_range)
         live_tips.on_clear_indicator_range.connect(editor.clear_indicator_range)
@@ -277,14 +295,36 @@ class Init(ModelApp):
             self.objects_mem["live_tipers"].append(live_tips)
         
         editor.set_ide_mode(True)
+        autocomplete.set_env(self._current_env)
+        live_tips.set_env(self._current_env)
+        ide_utils.set_env(self._current_env)
     
+    def repair(self, broke, editor, error):
+        if isinstance(broke, PyntellisenseCompletions):
+            
+            autocomplete = PyntellisenseCompletions(editor, SERVER_NAME)
+            autocomplete.on_error.connect(self.repair)
+            autocomplete.on_load_completions.connect(self.add_completions)
+            autocomplete.on_show_help.connect(self.show_help)
+            editor.add_code_completer(autocomplete, autocomplete.run)
+            
+            broke.stop()  
+            
     def show_help(self, editor, row, suggestion):
-        editor.display_annotation(row, suggestion, 210, "on_lines_changed")
+        #editor.display_annotation(row, suggestion, 210, "on_lines_changed", 1)
+        pass
     
     def add_completions(self, lexer_api, completions):
         if not sip.isdeleted(lexer_api):
             for completion in completions:
                 lexer_api.add(completion)
+            lexer_api.prepare()
+    
+    def remove_completion_entry(self, lexer_api, completions):
+        if not sip.isdeleted(lexer_api):
+            print(completion)
+            for completion in completions:
+                lexer_api.remove(completion)
             lexer_api.prepare()
             
     def run_code_warnings(self):

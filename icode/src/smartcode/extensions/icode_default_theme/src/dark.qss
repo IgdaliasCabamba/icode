@@ -47,23 +47,23 @@ QComboBox:item::selected{
 	background: rgba(18, 63, 115, 180)
 }
 
-QComboButton:hover {
+QGithubButton:hover {
 	background-color: rgba(180, 180, 180, 40);
 	border-radius:4px;
 }
-QComboButton QComboBox:!editable,
-QComboButton QComboBox::drop-down:editable,
-QComboButton QComboBox:!editable:on, 
-QComboButton QComboBox::drop-down:editable:on,
-QComboButton QComboBox QAbstractItemView,
-QComboButton QComboBox:editable,
-QComboButton QComboBox {
+QGithubButton QComboBox:!editable,
+QGithubButton QComboBox::drop-down:editable,
+QGithubButton QComboBox:!editable:on, 
+QGithubButton QComboBox::drop-down:editable:on,
+QGithubButton QComboBox QAbstractItemView,
+QGithubButton QComboBox:editable,
+QGithubButton QComboBox {
 	min-width:0;
 	color:#ffffff;
 	background-color: transparent;
 	border: none;
 }
-QComboButton QComboBox:hover {
+QGithubButton QComboBox:hover {
 	background-color: rgba(180, 180, 180, 70);
 	border-radius:4px;
 }

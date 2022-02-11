@@ -72,6 +72,7 @@
     "tab-corner-add":"app/add.png",
     "tab-corner-remove":"app/trash.png",
     "tab-corner-clear":"app/erase.png",
+	"tab-corner-pick":"app/expand-arrow.png",
     "tab-corner-start":"app/play.png",
     "tab-corner-stop":"app/stop.png",
     "tab-corner-restart":"app/restart.png",
@@ -150,6 +151,7 @@
 	"smartsci-expand-arrow":"code/expand-arrow.png",
 	"smartsci-forward":"code/forward.png",
     "smartsci-debug-mark":"code/breakpoint.png",
+	"smartsci-no-data":"images/not_found.svg"
 	
 	//brands logos
 	"logo-windows":"app/windows.png",

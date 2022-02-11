@@ -130,6 +130,37 @@
 			"bg":"#1e1e1e",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
+		"ButtonPrimary":{
+			"fg":"#de506a",
+			"bg":"#1e1e1e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ButtonSecondary":{
+			"fg":"#50de99",
+			"bg":"#1e1e1e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ButtonDisabled":{
+			"fg":"#999999",
+			"bg":"#1e1e1e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationButtonPrimary":{
+			"fg":"#de506a",
+			"bg":"#1e1e1e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationButtonSecondary":{
+			"fg":"#50de99",
+			"bg":"#1e1e1e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationButtonDisabled":{
+			"fg":"#999999",
+			"bg":"#1e1e1e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
 		// ALL
 		"DefaultColor":"#ffffff",
 		"DefaultPaper":"#1e1e1e",

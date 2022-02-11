@@ -20,6 +20,8 @@ from base.icache import *
 from base.isetting import *
 from base.font_loader import *
 from base.code_api import *
+import settings
+import langserver
 
 
 def make_dirs(dirs:list):

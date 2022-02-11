@@ -45,7 +45,7 @@ class TerminalWidget(QWidget):
 
     session_closed = pyqtSignal()
 
-    def __init__(self, parent=None, command:str="/bin/bash",
+    def __init__(self, parent=None, command:str=None,
                 color_map:dict = DEFAULT_COLOR_MAP, font_name:str="Monospace",
                 font_size:int=16) -> None:
         super().__init__(parent)
@@ -102,11 +102,12 @@ class TerminalWidget(QWidget):
         self._dirty = False
         self._blink = False
         self._clipboard = QApplication.clipboard()
-        self.last_char_to_commit = ""
+        #self.last_char_to_commit = ""
+        self.command = command
         
         QApplication.instance().lastWindowClosed.connect(Session.close_all)
-        if command:
-            self.execute()
+        if command is not None and command:
+            self.execute(self.command)
             
     def on_scrollbar_value_changed(self, value:int) -> None:
         try:
@@ -116,7 +117,7 @@ class TerminalWidget(QWidget):
         except Exception as e:
             print("TerminalWidget: ", e)
 
-    def execute(self, command:str="/bin/bash") -> object:
+    def execute(self, command:str) -> object:
         try:
             self._session = Session()
             self._session.start(command)

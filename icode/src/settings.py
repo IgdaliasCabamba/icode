@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
 import frameworks.jedit2 as ijson
 from base.system import BASE_PATH, SYS_SEP
-from data import qt_cache, DATA_FILE
+from data import qt_cache, DATA_FILE, TERMINALS_FILE
 import base.consts as iconsts
 from base.memory import *
 
@@ -220,7 +220,7 @@ def restore_window(window, app, getfn):
     save_memory()
 
 def icwd(new_dir):
-    MEMORY["icode"]["paths"]["current-path"] = new_dir
+    MEMORY["icode"]["paths"]["current-path"] = str(new_dir)
 
 def ipwd():
     return MEMORY["icode"]["paths"]["current-path"]

@@ -7,38 +7,13 @@ from functions import getfn
 
 from .root import CategoryMixin, TabData
 
-class QComboButton(QFrame):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.setObjectName("combo-button")
-        self.parent = parent
-        self.btn = None
-        self.box = None
-        self.size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.size_policy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        self.setSizePolicy(self.size_policy)
-        
-        self.layout = QHBoxLayout(self)
-        self.layout.setSpacing(0)
-        self.layout.setContentsMargins(0,0,0,0)
-        self.setLayout(self.layout)
-    
-    def set_button(self, btn):
-        self.btn = btn
-        self.layout.addWidget(self.btn)
-    
-    def set_combobox(self, box):
-        self.box = box
-        self.box.setSizePolicy(self.size_policy2)
-        self.layout.addWidget(self.box)
-
 class QGithubButton(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("github-button")
         self.parent = parent
-        self.btn_primary = None
-        self.btn_secondary = None
+        self.widget_primary = None
+        self.widget_secondary = None
         self.size_policy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.setSizePolicy(self.size_policy)
         
@@ -46,14 +21,14 @@ class QGithubButton(QFrame):
         self.layout.setSpacing(0)
         self.layout.setContentsMargins(0,0,0,0)
         self.setLayout(self.layout)
-    
-    def set_button_primary(self, btn):
-        self.btn_primary = btn
-        self.layout.addWidget(self.btn_primary)
-    
-    def set_button_secondary(self, btn):
-        self.btn_secondary = btn
-        self.layout.addWidget(self.btn_secondary)
+        
+    def set_widget_primary(self, btn):
+        self.widget_primary = btn
+        self.layout.addWidget(self.widget_primary)
+        
+    def set_widget_secondary(self, btn):
+        self.widget_secondary = btn
+        self.layout.addWidget(self.widget_secondary)
 
 class Animator(QLabel):
     def __init__(self, parent, animation=None) -> None:

@@ -9,13 +9,19 @@ class ILexer:
     Tip = 204
     Done = 205
     Label = 206
-    AnnotationTodo = 207
-    AnnotationWarning = 208
-    AnnotationBug = 209
-    AnnotationDisabled = 210
-    AnnotationTip = 211
-    AnnotationDone = 212
-    AnnotationLabel = 213
+    ButtonPrimary = 207
+    ButtonSecondary = 208
+    ButtonDisabled = 209
+    AnnotationTodo = 210
+    AnnotationWarning = 211
+    AnnotationBug = 212
+    AnnotationDisabled = 213
+    AnnotationTip = 214
+    AnnotationDone = 215
+    AnnotationLabel = 216
+    AnnotationButtonPrimary = 217
+    AnnotationButtonSecondary = 218
+    AnnotationButtonDisabled = 219
 
 from .lexerc import *
 from .lexercpp import *

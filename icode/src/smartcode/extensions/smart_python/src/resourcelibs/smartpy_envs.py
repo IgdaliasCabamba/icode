@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 from ui.igui import EditorListWidgetItem, InputHistory
 from smartpy_api import python_api
 from functions import getfn
+from extension_api import settings
 
 class Screen1(QFrame):
     def __init__(self, parent):
@@ -189,7 +190,8 @@ class PythonEnvs(QFrame):
         self.hide()
     
     def pick_env(self):
-        env_path = QFileDialog.getOpenFileName(None, 'Select Interpreter', "")
+        home_dir = settings.ipwd()
+        env_path = QFileDialog.getOpenFileName(None, 'Select Interpreter', home_dir)
         self.enter_env(env_path[0])
     
     def enter_env(self, env_path):

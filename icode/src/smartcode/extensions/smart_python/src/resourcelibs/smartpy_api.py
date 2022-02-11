@@ -16,7 +16,7 @@ import autopep8
 import isort
 from yapf.yapflib import yapf_api
 import jedi
-import smart_ide_core as ide
+import smartpy_ide_core as ide
 from radon.complexity import cc_rank, cc_visit
 from radon.raw import analyze
 
@@ -45,17 +45,20 @@ class EnvApi(QSettings):
         env = self.create_env(env_path)
         if env:
             self._python_envs.append(env)
+        self.save_envs()
     
     @property
-    def python_envs(self):
+    def python_envs(self) -> list:
         return self._python_envs
     
     def clear_envs(self) -> list:
         self._python_envs.clear()
         return self._python_envs
     
-    def remove_env(self, pos:int) -> list:
-        self._python_envs.pop(pos)
+    def remove_env(self, name:str) -> list:
+        for env in self._python_envs:
+            if env.executable == name:
+                self._python_envs.remove(env)
         return self._python_envs
 
     def create_env(self, env_path):
@@ -65,19 +68,19 @@ class EnvApi(QSettings):
             print(e)
         return False
     
-    def restore_envs(self):
+    def restore_envs(self) -> None:
         return self.value("envs")
     
-    def save_env(self, env_path):
+    def save_envs(self) -> None:
         key = "envs"
-        if env_path is not None:            
-            base_list = self.value(key)
-            if hasattr(base_list, "append"):
-                base_list.append(value)
-                self.setValue(key, base_list)
-            else:
-                self.setValue(key, [value])
-            return None
+        base_list = self.value(key)
+        if not isinstance(base_list, list):
+            base_list = []
+                
+        for env in self._python_envs:
+            base_list.append(env.executable)
+                
+        self.setValue(key, base_list)
 
 class PythonApi:
     def __init__(self):
