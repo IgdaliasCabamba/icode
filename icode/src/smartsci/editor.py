@@ -16,7 +16,7 @@ from .codesmart import Editor, EditorBase
 from .minimap import MiniMapBox
 from .editor_core import IFile
 from functions import filefn, getfn
-from . import iconsts
+from . import iconsts, get_unicon
 import settings
 
 class FileMenu(QMenu):
@@ -237,6 +237,7 @@ class EditorView(QFrame):
         widget = False
         type = False
         icon = False
+        last = False
         keys = data.keys()
         if "text" in keys:
             text = data["text"]
@@ -246,9 +247,13 @@ class EditorView(QFrame):
             type = data["type"]
         if "icon" in keys:
             icon = data["icon"]
+        if "last" in keys:
+            last = data["last"]
         
         if widget:
             if text:
+                if not last:
+                    text += f" {get_unicon('fae', 'bigger')}"
                 widget.setText(text)
             if icon:
                 widget.setIcon(icon)

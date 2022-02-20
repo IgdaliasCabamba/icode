@@ -322,7 +322,7 @@ class Init(ModelApp):
     
     def remove_completion_entry(self, lexer_api, completions):
         if not sip.isdeleted(lexer_api):
-            print(completion)
+            print(completions)
             for completion in completions:
                 lexer_api.remove(completion)
             lexer_api.prepare()

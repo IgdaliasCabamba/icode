@@ -236,17 +236,16 @@ class SideRight(QFrame):
 
         self.spaces_manager = QStackedLayout()
         self.spaces_manager.setContentsMargins(0, 0, 0, 0)
-
-        self.btn_add_note = QPushButton("/")
         self.btn_add_label = QPushButton("+")
+        self.btn_view_hide_labels = QPushButton("Show/Hide")
         
         self.notes = Notes(self, note_file_path)
         self.todos = Todos(self)
 
         self.table_notes = Table(self, "Notes")
-        self.table_notes.add_header_widget(self.btn_add_note)
 
         self.table_todos = Table(self, "Labels")
+        self.table_todos.add_header_widget(self.btn_view_hide_labels)
         self.table_todos.add_header_widget(self.btn_add_label)
 
         self.table_notes.add_widget(self.notes)

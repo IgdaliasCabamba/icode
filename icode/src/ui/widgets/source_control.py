@@ -15,6 +15,7 @@ import pygit2 as pygit
 import re
 import os
 from typing import Union
+import settings
 
 REGEX = re.compile(r"((https|http)(://[_a-zA-Z0-9-]*.[_a-zA-Z0-9-]*/[_a-zA-Z0-9-]*)/([-_a-zA-Z0-9-]*.git))")
 group_number = 4

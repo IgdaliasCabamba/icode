@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
                              QMainWindow, QMenu, QMenuBar, QPushButton,
                              QScrollArea, QSizePolicy, QSplitter,
                              QStackedLayout, QStatusBar, QTabWidget, QToolBar,
-                             QToolButton, QVBoxLayout, QWidget, qApp)
+                             QToolButton, QVBoxLayout, QWidget, qApp, QActionGroup)
 
 from functions import getfn
 from .assistant import AprilFace
@@ -24,6 +24,36 @@ from .igui import HeaderPushButton
 from data import note_file_path
 
 from functools import partial
+
+class IndentSizeMenu(QMenu):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent=parent)
+        self.parent = parent
+        self.build()
+
+    def build(self) -> None:
+        self.setTitle("")
+        self.group = QActionGroup(self)
+        
+        self.min = QAction("2", self)
+        self.min.setCheckable(True)
+        self.normal = QAction("4", self)
+        self.normal.setCheckable(True)
+        self.normal.setChecked(True)
+        self.large = QAction("8", self)
+        self.large.setCheckable(True)
+        self.toolarge = QAction("16", self)
+        self.toolarge.setCheckable(True)
+        
+        self.group.addAction(self.min)
+        self.group.addAction(self.normal)
+        self.group.addAction(self.large)
+        self.group.addAction(self.toolarge)
+        
+        self.addAction(self.min)
+        self.addAction(self.normal)
+        self.addAction(self.large)
+        self.addAction(self.toolarge)
 
 class ToolsMenu(QMenu):
     """

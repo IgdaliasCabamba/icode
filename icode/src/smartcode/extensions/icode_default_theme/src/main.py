@@ -10,7 +10,14 @@ class Init(ModelUi):
         "contrast":"#3c3c3c",
         "contrast2":"#333333"
     }
-    light_vars = {}
+    light_vars = {
+        "mid":"#f3f3f3",
+        "base":"#ffffff",
+        "border":"#007acc",
+        "base2":"#f3f3f3",
+        "contrast":"#dddddd",
+        "contrast2":"#eeeeee"
+    }
     
     def __init__(self, data) -> None:
         super().__init__(data, "icode_default_theme")        
@@ -57,26 +64,26 @@ class Init(ModelUi):
     
     def editor_light(self, editor):
         editor.setColor(QColor(255,255,255))
-        editor.setPaper(QColor(30, 30, 30))
+        editor.setPaper(QColor(255, 255, 255))
         editor.minimap.setColor(QColor(255,255,255))
-        editor.minimap.setPaper(QColor(30, 30, 30))
-        editor.setCaretForegroundColor(QColor(221, 221, 221))
+        editor.minimap.setPaper(QColor(255, 255, 255))
+        editor.setCaretForegroundColor(QColor(21, 21, 21))
         editor.setCaretLineBackgroundColor(QColor(180,180,180,70))
         editor.setIndentationGuidesBackgroundColor(QColor(0, 162, 232))
         editor.setIndentationGuidesForegroundColor(QColor(0, 162, 232))
-        editor.setMarginsBackgroundColor(QColor(30, 30, 30))
+        editor.setMarginsBackgroundColor(QColor(255, 255, 255))
         editor.setMarginsForegroundColor(QColor(170, 170, 170))
-        editor.setFoldMarginColors(QColor("#1e1e1e"), QColor("#1e1e1e"))
-        editor.setMarkerBackgroundColor(QColor(30, 30, 30), -1)
+        editor.setFoldMarginColors(QColor("#ffffff"), QColor("#ffffff"))
+        editor.setMarkerBackgroundColor(QColor(255, 255, 255), -1)
         editor.setMarkerForegroundColor(QColor(200, 200, 200), -1)
         editor.setSelectionBackgroundColor(QColor(0, 162, 232, 70))
-        editor.setSelectionForegroundColor(QColor("#ffffff"))
+        editor.setSelectionForegroundColor(QColor("#000000"))
         editor.setMatchedBraceBackgroundColor(QColor(0, 162, 232))
         editor.setMatchedBraceForegroundColor(QColor(255,255,255))
-        editor.setWhitespaceBackgroundColor(QColor("#1e1e1e"))
+        editor.setWhitespaceBackgroundColor(QColor("#ffffff"))
         editor.setWhitespaceForegroundColor(QColor("#999999"))
-        editor.setCallTipsBackgroundColor(QColor("#2a2a2a"))
-        editor.setCallTipsForegroundColor(QColor("#eeeeee"))
+        editor.setCallTipsBackgroundColor(QColor("#eaeaea"))
+        editor.setCallTipsForegroundColor(QColor("#111111"))
         editor.setCallTipsHighlightColor(QColor("#c683f2"))
 
 

@@ -10,6 +10,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor
 from .igui import HeaderPushButton, IStandardItem, HeaderLabel, InputHistory
 import re
 import settings
+from base.char_utils import get_unicon
 
 class GitMenu(QMenu):
     def __init__(self, parent):
@@ -110,41 +111,42 @@ class StatusTree(QTreeView):
             self.repo_header.setCheckable(False)
             self.model.appendRow(self.repo_header)
             
-            self.unmodified = IStandardItem(self.icons.get_icon("unmodified"), '•UNMODIFIED', None, None, 0)
+            self.unmodified = IStandardItem(self.icons.get_icon("unmodified"), 'UNMODIFIED ' + get_unicon("dev", "git"), None, None, 0)
             self.unmodified.setCheckable(False)
             self.unmodified.setForeground(QColor(63, 242, 105, 180))
             self.model.appendRow(self.unmodified)
             
-            self.modified = IStandardItem(self.icons.get_icon("modified"), '•MODIFIED', None, None, 0)
+            self.modified = IStandardItem(self.icons.get_icon("modified"), 'MODIFIED ' + get_unicon("dev", "git"), None, None, 0)
             self.modified.setCheckable(False)
             self.modified.setForeground(QColor(212, 242, 63, 180))
             self.model.appendRow(self.modified)
             
-            self.added = IStandardItem(self.icons.get_icon("added"), '•ADDED', None, None, 0)
+            self.added = IStandardItem(self.icons.get_icon("added"), 'ADDED ' + get_unicon("dev", "git"), None, None, 0)
             self.added.setCheckable(False)
             self.model.appendRow(self.added)
             
-            self.deleted = IStandardItem(self.icons.get_icon("deleted"), '•DELETED', None, None, 0)
+            self.deleted = IStandardItem(self.icons.get_icon("deleted"), 'DELETED ' + get_unicon("dev", "git"), None, None, 0)
             self.deleted.setCheckable(False)
+            self.deleted.setForeground(QColor(242, 63, 87, 180))
             self.model.appendRow(self.deleted)
             
-            self.renamed = IStandardItem(self.icons.get_icon("renamed"), '•RENAMED', None, None, 0)
+            self.renamed = IStandardItem(self.icons.get_icon("renamed"), 'RENAMED ' + get_unicon("dev", "git"), None, None, 0)
             self.renamed.setCheckable(False)
             self.model.appendRow(self.renamed)
             
-            self.copied = IStandardItem(self.icons.get_icon("copied"), '•COPIED', None, None, 0)
+            self.copied = IStandardItem(self.icons.get_icon("copied"), 'COPIED ' + get_unicon("dev", "git"), None, None, 0)
             self.copied.setCheckable(False)
             self.model.appendRow(self.copied)
             
-            self.updated_but_unmerged = IStandardItem(self.icons.get_icon("updated_unmerged"), '•UPDATED BUT UNMERGED', None, None, 0)
+            self.updated_but_unmerged = IStandardItem(self.icons.get_icon("updated_unmerged"), 'UPDATED BUT UNMERGED ' + get_unicon("dev", "git"), None, None, 0)
             self.updated_but_unmerged.setCheckable(False)
             self.model.appendRow(self.updated_but_unmerged)
             
-            self.untracked = IStandardItem(self.icons.get_icon("untracked"), '•UNTRACKED', None, None, 0)
+            self.untracked = IStandardItem(self.icons.get_icon("untracked"), 'UNTRACKED ' + get_unicon("dev", "git"), None, None, 0)
             self.untracked.setCheckable(False)
             self.model.appendRow(self.untracked)
             
-            self.ignored = IStandardItem(self.icons.get_icon("ignored"), '•IGNORED FILES', None, None, 0)
+            self.ignored = IStandardItem(self.icons.get_icon("ignored"), 'IGNORED FILES ' + get_unicon("dev", "git"), None, None, 0)
             self.ignored.setCheckable(False)
             self.model.appendRow(self.ignored)
             
@@ -172,6 +174,7 @@ class StatusTree(QTreeView):
                 
                 elif value in {512, 513, 514}:
                     self.deleted.appendRow(row)
+                    row.setForeground(QColor(242, 63, 87))
                     total_count += 1
                 
                 elif value == 16384:
@@ -325,4 +328,4 @@ class IGit(QFrame):
             self.commit_tree.setVisible(True)
     
     def update_headers(self, total, _, __):
-        self.lbl_total.setText(f"<p><img src='{self.icons.get_path('file')}' width='16' height='16'>{str(total)}</p>")
+        self.lbl_total.setText(f"<p><span style='font-size:15pt'>{get_unicon('dev', 'git')}</span> {str(total)}</p>")

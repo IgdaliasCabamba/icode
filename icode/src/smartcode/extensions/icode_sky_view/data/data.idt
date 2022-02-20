@@ -1,4 +1,4 @@
 [General]
-auto=true
+auto=false
 hide=false
-show=false
+show=true

@@ -102,7 +102,6 @@ class TerminalWidget(QWidget):
         self._dirty = False
         self._blink = False
         self._clipboard = QApplication.clipboard()
-        #self.last_char_to_commit = ""
         self.command = command
         
         QApplication.instance().lastWindowClosed.connect(Session.close_all)
@@ -618,14 +617,6 @@ class TerminalWidget(QWidget):
             
             text=event.commitString()
             self.send(text.encode("utf-8"))
-            
-            #if len(text) > 0:
-                #if len(event.preeditString()) == 0:
-                    #self.send(self.last_char_to_commit.encode("utf-8"))
-                    #self.last_char_to_commit = ""
-                    
-                #else:
-                    #self.last_char_to_commit = event.preeditString()
             
         except Exception as e:
             print("TerminalWidget: ", e)

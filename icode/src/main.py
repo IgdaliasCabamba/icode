@@ -88,14 +88,16 @@ class App(Base):
 
         editor = EditorView(self, self.ui, notebook)
         editor.on_tab_content_changed.connect(self.update_tab)
-        index = notebook.add_tab_and_get_index(
-            editor, f"# Untituled-{self.tabs_count}")
+        index = notebook.add_tab_and_get_index(editor, f"# Untituled-{self.tabs_count}")
         self.configure_tab(index, f"# Untituled-{self.tabs_count}", "new")
         self.on_new_editor.emit(editor)
         self.on_commit_app.emit(1)
     
-    def new_editor_notebook(self, direction):
-        pass
+    def new_editor_notebook(self, orientation):
+        print(orientation)
+        self.tabs_count += 1
+        notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
+        self.new_file(notebook)
 
     def open_file_from_search(self, file, query):
         if file != None:
@@ -455,7 +457,7 @@ class App(Base):
             self.update_components()
             self.save_status()
 
-def run(args=False) -> None:
+def run(args=None, call_out=None) -> None:
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     qapp = QApplication(sys.argv)
@@ -468,6 +470,8 @@ def run(args=False) -> None:
     exe = MainWindow(None, styler.windows_style, qapp)
     app = App(exe, qapp)
     settings.restore_window(exe, app, getfn)
+    if call_out is not None:
+        qapp.lastWindowClosed.connect(call_out)
     exe.show_()
     sys.exit(qapp.exec_())
 

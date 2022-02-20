@@ -1,12 +1,1202 @@
 {
-    "widget-colors":{
-        "*":{
-            "fg":"#111111",
-            "bg":"#c5c5c6"
-        }
-    },
-    "lexer-colors":{
-        "keyword":"#c683f2"
-    }
-    
+	"global-styles":{
+		"drop-shadow-color":"#222222"
+	},
+	"generic-lexer-styles":{
+		"keyword":["#c683f2"],
+		"operator":["#f283a8"],
+		"brace":["darkGray"],
+		"class-function":["#f7ffad"],
+		"string":["#d9715d"],
+		"string2":["#d9715d"],
+		"comment":["#69b562"],
+		"self":["#469afa"],
+		"numbers":["#afe37b"],
+		"inprompt":["darkBlue"],
+		"outprompt":["darkRed"]
+	},
+	"terminal-styles":{
+		"fg":{	
+			"0": "#000",
+			"1": "#b00",
+			"2": "#3bb860",
+			"3": "#eded53",
+			"4": "#698cf5",
+			"5": "#f760f7",
+			"6": "#6af7f7",
+			"7": "#bbb",
+			"8": "#666",
+			"9": "#ff5454",
+			"10": "#72f772",
+			"11": "#f7f74f",
+			"12": "#5784f7",
+			"13": "#f760f7",
+			"14": "#000",
+			"15": "#000"
+		},
+		"bg":{
+			"0": "transparent",
+			"1": "transparent",
+			"2": "transparent",
+			"3": "transparent",
+			"4": "transparent",
+			"5": "transparent",
+			"6": "transparent",
+			"7": "transparent",
+			"12": "transparent",
+			"14": "transparent",
+			"15": "#111"
+		}
+	},
+	"editor-styles":{
+		"color":"#000000",
+		"paper":"#ffffff",
+		"margin-background":"#ffffff",
+		"margin-foreround":"#aaaaaa",
+		"selection-foreground":"#ffffff",
+		"whitespace-background":"#ffffff",
+		"whitespace-foreground":"#999999"		
+	},
+	
+	"lexer-styles":{
+		// ILexer		
+		"Bug":{
+			"fg":"#de506a",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Todo":{
+			"fg":"#5086de",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Warning":{
+			"fg":"#d9de50",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Disabled":{
+			"fg":"#999999",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Done":{
+			"fg":"#63de50",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Tip":{
+			"fg":"#50de99",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Label":{
+			"fg":"#de5099",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationBug":{
+			"fg":"#de506a",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationTodo":{
+			"fg":"#5086de",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationWarning":{
+			"fg":"#d9de50",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationDisabled":{
+			"fg":"#999999",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationDone":{
+			"fg":"#63de50",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationTip":{
+			"fg":"#50de99",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationLabel":{
+			"fg":"#de5099",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ButtonPrimary":{
+			"fg":"#de506a",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ButtonSecondary":{
+			"fg":"#50de99",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ButtonDisabled":{
+			"fg":"#999999",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationButtonPrimary":{
+			"fg":"#de506a",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationButtonSecondary":{
+			"fg":"#50de99",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AnnotationButtonDisabled":{
+			"fg":"#999999",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
+		// ALL
+		"DefaultColor":"#000000",
+		"DefaultPaper":"#ffffff",
+		"DefaultFont":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false},
+
+		"Default":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
+		//Python; Java; JavaScript; C; C++; PHP
+		"Comment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Number":{
+			"fg":"#afe37b",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"DoubleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SingleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Keyword":{
+			"fg":"#c683f2",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TripleSingleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TripleDoubleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ClassName":{
+			"fg":"#499c44",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"FunctionMethodName":{
+			"fg":"#f7ffad",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Operator":{
+			"fg":"#f283a8",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Identifier":{
+			"fg":"#222222",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CommentBlock":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UnclosedString":{
+			"fg":"red",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HighlightedIdentifier":{
+			"fg":"#469afa",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Decorator":{
+			"fg":"#457340",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"DoubleQuotedFString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SingleQuotedFString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TripleSingleQuotedFString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TripleDoubleQuotedFString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Property":{
+			"fg":"#469afa",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"KeywordLD":{
+			"fg":"#c683f2",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"IRI":{
+			"fg":"#f7ffad",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"IRICompact":{
+			"fg":"#f7ffad",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"EscapeSequence":{
+			"fg":"#f7ffad",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Error":{
+			"fg":"yellow",
+			"bg":"red",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"String":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CommentDoc":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UUID":{
+			"fg":"#222222",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PreProcessor":{
+			"fg":"#c683f2",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VerbatimString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Regex":{
+			"fg":"#a372cf",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CommentLine":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CommentLineDoc":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"KeywordSet2":{
+			"fg":"#c683f2",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CommentDocKeyword":{
+			"fg":"#4e8749",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CommentDocKeywordError":{
+			"fg":"#769e60",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"GlobalClass":{
+			"fg":"#499c44",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"RawString":{
+			"fg":"#b3503d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TripleQuotedVerbatimString":{
+			"fg":"#b3503d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HashQuotedString":{
+			"fg":"#b3503d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PreProcessorComment":{
+			"fg":"#4e8749",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PreProcessorCommentLineDoc":{
+			"fg":"#4e8749",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UserLiteral":{
+			"fg":"#a372cf",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TaskMarker":{
+			"fg":"#dde087",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
+		// HTML; CSS; XML
+		"Tag":{
+			"fg":"#469afa",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UnknowTag":{
+			"fg":"#469afa",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Attribute":{
+			"fg":"#c683f2",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UnknownAttribute":{
+			"fg":"#c683f2",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HTMLNumber":{
+			"fg":"#afe37b",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HTMLDoubleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HTMLSingleQuotedString ":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"OtherInTag":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HTMLComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Entity":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"XMLTagEnd":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"XMLStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"XMLEnd":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Script":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPAtStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CDATA":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HTMLValue":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPXCComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLCommand":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLParameter":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLDoubleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLSingleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLError":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLSpecial":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLEntity":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLParameterComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SGMLBlockDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptCommentLine":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptCommentDoc":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptWord":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptDoubleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptSingleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptSymbol":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptUnclosedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"JavaScriptRegex":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptCommentLine":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptCommentDoc":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptWord":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptDoubleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptSingleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptSymbol":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptUnclosedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPJavaScriptRegex":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptIdentifier":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"VBScriptUnclosedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptIdentifier":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPVBScriptUnclosedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonDoubleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonSingleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonTripleSingleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonTripleDoubleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonClassName":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonFunctionMethodName":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonOperator":{
+			"fg":"#f283a8",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PythonIdentifier":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonStart":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonDoubleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonSingleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonTripleSingleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonTripleDoubleQuotedString":{
+			"fg":"#d9715d",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonClassName":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonFunctionMethodName":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonOperator":{
+			"fg":"#f283a8",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ASPPythonIdentifier":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPDefault":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPDoubleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPSingleQuotedString":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPKeyword":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPNumber":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPVariable":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPComment":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPCommentLine":{
+			"fg":"#69b562",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPDoubleQuotedVariable":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PHPOperator":{
+			"fg":"#f283a8",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ClassSelector":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PseudoClass":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UnknownPseudoClass":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CSS1Property":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UnknownProperty":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Value":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"IDSelector":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Important":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"AtRule":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CSS2Property":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CSS3Property":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"PseudoElement":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ExtendedCSSProperty":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ExtendedPseudoClass":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ExtendedPseudoElement":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"MediaRule":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Variable":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
+		//Bash; Batch
+		
+		"Scalar":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ParameterExpansion":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Backticks":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HereDocumentDelimiter":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SingleQuotedHereDocument":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Label":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HideCommandChar":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"ExternalCommand":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
+		// MarkDown
+		"Special":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"StrongEmphasisAsterisks":{
+			"fg":"#222222",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"StrongEmphasisUnderscores":{
+			"fg":"#222222",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"EmphasisAsterisks":{
+			"fg":"#222222",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"EmphasisUnderscores":{
+			"fg":"#222222",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Header1":{
+			"fg":"#eeeeee",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":16.5, "bold":true}
+		},
+		"Header2":{
+			"fg":"#eeeeee",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":15.5, "bold":true}
+		},
+		"Header3":{
+			"fg":"#eeeeee",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":14.5, "bold":true}
+		},
+		"Header4":{
+			"fg":"#eeeeee",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":13.5, "bold":true}
+		},
+		"Header5":{
+			"fg":"#eeeeee",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":12.5, "bold":true}
+		},
+		"Header6":{
+			"fg":"#eeeeee",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":11.5, "bold":true}
+		},
+		"Prechar":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"UnorderedListItem":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"OrderedListItem":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"BlockQuote":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"StrikeOut":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"HorizontalRule":{
+			"fg":"#ffffff",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"Link":{
+			"fg":"#87ace0",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CodeBackticks":{
+			"fg":"#e394c2",
+			"bg":"#2e2e2e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CodeDoubleBackticks":{
+			"fg":"#e394c2",
+			"bg":"#2e2e2e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"CodeBlock":{
+			"fg":"#e394c2",
+			"bg":"#2e2e2e",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		
+		// YAML
+		"Reference":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"DocumentDelimiter":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"TextBlockMarker":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+		"SyntaxErrorMarker":{
+			"fg":"",
+			"bg":"#ffffff",
+			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
+		},
+	}
+	
 }

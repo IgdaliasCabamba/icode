@@ -1,14 +1,18 @@
 from PyQt5.QtCore import pyqtSignal, QObject
 import wikipedia
-
+import json
 import re
 
 from .april_templates import *
 from .april import ask
 
+def get_query_clean(query:str):
+    text = re.sub(r"-[hjn]","",query, 1)
+    return text
+
 class Brain(QObject):
     
-    on_answered=pyqtSignal(str, int)
+    on_answered=pyqtSignal(object, int)
 
     def __init__(self, parent):
         super().__init__()
@@ -19,8 +23,7 @@ class Brain(QObject):
     
     def format_answer(self, value, code=False, line_width=80):
         if code:
-            # TODO > format code
-            return value
+            return json.loads(value)
 
         return value
 
@@ -40,7 +43,7 @@ class Brain(QObject):
 
         return text
     
-    def get_answer(self, text):
+    def get_answer(self, text, settings):
         if text.startswith("wiki:"):
             answer=self.get_wiki_answer(self.remove_commands(text, "wiki:"))
             type = 0
@@ -48,8 +51,12 @@ class Brain(QObject):
             answer=self.get_april_answer(self.remove_commands(text, "april:"))
             type = 1
         elif text.startswith("code:"):
-            answer=self.get_code_snippets(self.remove_commands(text, "code:"))
-            type = 2
+            try:
+                answer=self.get_code_snippets(self.remove_commands(text, "code:"), settings)
+                type = 2
+            except Exception as e:
+                answer = error_msg + str(e)
+                type = -1
         else:
             if not " " in text and not "_" in text:
                 answer=self.get_wiki_answer(text)
@@ -60,13 +67,13 @@ class Brain(QObject):
                 type = 1
             
             else:
-                answer=self.get_code_snippets(text)
-                type = 2
-        
-        # TODO > Return multiples answers
-        #answers=ask(args)
-        #for answer in answers:
-            #self.on_answered.emit(answer)
+                try:
+                    answer=self.get_code_snippets(text, settings)
+                    type = 2
+                    
+                except Exception as e:
+                    answer = error_msg + str(e)
+                    type = -1
 
         self.on_answered.emit(answer, type)
 
@@ -94,11 +101,13 @@ class Brain(QObject):
         except Exception as e:
             return str(e)
 
-    def get_code_snippets(self, text):
-        query=text.split()
-        args={"query":query}
-        try:
-            answer=ask(args)
-            return self.format_answer(answer, code=True)
-        except Exception as e:
-            return error_msg + str(e)
+    def get_code_snippets(self, text, settings):
+        query=text
+        args={
+            "query":get_query_clean(query),
+            "json_output":True,
+            "num_answers":settings["answer_count"],
+            "all":settings["all_response"]
+        }
+        answer=ask(args)
+        return self.format_answer(answer, code=True)

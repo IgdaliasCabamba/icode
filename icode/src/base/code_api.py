@@ -20,6 +20,9 @@ class Code:
 
         return None
     
+    def get_editor_settings(self):
+        return ijson.load(settings.EDITOR_FILE)
+    
     def get_terminals(self):
         return ijson.load(settings.TERMINALS_FILE)
     

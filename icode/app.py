@@ -6,7 +6,7 @@ faulthandler.enable()
 
 import os
 import importlib
-from bin import update, upgrade, utils
+from bin import utils
 
 src_path = "src"
 root_path = os.getcwd()
@@ -17,6 +17,9 @@ if getattr(sys, 'frozen', False):
 else:
     root_path = os.getcwd()
     os.chdir(root_path+os.sep+src_path)
+
+def finish():
+    print(utils.kernel_version, utils.bin_version, utils.frameworks_version, main.version)
     
 main_path = os.getcwd()
 
@@ -29,6 +32,4 @@ sys.path.append(main_path)
 
 main = importlib.import_module("main", "src")
 
-update.make(utils.kernel_version, utils.bin_version, utils.frameworks_version, main.version)
-
-main.run()
+main.run(None, finish)

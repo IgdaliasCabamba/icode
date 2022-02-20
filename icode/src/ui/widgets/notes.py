@@ -1,12 +1,13 @@
 from PyQt5.QtWidgets import (
     QFrame, QListWidget, QVBoxLayout,
     QPushButton, QLabel,
-    QTextEdit, QHBoxLayout, QListWidget, QStackedLayout, QFormLayout, QLineEdit
+    QTextEdit, QHBoxLayout, QListWidget, QStackedLayout, QFormLayout, QLineEdit, QComboBox
     )
     
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from pathlib import Path
 from ..igui import ScrollLabel, IListWidgetItem
+from base import memory
 
 class NotesCore(QObject):
     def __init__(self, editor):
@@ -33,8 +34,6 @@ class Notes(QFrame):
         self.layout.setContentsMargins(2,2,2,2)
         self.setLayout(self.layout)
         
-        self.title_input = QLineEdit(self)
-        
         self.text_editor = QTextEdit(self)
         self.thread_text=QThread(self)
         self.text_object=NotesCore(self)
@@ -45,7 +44,6 @@ class Notes(QFrame):
         self.text_editor.setAcceptRichText(True)
         self.text_editor.setPlaceholderText("Make your notes here, they are automatically saved")
         
-        self.layout.addWidget(self.title_input)
         self.layout.addWidget(self.text_editor)
         
         if self.file.exists():
@@ -62,7 +60,7 @@ class Todos(QFrame):
         super().__init__()
         self.setObjectName("ilabs-notes")
         self.parent=parent
-        self.parent.btn_add_label.clicked.connect(lambda: self.add_todo("MEU rabo", "YEE", 0))
+        self.parent.btn_add_label.clicked.connect(self.go_screen_new)
         self.build()
     
     def build(self):
@@ -70,18 +68,43 @@ class Todos(QFrame):
         self.layout.setContentsMargins(0,0,0,0)
         self.setLayout(self.layout)
         
-        self.form_layout = QFormLayout()
-        self.screen_new = QFrame()
+        self.screen_new = QFrame(self)
+        self.input_title = QLineEdit(self)
+        self.input_desc = QTextEdit(self)
+        self.input_desc.setPlaceholderText("Enter description here")
+        self.input_line = QLineEdit(self)
+        self.label_picker = QComboBox(self)
+        self.btn_save = QPushButton("Save", self)
+        self.label_picker.addItems(["Bug","Todo"])
+        
+        self.form_layout = QFormLayout(self.screen_new)
         self.screen_new.setLayout(self.form_layout)
-        self.form_layout.addRow("Text:", QLineEdit())
+        
+        self.form_layout.addRow("Title:", self.input_title)
+        self.form_layout.addRow("Line:", self.input_line)
+        self.form_layout.addRow("Label:", self.label_picker)
+        self.form_layout.addRow("Desc:", self.input_desc)
+        self.form_layout.addRow("", self.btn_save)
         
         self.display=QListWidget(self)
         self.layout.addWidget(self.display)
         self.layout.addWidget(self.screen_new)
         
+        self.btn_save.clicked.connect(self.new_todo)
+        
     def add_todo(self, text, tooltip, type):
+        self.layout.setCurrentWidget(self.display)
+        self.display.addItem(IListWidgetItem(None, text, tooltip))
+    
+    def go_screen_new(self):
         self.layout.setCurrentWidget(self.screen_new)
-        #self.display.addItem(IListWidgetItem(None, text, tooltip))
+    
+    def new_todo(self):
+        desc = self.input_desc.toPlainText()
+        line = self.input_line.text()
+        title = self.input_title.text()
+        label = self.label_picker.currentText()
+        self.add_todo(title, desc, label)
         
         
 class Produtivity(QFrame):

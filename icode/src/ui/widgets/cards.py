@@ -54,12 +54,12 @@ class CardLab(QFrame):
 
 
 class CardApril(QFrame):
-    def __init__(self, parent, text:str, title:str, pos:int, type:str="text"):
+    def __init__(self, parent, content:object, title:str, pos:int, type:str="text"):
         super().__init__(parent)
         self.icons = getfn.get_smartcode_icons("*")
         self.setObjectName("card-message")
         self.parent=parent
-        self.text=text
+        self.content=content
         self.title=title
         self.type = type
         self.pos=pos
@@ -108,12 +108,22 @@ class CardApril(QFrame):
         value= wrapper.fill(text=self.text)
 
         pc.copy(value)
+    
+    @property
+    def text(self) -> str:    
+        return self.content
 
     @property
     def msg_size(self):
+        min_height = 2
+        if self.type == "code":
+            min_height = 4
+            
         text_height=len(self.text.splitlines())
-        text_height = text_height if text_height >= 2 else 2
+        text_height = text_height if text_height >= min_height else min_height
         size = text_height*self.editor.font().pointSize()*2
+        if size > 600:
+            return 600
         return size
     
     def get_text_editor(self):
@@ -121,8 +131,12 @@ class CardApril(QFrame):
             content=QTextEdit()
             content.setObjectName("msg")
             content.setText(self.text)
-            markdown=content.toMarkdown()
-            content.setMarkdown(markdown)
+            if self.pos == 0:
+                marked_text=content.toHtml()
+                content.setHtml(marked_text)
+            else:
+                marked_text=content.toMarkdown()
+                content.setMarkdown(marked_text)
             content.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
         elif self.type == "code":
@@ -140,5 +154,5 @@ class CardApril(QFrame):
                 editor.set_lexer(lexer)
             
             vbox.addWidget(editor)
-            
+            content.setStyleSheet(f"""background:{editor.paper().name()}; border:none""")
         return content

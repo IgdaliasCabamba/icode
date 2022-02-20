@@ -1,7 +1,0 @@
-{
-	"path":{
-		"rem-dirs":["iterm", "iterm>core", "iterm>foobar", "iterm>info"],
-		"rem-files":["iterm>__init__.py"]
-	},
-	"install":"new.tar.gz"
-}

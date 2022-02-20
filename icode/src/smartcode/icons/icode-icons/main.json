@@ -4,7 +4,10 @@
 	
     //menubar icons 
     "window-menubar-menu":"app/menu.png",
+	
+	//assistant icons
 	"assistant-loading":"animations/loading.gif",
+	"assistant-options":"app/expand-arrow.png",
 	
     //toolbar icons 
     "toolbar-explorer":"app/file.png",
@@ -186,4 +189,5 @@
 	"*-macos":"app/macos.png",
 	
 	"*-python":"languages/python.png",
+	"*-loading-animation":"animations/loading.gif",
 }

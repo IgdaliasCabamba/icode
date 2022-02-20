@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSignal, Qt
 from PyQt5.QtWidgets import QApplication
 
 from .system import *
@@ -26,6 +26,8 @@ class Core(object):
 
     def run(self) -> None:
         self.menu.file.new_file.triggered.connect(self.new_file)
+        self.menu.file.new_notebook_vertical.triggered.connect(lambda: self.new_editor_notebook(Qt.Vertical))
+        self.menu.file.new_notebook_horizontal.triggered.connect(lambda: self.new_editor_notebook(Qt.Horizontal))
         self.menu.file.open_file.triggered.connect(self.open_file)
         self.menu.file.save_file.triggered.connect(self.save_file)
         self.menu.file.save_all.triggered.connect(self.save_all)

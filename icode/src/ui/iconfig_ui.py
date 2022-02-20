@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QFrame, QVBoxLayout
 from functions import getfn
-import config
 
 class ConfigUi(QFrame):
     def __init__(self, parent):

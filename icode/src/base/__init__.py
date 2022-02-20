@@ -11,3 +11,4 @@ from .isetting import *
 from .styler import *
 from .system import *
 from .memory import *
+from .char_utils import *

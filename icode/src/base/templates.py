@@ -1,5 +1,6 @@
 from functions import getfn
 import pathlib
+from .char_utils import get_unicon
 
 icons=getfn.get_smartcode_icons("index")
 
@@ -112,19 +113,19 @@ def welcome_msg_left(files:list=[]):
     """
 
 def welcome_msg_right():
-   return """
-    <h3>Useful links</h3>
+   return f"""
+    <h3><nobr>Useful links</nobr></h3>
     <p>
-        <a href='#show-commands' style='text-decoration:none;'>Read The Docs</a>
+        <nobr><a href='#show-commands' style='text-decoration:none;'><span style="font-size:15pt">{ get_unicon("fa", "external_link")}</span> Read The Docs</a></nobr>
     </p>
     <p>
-        <a href='#show-commands' style='text-decoration:none;'>Get Started</a>
+        <nobr><a href='#show-commands' style='text-decoration:none;'><span style="font-size:15pt">{get_unicon("fa", "external_link")}</span> Get Started</nobr></a></nobr>
     </p>
     <p>
-        <a href='#show-commands' style='text-decoration:none;'>YouTube Chanel</a>
+        <nobr><a href='#show-commands' style='text-decoration:none;'><span style="font-size:15pt">{get_unicon("fa", "external_link")}</span> YouTube Chanel</a></nobr>
     </p>
     <p>
-        <a href='#show-commands' style='text-decoration:none;'>Tips and Tricks</a>
+        <nobr><a href='#show-commands' style='text-decoration:none;'><span style="font-size:15pt">{get_unicon("fa", "external_link")}</span> Tips and Tricks</a></nobr>
     </p>
     <br>
     """

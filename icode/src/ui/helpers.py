@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
                              QToolButton, QVBoxLayout, QWidget, qApp)
 from functions import getfn
 from .igui import QGithubButton
+from .menus import IndentSizeMenu
 
 class ToolBar(QToolBar):
     def __init__(self, parent) -> None:
@@ -87,6 +88,7 @@ class StatusBar(QStatusBar):
         self.icons = getfn.get_smartcode_icons("statusbar")
         self.setObjectName("status-bar")
         self.setProperty("folder_open", False)
+        self.indent_size_menu = IndentSizeMenu(self)
         self.init_ui()
 
     def init_ui(self) -> None:
@@ -105,6 +107,8 @@ class StatusBar(QStatusBar):
         self.indentation_box = QGithubButton(self)
         self.indentation = QPushButton(self.indentation_box)
         self.indentation_size = QPushButton(self.indentation_box)
+        self.indentation_size.setMenu(self.indent_size_menu)
+        self.indentation_size.clicked.connect(lambda: self.indentation_size.showMenu())
         self.indentation_box.set_widget_primary(self.indentation)
         self.indentation_box.set_widget_secondary(self.indentation_size)
         

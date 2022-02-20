@@ -18,6 +18,9 @@ MEMORY = {
         "paths":{
             "current-path":str(pathlib.Path.home())
         }
+    },
+    "dev":{
+        "tasks":[]
     }
 }
 

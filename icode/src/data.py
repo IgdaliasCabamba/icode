@@ -19,6 +19,7 @@ assistant_cache = CacheManager(
 
 DATA_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}settings.json"
 TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}terminals.json"
+EDITOR_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}editor.json"
 app_settings = DataManager(f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.idt")
 qt_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.idt")
 

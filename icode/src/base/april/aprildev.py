@@ -787,27 +787,6 @@ def command_line_runner():  # pylint: disable=too-many-return-statements,too-man
     sys.stdout.buffer.write(utf8_result)
 
 def ask(args):
-    """
-    args={
-        'query': [],
-        'pos': 1,
-        'num_answers': 1,
-        'all': False,
-        'link': False,
-        'color': False,
-        'explain': False,
-        #'clear_cache': False,
-        'json_output': False,
-        #'version': False,
-        'search_engine': None,
-        'save': False,
-        'view': False,
-        'remove': False,
-        'empty': False,
-        'sanity_check': False
-        }
-    """
-
     
     howdoi_session = requests.session()
 
@@ -824,7 +803,7 @@ def ask(args):
         args["all"]=False
     
     if not "link" in args:
-        args["link"]=False
+        args["link"]=True
 
     if not "color" in args:
         args["color"]=False
@@ -833,7 +812,7 @@ def ask(args):
         args["explain"]=False
 
     if not "json_output" in args:
-        args["json_output"]=False
+        args["json_output"]=True
 
     if not "search_engine" in args:
         args["search_engine"]=None
@@ -856,7 +835,3 @@ def ask(args):
     results = howdoi(args)
     howdoi_session.close()
     return results
-
-
-if __name__ == '__main__':
-    command_line_runner()

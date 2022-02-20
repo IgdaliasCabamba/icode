@@ -17,6 +17,7 @@ from .splitter import ISplitter
 from .index import Index, Welcome
 from .April import April
 from .notificator import Notificator
+from .iconfig_ui import ConfigUi
 from frameworks.icodeframe import iwindow
 from smartsci.editor import *
 
@@ -73,6 +74,8 @@ class MainWindow(QMainWindow):
 
         self._notebook = NoteBookEditor(self.isplitter, self)
         self._notebook.setVisible(True)
+        
+        #self.config_ui = ConfigUi(self)
 
         self.welcome = Welcome(self._notebook)
 
