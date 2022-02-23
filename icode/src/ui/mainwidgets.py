@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QPushButton,
                              QSizePolicy, QStackedLayout, QToolButton,
                              QVBoxLayout)
 
-from data import note_file_path
 from functions import getfn
 
 from .assistant import AprilFace
@@ -216,6 +215,7 @@ class SideRight(QFrame):
         super().__init__(parent)
         self.setObjectName("side-right")
         self.icons = getfn.get_smartcode_icons("ilab")
+        self.parent = parent
         self.spaces = {}
         self.init_ui()
 
@@ -239,7 +239,7 @@ class SideRight(QFrame):
         self.btn_add_label = QPushButton("+")
         self.btn_view_hide_labels = QPushButton("Show/Hide")
         
-        self.notes = Notes(self, note_file_path)
+        self.notes = Notes(self)
         self.todos = Todos(self)
 
         self.table_notes = Table(self, "Notes")

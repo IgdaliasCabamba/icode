@@ -22,15 +22,16 @@ TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}terminals.
 EDITOR_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}editor.json"
 app_settings = DataManager(f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.idt")
 qt_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.idt")
+labels_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"labs"+SYS_SEP+"labels.idt")
+
+note_file_path = f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}labs{SYS_SEP}notes.txt"
+note_file_path_obj = Path(note_file_path)
 
 cache_directorys = [
     os.path.join(BASE_PATH, '.cache', 'editors'),
     os.path.join(BASE_PATH, '.cache', 'labs'),
     os.path.join(BASE_PATH, '.cache', 'april'),
 ]
-
-note_file_path = f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}labs{SYS_SEP}notes.txt"
-note_file_path_obj = Path(note_file_path)
 
 
 def build_app_dirs():

@@ -41,6 +41,7 @@ class ToolBar(QToolBar):
 
         self.extensions = QAction(self.icons.get_icon("extension"), "", self)
         self.extensions.setCheckable(True)
+        self.extensions.setToolTip("Icode marketplace, extends your editor")
 
         self.april = QAction(self.icons.get_icon("april"), "", self)
         self.april.setCheckable(True)

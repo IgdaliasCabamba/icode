@@ -16,10 +16,4 @@
 
     //Extensions
     "extensions":["icode_sky_view", "smart_python"],
-	
-    //Terminals Settings
-	"iterminals":"terminals.json",
-	
-	//Editor Settings
-	"editor":"editor.json"
 }

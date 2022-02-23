@@ -7,10 +7,11 @@ faulthandler.enable()
 from base import *
 
 class App(Base):
-    def __init__(self, ui, qt_app) -> None:
+    def __init__(self, ui:object, qt_app:object) -> None:
         super().__init__(None)
         self.qt_app = qt_app
         self.ui = ui
+        self.ui.set_controller(self)
         self.last_files = editor_cache.get_all_from_list("files")
         self.last_folders = editor_cache.get_all_from_list("folders")
         self.last_folder = editor_cache.restore_from_list("folders", -1)
@@ -25,9 +26,8 @@ class App(Base):
         self.side_right = self.ui.side_right
         self.editor_widgets = self.ui.editor_widgets
         self.april = self.ui.april
-        self.ui.set_controller(self)
-        self.run()
-        self.run_api()
+        self.run() #running the server
+        self.run_api() 
         self.init_ui()
         self.load_plugins()
         self.build_components()
@@ -40,8 +40,7 @@ class App(Base):
         )
         self.configure_tab(index, f"# Get Started", "init")
         self.on_new_tab.emit(self.welcome_widget)
-
-    #TODO
+        
     def create_editor_from_file(self, code_file) -> object:
         editor = EditorView(self, self.ui, self.ui.notebook, code_file)
         editor.on_tab_content_changed.connect(self.update_tab)
@@ -94,7 +93,6 @@ class App(Base):
         self.on_commit_app.emit(1)
     
     def new_editor_notebook(self, orientation):
-        print(orientation)
         self.tabs_count += 1
         notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
         self.new_file(notebook)
@@ -230,7 +228,7 @@ class App(Base):
 
             if tab_type == "new":
                 self.ui.notebook.setTabIcon(
-                    index, getfn.get_qicon(getfn.get_icon_from_ext(".?icode")))
+                    index, getfn.get_qicon(getfn.get_icon_from_ext(None)))
 
             elif tab_type == "init":
                 self.ui.notebook.setTabIcon(index, getfn.get_app_icon())
@@ -304,18 +302,19 @@ class App(Base):
             f"{self.ui.notebook.tabText(index)} - Intelligent Code")
 
     def last_tab_closed(self):
+        """Display home screen when no have more tabs to show in any notebook"""
         self.toggle_main_views()
 
     def notebook_tab_closed(self, widget):
         pass    
     
     def set_current_editor(self, widget):
+        """Set the current editor and change icode current working dir in memory"""
         self.editor_widgets.set_current_editor(widget)
         file = widget.file
         if file is not None and isinstance(file, str):
             settings.icwd(pathlib.Path(file).parent)
-            print("DONE")
-        print("OK")
+            self.side_right.todos.set_data(widget, file)
 
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""
@@ -355,6 +354,7 @@ class App(Base):
                 self.status_bar.main_view()
 
     def tab_droped(self, event, notebook, tab_data):
+        """When tab is droped prepare notebook to recive the tab"""
         if event.source().count() <= 0:
             event.source().parent().hide()
 
@@ -366,9 +366,11 @@ class App(Base):
         self.notebook_tab_changed(index)
 
     def editor_changed(self, editor):
+        """Change to editor view code buttons is showing"""
         self.status_bar.editor_view()
 
     def tab_buffer_focused(self, buffer):
+        """Change to main view code buttons is hidden"""
         self.status_bar.main_view()
 
     def tabbar_last_closed(self, tw):

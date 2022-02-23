@@ -7,3 +7,4 @@ tests/local/
 **/__pycache__
 *.pyi
 *.pyc
+*.idt

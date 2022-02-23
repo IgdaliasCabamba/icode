@@ -7,7 +7,7 @@ class CacheManager(QSettings):
         self.file_path = file_with_path
         self.file_path_object = pathlib.Path(self.file_path)
         self.optimization = optimization
-        self.defaults = {"files":None, "folders":None, "repositorys":None}
+        self.defaults = {}
 
     def __create_data(self):
         for key, value in self.defaults.items():

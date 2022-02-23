@@ -19,6 +19,7 @@ import frameworks.jedit2 as ijson
 from base.extender import Ext
 from smartsci.lexers import *
 
+
 class IO:
     """
     IO functions to control tasks related to data input and output in the operating system
@@ -348,11 +349,11 @@ class Get:
         elif SYS_NAME.startswith("win"):
             font = QFont('Consolas', iconsts.APP_BASE_FONT_SIZE)
         return font
-    
+
     @staticmethod
     def get_python_version():
         return f"Python{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-    
+
     @staticmethod
     def get_line_indentation(line):
         indentation = 0
@@ -362,7 +363,7 @@ class Get:
             else:
                 break
         return indentation
-    
+
     @staticmethod
     def get_char_is_closable(col: int, text: str) -> bool:
         if len(text) > col + 1:
@@ -375,7 +376,7 @@ class Get:
     @staticmethod
     def get_text_without(text: str, old_char: str, new_char: str) -> str:
         return text.replace(old_char, new_char)
-    
+
     @staticmethod
     def get_expanded_tab_text(txt: str,
                               tabWidth: int = iconsts.EXPANDED_TAB_WIDTH
@@ -393,55 +394,61 @@ class Get:
             except:
                 out.append(line)
         return "\n".join(out)
-    
+
     @staticmethod
-    def get_tab_to_space(text, tab_count:int=1, space_count:int=4):
-        new_text = re.sub("\t{"+str(tab_count)+"}", " "*space_count, text)
+    def get_tab_to_space(text, tab_count: int = 1, space_count: int = 4):
+        new_text = re.sub("\t{" + str(tab_count) + "}", " " * space_count,
+                          text)
         return new_text
-    
+
     @staticmethod
-    def get_space_to_tab(text, space_count:int=4, tab_count:int=1):
-        new_text = re.sub("[ ]{"+str(space_count)+"}", "\t"*tab_count, text)
+    def get_space_to_tab(text, space_count: int = 4, tab_count: int = 1):
+        new_text = re.sub("[ ]{" + str(space_count) + "}", "\t" * tab_count,
+                          text)
         return new_text
-    
+
     @staticmethod
-    def get_space_to_tab_in_file(filename, space_count:int=4, tab_count:int=1):
+    def get_space_to_tab_in_file(filename,
+                                 space_count: int = 4,
+                                 tab_count: int = 1):
         with open(filename, "r") as file:
-            filedata=file.read()
+            filedata = file.read()
 
         filedata = self.space_to_tab(filedata, space_count, tab_count)
 
         with open(filename, "w") as file:
             file.write(filedata)
-        
+
         return filedata
-    
+
     @staticmethod
-    def get_tab_to_space_in_file(filename, tab_count:int=1, space_count:int=4):
+    def get_tab_to_space_in_file(filename,
+                                 tab_count: int = 1,
+                                 space_count: int = 4):
         with open(filename, "r") as file:
-            filedata=file.read()
+            filedata = file.read()
 
         filedata = self.tab_to_space(filedata, tab_count, space_count)
 
         with open(filename, "w") as file:
             file.write(filedata)
-        
+
         return filedata
 
     @staticmethod
     def get_code_with_identation(code: str, old_char: str,
                                  new_char: str) -> str:
         return re.sub(old_char, new_char, code)
-    
+
     @staticmethod
     def get_file_with_identation(file: str, old_char: str,
                                  new_char: str) -> str:
         pass
-    
+
     @staticmethod
     def get_list_without_duplicates(x):
         return list(dict.fromkeys(x))
-        
+
     @staticmethod
     def get_root_path():
         return BASE_PATH
@@ -449,7 +456,7 @@ class Get:
     def get_full_path(self, relative_path):
         full_path = self.get_root_path() + relative_path
         return self.get_correct_path(full_path)
-    
+
     @staticmethod
     def get_selection_from_item_data(editor, name, line):
         line -= 1
@@ -466,13 +473,13 @@ class Get:
             return line_from, index_from, line_to, index_to
         except:
             return False
-    
+
     def get_lexer_from_code(self, code: str) -> object:
         langs = Shaman.default().detect(code)
         if langs:
             lang = langs[0][0].lower()
             return self.get_lexer_from_name(lang)
-    
+
     @staticmethod
     def get_lexer_from_name(lang_name: str) -> object:
         if lang_name == "python":
@@ -525,12 +532,15 @@ class Get:
             return MarkdownLexer
         else:
             return NoneLexer
-    
+
     def get_lexer_from_instance(self, lexer_instance):
-        lexers = [CLexer, CPPLexer, CSSLexer, HTMLLexer, JSONLexer, JavaScriptLexer, PythonLexer, JavaLexer, YAMLLexer, MarkdownLexer, NoneLexer]
+        lexers = [
+            CLexer, CPPLexer, CSSLexer, HTMLLexer, JSONLexer, JavaScriptLexer,
+            PythonLexer, JavaLexer, YAMLLexer, MarkdownLexer, NoneLexer
+        ]
         if lexer_instance is None:
             return NoneLexer
-            
+
         for lexer in lexers:
             if isinstance(lexer_instance, lexer):
                 return lexer
@@ -542,7 +552,7 @@ class Get:
     @staticmethod
     def get_qimage(path) -> object:
         return QImage(path)
-    
+
     @staticmethod
     def get_pixmap(icon_path) -> object:
         return QPixmap(icon_path)
@@ -550,22 +560,22 @@ class Get:
     @staticmethod
     def get_qicon(icon_path) -> object:
         return QIcon(icon_path)
-    
-    def get_any_icon_by_name(self, area:str, name:str):
+
+    def get_any_icon_by_name(self, area: str, name: str):
         api = self.get_icon_api()
         if api is None:
             return None
         try:
-            raw_key = api[area+"-"+name]
+            raw_key = api[area + "-" + name]
             processed_key = self.get_adjusted_path(raw_key)
             icon = self.icon_path + processed_key
             return icon
-            
+
         except Exception as e:
             print(f"{area} icon by name error: {e}", )
-        
+
         return None
-            
+
     def get_lexer_icon_by_name(self, name):
         icon = self.get_any_icon_by_name("lexer", name)
         if icon is None:
@@ -575,8 +585,8 @@ class Get:
     def get_icon_from_lexer(self, lexer_name):
         return self.get_lexer_icon_by_name(lexer_name.lower())
 
-    def get_icon_from_ext(self, file, ext=False) -> str:        
-        if file == ".?icode" or file is None:
+    def get_icon_from_ext(self, file, ext=False) -> str:
+        if file is None:
             return self.get_any_icon_by_name("lexer", "none")
 
         if not ext:
@@ -584,18 +594,18 @@ class Get:
 
         if ext in data.ext_text:
             return self.get_any_icon_by_name("lexer", "none")
-            
+
         elif ext in data.ext_python:
             return self.get_any_icon_by_name("lexer", "python")
-            
+
         elif ext in data.ext_json:
             return self.get_any_icon_by_name("lexer", "json")
-            
+
         elif ext in data.ext_javascript:
             return self.get_any_icon_by_name("lexer", "javascript")
         else:
             return self.get_any_icon_by_name("lexer", "none")
-    
+
     def get_icon_api(self):
         api_file = pathlib.Path(
             f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{settings.get_icons_package()}{SYS_SEP}main.json"
@@ -603,12 +613,14 @@ class Get:
         if api_file.is_file() and api_file.exists():
             return ijson.load(api_file)
         return None
-    
+
     def get_default_icons(self, icon):
         return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}{icon}"
-    
+
     def get_app_icon(self) -> object:
-        return self.get_qicon(f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}logo-min.svg")
+        return self.get_qicon(
+            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}logo-min.svg"
+        )
 
     # TODO
     def get_smartcode_icons(self, area: str = "-") -> dict:
@@ -647,12 +659,12 @@ class Get:
 
         if area == "index":
             return {
-                "logo":self.get_default_icons("logo.svg"),
-                "python":self.get_default_icons("python.svg")
+                "logo": self.get_default_icons("logo.svg"),
+                "python": self.get_default_icons("python.svg")
             }
 
         return IconMaker(self.icon_path, api, area)
-    
+
     def get_bool_from_str(self, chars):
         text = str(chars).lower()
 
@@ -662,7 +674,8 @@ class Get:
             return False
 
         return None
-        
+
+
 filefn = File()
 getfn = Get()
 iofn = IO()
