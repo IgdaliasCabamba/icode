@@ -1,8 +1,7 @@
 from extension_api import *
 import sip
 
-need_dirs = [os.path.join(BASE_PATH, '.cache', 'jedi'), os.path.join(BASE_PATH, 'smartcode', 'data', 'user', 'envs')]
-make_dirs(need_dirs)
+make_dirs([os.path.join(BASE_PATH, '.cache', 'jedi')])
 
 export(path="smart_python.src")
 export(path="smart_python.src.vendor")

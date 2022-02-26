@@ -27,13 +27,14 @@ class App(Base):
         self.editor_widgets = self.ui.editor_widgets
         self.april = self.ui.april
         self.run() #running the server
-        self.run_api() 
-        self.init_ui()
+        self.run_api() #setting the api for external services as widgets
+        self.run_ui()
         self.load_plugins()
         self.build_components()
         self.open_app()
 
-    def init_ui(self):
+    def run_ui(self) -> None:
+        """Organize the main widgets in current notebook"""
         self.welcome_widget = self.ui.welcome
         index = self.ui.notebook.add_tab_and_get_index(
             self.welcome_widget, f"# Get Started"
@@ -41,7 +42,7 @@ class App(Base):
         self.configure_tab(index, f"# Get Started", "init")
         self.on_new_tab.emit(self.welcome_widget)
         
-    def create_editor_from_file(self, code_file) -> object:
+    def create_editor_from_file(self, code_file:str) -> EditorView:
         editor = EditorView(self, self.ui, self.ui.notebook, code_file)
         editor.on_tab_content_changed.connect(self.update_tab)
         index = self.ui.notebook.add_tab_and_get_index(editor, code_file.name)
@@ -50,8 +51,17 @@ class App(Base):
         self.files_opened.append(code_file)
         self.on_commit_app.emit(1)
         return editor
+    
+    def copy_editor(self, notebook, tab_data) -> EditorView:
+        editor = self.get_new_editor(notebook)
+        editor.make_deep_copy(tab_data.widget)
+        index = notebook.add_tab_and_get_index(editor, tab_data.title)
+        notebook.setTabToolTip(index, tab_data.tooltip)
+        notebook.setTabIcon(index, tab_data.icon)
+        return editor
 
-    def create_new_notebook(self, orientation, widget=None, copy:bool=True):
+    def create_new_notebook(self, orientation:int, widget=None, copy:bool=True) -> NoteBookEditor:
+        """Create a new notebook and split in mainwindow"""
         if widget is None:
             widget = self.ui.notebook
         parent_notebook = parent_tab_widget(widget)
@@ -66,11 +76,7 @@ class App(Base):
         self.ui.set_notebook(notebook)
         
         if copy:
-            editor = self.get_new_editor(notebook)
-            editor.make_deep_copy(tab_data.widget)
-            index = notebook.add_tab_and_get_index(editor, tab_data.title)
-            notebook.setTabToolTip(index, tab_data.tooltip)
-            notebook.setTabIcon(index, tab_data.icon)
+            self.copy_editor(notebook, tab_data)
 
         DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
 
@@ -79,7 +85,7 @@ class App(Base):
         self.on_commit_app.emit(1)
         return notebook
 
-    def new_file(self, notebook=False):
+    def new_file(self, notebook=False) -> EditorView:
         if isinstance(notebook, bool):
             notebook = self.ui.notebook
 
@@ -91,14 +97,15 @@ class App(Base):
         self.configure_tab(index, f"# Untituled-{self.tabs_count}", "new")
         self.on_new_editor.emit(editor)
         self.on_commit_app.emit(1)
+        return editor
     
-    def new_editor_notebook(self, orientation):
+    def new_editor_notebook(self, orientation:int) -> None:
         self.tabs_count += 1
         notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
         self.new_file(notebook)
 
-    def open_file_from_search(self, file, query):
-        if file != None:
+    def open_file_from_search(self, file:str, query:str) -> None:
+        if file is not None:
             self.open_file(file)
             try:
                 editor = self.ui.notebook.currentWidget().editor
@@ -106,16 +113,17 @@ class App(Base):
             except Exception as e:
                 print(e)
 
-    def open_file_from_explorer(self, file_with_path):
+    def open_file_from_explorer(self, file_with_path:str) -> None:
         self.open_file(file_with_path)
 
-    def open_file(self, file_with_path=False):
+    def open_file(self, file_with_path=False) -> None:
         home_dir = str(Path.home())
         if file_with_path:
             code_file = Path(file_with_path)
             duplicate = self.is_duplicated_file(file_with_path, self.ui.notebook)
             if code_file.is_file():
                 if duplicate:
+                    # if file already exist in this notebook just go to file tab
                     duplicate["notebook"].setCurrentWidget(duplicate["widget"])
                 else:
                     self.create_editor_from_file(code_file)
@@ -133,12 +141,10 @@ class App(Base):
                         editor_cache.save_to_list(str(file), "files")
                     else:
                         duplicate["notebook"].setCurrentWidget(duplicate["widget"])
-            else:
-                return
         
         self.on_commit_app.emit(0)
     
-    def open_dir(self, dir=None):
+    def open_dir(self, dir=None) -> None:
         if dir is not None:
             folder = self.ui.side_left.explorer.open_folder(dir)
             if not self.ui.side_left.explorer.isVisible():

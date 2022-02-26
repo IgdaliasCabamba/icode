@@ -141,8 +141,7 @@ class Base(QObject, Core):
         self.eol_list = self.get_eol_list()
         self.space_list = self.get_space_list()
         self.api_commands_list = self.get_api_commands_list(self)
-
-    # TODO
+        
     def run_api(self):
         self.editor_widgets.set_api(self)
 

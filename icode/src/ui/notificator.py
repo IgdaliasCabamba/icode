@@ -1,5 +1,3 @@
-#https://github.com/IgdaliasCabamba/iterm.git
-
 from typing import Union
 from PyQt5.QtCore import pyqtSignal, Qt, QTimer, QPropertyAnimation, QPoint, QEasingCurve
 from PyQt5.QtGui import QColor
@@ -8,46 +6,7 @@ from PyQt5.QtWidgets import (QButtonGroup, QFrame, QGraphicsDropShadowEffect,
                              
 from .igui import HeaderLabel, HeaderPushButton                             
 from functions import getfn
-
-class Notification(QFrame):
-    
-    on_displayed = pyqtSignal(object)
-    
-    def __init__(self, parent, title, desc, widgets, time:Union[int, float]):
-        super().__init__(parent)
-        self.setObjectName("Notification")
-        self.parent = parent
-        self.title = title
-        self.desc = desc
-        self.widgets = widgets
-        self.timer = QTimer(self)
-        self.timer.singleShot(time, lambda:self.on_displayed.emit(self))
-        self.init_ui()
-    
-    def init_ui(self):
-        self.layout = QVBoxLayout(self)
-        self.setLayout(self.layout)
-        self.setMinimumHeight(90)
-        
-        self.lbl_title = QLabel(self.title)
-        self.lbl_title.setWordWrap(True)
-        self.lbl_desc = QLabel(self.desc)
-        self.lbl_desc.setWordWrap(True)
-        
-        self.hbox = QHBoxLayout()
-        
-        for i in self.widgets:
-            self.hbox.addWidget(i)
-        
-        self.layout.addWidget(self.lbl_title)
-        self.layout.addWidget(self.lbl_desc)
-        self.layout.addLayout(self.hbox)
-        
-        self.setVisible(True)
-    
-    def clear(self):
-        self.timer.stop()
-        self.close()
+from .widgets import Notification
 
 class Notificator(QFrame):
     
@@ -151,17 +110,25 @@ class Notificator(QFrame):
         self._editor = editor_widget.editor
         self._current_editors = editor_widget.editors
     
-    def new_notification(self, title:str, desc:str, widgets:list, time:Union[int, float]=10000) -> object:
+    def new_notification(self, title:str, desc:str, widgets:list, time:Union[int, float]=10000, kill_action:object=None) -> object:
         if time <= 3600:
             time *= 2
         new_notification = Notification(self, title, desc, widgets, time)
         self.notificate(new_notification)
+        if kill_action is not None:
+            kill_action.connect(lambda: self.kill(new_notification))
         return new_notification
     
     def notificate(self, widget:object) -> None:
         self.widget_list.append(widget)
         widget.on_displayed.connect(self.hide_notification)
         self.display_notification(widget)
+    
+    def kill(self, notification:object) -> None:
+        if notification in self.widget_list:
+            self.widget_list.remove(notification)
+            notification.clear()
+            self.update_ui()
     
     def clear_all(self):
         for widget in self.widget_list:
@@ -193,7 +160,7 @@ class Notificator(QFrame):
         self.scroll_area.setVisible(True)
         self.update_ui()
 
-    
+    @property
     def diplaying_notifications(self):
         active = []
         for x in self.widget_list:
@@ -227,7 +194,14 @@ class Notificator(QFrame):
         self.update_position()
         self.style().polish(self)
         self.update()
-
+        notifications_count = len(self.widget_list)
+        if notifications_count <= 0:
+            self.label_info.setText("No New Notifications")
+        elif notifications_count > 0 and notifications_count <= 9:
+            self.label_info.setText(f"{notifications_count} Notifications")
+        else:
+            self.label_info.setText(f"9\uf914 Notifications")
+        
     
     def appear(self):
         """Show or hide the Notifications and update the visiblity of notifications"""

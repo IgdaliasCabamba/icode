@@ -17,10 +17,9 @@ april_cache = CacheManager(
 assistant_cache = CacheManager(
     f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}bot.idt")
 
-DATA_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}settings.json"
-TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}terminals.json"
-EDITOR_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}editor.json"
-app_settings = DataManager(f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}data.idt")
+DATA_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}settings.json"
+TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}terminals.json"
+EDITOR_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}editor.json"
 qt_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.idt")
 labels_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"labs"+SYS_SEP+"labels.idt")
 
@@ -31,6 +30,10 @@ cache_directorys = [
     os.path.join(BASE_PATH, '.cache', 'editors'),
     os.path.join(BASE_PATH, '.cache', 'labs'),
     os.path.join(BASE_PATH, '.cache', 'april'),
+    os.path.join(BASE_PATH, 'smartcode', 'code'),
+    os.path.join(BASE_PATH, 'smartcode', 'data'),
+    os.path.join(BASE_PATH, 'smartcode', 'data', 'memory'),
+    os.path.join(BASE_PATH, 'smartcode', 'data', 'user'),
 ]
 
 

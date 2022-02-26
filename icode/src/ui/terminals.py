@@ -105,7 +105,7 @@ class Terminal(QFrame):
         self.change_to_terminal(item)
     
     def change_to_terminal(self, item):
-        if self.term_header.count() > 0:
+        if self.term_header.count() > 0 and item is not None:
             widget = item.item_data["widget"]
             self.terminals_layout.setCurrentWidget(widget)
 
@@ -140,7 +140,7 @@ class Terminal(QFrame):
         widget.stop()
 
     def remove_terminal(self):
-        if self.term_header.count() > 1:
+        if self.term_header.count() > 0:
             widget = self.terminals_layout.currentWidget()
             index = self.terminals_layout.currentIndex()
             item = widget.header_item
