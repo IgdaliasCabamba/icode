@@ -160,7 +160,7 @@ class Base(QObject, Core):
                     return widget
         return False
 
-    def current_notebook_editor(self, notebook:object = None, attr:str=None, value:str=None) -> Union[object, bool]:
+    def current_notebook_editor(self, notebook:object = None, attr:str=None, value:object=None) -> Union[object, bool]:
         if not self.are_notebooks_empty():
             if notebook is None:
                 widget = self.ui.notebook.currentWidget()
@@ -276,13 +276,14 @@ class Base(QObject, Core):
     
     @property
     def tabs_navigation(self):
+        notebook = self.ui.notebook
         return {
-            "notebook":self.ui.notebook,
+            "notebook":notebook,
             "tabs":notebook.get_navigation()
         }
     
     @property
-    def indentation(self):
+    def indentations(self):
         return [{
             "name": "Indent Using Spaces",
             "action": 0,

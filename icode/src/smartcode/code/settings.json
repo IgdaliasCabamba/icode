@@ -22,7 +22,7 @@
     "palette":"dark",
     "qt-theme":null,
     
-    //App Theme and Window Style |window-style:[custom, native, icode]
+    //App Theme and Window Style | window-style:[custom, native, icode]
     "theme":"icode_default_theme",
     "window-style":"custom",
 

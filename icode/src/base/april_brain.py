@@ -74,7 +74,7 @@ class Brain(QObject):
                 except Exception as e:
                     answer = self.templates.error_log + str(e)
                     type = -1
-
+        print(answer)
         self.on_answered.emit(answer, type)
 
     

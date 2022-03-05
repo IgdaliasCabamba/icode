@@ -259,6 +259,9 @@ Editor {
     spacing: 0px;
     margin: 0px;
 }
+QRoundProgressBar {
+	background:$contrast2
+}
 /*Styling by IDs*/
 /* Main Areas*/
 

@@ -331,7 +331,8 @@ class Get:
     def get_correct_path_join(self, *path):
         try:
             return self.io.correct_path_join(*path)
-        except:
+        except Exception as e:
+            print(e)
             return False
 
     @staticmethod

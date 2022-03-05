@@ -322,6 +322,8 @@ class Editor(EditorBase):
     on_saved = pyqtSignal(str)
     on_abcd_added = pyqtSignal()
     on_complete = pyqtSignal(dict)
+    on_close_char = pyqtSignal(str)
+    on_intellisense = pyqtSignal(object, str)
     
     def __init__(self, parent:object, file=Union[str,None]) -> None:
         super().__init__(parent)
@@ -676,24 +678,13 @@ class Editor(EditorBase):
     def key_press_event(self, event:QKeyEvent) -> None:
         key=event.key()
         string = str(event.text())
-        line, index = self.getCursorPosition()
         
         if key in range(65, 90):
             self.on_abcd_added.emit()
         
         if string in self.pre_complete_keys or key in range(65, 90):
-            self.on_complete.emit(
-                {
-                    "code":self.text(),
-                    "file":self.file_path,
-                    "cursor-pos":self.getCursorPosition(),
-                    "lexer-api":self.lexer_api,
-                    "lexer-name":self.lexer_name,
-                    "event-text":string,
-                    "word":self.wordAtLineIndex(line, index)
-                }
-            )
-        
+            self.on_intellisense.emit(self, string) # it make icode more fast and responsive
+                
         if key in {32, 16777220}:
             self.on_word_added.emit()
         
@@ -701,7 +692,7 @@ class Editor(EditorBase):
             self.on_modify_key.emit()
         
         if string in self.closable_key_map.keys():
-            self.coeditor.close_char(string)
+            self.on_close_char.emit(string)
             
     def mouse_move_event(self, event:QMouseEvent) -> None:
         self.on_mouse_moved.emit(event)

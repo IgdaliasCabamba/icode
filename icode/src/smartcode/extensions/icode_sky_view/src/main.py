@@ -3,7 +3,7 @@ from extension_api import *
 class Init(ModelApp):
     def __init__(self, data) -> None:
         super().__init__(data, "icode_sky_view")        
-        self._db=CacheManager(self.path_to("data", "data.idt"))
+        self._db=CacheManager(self.local_storage_to("cache", "data.idt"))
         
         self.menu = QMenu("Sky View")
         self.action_manager = QActionGroup(self)

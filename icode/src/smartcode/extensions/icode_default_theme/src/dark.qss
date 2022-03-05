@@ -259,6 +259,9 @@ Editor {
     spacing: 0px;
     margin: 0px;
 }
+QRoundProgressBar {
+	background:$contrast2
+}
 /*Styling by IDs*/
 /* Main Areas*/
 
@@ -327,7 +330,6 @@ QStatusBar QSizeGrip,
     background:#252526;
     border-radius:0
 }
-
 #notify #main-area,
 #notify #main-frame,
 #notify #Header QPushButton,

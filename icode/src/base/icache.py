@@ -2,6 +2,7 @@ import pathlib
 from PyQt5.QtCore import QSettings
 
 class CacheManager(QSettings):
+
     def __init__(self, file_with_path:str, format:object=QSettings.IniFormat, optimization:int = 3):
         super().__init__(file_with_path, format)
         self.file_path = file_with_path
@@ -22,7 +23,7 @@ class CacheManager(QSettings):
                 if value in base_list:
                     base_list.remove(value)
             
-            if isinstance(value, str):
+            if value is not None:
                 base_list.append(value)
                 
             self.setValue(key, base_list)

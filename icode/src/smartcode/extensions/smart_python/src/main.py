@@ -20,17 +20,17 @@ from smartpy_refactor import *
 from smartpy_warning import *
 from smartpy_debug import *
 from smartpy_server import *
+from smartpy_utils import *
 
-lang_server_data = run_lang_server()
-SERVER_NAME = "smartpy_language_server"
+pylang_server_data = get_pylang_server()
 
 py_server = langserver.icenter.run_new_server(
-    lang_server_data["run"],
+    pylang_server_data["run"],
     {   "name":SERVER_NAME,
         "mode":"TCP4",
-        "service":lang_server_data["service"],
-        "host":lang_server_data["host"],
-        "port":lang_server_data["port"],
+        "service":pylang_server_data["service"],
+        "host":pylang_server_data["host"],
+        "port":pylang_server_data["port"],
     }
 )
 
@@ -44,7 +44,6 @@ class Init(ModelApp):
         self.listen_slots()
         self.api_envs_list = envs_api.python_envs
         self._current_env = self.api_envs_list[0]
-        print(self._current_env)
         self.objects_mem = {
             "editors":[],
             "autocompleters":[],
@@ -98,14 +97,7 @@ class Init(ModelApp):
         
         self.btn_open_pylab=QPushButton("Open")
         self.btn_open_pylab.setObjectName("btn-open-pylab")
-        self.pylab_desc = """
-            <ul>
-                <li>Tree, Doctor</li>
-                <li>Warnings, Analyzes</li>
-                <li>Debug, Tests</li>
-                <li>Refactor</li>
-            </ul>
-        """
+        self.pylab_desc = DESCRIPTION
         self.ui.side_left.labs.new_work_space("Python", "smart_python", self.pylab_desc, self.btn_open_pylab)
         
         self.code_tree = CodeTree(None)
@@ -114,7 +106,7 @@ class Init(ModelApp):
         self.btn_run_tree.setProperty("style-bg","transparent")
         self.btn_run_tree.setIcon(corner_icons.get_icon("start"))
         table1 = self.ui.side_right.new_table("Code Tree", self.code_tree)
-        table1.setMinimumSize(250,300)
+        table1.setMinimumSize(300,360)
         table1.add_header_widget(self.btn_run_tree)
         
         self.code_doctor = CodeDoctor(None)
@@ -124,7 +116,7 @@ class Init(ModelApp):
         self.btn_run_doctor.setIcon(corner_icons.get_icon("start"))
         table2 = self.ui.side_right.new_table("Code Doctor", self.code_doctor)
         table2.add_header_widget(self.btn_run_doctor)
-        table2.setMinimumSize(250,300)
+        table2.setMinimumSize(300,360)
         
         self.code_warnings = CodeWarnings(None)
         self.btn_run_warnings = QPushButton()
@@ -133,11 +125,11 @@ class Init(ModelApp):
         self.btn_run_warnings.setIcon(corner_icons.get_icon("start"))
         table3 = self.ui.side_right.new_table("Code Warnings", self.code_warnings)
         table3.add_header_widget(self.btn_run_warnings)
-        table3.setMinimumSize(250,300)
+        table3.setMinimumSize(300,360)
         
         self.refactor = Refactor(None)
         table4 = self.ui.side_right.new_table("Code Refactor", self.refactor)
-        table4.setMinimumSize(250,300)
+        table4.setMinimumSize(300,360)
         
         self.deep_analyze = DeepAnalyze(None)
         self.btn_run_analyze = QPushButton()
@@ -146,7 +138,7 @@ class Init(ModelApp):
         self.btn_run_analyze.setIcon(corner_icons.get_icon("start"))
         table5 = self.ui.side_right.new_table("Deep Analyze", self.deep_analyze)
         table5.add_header_widget(self.btn_run_analyze)
-        table5.setMinimumSize(200,200)
+        table5.setMinimumSize(200,300)
         
         self.debug = Debug(None)
         self.btn_clear_debug=QPushButton()
@@ -165,7 +157,7 @@ class Init(ModelApp):
         table6.add_header_widget(self.btn_start_debug)
         table6.add_header_widget(self.btn_stop_debug)
         table6.add_header_widget(self.btn_clear_debug)
-        table6.setMinimumSize(200,300)
+        table6.setMinimumSize(300,400)
         
         space.add_table(table1, 0, 0)
         space.add_table(table2, 0, 1)
@@ -190,7 +182,7 @@ class Init(ModelApp):
             if hasattr(x, "set_env"):
                 x.set_env(self._current_env)
     
-    def show_envs(self):
+    def show_envs(self) -> None:
         self.python_envs.set_envs(self.api_envs_list)
         self.ui.editor_widgets.run_widget(self.python_envs)
     
@@ -200,16 +192,16 @@ class Init(ModelApp):
             self.symbol_navigator.set_symbols(self.get_code_tree(editor))
             self.ui.editor_widgets.run_widget(self.symbol_navigator)
     
-    def get_code_tree(self, editor):
+    def get_code_tree(self, editor) -> object:
         return python_api.get_python_node_tree(editor.text())
         
-    def update_statusbar_env(self, env):
+    def update_statusbar_env(self, env) -> None:
         self.interpreter.setText(f"Python {env.version_info.major}.{env.version_info.minor}.{env.version_info.micro}")
         
-    def listen_notebook_slots(self, notebook):
+    def listen_notebook_slots(self, notebook) -> None:
         notebook.widget_added.connect(self.take_editor)
 
-    def listen_slots(self):
+    def listen_slots(self) -> None:
         self.do_on(self.take_editor, "ui", "notebook", "widget_added")
         self.do_on(self.listen_notebook_slots, "app", "on_new_notebook")
         self.do_on(self.update_statusbar_env, "on_env_changed")
@@ -230,7 +222,7 @@ class Init(ModelApp):
         self.do_on(self.add_env, "python_envs", "on_env_added")
         self.do_on(self.set_current_env, "python_envs", "on_current_env")
     
-    def take_editor(self, widget):
+    def take_editor(self, widget) -> None:
         if self.object_is(widget, "editor-frame"):
             editor1, editor2 = widget.get_editors()
             
@@ -243,7 +235,7 @@ class Init(ModelApp):
             editor1.on_lexer_changed.connect(self.build_editor)
             editor2.on_lexer_changed.connect(self.build_editor)
     
-    def build_editor(self, editor):
+    def build_editor(self, editor) -> None:
         status = getattr(editor, "smartpy", None)
         if status is not None:
             
@@ -300,7 +292,7 @@ class Init(ModelApp):
         live_tips.set_env(self._current_env)
         ide_utils.set_env(self._current_env)
     
-    def repair(self, broke, editor, error):
+    def repair(self, broke, editor, error) -> None:
         if isinstance(broke, PyntellisenseCompletions):
             
             autocomplete = PyntellisenseCompletions(editor, SERVER_NAME)
@@ -311,39 +303,39 @@ class Init(ModelApp):
             
             broke.stop()  
             
-    def show_help(self, editor, row, suggestion):
+    def show_help(self, editor, row, suggestion) -> None:
         #editor.display_annotation(row, suggestion, 210, "on_lines_changed", 1)
         pass
     
-    def add_completions(self, lexer_api, completions):
+    def add_completions(self, lexer_api, completions) -> None:
         if not sip.isdeleted(lexer_api):
             for completion in completions:
                 lexer_api.add(completion)
             lexer_api.prepare()
     
-    def remove_completion_entry(self, lexer_api, completions):
+    def remove_completion_entry(self, lexer_api, completions) -> None:
         if not sip.isdeleted(lexer_api):
             #print(completions)
             for completion in completions:
                 lexer_api.remove(completion)
             lexer_api.prepare()
             
-    def run_code_warnings(self):
+    def run_code_warnings(self) -> None:
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.code_warnings.get_warnings(editor)
 
-    def run_code_tree(self):
+    def run_code_tree(self) -> None:
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.code_tree.build_tree(editor)
 
-    def run_code_doctor(self):
+    def run_code_doctor(self) -> None:
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.code_doctor.do_analyze(editor.text(), editor)
     
-    def run_code_analyze(self):
+    def run_code_analyze(self) -> None:
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.deep_analyze.do_analyze(editor.text(), editor)
@@ -351,25 +343,27 @@ class Init(ModelApp):
     def adjust_code(self, editor=None) -> None:
         """Straighten the Python code """
         if editor is None or isinstance(editor, bool):
-            editor = self.app.has_notebook_editor_with_python(self.ui.notebook)
+            editor = self.app.current_notebook_editor(self.ui.notebook, "lexer_name", "python")
 
         if editor is None or isinstance(editor, bool):
             return
             
         code_smell = editor.text()
         nice_code = python_api.get_straighten_code(code_smell)
-        editor.set_text(nice_code)
+        if nice_code is not None:
+            editor.set_text(nice_code)
 
-    def adjust_imports(self):
+    def adjust_imports(self) -> None:
         """Sort the imported Python libs in code by name"""
-        editor = self.app.has_notebook_editor_with_python(self.ui.notebook)
+        editor = self.app.current_notebook_editor(self.ui.notebook, "lexer_name", "python")
         if editor is None or isinstance(editor, bool):
             return
         code_smell = editor.text()
         nice_code = python_api.get_sorted_imports(code_smell)
-        editor.set_text(nice_code)
+        if nice_code is not None:
+            editor.set_text(nice_code)
 
-    def fix_bugs(self, editor):
+    def fix_bugs(self, editor) -> None:
         """Call method to fix some pep-8 issues and remake the analyze"""
         self.adjust_code(editor)
         self.run_code_warnings()

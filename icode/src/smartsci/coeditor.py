@@ -33,6 +33,8 @@ class CoEditor(QObject):
         self.editor.file_watcher.on_file_modified.connect(self.file_modified)
         self.editor.on_word_added.connect(
             lambda: self.timer.singleShot(500, self.set_lexer_from_code))
+        self.editor.on_close_char.connect(self.close_char)
+        self.editor.on_intellisense.connect(self.intellisense_editor)
 
     def make_headers(self):
         if self.editor.file_path is None:
@@ -178,3 +180,15 @@ class CoEditor(QObject):
 
                 except Exception as e:
                     print("highlight_match Exception: ", e)
+    
+    def intellisense_editor(self, editor, string):
+        line, index = editor.getCursorPosition()
+        editor.on_complete.emit({
+            "code":editor.text(),
+            "file":editor.file_path,
+            "cursor-pos":editor.getCursorPosition(),
+            "lexer-api":editor.lexer_api,
+            "lexer-name":editor.lexer_name,
+            "event-text": string,
+            "word":editor.wordAtLineIndex(line, index)
+        })

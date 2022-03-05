@@ -5,6 +5,7 @@ import frameworks.jedit2 as ijson
 class Extender:
     def __init__(self) -> None:
         self.extensions=[]
+        self.running_extensions = []
 
     def load_plugin(self, plugin, data) -> Union[object, bool]:
         try:
@@ -16,7 +17,7 @@ class Extender:
             else:
                 return False
             try:
-                extension.Init(data)
+                self.running_extensions.append(extension.Init(data))
             except Exception as e:
                 print(f"Crash Failed to load:{plugin} because {e}")
                 return e
@@ -27,11 +28,13 @@ class Extender:
             print(e)
             return False
     
-    def get_plugin_list(self) -> list:
+    def get_plugin_list(self, only_running:bool=False) -> list:
+        if only_running:
+            return self.running_extensions
         return self.extensions
     
     def exit_all(self) -> None:
-        for ext in self.extensions:
+        for ext in self.running_extensions:
             self.finish_one(ext)
     
     def finish_one(self, extension: object) -> None:

@@ -1,0 +1,14 @@
+{
+	//Users profiles
+	"users":[
+		{
+			"name":null,
+			"source_control":{
+				"tool":null,
+				"service":null
+			},
+			"stacks":[""]
+			"languages":[""]
+		}
+	]
+}

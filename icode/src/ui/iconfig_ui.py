@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QFrame, QVBoxLayout
+from PyQt5.QtWidgets import QFrame, QVBoxLayout, QTreeWidget
 from functions import getfn
+from .igui import IStandardItem, QGithubButton
 
 class ConfigUi(QFrame):
     def __init__(self, parent):

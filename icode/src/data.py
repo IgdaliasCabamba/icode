@@ -17,23 +17,29 @@ april_cache = CacheManager(
 assistant_cache = CacheManager(
     f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}bot.idt")
 
+qt_cache = CacheManager(
+    BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.idt")
+    
+labels_cache = CacheManager(
+    BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"labs"+SYS_SEP+"labels.idt")
+    
 DATA_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}settings.json"
 TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}terminals.json"
 EDITOR_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}editor.json"
-qt_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"user"+SYS_SEP+"cache.idt")
-labels_cache = CacheManager(BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"labs"+SYS_SEP+"labels.idt")
 
 note_file_path = f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}labs{SYS_SEP}notes.txt"
 note_file_path_obj = Path(note_file_path)
 
 cache_directorys = [
-    os.path.join(BASE_PATH, '.cache', 'editors'),
     os.path.join(BASE_PATH, '.cache', 'labs'),
     os.path.join(BASE_PATH, '.cache', 'april'),
+    os.path.join(BASE_PATH, '.cache', 'editors'),
+    os.path.join(BASE_PATH, '.cache', 'extensions'),
     os.path.join(BASE_PATH, 'smartcode', 'code'),
     os.path.join(BASE_PATH, 'smartcode', 'data'),
-    os.path.join(BASE_PATH, 'smartcode', 'data', 'memory'),
     os.path.join(BASE_PATH, 'smartcode', 'data', 'user'),
+    os.path.join(BASE_PATH, 'smartcode', 'data', 'memory'),
+    os.path.join(BASE_PATH, 'smartcode', 'data', 'extensions'),
 ]
 
 
@@ -55,7 +61,6 @@ smartcode_directory = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}"
 def save_data():
     pass
     
-
 ext_python              = {".py", ".pyw", ".pyi", ".scons", ".w"}
 ext_cython              = {".pyx", ".pxd", ".pxi"}
 ext_c                   = {".c", ".h"}
@@ -90,4 +95,4 @@ ext_css                 = {".css"}
 ext_awk                 = {".awk"}
 ext_cicode              = {".ci"}
 ext_yaml                = {".yaml", ".yml"}
-ext_markdown            = {".md", ".MARKDOWN", ".rst"} 
+ext_markdown            = {".md", ".MARKDOWN", ".rst"}

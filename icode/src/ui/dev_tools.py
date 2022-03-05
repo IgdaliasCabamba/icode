@@ -9,7 +9,6 @@ from .igui import ScrollLabel, IListWidgetItem
 from base import memory, system
 from data import note_file_path, labels_cache
 
-
 class NotesCore(QObject):
     def __init__(self, editor):
         super().__init__()
@@ -21,7 +20,6 @@ class NotesCore(QObject):
 
     def save_data(self):
         self.parent.file.write_text(self.editor.toPlainText())
-
 
 class Notes(QFrame):
     def __init__(self, parent):
@@ -66,7 +64,9 @@ class Todos(QFrame):
         self.parent = parent
         self.file_name = None
         self.editor = None
+        self.is_showing = False
         self.parent.btn_add_label.clicked.connect(self.go_screen_new)
+        self.parent.btn_show_hide_labels.clicked.connect(self.show_hide_all)
         self.build()
 
     def build(self):
@@ -96,23 +96,23 @@ class Todos(QFrame):
         self.display.currentRowChanged.connect(self.goto_annotation_line)
         self.layout.addWidget(self.display)
         self.layout.addWidget(self.screen_new)
-
+        
         self.btn_save.clicked.connect(self.new_todo)
         self.update_data()
 
     def update_data(self):
         self.display.clear()
-        labels_cache.beginGroup(self.file_name)
-        keys = labels_cache.childKeys()
-        for x in keys:
-            label = labels_cache.value(x)
-            self.add_todo(label["line"], label["title"], label["desc"], label["label"])
-        labels_cache.endGroup()
+        if self.file_name is not None:
+            labels = labels_cache.get_all_from_list(self.file_name)
+            if isinstance(labels, list):
+                for label in labels:
+                    self.add_todo(label["line"], label["title"], label["desc"], label["label"])
 
     def add_todo(self, line, text, tooltip, type):
         self.layout.setCurrentWidget(self.display)
         
         title = text
+        color_text = QColor("white")
         if type == "bug":
             color_text = QColor("red")
             title = "\uf188"+" "+text
@@ -121,7 +121,7 @@ class Todos(QFrame):
             title = "\uf0ae"+" "+text
             color_text = QColor("blue")
         
-        item = IListWidgetItem(None, title, tooltip, {"line": line})
+        item = IListWidgetItem(None, title, tooltip, {"line": line, "note":tooltip, "label":type})
         item.setForeground(color_text)
             
         self.display.addItem(item)
@@ -135,24 +135,68 @@ class Todos(QFrame):
         title = self.input_title.text()
         label = self.label_picker.currentText().lower()
 
-        labels_cache.beginGroup(self.file_name)
-        labels_cache.setValue(line, {
+        labels_cache.save_to_list({
             "line":line,
             "desc": desc,
             "title": title,
             "label": label
-        })
-        labels_cache.endGroup()
+        }, self.file_name)
+        
         self.update_data()
 
     def set_data(self, editor: object, file_name: str):
-        self.file_name = file_name.replace(system.SYS_SEP, "_")
+        if file_name is not None:
+            self.file_name = str(file_name).replace(system.SYS_SEP, "_")
+        else:
+            self.file_name = file_name
+        
         self.editor = editor
         self.update_data()
 
     def goto_annotation_line(self, row):
-        item = self.display.item(row)
-        if hasattr(item, "item_data"):
-            line = int(item.item_data["line"])
-            self.editor.editor.go_to_line(line)
+        try:
+            item = self.display.item(row)
+            if hasattr(item, "item_data"):
+                line = int(item.item_data["line"])
+                note = item.item_data["note"]
+                label = item.item_data["label"]
+                if label.lower() == "todo":
+                    text = "\uf0ae TODO: "
+                    style = 210
+                elif label.lower() == "bug":
+                    text = "\uf188 ISSUE: "
+                    style = 202
+                else:
+                    text = "\uf249 NOTE: "
+                    style = 206
+                if hasattr(self.editor, "editor"):
+                    self.editor.editor.go_to_line(line)
+                    self.editor.editor.display_annotation(line, text+note, style, "on_text_changed", 0)
+                        
+        except Exception as e:
+            print(e)
             
+    def show_hide_all(self):
+        try:
+            if self.is_showing:
+                self.is_showing = False
+            else:
+                if hasattr(self.editor, "editor"):
+                    labels = labels_cache.get_all_from_list(self.file_name)        
+                    if isinstance(labels, list):
+                        for label in labels:    
+                            if label["label"].lower() == "todo":
+                                text = "\uf0ae TODO: "
+                                style = 210
+                            elif label["label"].lower() == "bug":
+                                text = "\uf188 ISSUE: "
+                                style = 202
+                            else:
+                                text = "\uf249 NOTE: "
+                                style = 206
+                                
+                            self.editor.editor.display_annotation(int(label["line"]), text+label["desc"], style, "on_text_changed", 0)
+                                
+                self.is_showing = True
+        except Exception as e:
+            print(e)

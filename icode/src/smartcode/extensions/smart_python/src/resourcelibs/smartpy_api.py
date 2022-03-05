@@ -19,12 +19,11 @@ import jedi
 import smartpy_ide_core as ide
 from radon.complexity import cc_rank, cc_visit
 from radon.raw import analyze
+from radon.visitors import ComplexityVisitor
 
 class EnvApi(QSettings):
     def __init__(self, file_with_path:str, format=QSettings.IniFormat):
         super().__init__(file_with_path, format)
-        self.file_path = file_with_path
-        self.file_path_object = pathlib.Path(self.file_path)
         self._python_envs = [jedi.get_default_environment()]
 
         if 'PYTHONPATH' in os.environ:
@@ -148,13 +147,32 @@ class PythonApi:
         return results
 
     def get_pycode_2to3(self, code):
-        return autopep8.fix_2to3(code, True)
+        try:
+            return autopep8.fix_2to3(code, True)
+        except Exception as e:
+            print(e)
+            return None
 
     def get_straighten_code(self, code):
-        return yapf_api.FormatCode(code, style_config='pep8')[0]
+        try:
+            return yapf_api.FormatCode(code, style_config='pep8')[0]
+        except Exception as e:
+            print(e)
+            return None
 
     def get_sorted_imports(self, code):
-        return isort.code(code)
+        try:
+            return isort.code(code)
+        except Exception as e:
+            print(e)
+            return None
+    
+    def get_code_analyze(self, code):
+        try:
+            return cc_visit(code)
+        except Exception as e:
+            print(e)
+            return None
     
     def get_python_node_tree(self, python_code, sort_way="name"):
         try:
@@ -327,4 +345,4 @@ class PythonApi:
             return False
 
 python_api = PythonApi()
-envs_api = EnvApi(f"{BASE_PATH}{SYS_SEP}.data{SYS_SEP}user{SYS_SEP}envs{SYS_SEP}envs.idt")
+envs_api = EnvApi("")

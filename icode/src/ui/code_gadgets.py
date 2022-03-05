@@ -183,7 +183,7 @@ class EditorWidgets(QObject):
     
     def do_space_mode(self):
         if self.api is not None:
-            self.space_mode.set_spaces(self.get_all_spaces())
+            self.space_mode.set_spaces(self.get_all_indentations())
             self.run_widget(self.space_mode)
     
     def do_eol_mode(self):
@@ -201,7 +201,7 @@ class EditorWidgets(QObject):
             if self.is_runing(self.tab_browser):
                 self.tab_browser.next_item()
             else:
-                self.tab_browser.set_navigation(self.api.get_tabs_navigation())
+                self.tab_browser.set_navigation(self.api.tabs_navigation)
                 self.run_widget(self.tab_browser)
     
     def do_clone_repo(self):
@@ -209,7 +209,7 @@ class EditorWidgets(QObject):
     
     def get_all_commands(self):
         if self.api is not None:
-            return self.api.commands_list
+            return self.api.commands
     
     def get_all_languages(self):
         if self.api is not None:
@@ -222,12 +222,12 @@ class EditorWidgets(QObject):
     def get_all_eols(self):
         if self.api is not None:
             if self.api.has_notebook_editor():
-                return self.api.eol_list
+                return self.api.eols
     
-    def get_all_spaces(self):
+    def get_all_indentations(self):
         if self.api is not None:
             if self.api.has_notebook_editor():
-                return self.api.space_list
+                return self.api.indentations
     
     def run_by_id(self, widget, text):
         if text.startswith(":"):

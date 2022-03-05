@@ -231,7 +231,8 @@ class App(Base):
             widget = self.ui.notebook.currentWidget()
             if widget.objectName() == "editor-frame":
                 self.ui.notebook.find_replace.do_replace()
-
+    
+    # TODO: turn this function useless
     def configure_tab(self, index, tab_text, tab_type=False):
         widget = self.ui.notebook.widget(index)
         if widget is not None:
@@ -253,12 +254,15 @@ class App(Base):
                     index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
     
     def change_ide_mode(self, mode:int) -> None:
+        """Emit a signal to change the performance of icode"""
         self.on_change_ide_mode.emit(mode)
     
     def call_april(self):
+        """Show/Hide April"""
         self.ui.april.appear()
     
     def show_notifications(self):
+        """Show/Hide Notifications Panel"""
         self.ui.notificator.appear()
     
     def show_goto_tab(self):
@@ -325,11 +329,11 @@ class App(Base):
     
     def set_current_editor(self, widget):
         """Set the current editor and change icode current working dir in memory"""
-        self.editor_widgets.set_current_editor(widget)
         file = widget.file
-        if file is not None and isinstance(file, str):
+        self.editor_widgets.set_current_editor(widget)
+        self.side_right.todos.set_data(widget, file)
+        if file is not None:
             settings.icwd(pathlib.Path(file).parent)
-            self.side_right.todos.set_data(widget, file)
 
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""

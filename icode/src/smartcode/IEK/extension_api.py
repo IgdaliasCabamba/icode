@@ -4,25 +4,24 @@ import os
 import pathlib
 import re
 import textwrap
+from typing import Union
 
-from settings import get_icons_package, get_icons_theme, get_palette
-from data import ijson
-from functions import filefn, getfn
+import langserver
 from PyQt5.Qsci import *
 from PyQt5.QtCore import *
-from PyQt5.QtCore import QObject, QPoint, QTimer, pyqtSignal
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import base.consts as iconsts
-from base.system import *
+import settings
+from base.code_api import *
+from base.font_loader import *
 from base.icache import *
 from base.isetting import *
-from base.font_loader import *
-from base.code_api import *
-import settings
-import langserver
-from typing import Union
+from base.system import *
+from data import ijson
+from functions import *
+from settings import *
 
 
 def make_dirs(dirs:list):
@@ -40,8 +39,8 @@ class BaseApi:
     def __init__(self):
         pass
 
-    def source_path(self, default:str = "src"):
-        return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{self.ext_name}{SYS_SEP}{default}{SYS_SEP}"
+    def source_path(self, name:str = "src"):
+        return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{self.ext_name}{SYS_SEP}{name}{SYS_SEP}"
     
     def path_object_to(self, prefix:str, path:str="") -> object:
         if path != "":
@@ -52,6 +51,15 @@ class BaseApi:
         if path != "":
             path = getfn.get_adjusted_path(path)
         return f"{self.source_path(prefix)}{path}"
+    
+    def local_storage_to(self, type:str, *names, make:bool=False) -> str:
+        if type == "data":
+            return BASE_PATH+SYS_SEP+"data"+SYS_SEP+"extensions"+SYS_SEP+self.ext_name+SYS_SEP+os.path.join(*names)
+        elif type == "cache":
+            return BASE_PATH+SYS_SEP+".cache"+SYS_SEP+"extensions"+SYS_SEP+self.ext_name+SYS_SEP+os.path.join(*names)
+        else:
+            if len(names) >=2:
+                return self.path_to(names[0], names[1])
     
     def object_is(self, object_:object, name:str) -> bool:
         object_name = getattr(object_, "objectName", None)
@@ -84,14 +92,12 @@ class BaseApi:
             if isinstance(arg, str):
                 attrs.append(arg)
         
-        attr = self.parse_attr(self, attrs)    
-        #print(attr)
+        attr = self.parse_attr(self, attrs)
         if hasattr(attr, "connect"):
             attr.connect(action)
-            
 
 class StyleMaker:
-    def __init__(self, main, path:object, vars:dict={}) -> None:
+    def __init__(self, main, path:Union[list, str], vars:dict={}) -> None:
         self._sheet_object = pathlib.Path(path)
         self._text = self.get_content()
         self.main = main

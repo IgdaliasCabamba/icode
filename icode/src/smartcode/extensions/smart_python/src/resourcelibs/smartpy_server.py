@@ -120,7 +120,7 @@ class SmartPyLanguageServer(object):
             print(e)
             self.notfound(request, e)
 
-def run_lang_server() -> dict:
+def get_pylang_server() -> dict:
     
     smartpy_lang_server = SmartPyLanguageServer()
 
