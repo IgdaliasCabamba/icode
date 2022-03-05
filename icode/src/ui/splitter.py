@@ -69,7 +69,7 @@ class ISplitter(QFrame, CategoryMixin):
     def add_notebook(self, notebook:QTabWidget):
         self.notebooks_list.append(notebook)
 
-    def splitAt(self, current_widget, direction, new_widget):
+    def splitAt(self, current_widget, direction, new_widget) -> None:
         if current_widget is None:
             parent = self.root
             idx = 0
@@ -143,7 +143,7 @@ class ISplitter(QFrame, CategoryMixin):
                 
         self.splited_widgets.append({"id":id, "ref":ref_id, "direction":direction, "widget":new_widget})
 
-    def update_size(self):
+    def update_size(self) -> None:
         x = []
 
         for i in range(self.root.count()):
@@ -151,11 +151,12 @@ class ISplitter(QFrame, CategoryMixin):
 
         self.root.setSizes(x)
 
-    def notebook_last_tab_closed(self):
-        if self.is_empty():
+    def notebook_last_tab_closed(self) -> None:
+        if self.is_empty:
             self.on_last_tab_closed.emit()
 
-    def is_empty(self):
+    @property
+    def is_empty(self) -> bool:
         x = 0
         for notebook in self.notebooks_list:
             if notebook.count() > 0 :

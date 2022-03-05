@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QSize, QRect
+from PyQt5.QtCore import QSize, QRect, Qt
 
 APP_BASE_FONT_SIZE:int = 11
 MAINWINDOW_BASE_GEOMETRY:QRect = QRect(0, 0, 1000, 600)
@@ -56,3 +56,10 @@ class APRIL:
     FULL = 2
     SMART = 3
     CUSTOM = 999
+
+ORIENTATIONS = {
+    0: Qt.Vertical,
+    1: Qt.Vertical,
+    2: Qt.Horizontal,
+    3: Qt.Horizontal
+}

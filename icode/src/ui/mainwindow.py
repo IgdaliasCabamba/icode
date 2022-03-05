@@ -202,43 +202,11 @@ class MainWindow(QMainWindow):
     def current_widget(self):
         return self.last_focus()
 
-    def _create_new_notebook(self, orientation, widget=None):
-        if widget is None:
-            widget = self.notebook
-        parent_notebook = parent_tab_widget(widget)
-
-        tab_data = parent_notebook.get_tab_data()
-
-        notebook = NoteBookEditor(self.isplitter, self)
-        notebook.last_tab_closed.connect(self.on_tabbar_last_closed)
-        notebook.on_user_event.connect(self.set_notebook)
-
-        self.on_new_notebook.emit(notebook)
-        self._current_notebook = notebook
-
-        editor = self._controller.get_new_editor(notebook)
-        editor.make_deep_copy(tab_data.widget)
-        index = notebook.add_tab_and_get_index(editor, tab_data.title)
-        notebook.setTabToolTip(index, tab_data.tooltip)
-        notebook.setTabIcon(index, tab_data.icon)
-
-        DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
-
-        self.isplitter.add_notebook(notebook)
-        self.isplitter.splitAt(parent_notebook, DIRS[orientation], notebook)
-
-    def new_split_horizontal(self, widget=None):
-        self._create_new_notebook(Qt.Horizontal, widget)
-
-    def new_split_vertical(self, widget=None):
-        self._create_new_notebook(Qt.Vertical, widget)
-
     def on_tabbar_last_closed(self, tw):
         self.isplitter.notebook_last_tab_closed()
 
     def set_window_title(self, title: str) -> None:
         if self.frame:
             self.frame.set_window_title(title)
-
         else:
             self.setWindowTitle(title)

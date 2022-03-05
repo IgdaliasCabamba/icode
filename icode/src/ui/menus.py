@@ -1,4 +1,3 @@
-from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
@@ -9,20 +8,6 @@ from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
                              QToolButton, QVBoxLayout, QWidget, qApp, QActionGroup)
 
 from functions import getfn
-from .assistant import AprilFace
-from .explorer import FileExplorer
-from .istore import ExtensionsUi
-from .research_space import Labs
-from .code_notebook import SideBottomNotebook
-from .log_viewer import ProblemLogs
-from .investigator import Searcher
-from .source_control import IGit
-from .terminals import Terminal
-from .widgets import Notes, WorkSpace, Table
-
-from .igui import HeaderPushButton
-from data import note_file_path
-
 from functools import partial
 
 class IndentSizeMenu(QMenu):

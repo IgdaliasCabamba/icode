@@ -1,4 +1,16 @@
 {
+    //Application Fonts
+    "font":{
+        "app":{
+                "size":"11pt",
+                "size-int":11
+            },
+        "md-text":{
+            "size":"11pt",
+            "size-int":11
+        }
+    },
+
     //Application Language
     "lang":"en",
     
@@ -15,5 +27,5 @@
     "window-style":"custom",
 
     //Extensions
-    "extensions":["icode_sky_view", "smart_python"],
+    "extensions":["icode_sky_view", "smart_python"]
 }

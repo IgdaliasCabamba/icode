@@ -1,6 +1,6 @@
 from .version import version
 from .april_brain import *
-from .april_templates import *
+from .templates import *
 from .icache import *
 from .consts import *
 from .extender import *

@@ -4,7 +4,7 @@ import functions
 import data
 from PyQt5.QtGui import QFontDatabase
 
-def get_fonts_from_resources():
+def get_fonts_from_resources() -> list:
     directory = functions.getfn.get_correct_path_join(f"{data.smartcode_directory}fonts{data.SYS_SEP}")
     font_file_list = []
     if directory:    
@@ -17,5 +17,5 @@ def get_fonts_from_resources():
                     )
     return font_file_list
 
-def add_application_font(font_with_path):    
+def add_application_font(font_with_path) -> None:
     QFontDatabase.addApplicationFont(font_with_path)

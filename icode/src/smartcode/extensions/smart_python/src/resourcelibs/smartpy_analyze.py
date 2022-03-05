@@ -54,10 +54,12 @@ class DeepAnalyze(QFrame):
         self.status.setRange(0,100)
         self.status.setValue(30)
         
-        
-        
         self.layout.addWidget(self.readme)
         self.layout.addWidget(self.status)
         self.layout.addWidget(self.btn_get_diagnosis)
         self.layout.setAlignment(self.readme, Qt.AlignTop)
         self.layout.setAlignment(self.btn_get_diagnosis, Qt.AlignTop)
+    
+    def do_analyze(self, code, editor):
+        print(code, editor)
+        self.readme.setVisible(False)

@@ -26,14 +26,13 @@ class Init(ModelUi):
 
     def listen_notebook_slots(self, notebook):
         notebook.widget_added.connect(self.apply_style_in_editor)
-        pass
 
     def listen_slots(self):
-        self.add_event("ui.notebook.widget_added", self.apply_style_in_editor)
-        self.add_event("app.on_new_notebook", self.listen_notebook_slots)
+        self.do_on(self.apply_style_in_editor, "ui", "notebook", "widget_added")
+        self.do_on(self.listen_notebook_slots, "app", "on_new_notebook")
 
     def apply_style(self):
-        style_sheet = self.palette_to_styles(
+        style_sheet = self.get_styles(
             dark={"styles":"dark.qss", "vars":self.dark_vars},
             light={"styles":"light.qss", "vars":self.light_vars}
         ) 

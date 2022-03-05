@@ -1,50 +1,59 @@
+from dataclasses import dataclass
 from PyQt5.QtCore import Qt
+from urllib3 import Retry
 import frameworks.jedit2 as ijson
 from base.system import BASE_PATH, SYS_SEP
-from data import qt_cache, DATA_FILE, TERMINALS_FILE
+from data import qt_cache, DATA_FILE, TERMINALS_FILE, EDITOR_FILE
 import base.consts as iconsts
 from base.memory import *
 
-ORIENTATIONS = {
-    0: Qt.Vertical,
-    1: Qt.Vertical,
-    2: Qt.Horizontal,
-    3: Qt.Horizontal
-}
+@dataclass
+class SettingsCache:
+    settings:dict = None
 
-def get_all() -> dict:
+settings_cache = SettingsCache()
 
-    return ijson.load(DATA_FILE)
+def get_settings() -> dict:
+    try:
+        data = ijson.load(DATA_FILE)
+        settings_cache.settings = data
+        return data
+    except:
+        return settings_cache.settings
+
+def get_font():
+    return get_settings()["font"]
 
 def get_icons_package():
 
-    return ijson.load(DATA_FILE)["icons-package"]
+    return get_settings()["icons-package"]
 
 def get_icons_theme():
 
-    return ijson.load(DATA_FILE)["icons-theme"]
+    return get_settings()["icons-theme"]
 
 def get_palette():
 
-    return ijson.load(DATA_FILE)["palette"]
+    return get_settings()["palette"]
 
 def get_qt_theme():
     
-    return ijson.load(DATA_FILE)["qt-theme"]
+    return get_settings()["qt-theme"]
 
 def get_window_style():
     
-    return ijson.load(DATA_FILE)["window-style"]
+    return get_settings()["window-style"]
 
 def get_theme():
     
-    return ijson.load(DATA_FILE)["theme"]
+    return get_settings()["theme"]
 
 def get_extensions():
     
-    return ijson.load(DATA_FILE)["extensions"]
+    return get_settings()["extensions"]
 
 def save_window(window, app):
+    """Save The Main Window"""
     if window.frame:
         window_object = window.frame
     else:
@@ -62,17 +71,14 @@ def save_window(window, app):
             qt_cache.setValue("toolbar_action", i)
             break
     
-    #--------------------------------------
-    
-    def get_direction(dir):
-        return ORIENTATIONS[dir]
+    """Save The Notebooks and Editors"""
             
     data = []
     for notebook in window.isplitter.splited_widgets:
         childs = []
         for i in range(notebook["widget"].count()):
             widget = notebook["widget"].widget(i)
-            if app.widget_is_code_editor(widget):
+            if app.is_widget_code_editor(widget):
                 
                 content_path = str(widget.file)    
                 content = widget.editor.text()
@@ -107,7 +113,7 @@ def save_window(window, app):
         data.append({
             "id":notebook["id"],
             "ref":notebook["ref"],
-            "direction":get_direction(notebook["direction"]),
+            "direction":iconsts.ORIENTATIONS[notebook["direction"]],
             "childs":childs
             })
                     
@@ -116,6 +122,7 @@ def save_window(window, app):
     save_memory()
             
 def restore_window(window, app, getfn):
+    """Restore the Main Window"""
     window_geometry = qt_cache.value("window_geometry")
     window_state = qt_cache.value("window_state")
     side_right_visiblity = qt_cache.value("side_right_visiblity")
@@ -168,7 +175,7 @@ def restore_window(window, app, getfn):
     if toolbar_action is not None:
        window.tool_bar.actions_list[int(toolbar_action)].trigger()
     
-    #--------------------------------------
+    """Restore the Notebooks and Editors"""
     
     for item in MEMORY["icode"]["editing"]:
         id = item["id"]
@@ -202,7 +209,7 @@ def restore_window(window, app, getfn):
             title = child["notebook"]["title"]
             icon = getfn.get_icon_from_lexer(lexer_name)
             
-            editor = app.get_new_editor(notebook, file)
+            editor = app.new_editor(notebook, file)
             editor.editor.set_text(code)
             index = notebook.add_tab_and_get_index(editor, title)
             notebook.setTabIcon(index, icon)

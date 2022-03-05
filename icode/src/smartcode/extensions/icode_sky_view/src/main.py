@@ -26,13 +26,14 @@ class Init(ModelApp):
         self.action_manager.addAction(self.opt_auto)
         self.action_manager.addAction(self.opt_show)
         self.action_manager.addAction(self.opt_hide)
-        self.action_manager.triggered.connect(self.change_status)
         self.menu.addAction(self.opt_auto)
         self.menu.addAction(self.opt_show)
         self.menu.addAction(self.opt_hide)
         self.ui.menu_bar.tools.addMenu(self.menu)
         
         self.load_settings()
+        
+        self.do_on(self.change_status, "action_manager", "triggered")
 
     def change_status(self, action):
         if action.objectName() == "auto":

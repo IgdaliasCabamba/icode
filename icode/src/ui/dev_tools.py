@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QFrame, QListWidget, QVBoxLayout, QPushButton,
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QColor
 from pathlib import Path
-from ..igui import ScrollLabel, IListWidgetItem
+from .igui import ScrollLabel, IListWidgetItem
 from base import memory, system
 from data import note_file_path, labels_cache
 
@@ -134,7 +134,6 @@ class Todos(QFrame):
         line = self.input_line.text()
         title = self.input_title.text()
         label = self.label_picker.currentText().lower()
-        self.add_todo(line, title, desc, label)
 
         labels_cache.beginGroup(self.file_name)
         labels_cache.setValue(line, {
@@ -144,6 +143,7 @@ class Todos(QFrame):
             "label": label
         })
         labels_cache.endGroup()
+        self.update_data()
 
     def set_data(self, editor: object, file_name: str):
         self.file_name = file_name.replace(system.SYS_SEP, "_")

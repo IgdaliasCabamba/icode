@@ -52,8 +52,17 @@ class App(Base):
         self.on_commit_app.emit(1)
         return editor
     
+    def new_editor(self, notebook, file=None):
+        if file is None:
+            editor = EditorView(self, self.ui, notebook)
+        else:
+            editor = EditorView(self, self.ui, notebook, file)
+        
+        editor.on_tab_content_changed.connect(self.update_tab)
+        return editor
+    
     def copy_editor(self, notebook, tab_data) -> EditorView:
-        editor = self.get_new_editor(notebook)
+        editor = self.new_editor(notebook)
         editor.make_deep_copy(tab_data.widget)
         index = notebook.add_tab_and_get_index(editor, tab_data.title)
         notebook.setTabToolTip(index, tab_data.tooltip)
@@ -120,7 +129,7 @@ class App(Base):
         home_dir = str(Path.home())
         if file_with_path:
             code_file = Path(file_with_path)
-            duplicate = self.is_duplicated_file(file_with_path, self.ui.notebook)
+            duplicate = self.is_file_duplicated(file_with_path, self.ui.notebook)
             if code_file.is_file():
                 if duplicate:
                     # if file already exist in this notebook just go to file tab
@@ -135,7 +144,7 @@ class App(Base):
             if files[0]:
                 for file in files[0]:
                     code_file = Path(file)
-                    duplicate = self.is_duplicated_file(file, self.ui.notebook)
+                    duplicate = self.is_file_duplicated(file, self.ui.notebook)
                     if code_file.is_file() and not duplicate:
                         self.create_editor_from_file(code_file)
                         editor_cache.save_to_list(str(file), "files")
@@ -211,14 +220,14 @@ class App(Base):
 
     def find_in_editor(self):
         self.editor_widgets.close_all()
-        if not self.notebooks_is_empty():
+        if not self.are_notebooks_empty():
             widget = self.ui.notebook.currentWidget()
             if widget.objectName() == "editor-frame":
                 self.ui.notebook.find_replace.do_find()
 
     def replace_in_editor(self):
         self.editor_widgets.close_all()
-        if not self.notebooks_is_empty():
+        if not self.are_notebooks_empty():
             widget = self.ui.notebook.currentWidget()
             if widget.objectName() == "editor-frame":
                 self.ui.notebook.find_replace.do_replace()
@@ -271,7 +280,7 @@ class App(Base):
         self.editor_widgets.do_eol_mode()
     
     def toggle_eol_visiblity(self):
-        editor = self.notebook_have_editor()
+        editor = self.has_notebook_editor()
         if editor:
             if editor.editor.eolVisibility():
                 editor.editor.set_eol_visible(False)
@@ -325,7 +334,7 @@ class App(Base):
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""
         self.editor_widgets.close_all()
-        widget = self.widget_is_code_editor(self.ui.notebook.widget(index))
+        widget = self.is_widget_code_editor(self.ui.notebook.widget(index))
             
 
         if index == -1:
@@ -346,7 +355,7 @@ class App(Base):
 
     def toggle_main_views(self):
         """toggle beetwen initial screen and editor screen"""
-        if self.notebooks_is_empty():
+        if self.are_notebooks_empty():
             self.ui.index.setVisible(True)
             self.ui.scroll_area.setVisible(False)
             self.status_bar.main_view()
@@ -354,7 +363,7 @@ class App(Base):
         else:
             self.ui.scroll_area.setVisible(True)
             self.ui.index.setVisible(False)
-            if self.notebooks_have_editor():
+            if self.has_notebook_editor():
                 self.status_bar.editor_view()
             else:
                 self.status_bar.main_view()
@@ -404,19 +413,19 @@ class App(Base):
 
     def split_in_group_hor(self) -> None:
         """Split the editor in two horizontally, like a vscode"""
-        widget = self.notebook_have_editor()
+        widget = self.has_notebook_editor()
         if widget:
             widget.split_horizontally()
 
     def split_in_group_ver(self) -> None:
         """Split the editor in two vertically, like a vscode"""
-        widget = self.notebook_have_editor()
+        widget = self.has_notebook_editor()
         if widget:
             widget.split_vertically()
 
     def join_in_group(self) -> None:
         """Merge the splited editors in one, like a vscode"""
-        widget = self.notebook_have_editor()
+        widget = self.has_notebook_editor()
         if widget:
             widget.join_in_group()
     

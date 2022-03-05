@@ -14,7 +14,8 @@ from .log_viewer import ProblemLogs
 from .research_space import Labs
 from .source_control import IGit
 from .terminals import Terminal
-from .widgets import Notes, Table, Todos, WorkSpace
+from .widgets import Table, WorkSpace
+from .dev_tools import Notes, Todos
 
 
 class SideBottom(QFrame):
@@ -245,7 +246,6 @@ class SideRight(QFrame):
         self.table_notes = Table(self, "Notes")
 
         self.table_todos = Table(self, "Labels")
-        self.table_todos.add_header_widget(self.btn_view_hide_labels)
         self.table_todos.add_header_widget(self.btn_add_label)
 
         self.table_notes.add_widget(self.notes)

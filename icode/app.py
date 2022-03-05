@@ -8,6 +8,9 @@ import os
 import importlib
 from bin import utils
 
+IS_RUNNING = True
+IS_FINISHED = False
+
 src_path = "src"
 root_path = os.getcwd()
 
@@ -19,7 +22,10 @@ else:
     os.chdir(root_path+os.sep+src_path)
 
 def finish():
-    print(utils.kernel_version, utils.bin_version, utils.frameworks_version, main.version)
+    global IS_FINISHED
+    if not IS_FINISHED:
+        IS_FINISHED = True
+        print(utils.kernel_version, utils.bin_version, utils.frameworks_version, main.version)
     
 main_path = os.getcwd()
 

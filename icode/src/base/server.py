@@ -8,6 +8,7 @@ from settings import DATA_FILE
 from ui import *
 from data import editor_cache
 from .extender import Plugin
+from typing import Union
 
 plugin = Plugin()
 
@@ -132,74 +133,48 @@ class Base(QObject, Core):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self._parent = parent
-        
         self.logo_icons = getfn.get_smartcode_icons("logo")
         self.command_icons = getfn.get_smartcode_icons("action")
         self.indentation_icons = getfn.get_smartcode_icons("indentation")
-        
-        self.api_lexers_list = self.get_all_lexers_objects_api()
-        self.eol_list = self.get_eol_list()
-        self.space_list = self.get_space_list()
-        self.api_commands_list = self.get_api_commands_list(self)
+        self.__lexers = []
+        self.__commands = []
         
     def run_api(self):
         self.editor_widgets.set_api(self)
 
-    @property
-    def commands_list(self) -> list:
-        return self.api_commands_list
-
-    @property
-    def lexers_list(self) -> list:
-        return self.api_lexers_list
-
     def add_lexer(self, lexer: object) -> None:
-        self.api_lexer_list.append(lexer)
+        self.__lexers.append(lexer)
     
     def add_command(self, command) -> None:
-        self.api_commands_list.append(command)
+        self.__commands.append(command)
 
     def load_plugins(self):
         data = {"app": self, "qt_app": self.qt_app}
         plugin.run_ui_plugin(DATA_FILE, data)
         plugin.run_app_plugin(DATA_FILE, data)
 
-    def get_new_editor(self, notebook, file=None):
-        if file is None:
-            editor = EditorView(self, self.ui, notebook)
-        else:
-            editor = EditorView(self, self.ui, notebook, file)
-        
-        editor.on_tab_content_changed.connect(self.update_tab)
-        return editor
-
-    def widget_is_code_editor(self, widget):
+    def is_widget_code_editor(self, widget, attr:str=None, value:str=None) -> bool:
         if hasattr(widget, "objectName"):
             if widget.objectName() == "editor-frame":
-                return widget
-            return False
-
-    def widget_is_code_editor_with_python_lexer(self, widget):
-        if widget.objectName() == "editor-frame":
-            if widget.editor.lexer_name == "python":
-                return True
+                if getattr(widget.editor, str(attr), None) == value:
+                    return widget
         return False
 
-    def notebook_have_editor_with_python(self, notebook:object = None):
-        if not self.notebooks_is_empty():
+    def current_notebook_editor(self, notebook:object = None, attr:str=None, value:str=None) -> Union[object, bool]:
+        if not self.are_notebooks_empty():
             if notebook is None:
                 widget = self.ui.notebook.currentWidget()
             else:
                 widget = notebook.currentWidget()
             if widget is not None:
-                if self.widget_is_code_editor_with_python_lexer(widget):
-                        return widget.editor
+                if self.is_widget_code_editor(widget, attr, value):
+                    return widget.editor
         return False
 
-    def notebooks_is_empty(self) -> bool:
-        return self.ui.isplitter.is_empty()
+    def are_notebooks_empty(self) -> bool:
+        return self.ui.isplitter.is_empty
 
-    def notebook_have_editor(self, notebook=None):
+    def has_notebook_editor(self, notebook=None) -> Union[object, bool]:
         if notebook is None:
             notebook = self.ui.notebook
         widget = notebook.currentWidget()
@@ -208,84 +183,83 @@ class Base(QObject, Core):
                 return widget
         return False
 
-    def notebooks_have_editor(self):
+    def have_notebooks_editor(self) -> bool:
         for notebook in self.ui.notebooks:
             widget = self.notebook_have_editor(notebook)
             if widget:
                 return True
         return False
     
-    def is_duplicated_file(self, file:str, notebook:object) -> bool:
+    def is_file_duplicated(self, file:str, notebook:object) -> bool:
         for i in range(notebook.count()):
             widget = notebook.widget(i)
-            if self.widget_is_code_editor(widget):
+            if self.is_widget_code_editor(widget):
                 if str(widget.file) == file:
                     return {"index":i, "widget":widget, "notebook":notebook}
         return False
-
-    def get_editor_class(self):
-        return EditorView
     
-    def get_api_commands_list(self, app) -> list:
+    @property
+    def commands(self) -> list:
         return [
             {
                 "name": "New File\t\tCtrl+N",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.new_file
+                "command": self.new_file
             },
             {
                 "name": "Open File\t\tCtrl+O",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.open_file
+                "command": self.open_file
             },
             {
                 "name": "Save File\t\tCtrl+S",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.save_file
+                "command": self.save_file
             },
             {
                 "name": "Open Folder\tCtrl+K",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.open_folder
+                "command": self.open_folder
             },
             {
                 "name": "Open Repository\t",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.open_repository
+                "command": self.open_repository
             },
             {
                 "name": "Close File\t\tCtrl+W",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.close_editor
+                "command": self.close_editor
             },
             {
                 "name": "Reopen Last Closed Editor\tCtrl+Shift+T",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.reopen_editor
+                "command": self.reopen_editor
             },
             {
                 "name": "Reopen Last Closed Editors",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.reopen_editors
+                "command": self.reopen_editors
             },
             {
                 "name": "Split In Group Horizontal",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.split_in_group_hor
+                "command": self.split_in_group_hor
             },
             {
                 "name": "Split In Group Vertical",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.split_in_group_ver
+                "command": self.split_in_group_ver
             },
             {
                 "name": "Join In Group",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": app.join_in_group
+                "command": self.join_in_group
             },
         ]
-    
-    def get_eol_list(self):
+        
+    @property
+    def eols(self):
         return [{
             "name": r"Windows (\r\n)",
             "mode": 0,
@@ -300,14 +274,15 @@ class Base(QObject, Core):
             "icon": self.logo_icons.get_icon("macos")
         }]
     
-    def get_tabs_navigation(self):
-        notebook = self.ui.notebook
+    @property
+    def tabs_navigation(self):
         return {
-            "notebook":notebook,
+            "notebook":self.ui.notebook,
             "tabs":notebook.get_navigation()
         }
     
-    def get_space_list(self):
+    @property
+    def indentation(self):
         return [{
             "name": "Indent Using Spaces",
             "action": 0,
@@ -330,7 +305,8 @@ class Base(QObject, Core):
             "icon": self.indentation_icons.get_icon("spaces")
         }]
     
-    def get_all_lexers_objects_api(self) -> dict:
+    @property
+    def lexers(self) -> dict:
         return [{
             "name": "python",
             "lexer": PythonLexer,

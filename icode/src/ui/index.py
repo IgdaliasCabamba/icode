@@ -18,6 +18,7 @@ class QuickActions(QFrame):
         super().__init__(parent)
         self.setObjectName("quick-actions-panel")
         self.parent=parent
+        self.template = IndexRender()
         
         self.index_events={
             "#new":self.on_new_clicked,
@@ -34,7 +35,7 @@ class QuickActions(QFrame):
 
         self.label=QLabel(self)
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setText(hello_msg())
+        self.label.setText(self.template.hello_code)
         self.layout.addWidget(self.label)
         self.label.linkActivated.connect(self.option_clicked)
     
@@ -53,6 +54,7 @@ class Index(QFrame):
         super().__init__(parent)
         self.setObjectName("index")
         self.parent=parent
+        self.template = IndexRender()
         self.init_ui()
     
     def init_ui(self) -> None:
@@ -61,7 +63,7 @@ class Index(QFrame):
         self.layout.setContentsMargins(0,0,0,0)
         self.label=QLabel(self)
         self.label.setMinimumSize(100,100)
-        self.label.setStyleSheet(logo)
+        self.label.setStyleSheet(self.template.logo)
         self.actions=QuickActions(self)
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.actions)
@@ -86,6 +88,7 @@ class WelcomeActions(QFrame):
         super().__init__(parent)
         self.setObjectName("quick-actions-panel")
         self.parent=parent
+        self.template = IndexRender()
         self.init_ui()
         
         self.index_events={
@@ -103,13 +106,13 @@ class WelcomeActions(QFrame):
         self.side_left=QLabel(self)
         self.side_left.setWordWrap(True)
         self.side_left.setAlignment(Qt.AlignLeft)
-        self.side_left.setText(welcome_msg_left([]))
+        self.side_left.setText(self.template.recent_paths)
         self.side_left.setMinimumSize(100,100)
         
         self.side_right=QLabel(self)
         self.side_right.setWordWrap(True)
         self.side_right.setAlignment(Qt.AlignLeft)
-        self.side_right.setText(welcome_msg_right())
+        self.side_right.setText(self.template.dev_utils)
         self.side_right.setMinimumSize(100,100)
         
         self.layout.addWidget(self.side_left)
@@ -127,8 +130,9 @@ class WelcomeActions(QFrame):
                 self.on_open_recent_folder.emit(link)
     
     
-    def rebuild(self, files:list = []):
-        self.side_left.setText(welcome_msg_left(files))
+    def rebuild(self, paths:list = []):
+        self.template.set_paths(paths)
+        self.side_left.setText(self.template.recent_paths)
     
 class Welcome(QFrame):
 

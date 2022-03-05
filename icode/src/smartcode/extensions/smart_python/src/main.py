@@ -195,7 +195,7 @@ class Init(ModelApp):
         self.ui.editor_widgets.run_widget(self.python_envs)
     
     def show_goto_symbol(self):
-        editor = self.app.notebook_have_editor_with_python()
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.symbol_navigator.set_symbols(self.get_code_tree(editor))
             self.ui.editor_widgets.run_widget(self.symbol_navigator)
@@ -210,23 +210,25 @@ class Init(ModelApp):
         notebook.widget_added.connect(self.take_editor)
 
     def listen_slots(self):
-        self.add_event("ui.notebook.widget_added", self.take_editor)
-        self.add_event("app.on_new_notebook", self.listen_notebook_slots)
-        self.add_event("on_env_changed", self.update_statusbar_env)
-        self.add_event("straighten_code.triggered", self.adjust_code)
-        self.add_event("sort_imports.triggered", self.adjust_imports)
-        self.add_event("interpreter.clicked", self.show_envs)
-        self.add_event("python_env.triggered", self.show_envs)
-        self.add_event("goto_symbol.triggered", self.show_goto_symbol)
-        self.add_event("btn_open_pylab.clicked", lambda: self.app.open_research_space("smart_python"))        
-        self.add_event("btn_run_tree.clicked", self.run_code_tree)
-        self.add_event("btn_run_doctor.clicked", self.run_code_doctor)
-        self.add_event("btn_run_warnings.clicked", self.run_code_warnings)
-        self.add_event("code_doctor.btn_get_diagnosis.clicked", self.run_code_doctor)
-        self.add_event("code_warnings.btn_get_warnings.clicked", self.run_code_warnings)
-        self.add_event("code_warnings.on_fix_bugs_clicked", self.fix_bugs)
-        self.add_event("python_envs.on_env_added", self.add_env)
-        self.add_event("python_envs.on_current_env", self.set_current_env)
+        self.do_on(self.take_editor, "ui", "notebook", "widget_added")
+        self.do_on(self.listen_notebook_slots, "app", "on_new_notebook")
+        self.do_on(self.update_statusbar_env, "on_env_changed")
+        self.do_on(self.adjust_code, "straighten_code", "triggered")
+        self.do_on(self.adjust_imports, "sort_imports", "triggered")
+        self.do_on(self.show_envs, "interpreter", "clicked")
+        self.do_on(self.show_envs, "python_env", "triggered")
+        self.do_on(self.show_goto_symbol, "goto_symbol", "triggered")
+        self.do_on(lambda: self.app.open_research_space("smart_python"), "btn_open_pylab", "clicked")
+        self.do_on(self.run_code_tree, "btn_run_tree", "clicked")
+        self.do_on(self.run_code_doctor, "btn_run_doctor", "clicked")
+        self.do_on(self.run_code_warnings,  "btn_run_warnings", "clicked")
+        self.do_on(self.run_code_analyze, "btn_run_analyze", "clicked")
+        self.do_on(self.run_code_doctor, "code_doctor", "btn_get_diagnosis", "clicked")
+        self.do_on(self.run_code_warnings, "code_warnings", "btn_get_warnings", "clicked")
+        self.do_on(self.fix_bugs, "code_warnings", "on_fix_bugs_clicked")
+        self.do_on(self.run_code_analyze, "deep_analyze", "btn_get_diagnosis", "clicked")
+        self.do_on(self.add_env, "python_envs", "on_env_added")
+        self.do_on(self.set_current_env, "python_envs", "on_current_env")
     
     def take_editor(self, widget):
         if self.object_is(widget, "editor-frame"):
@@ -321,30 +323,35 @@ class Init(ModelApp):
     
     def remove_completion_entry(self, lexer_api, completions):
         if not sip.isdeleted(lexer_api):
-            print(completions)
+            #print(completions)
             for completion in completions:
                 lexer_api.remove(completion)
             lexer_api.prepare()
             
     def run_code_warnings(self):
-        editor = self.app.notebook_have_editor_with_python()
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.code_warnings.get_warnings(editor)
 
     def run_code_tree(self):
-        editor = self.app.notebook_have_editor_with_python()
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.code_tree.build_tree(editor)
 
     def run_code_doctor(self):
-        editor = self.app.notebook_have_editor_with_python()
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
             self.code_doctor.do_analyze(editor.text(), editor)
+    
+    def run_code_analyze(self):
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
+        if editor:
+            self.deep_analyze.do_analyze(editor.text(), editor)
 
     def adjust_code(self, editor=None) -> None:
         """Straighten the Python code """
         if editor is None or isinstance(editor, bool):
-            editor = self.app.notebook_have_editor_with_python(self.ui.notebook)
+            editor = self.app.has_notebook_editor_with_python(self.ui.notebook)
 
         if editor is None or isinstance(editor, bool):
             return
@@ -355,7 +362,7 @@ class Init(ModelApp):
 
     def adjust_imports(self):
         """Sort the imported Python libs in code by name"""
-        editor = self.app.notebook_have_editor_with_python(self.ui.notebook)
+        editor = self.app.has_notebook_editor_with_python(self.ui.notebook)
         if editor is None or isinstance(editor, bool):
             return
         code_smell = editor.text()

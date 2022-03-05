@@ -203,7 +203,6 @@ class IGit(QFrame):
         self.parent=parent
         self.icons=getfn.get_smartcode_icons("source_control")
         self.repository_menu = GitMenu(self)
-        self.repository_menu.open_repository.triggered.connect(lambda: self.open_repository())
         self.repository_menu.clone_repository.triggered.connect(self.clone_repository)
         self.repository_menu.add_all.triggered.connect(self.add_all)
         self.repository = None

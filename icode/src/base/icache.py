@@ -49,7 +49,6 @@ class CacheManager(QSettings):
             return base_list
         return None
     
-    # TODO
     def remove_list_data(self, key:str, until:int) -> None:
         self.remove(key)
     

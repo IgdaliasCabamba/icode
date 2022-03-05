@@ -193,7 +193,7 @@ class EditorWidgets(QObject):
     
     def do_goto_line(self):
         if self.api is not None:
-            if self.api.notebook_have_editor():
+            if self.api.has_notebook_editor():
                 self.run_widget(self.go_to)
     
     def do_goto_tab(self):
@@ -213,20 +213,20 @@ class EditorWidgets(QObject):
     
     def get_all_languages(self):
         if self.api is not None:
-            if self.api.notebook_have_editor():
-                return self.api.lexers_list
+            if self.api.has_notebook_editor():
+                return self.api.lexers
     
     def get_current_editor(self):
         return self._editor_widget.editor
     
     def get_all_eols(self):
         if self.api is not None:
-            if self.api.notebook_have_editor():
+            if self.api.has_notebook_editor():
                 return self.api.eol_list
     
     def get_all_spaces(self):
         if self.api is not None:
-            if self.api.notebook_have_editor():
+            if self.api.has_notebook_editor():
                 return self.api.space_list
     
     def run_by_id(self, widget, text):

@@ -67,6 +67,7 @@ class AprilFace(QFrame):
         self.icons = getfn.get_smartcode_icons("assistant")
         self._work_count = 0
         self.options = AssistantMenu(self)
+        self.template = AprilRender()
         self.settings = {
             "all_response":False,
             "answer_count":1
@@ -93,7 +94,7 @@ class AprilFace(QFrame):
         self.vbox = QVBoxLayout(self.widget)
         self.widget.setLayout(self.vbox)
 
-        self.hello_msg=CardApril(self, hello_msg, "April \uf860", 0)
+        self.hello_msg=CardApril(self, self.template.readme, "April \uf860", 0)
         self.hello_msg.set_read_only(True)
 
         self.vbox.addWidget(self.hello_msg)
@@ -152,7 +153,8 @@ class AprilFace(QFrame):
             for ans in res:
                 if isinstance(ans, dict):
                     if "answer" in ans.keys():
-                        self.vbox.addWidget(CardApril(self, ans["answer"], "April \uf860", 0, "code"))
+                        if ans["answer"] is not None:
+                            self.vbox.addWidget(CardApril(self, ans["answer"], "April \uf860", 0, "code"))
         elif type == -1:
             self.vbox.addWidget(CardApril(self, res, "April \uf860", 0, "text"))
                 

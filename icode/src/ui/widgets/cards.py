@@ -7,7 +7,7 @@ from PyQt5.QtGui import QColor
 from base.april_brain import *
 
 from ui.chelly import GenericEditor
-import pyperclip as pc
+import pyperclip
 import textwrap
 import commonmark
 from functions import getfn
@@ -96,6 +96,8 @@ class CardApril(QFrame):
             self.layout.setAlignment(self.lbl_title, Qt.AlignRight)
             self.layout.setAlignment(self.editor, Qt.AlignRight)    
             self.drop_shadow.setOffset(4, 4)
+        
+        if self.type != "code":
             self.set_read_only(True)
     
         self.editor.setGraphicsEffect(self.drop_shadow)
@@ -104,13 +106,18 @@ class CardApril(QFrame):
         self.editor.setReadOnly(arg)
     
     def copy_to_clipboard(self):
-        wrapper = textwrap.TextWrapper(width=80)
-        value= wrapper.fill(text=self.text)
+        if self.type == "text":
+            wrapper = textwrap.TextWrapper(width=80)
+            value= wrapper.fill(text=self.text)
+            
+        elif self.type == "code":
+            self.code_editor.selectAll()
+            value = self.code_editor.selectedText()
 
-        pc.copy(value)
+        pyperclip.copy(value)
     
     @property
-    def text(self) -> str:    
+    def text(self) -> str:
         return self.content
 
     @property
@@ -147,12 +154,12 @@ class CardApril(QFrame):
             content.setLayout(vbox)
             
             lexer = getfn.get_lexer_from_code(self.text)
-            editor = GenericEditor()
-            editor.setText(self.text)
+            self.code_editor = GenericEditor()
+            self.code_editor.setText(self.text)
             if lexer is not None:
                 lexer = lexer()
-                editor.set_lexer(lexer)
+                self.code_editor.set_lexer(lexer)
             
-            vbox.addWidget(editor)
-            content.setStyleSheet(f"""background:{editor.paper().name()}; border:none""")
+            vbox.addWidget(self.code_editor)
+            content.setStyleSheet(f"""background:{self.code_editor.paper().name()}; border:none""")
         return content

@@ -16,7 +16,7 @@ import base.consts as iconsts
 import settings
 import data
 import frameworks.jedit2 as ijson
-from base.extender import Ext
+from base.extender import Extender
 from smartsci.lexers import *
 
 
@@ -606,13 +606,15 @@ class Get:
         else:
             return self.get_any_icon_by_name("lexer", "none")
 
-    def get_icon_api(self):
+    def get_icon_api(self) -> None:
         api_file = pathlib.Path(
             f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{settings.get_icons_package()}{SYS_SEP}main.json"
         )
-        if api_file.is_file() and api_file.exists():
-            return ijson.load(api_file)
-        return None
+        try:
+            if api_file.is_file() and api_file.exists():
+                return ijson.load(api_file)
+        except:
+            return None
 
     def get_default_icons(self, icon):
         return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}{icon}"

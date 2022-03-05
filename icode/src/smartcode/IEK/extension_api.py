@@ -22,6 +22,7 @@ from base.font_loader import *
 from base.code_api import *
 import settings
 import langserver
+from typing import Union
 
 
 def make_dirs(dirs:list):
@@ -60,30 +61,31 @@ class BaseApi:
         
         return False
     
-    def parse_attr(self, parent:object = None, name:str = None) -> None:
-        if isinstance(parent, str) and name is None:
-            name = parent
-            parent = None
+    def parse_attr(self, parent:object=None, attrs:list = []) -> None:
+        if parent is None:
+            parent = self
+        
+        if attrs:
+            swap_attr = None
+            base_attr = getattr(parent, attrs[0], None)
+            attrs.pop(0)
 
-        if name is not None:
-            if parent is None:
-                parent = self
-
-            splitted_name = name.split(".")
-            tmp_name = None
-            base_name = getattr(parent, splitted_name[0], None)
-            splitted_name.pop(0)
-
-            for item in splitted_name:
-                tmp_name = getattr(base_name, item, None)
-                if tmp_name is None:
+            for attr in attrs:
+                swap_attr = getattr(base_attr, attr, None)
+                if swap_attr is None:
                     break
-                base_name = tmp_name
+                base_attr = swap_attr
             
-            return base_name
+            return base_attr
     
-    def add_event(self, name:str, action:object):
-        attr = self.parse_attr(name)
+    def do_on(self, action:object, *names:tuple):
+        attrs = []
+        for arg in names:
+            if isinstance(arg, str):
+                attrs.append(arg)
+        
+        attr = self.parse_attr(self, attrs)    
+        #print(attr)
         if hasattr(attr, "connect"):
             attr.connect(action)
             
@@ -159,7 +161,7 @@ class ModelUi(QObject, BaseApi):
                 editor.on_style_changed.connect(painter)
                 painter(editor)
 
-    def palette_to_styles(self, dark:dict, light:dict):
+    def get_styles(self, dark:dict, light:dict):
         if self.is_dark():
             return StyleMaker(self, self.path_to("src", dark["styles"]), dark["vars"])
 

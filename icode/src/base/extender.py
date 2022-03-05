@@ -1,11 +1,12 @@
 import importlib
+from typing import Union
 import frameworks.jedit2 as ijson
 
-class Ext:
-    def __init__(self):
+class Extender:
+    def __init__(self) -> None:
         self.extensions=[]
 
-    def load_plugin(self, plugin, data):
+    def load_plugin(self, plugin, data) -> Union[object, bool]:
         try:
             package_info=importlib.import_module(".package", plugin)
             name=package_info.PACKAGE["__name__"]
@@ -29,12 +30,16 @@ class Ext:
     def get_plugin_list(self) -> list:
         return self.extensions
     
-    def exit_all(self):
+    def exit_all(self) -> None:
         for ext in self.extensions:
-            ext.finish()
+            self.finish_one(ext)
+    
+    def finish_one(self, extension: object) -> None:
+        if hasattr(extension, "finish"):
+            extension.finish()
 
-class Plugin(Ext):
-    def __init__(self):
+class Plugin(Extender):
+    def __init__(self) -> None:
         super().__init__()
     
     def run_ui_plugin(self, config, data) -> None:
@@ -45,7 +50,7 @@ class Plugin(Ext):
         else:
             self.load_plugin("icode_default_theme", data)
     
-    def run_app_plugin(self, config, data):
+    def run_app_plugin(self, config, data) -> None:
         config=ijson.load(config)
         if config["extensions"]:
             for extension in config["extensions"]:
