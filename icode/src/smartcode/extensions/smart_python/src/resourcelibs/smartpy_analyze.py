@@ -26,6 +26,7 @@ class DataViewer(QFrame):
         
         self.vbox_left = QVBoxLayout()
         self.inspect_objects = QListWidget(self)
+        self.inspect_objects.
         self.vbox_left.addWidget(self.inspect_objects)
         
         self.vbox_right = QVBoxLayout()
