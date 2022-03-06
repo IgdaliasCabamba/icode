@@ -128,7 +128,12 @@ class Init(ModelApp):
         table3.setMinimumSize(300,360)
         
         self.refactor = Refactor(None)
+        self.btn_run_refactor = QPushButton()
+        self.btn_run_refactor.setObjectName("Button")
+        self.btn_run_refactor.setProperty("style-bg", "transparent")
+        self.btn_run_refactor.setIcon(corner_icons.get_icon("start"))
         table4 = self.ui.side_right.new_table("Code Refactor", self.refactor)
+        table4.add_header_widget(self.btn_run_refactor)
         table4.setMinimumSize(300,360)
         
         self.deep_analyze = DeepAnalyze(None)

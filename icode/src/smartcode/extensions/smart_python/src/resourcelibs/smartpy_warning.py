@@ -7,10 +7,10 @@ from PyQt5.QtWidgets import (
 from itertools import zip_longest
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api
 from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from smartpy_utils import code_warnings_doc
 
 class CodeWarningsCore(QObject):
     
@@ -79,27 +79,7 @@ class CodeWarnings(QFrame):
         self.fix_bugs_btn.setVisible(False)
         
         self.readme = QLabel(self)
-        self.readme.setText("""
-            <small>
-                Get warnings for your code,
-                problems related to pep8 in
-                your code will be detected and
-                presented here, with the option
-                to fix some of them!
-                to use this functionality click
-                on get warnings, here or on icode labs
-                <p>
-                    click 
-                    <strong>
-                        <a href="www.github.io">here</a>
-                    </strong>
-                    to learn more
-                    <strong>
-                    or
-                    </strong>
-                </p>
-            </small>
-        """)
+        self.readme.setText(code_warnings_doc)
         self.readme.setWordWrap(True)
         
         self.btn_get_warnings=QPushButton("Get Warnings", self)

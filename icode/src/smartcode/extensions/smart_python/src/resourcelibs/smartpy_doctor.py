@@ -11,6 +11,7 @@ from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api
 from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from smartpy_utils import code_doctor_doc
 
 class CodeDoctorCore(QObject):
     
@@ -137,29 +138,7 @@ class CodeDoctor(QFrame):
         self.tree.setVisible(False)
         
         self.readme = QLabel(self)
-        self.readme.setText("""
-            <small>
-                Get basic diagnosis for your code,
-                get data such as:
-                <ul>
-                    <li>number of lines</li>
-                    <li>coments</li>
-                    <li>logic lines of code</li>
-                    <li>blank lines</li>
-                    <li>syntax errors and more.</li>
-                </ul>
-                <p>
-                    click 
-                    <strong>
-                        <a href="www.github.io">here</a>
-                    </strong>
-                    to learn more
-                    <strong>
-                    or
-                    </strong>
-                </p>
-            </small>
-        """)
+        self.readme.setText(code_doctor_doc)
         self.readme.setWordWrap(True)
         
         self.btn_get_diagnosis = QPushButton("Get Diagnosis", self)

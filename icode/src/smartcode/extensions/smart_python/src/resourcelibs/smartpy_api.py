@@ -174,6 +174,9 @@ class PythonApi:
             print(e)
             return None
     
+    def get_analyze_rank(self, complexity:int) -> str:
+        return cc_rank(complexity)
+    
     def get_python_node_tree(self, python_code, sort_way="name"):
         try:
             # Node object
