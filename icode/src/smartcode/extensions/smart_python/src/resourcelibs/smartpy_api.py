@@ -20,6 +20,7 @@ import smartpy_ide_core as ide
 from radon.complexity import cc_rank, cc_visit
 from radon.raw import analyze
 from radon.visitors import ComplexityVisitor
+from radon import visitors
 
 class EnvApi(QSettings):
     def __init__(self, file_with_path:str, format=QSettings.IniFormat):

@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
-from smartpy_api import python_api
+from smartpy_api import python_api, visitors
 from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
 from frameworks.qroundprogressbar import QRoundProgressBar
 from smartpy_utils import format_analyze_rank, deep_analyze_doc
@@ -64,10 +64,17 @@ class DataViewer(QFrame):
         
         if results is not None:
             for result in results:
+                if isinstance(result, visitors.Function):
+                    icon_category = "function"
+                elif isinstance(result, visitors.Class):
+                    icon_category = "class"
+                else:
+                    icon_category = "*"
+                    
                 rank = python_api.get_analyze_rank(result.complexity)
                 self.inspect_objects.addItem(
                     IListWidgetItem(
-                        self.icons.get_icon("class"),
+                        self.icons.get_icon(icon_category),
                         result.name,
                         None,
                         {"editor":editor, "object":result, "rank":rank}
@@ -80,7 +87,6 @@ class DataViewer(QFrame):
             editor = item.item_data["editor"]
             result = item.item_data["object"]
             rank = format_analyze_rank(item.item_data["rank"])
-            
             self.complexity_bar.setValue(result.complexity)
             self.label_rank.setText(rank[0])
             self.quality_label.setText(rank[1])

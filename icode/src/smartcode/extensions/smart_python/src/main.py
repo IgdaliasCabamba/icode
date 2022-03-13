@@ -171,42 +171,8 @@ class Init(ModelApp):
         space.add_table(table5, 2, 0, 2, 2)
         space.add_table(table6, 4, 0, 4, 2)
     
-    def add_env(self, env:object) -> None:
-        envs_api.add_env(env.executable)
-        self.python_envs.set_envs(self.api_envs_list)
-        self.api_envs_list = envs_api.python_envs
-        
-    def set_current_env(self, env: object) -> None:
-        self._current_env = env
-        self.on_env_changed.emit(env)
-        l = []
-        l.extend(self.objects_mem["autocompleters"])
-        l.extend(self.objects_mem["ide_utils"])
-        l.extend(self.objects_mem["live_tipers"])
-        for x in l:
-            if hasattr(x, "set_env"):
-                x.set_env(self._current_env)
-    
-    def show_envs(self) -> None:
-        self.python_envs.set_envs(self.api_envs_list)
-        self.ui.editor_widgets.run_widget(self.python_envs)
-    
-    def show_goto_symbol(self):
-        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
-        if editor:
-            self.symbol_navigator.set_symbols(self.get_code_tree(editor))
-            self.ui.editor_widgets.run_widget(self.symbol_navigator)
-    
-    def get_code_tree(self, editor) -> object:
-        return python_api.get_python_node_tree(editor.text())
-        
-    def update_statusbar_env(self, env) -> None:
-        self.interpreter.setText(f"Python {env.version_info.major}.{env.version_info.minor}.{env.version_info.micro}")
-        
-    def listen_notebook_slots(self, notebook) -> None:
-        notebook.widget_added.connect(self.take_editor)
-
     def listen_slots(self) -> None:
+        self.do_on(self.set_current_editor, "app", "on_current_editor_changed")
         self.do_on(self.take_editor, "ui", "notebook", "widget_added")
         self.do_on(self.listen_notebook_slots, "app", "on_new_notebook")
         self.do_on(self.update_statusbar_env, "on_env_changed")
@@ -226,6 +192,42 @@ class Init(ModelApp):
         self.do_on(self.run_code_analyze, "deep_analyze", "btn_get_diagnosis", "clicked")
         self.do_on(self.add_env, "python_envs", "on_env_added")
         self.do_on(self.set_current_env, "python_envs", "on_current_env")
+        self.do_on(self.start_debuging, "btn_start_debug", "clicked")
+    
+    def add_env(self, env:object) -> None:
+        envs_api.add_env(env.executable)
+        self.python_envs.set_envs(self.api_envs_list)
+        self.api_envs_list = envs_api.python_envs
+        
+    def set_current_env(self, env: object) -> None:
+        self._current_env = env
+        self.on_env_changed.emit(env)
+        l = []
+        l.extend(self.objects_mem["autocompleters"])
+        l.extend(self.objects_mem["ide_utils"])
+        l.extend(self.objects_mem["live_tipers"])
+        for x in l:
+            if hasattr(x, "set_env"):
+                x.set_env(env)
+    
+    def show_envs(self) -> None:
+        self.python_envs.set_envs(self.api_envs_list)
+        self.ui.editor_widgets.run_widget(self.python_envs)
+    
+    def show_goto_symbol(self):
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
+        if editor:
+            self.symbol_navigator.set_symbols(self.get_code_tree(editor))
+            self.ui.editor_widgets.run_widget(self.symbol_navigator)
+    
+    def get_code_tree(self, editor) -> object:
+        return python_api.get_python_node_tree(editor.text())
+        
+    def update_statusbar_env(self, env) -> None:
+        self.interpreter.setText(f"Python {env.version_info.major}.{env.version_info.minor}.{env.version_info.micro}")
+        
+    def listen_notebook_slots(self, notebook) -> None:
+        notebook.widget_added.connect(self.take_editor)
     
     def take_editor(self, widget) -> None:
         if self.object_is(widget, "editor-frame"):
@@ -324,6 +326,9 @@ class Init(ModelApp):
             for completion in completions:
                 lexer_api.remove(completion)
             lexer_api.prepare()
+    
+    def set_current_editor(self, editor):
+        pass
             
     def run_code_warnings(self) -> None:
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
@@ -372,3 +377,7 @@ class Init(ModelApp):
         """Call method to fix some pep-8 issues and remake the analyze"""
         self.adjust_code(editor)
         self.run_code_warnings()
+    
+    def start_debuging(self):
+        editor = self.app.current_notebook_editor(None, "lexer_name", "python")
+        self.debug.start(editor, editor.text(), editor.file_path, self._current_env)

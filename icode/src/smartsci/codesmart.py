@@ -486,10 +486,8 @@ class Editor(EditorBase):
         except FileNotFoundError as e:
             self.info_image = self.add_image(self.icons.get_path("no-data"), (20, 5),  (500, 500))
             self.set_mode(0)
-            
-            message = "File does not exist try to recreate or recover here"
+            message = "File does not exist try to recreate pressing Ctrl+S"
             self.insertAt(message, 0, 0)
-            self.add_indicator_range(0, len(message)-4, 0, len(message), 4, False)
     
     def save_file(self, file_path:str):
         self.file_path = file_path
@@ -650,7 +648,7 @@ class Editor(EditorBase):
             self.minimap.setDocument(self.document())
             self.minimap.setLexer(self.lexer())
     
-    def mark_fold(self, line, mark, id):
+    def mark_fold(self, line, mark, id) -> None:
         if line not in self.folded_lines:
             self.folded_lines.append(line)
         self.display_annotation(line, mark, id, "on_fold")
@@ -667,9 +665,8 @@ class Editor(EditorBase):
         
     def mouse_press_event(self, event:QMouseEvent) -> None:
         self.on_mouse_pressed.emit(event)
+        #word = self.wordAtPoint(event.pos()).lower()
         
-        if not self.editable:
-            print(self.wordAtPoint(event.pos()))
         #cmenu = QMenu(self)
         #newAct = cmenu.addAction("Foo")
         #openAct = cmenu.addAction("Bar")

@@ -3,6 +3,7 @@ dist/
 get-icode/
 smartenv/
 icode/src/.cache/
+icode/src/data/
 tests/local/
 **/__pycache__
 *.pyi

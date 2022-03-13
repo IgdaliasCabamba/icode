@@ -334,6 +334,7 @@ class App(Base):
         self.side_right.todos.set_data(widget, file)
         if file is not None:
             settings.icwd(pathlib.Path(file).parent)
+        self.on_current_editor_changed.emit(widget)
 
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""

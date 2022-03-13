@@ -21,6 +21,7 @@ class Core(object):
     on_env_changed = pyqtSignal(object)
     on_commit_app = pyqtSignal(int)
     on_change_ide_mode = pyqtSignal(int)
+    on_current_editor_changed = pyqtSignal(object)
 
     def __init__(self) -> None:
         super().__init__()

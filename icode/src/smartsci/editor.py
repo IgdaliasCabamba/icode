@@ -52,7 +52,7 @@ class EditorView(QFrame):
         self.parent=parent
         self.notebook = notebook
         self._title = None
-        self.file=file
+        self.file = file
         self._editor = None
         self._editors = []
         self.icons = getfn.get_smartcode_icons("editor")
