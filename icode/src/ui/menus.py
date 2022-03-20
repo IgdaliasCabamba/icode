@@ -221,7 +221,13 @@ class ViewMenu(QMenu):
         self.addAction(self.left)
         self.right = QAction("Side Right", self)
         self.addAction(self.right)
-
+        
+        self.addSeparator()
+        
+        self.minimap = QAction("Mini Map", self)
+        self.minimap.setCheckable(True)
+        self.minimap.setChecked(True)
+        self.addAction(self.minimap)
 
 class SelectionMenu(QMenu):
     """

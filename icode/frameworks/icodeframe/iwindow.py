@@ -2,7 +2,6 @@ from PyQt5.QtCore import Qt, QMetaObject, pyqtSignal as Signal, pyqtSlot as Slot
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QToolButton,
                             QLabel, QDesktopWidget, QSizePolicy)
 from ._utils import QT_VERSION, PLATFORM, _FL_STYLESHEET
-import base.system as system
 
 class WindowDragger(QWidget):
     
@@ -68,8 +67,6 @@ class ModernWindow(QWidget):
 
         self._w.setAttribute(Qt.WA_DeleteOnClose, True)
         self._w.destroyed.connect(self.__child_was_closed)
-
-        self.border_radius=None
 
     def setupUi(self):
         self.vboxWindow = QVBoxLayout(self)
@@ -148,44 +145,17 @@ class ModernWindow(QWidget):
                             Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
 
         self.setStyleSheet(_FL_STYLESHEET)
-        
-        if self.window_style == "icode":
-            self.setAttribute(Qt.WA_TranslucentBackground)
 
         # automatically connect slots
         QMetaObject.connectSlotsByName(self)
-        self.build_window(self.window_style)
         self.allowed_buttons.append(self.btnClose)
         self.allowed_buttons.append(self.btnMaximize)
         self.allowed_buttons.append(self.btnMinimize)
         self.allowed_buttons.append(self.btnRestore)
-    
-    def update_window_borders(self, state:str):
-        if self.border_radius:
-            if state == "max":
-                self._w.status_bar.setStyleSheet("#status-bar {border-radius:0}")
-                self.titleBar.setStyleSheet("#titleBar {border-radius:0}")
-                self.windowFrame.setStyleSheet("#windowFrame {border-radius: 0 0 0 0}")
-            elif state == "res":
-                self._w.setStyleSheet("#main-window {background-color: transparent;}")
-                self._w.status_bar.setStyleSheet("#status-bar {border-bottom-left-radius:7px; border-bottom-right-radius:7px}")
-                self.titleBar.setStyleSheet("#titleBar {border-top-left-radius:7px; border-top-right-radius:7px}")
-                self.windowFrame.setStyleSheet("#windowFrame {border-radius: 7px 7px 7px 7px}")
-    
-    def build_window(self, window_style) -> None:
-        if window_style == "icode":
-            self.border_radius=True
-            self._w.setStyleSheet("#main-window {background-color: transparent;}")
-            self.windowFrame.setStyleSheet("#windowFrame {border-radius: 7px 7px 7px 7px}")
-            self.titleBar.setStyleSheet("#titleBar {border-top-left-radius:7px; border-top-right-radius:7px}")
-            self._w.status_bar.setStyleSheet("#status-bar {border-bottom-left-radius:7px; border-bottom-right-radius:7px}")
-        elif window_style == "custom":
-            self.border_radius=False
 
     def __child_was_closed(self) -> None:
         self._w = None  # The child was deleted, remove the reference to it and close the parent window
         self.close()
-        system.end(0)
 
     def closeEvent(self, event) -> None:
         if not self._w:
@@ -284,7 +254,6 @@ class ModernWindow(QWidget):
             self._setWindowButtonState(hint, bool(Qt_WindowFlags & hint))
 
         super().setWindowFlags(Qt_WindowFlags)
-    
 
     @Slot()
     def on_btnMinimize_clicked(self):
@@ -299,7 +268,6 @@ class ModernWindow(QWidget):
             self.btnMaximize.setEnabled(True)
 
         self.setWindowState(Qt.WindowNoState)
-        self.update_window_borders("res")
 
     @Slot()
     def on_btnMaximize_clicked(self):
@@ -310,7 +278,6 @@ class ModernWindow(QWidget):
             self.btnMaximize.setEnabled(False)
 
         self.setWindowState(Qt.WindowMaximized)
-        self.update_window_borders("max")
 
     @Slot()
     def on_btnClose_clicked(self):

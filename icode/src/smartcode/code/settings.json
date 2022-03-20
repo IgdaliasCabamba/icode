@@ -24,7 +24,7 @@
     
     //App Theme and Window Style | window-style:[custom, native, icode]
     "theme":"icode_default_theme",
-    "window-style":"custom",
+    "window-style":"icode",
 
     //Extensions
     "extensions":["icode_sky_view", "smart_python"]

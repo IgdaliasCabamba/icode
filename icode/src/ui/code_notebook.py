@@ -132,6 +132,17 @@ class NoteBookEditor(ITabWidget):
     def get_navigation(self):
         self.update_navigation()
         return self.navigation
+    
+    def is_widget_in(self, widget):
+        for i in range(self.count()):
+            if widget == self.widget(i):
+                return True
+        return False
+    
+    def close_widget(self, widget):
+        index = self.indexOf(widget)
+        if index > -1:
+            self.removeTab(index)
         
 
 class SideBottomNotebook(ITabWidget):

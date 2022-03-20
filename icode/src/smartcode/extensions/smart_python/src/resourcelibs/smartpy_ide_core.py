@@ -7,6 +7,10 @@ SINGLETONS = frozenset(['False', 'None', 'True'])
 KEYWORDS = frozenset(keyword.kwlist + ['print', 'async']) - SINGLETONS
 WHITESPACE = frozenset(' \t')
 
+DEBUG_STATUS_REGEX = re.compile("([_a-z-A-Z-0-9]*.py)\\(([0-9]*)\\)<([_a-z-A-Z-0-9]*)>")
+DEBUG_RETURN_REGEX = re.compile("(->) (.*)")
+DEBUG_CONTEXT_REGEX = re.compile("(Pdb)")
+
 INDENT_REGEX = re.compile(r'([ \t]*)')
 EXTRANEOUS_WHITESPACE_REGEX = re.compile(r'[\[({] | [\]}),;]| :(?!=)')
 WHITESPACE_AFTER_COMMA_REGEX = re.compile(r'[,;:]\s*(?:  |\t)')

@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         self._notebook = NoteBookEditor(self.isplitter, self)
         self._notebook.setVisible(True)
         
-        #self.config_ui = ConfigUi(self)
+        self.config_ui = ConfigUi(self._notebook)
 
         self.welcome = Welcome(self._notebook)
 

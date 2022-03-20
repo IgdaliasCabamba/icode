@@ -1,2 +1,3 @@
 #!/usr/bin/bash
 source ~/SmartCode/smartenv/bin/activate
+cd ~/SmartCode/icode

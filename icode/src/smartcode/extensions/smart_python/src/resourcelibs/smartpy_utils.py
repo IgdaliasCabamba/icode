@@ -1,5 +1,7 @@
-DESCRIPTION = """
-    <ul>
+from smartpy_ide_core import DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX
+
+DESCRIPTION = """          
+    <ul>                   
         <li>Tree, Doctor</li>
         <li>Warnings, Analyzes</li>
         <li>Debug, Tests</li>
@@ -73,6 +75,28 @@ code_doctor_doc = """
             </small>
         """
 
+code_debug_doc = """
+            <small>
+                Get warnings for your code,
+                problems related to pep8 in
+                your code will be detected and
+                presented here, with the option
+                to fix some of them!
+                to use this functionality click
+                on get warnings, here or on icode labs
+                <p>
+                    click 
+                    <strong>
+                        <a href="www.github.io">here</a>
+                    </strong>
+                    to learn more
+                    <strong>
+                    or
+                    </strong>
+                </p>
+            </small>
+        """
+
 def format_analyze_rank(rank:str):
     if rank == "A":
         return (f"<h2 style='color:#9de35f'>{rank}</h2>", "<strong style='color:#9de35f'>low risk - simple block</strong>")
@@ -88,3 +112,6 @@ def format_analyze_rank(rank:str):
         return (f"<h2 style='color:#e35f5f'>{rank}</h2>", "<strong style='color:#e35f5f'>very high risk - error-prone, unstable block</strong>")
     else:
         return (f"<h2>{rank}</h2>", "")
+
+def debug_formatter(stdout):
+    return stdout + "\n"

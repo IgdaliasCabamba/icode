@@ -5,10 +5,6 @@ import re
 from .templates import AprilRender
 from .april import ask
 
-def get_query_clean(query:str):
-    text = re.sub(r"-[hjn]","",query, 1)
-    return text
-
 class Brain(QObject):
     
     on_answered=pyqtSignal(object, int)
@@ -26,21 +22,22 @@ class Brain(QObject):
             return json.loads(value)
 
         return value
-
-        # TODO > Format answers with textwrap and return it
+    
+    def get_query_clean(self, query:str):
+        text = re.sub(r"-[hjn]","",query, 1)
+        return text
     
     def remove_commands(self, text, command):
         pos = re.search(":", text)
         text_splited=re.split(":", text)
+        
         if len(text_splited)>2:
             query_list=text_splited[1:-1]
             text= ' '.join(map(str, query_list))
-            print(text)
+            
         else:
             text=text_splited[1]
-            print(text)
-        print(text_splited)
-
+            
         return text
     
     def get_answer(self, text, settings):
@@ -55,7 +52,7 @@ class Brain(QObject):
                 answer=self.get_code_snippets(self.remove_commands(text, "code:"), settings)
                 type = 2
             except Exception as e:
-                answer = self.templates.error_log + str(e)
+                answer = self.templates.error_log
                 type = -1
         else:
             if not " " in text and not "_" in text:
@@ -72,9 +69,8 @@ class Brain(QObject):
                     type = 2
                     
                 except Exception as e:
-                    answer = self.templates.error_log + str(e)
+                    answer = self.templates.error_log
                     type = -1
-        print(answer)
         self.on_answered.emit(answer, type)
 
     
@@ -104,7 +100,7 @@ class Brain(QObject):
     def get_code_snippets(self, text:str, settings):
         query=text
         args={
-            "query":get_query_clean(query),
+            "query":self.get_query_clean(query),
             "json_output":True,
             "num_answers":settings["answer_count"],
             "all":settings["all_response"]

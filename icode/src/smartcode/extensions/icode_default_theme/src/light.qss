@@ -321,7 +321,7 @@ QStatusBar QSizeGrip,
 #side-bottom {background-color: $base;}
 
 /* Application Widgets*/
-#index, #welcome {background-color: $base;}
+#index, #welcome, #settings {background-color: $base;}
 
 #finder_replacer:focus
 #editor-widget:focus {border:none}

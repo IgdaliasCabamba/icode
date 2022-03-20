@@ -139,6 +139,7 @@
 	"code-good":"code/good_code.png",
     "code-terminal":"app/console.png",
     "code-*":"code/poligon.png",
+	"code-return":"code/poligon.png",
 	
 	//smartsci
 	"smartsci-class":"code/class.png",

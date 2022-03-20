@@ -21,11 +21,11 @@ def can_connect_to(host:str, port:int) -> bool:
     result_of_check = socket_con.connect_ex(location)
     
     if result_of_check == 0:
-        print("Can NOT connect to: ", port)
+        #print("Can NOT connect to: ", port)
         return False
         
     else:
-        print("Can connect to: ", port)
+        #print("Can connect to: ", port)
         return True
 
 class ICenter:
@@ -66,9 +66,9 @@ class ICenter:
                 if can_connect_to(host, possible_port) and port not in self.__used_ports:
                     port = possible_port
                     self.__used_ports.append(port)
-                    print("Tryning to connect to: ", port)
+                    #print("Tryning to connect to: ", port)
                     break
-        print("Connecting to: ", port)
+        #print("Connecting to: ", port)
         return port
     
     def get_host(self, data:dict) -> str:
@@ -100,7 +100,7 @@ class ICenter:
         return service
     
     def serve(self, call, args:dict) -> tuple:
-        print(self.__data["servers"])
+        #print(self.__data["servers"])
         host = self.get_host(args)
         port = self.get_port(host, args)
         name = self.get_name(call, args)

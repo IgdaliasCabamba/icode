@@ -162,7 +162,7 @@ class Init(ModelApp):
         table6.add_header_widget(self.btn_start_debug)
         table6.add_header_widget(self.btn_stop_debug)
         table6.add_header_widget(self.btn_clear_debug)
-        table6.setMinimumSize(300,400)
+        table6.setMinimumSize(300,700)
         
         space.add_table(table1, 0, 0)
         space.add_table(table2, 0, 1)
@@ -192,7 +192,10 @@ class Init(ModelApp):
         self.do_on(self.run_code_analyze, "deep_analyze", "btn_get_diagnosis", "clicked")
         self.do_on(self.add_env, "python_envs", "on_env_added")
         self.do_on(self.set_current_env, "python_envs", "on_current_env")
-        self.do_on(self.start_debuging, "btn_start_debug", "clicked")
+        self.do_on(self.start_debugging, "btn_start_debug", "clicked")
+        self.do_on(self.start_debugging, "debug", "btn_start_debug", "clicked")
+        self.do_on(self.stop_debugging, "btn_stop_debug", "clicked")
+        self.do_on(self.clear_debug_output, "btn_clear_debug", "clicked")
     
     def add_env(self, env:object) -> None:
         envs_api.add_env(env.executable)
@@ -378,6 +381,13 @@ class Init(ModelApp):
         self.adjust_code(editor)
         self.run_code_warnings()
     
-    def start_debuging(self):
+    def start_debugging(self):
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
-        self.debug.start(editor, editor.text(), editor.file_path, self._current_env)
+        if editor:
+            self.debug.start(editor, editor.text(), editor.file_path, self._current_env)
+    
+    def stop_debugging(self):
+        self.debug.stop()
+    
+    def clear_debug_output(self):
+        self.debug.clear()

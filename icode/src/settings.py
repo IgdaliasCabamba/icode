@@ -210,7 +210,8 @@ def restore_window(window, app, getfn):
             icon = getfn.get_icon_from_lexer(lexer_name)
             
             editor = app.new_editor(notebook, file)
-            editor.editor.set_text(code)
+            if file is None:
+                editor.editor.set_text(code)
             index = notebook.add_tab_and_get_index(editor, title)
             notebook.setTabIcon(index, icon)
             

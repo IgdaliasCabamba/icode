@@ -92,7 +92,7 @@ class CodeDoctorCore(QObject):
         else:
             row=DoctorStandardItem(
                     self.parent.icons.get_icon("good"),
-                    f"No errors found 🙂",
+                    f"No errors found",
                     None,
                     None
                     )

@@ -48,7 +48,7 @@ class ToolBar(QToolBar):
         self.april.setToolTip("April, your assitent")
 
         self.config = QAction(self.icons.get_icon("config"), "", self)
-        self.config.setCheckable(True)
+        self.config.setCheckable(False)
         self.config.setToolTip("Settings")
 
         self.ilab = QAction(self.icons.get_icon("ilab"), "", self)

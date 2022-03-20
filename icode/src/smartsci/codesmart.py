@@ -87,9 +87,14 @@ class EditorBase(ImageScintilla):
         self.setIndicatorHoverForegroundColor(QColor("#5387e0"), 4)
     
     def set_minimap(self, minimap:object) -> None:
+        self._minimap_box = minimap
         self.minimap=minimap.minimap
         self.scrollbar=minimap.scrollbar
         self.build_doc_map()
+    
+    def set_minimap_visiblity(self, visiblity:bool):
+        if self.minimap:
+            self._minimap_box.setVisible(visiblity)
     
     def set_mode(self, mode:int):
         if mode == 0:

@@ -43,6 +43,7 @@ class Core(object):
 
         self.menu.view.command_palette.triggered.connect(self.show_command_palette)
         self.menu.view.languages.triggered.connect(self.show_langs)
+        self.menu.view.minimap.triggered.connect(lambda: self.change_minimap_visiblity(self.menu.view.minimap.isChecked()))
 
         self.menu.go.goto_line.triggered.connect(self.show_goto_line)
         self.menu.go.goto_tab.triggered.connect(self.show_goto_tab)
@@ -53,6 +54,7 @@ class Core(object):
         self.tool_bar.april.triggered.connect(self.side_left.do_april)
         self.tool_bar.ilab.triggered.connect(self.side_left.do_icode_labs)
         self.tool_bar.igit.triggered.connect(self.side_left.do_igit)
+        self.tool_bar.config.triggered.connect(self.configure_icode)
 
         self.status_bar.lang.clicked.connect(self.show_langs)
         self.status_bar.line_col.clicked.connect(self.show_goto_line)
@@ -142,17 +144,91 @@ class Base(QObject, Core):
         
     def run_api(self):
         self.editor_widgets.set_api(self)
+    
+    def load_plugins(self):
+        data = {"app": self, "qt_app": self.qt_app}
+        plugin.run_ui_plugin(DATA_FILE, data)
+        plugin.run_app_plugin(DATA_FILE, data)
 
     def add_lexer(self, lexer: object) -> None:
         self.__lexers.append(lexer)
     
     def add_command(self, command) -> None:
         self.__commands.append(command)
+    
+    def new_editor(self, notebook, file=None):
+        if file is None:
+            editor = EditorView(self, self.ui, notebook)
+        else:
+            editor = EditorView(self, self.ui, notebook, file)
+        
+        self.configure_editor(editor)
+        return editor
+    
+    def new_editor_notebook(self, orientation:int) -> None:
+        self.tabs_count += 1
+        notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
+        self.new_file(notebook)
+    
+    def new_file(self, notebook=False) -> EditorView:
+        if isinstance(notebook, bool):
+            notebook = self.ui.notebook
 
-    def load_plugins(self):
-        data = {"app": self, "qt_app": self.qt_app}
-        plugin.run_ui_plugin(DATA_FILE, data)
-        plugin.run_app_plugin(DATA_FILE, data)
+        self.tabs_count += 1
+
+        editor = EditorView(self, self.ui, notebook)
+        editor.on_tab_content_changed.connect(self.update_tab)
+        index = notebook.add_tab_and_get_index(editor, f"# Untituled-{self.tabs_count}")
+        self.configure_tab(index, f"# Untituled-{self.tabs_count}", None)
+        self.configure_editor(editor)
+        self.on_commit_app.emit(1)
+        return editor
+    
+    def configure_editor(self, editor):
+        editor.on_tab_content_changed.connect(self.update_tab)
+        self.on_new_editor.emit(editor)
+    
+    def copy_editor(self, notebook, tab_data) -> EditorView:
+        editor = self.new_editor(notebook)
+        editor.make_deep_copy(tab_data.widget)
+        index = notebook.add_tab_and_get_index(editor, tab_data.title)
+        notebook.setTabToolTip(index, tab_data.tooltip)
+        notebook.setTabIcon(index, tab_data.icon)
+        return editor
+    
+    def create_editor_from_file(self, code_file:str) -> EditorView:
+        editor = EditorView(self, self.ui, self.ui.notebook, code_file)
+        index = self.ui.notebook.add_tab_and_get_index(editor, code_file.name)
+        self.configure_tab(index, code_file)
+        self.configure_editor(editor)
+        self.files_opened.append(code_file)
+        self.on_commit_app.emit(1)
+        return editor
+    
+    def create_new_notebook(self, orientation:int, widget=None, copy:bool=True) -> NoteBookEditor:
+        """Create a new notebook and split in mainwindow"""
+        if widget is None:
+            widget = self.ui.notebook
+        parent_notebook = parent_tab_widget(widget)
+
+        tab_data = parent_notebook.get_tab_data()
+
+        notebook = NoteBookEditor(self.ui.isplitter, self)
+        notebook.last_tab_closed.connect(self.tabbar_last_closed)
+        notebook.on_user_event.connect(self.ui.set_notebook)
+
+        self.on_new_notebook.emit(notebook)
+        self.ui.set_notebook(notebook)
+        
+        if copy:
+            self.copy_editor(notebook, tab_data)
+
+        DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
+
+        self.ui.isplitter.add_notebook(notebook)
+        self.ui.isplitter.splitAt(parent_notebook, DIRS[orientation], notebook)
+        self.on_commit_app.emit(1)
+        return notebook
 
     def is_widget_code_editor(self, widget, attr:str=None, value:str=None) -> bool:
         if hasattr(widget, "objectName"):

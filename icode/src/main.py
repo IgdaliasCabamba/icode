@@ -36,82 +36,13 @@ class App(Base):
     def run_ui(self) -> None:
         """Organize the main widgets in current notebook"""
         self.welcome_widget = self.ui.welcome
-        index = self.ui.notebook.add_tab_and_get_index(
-            self.welcome_widget, f"# Get Started"
-        )
-        self.configure_tab(index, f"# Get Started", "init")
+        index = self.ui.notebook.add_tab_and_get_index(self.welcome_widget, f"# Get Started")
+        self.configure_tab(index = index, tab_type = "icode")
         self.on_new_tab.emit(self.welcome_widget)
-        
-    def create_editor_from_file(self, code_file:str) -> EditorView:
-        editor = EditorView(self, self.ui, self.ui.notebook, code_file)
-        editor.on_tab_content_changed.connect(self.update_tab)
-        index = self.ui.notebook.add_tab_and_get_index(editor, code_file.name)
-        self.configure_tab(index, code_file)
-        self.on_new_editor.emit(editor)
-        self.files_opened.append(code_file)
-        self.on_commit_app.emit(1)
-        return editor
     
-    def new_editor(self, notebook, file=None):
-        if file is None:
-            editor = EditorView(self, self.ui, notebook)
-        else:
-            editor = EditorView(self, self.ui, notebook, file)
+        self.ui.config_ui.setVisible(False)
+        self.ui.notebook.close_widget(self.ui.config_ui)
         
-        editor.on_tab_content_changed.connect(self.update_tab)
-        return editor
-    
-    def copy_editor(self, notebook, tab_data) -> EditorView:
-        editor = self.new_editor(notebook)
-        editor.make_deep_copy(tab_data.widget)
-        index = notebook.add_tab_and_get_index(editor, tab_data.title)
-        notebook.setTabToolTip(index, tab_data.tooltip)
-        notebook.setTabIcon(index, tab_data.icon)
-        return editor
-
-    def create_new_notebook(self, orientation:int, widget=None, copy:bool=True) -> NoteBookEditor:
-        """Create a new notebook and split in mainwindow"""
-        if widget is None:
-            widget = self.ui.notebook
-        parent_notebook = parent_tab_widget(widget)
-
-        tab_data = parent_notebook.get_tab_data()
-
-        notebook = NoteBookEditor(self.ui.isplitter, self)
-        notebook.last_tab_closed.connect(self.tabbar_last_closed)
-        notebook.on_user_event.connect(self.ui.set_notebook)
-
-        self.on_new_notebook.emit(notebook)
-        self.ui.set_notebook(notebook)
-        
-        if copy:
-            self.copy_editor(notebook, tab_data)
-
-        DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
-
-        self.ui.isplitter.add_notebook(notebook)
-        self.ui.isplitter.splitAt(parent_notebook, DIRS[orientation], notebook)
-        self.on_commit_app.emit(1)
-        return notebook
-
-    def new_file(self, notebook=False) -> EditorView:
-        if isinstance(notebook, bool):
-            notebook = self.ui.notebook
-
-        self.tabs_count += 1
-
-        editor = EditorView(self, self.ui, notebook)
-        editor.on_tab_content_changed.connect(self.update_tab)
-        index = notebook.add_tab_and_get_index(editor, f"# Untituled-{self.tabs_count}")
-        self.configure_tab(index, f"# Untituled-{self.tabs_count}", "new")
-        self.on_new_editor.emit(editor)
-        self.on_commit_app.emit(1)
-        return editor
-    
-    def new_editor_notebook(self, orientation:int) -> None:
-        self.tabs_count += 1
-        notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
-        self.new_file(notebook)
 
     def open_file_from_search(self, file:str, query:str) -> None:
         if file is not None:
@@ -232,26 +163,34 @@ class App(Base):
             if widget.objectName() == "editor-frame":
                 self.ui.notebook.find_replace.do_replace()
     
-    # TODO: turn this function useless
-    def configure_tab(self, index, tab_text, tab_type=False):
+    def configure_tab(self, index:int, tab_text:str="", tab_type:str=""):
         widget = self.ui.notebook.widget(index)
-        if widget is not None:
-
-            if widget.objectName() == "editor-frame":
-                widget.set_title(tab_text)
-
-            self.ui.notebook.setTabToolTip(index, str(tab_text))
-
-            if tab_type == "new":
-                self.ui.notebook.setTabIcon(
-                    index, getfn.get_qicon(getfn.get_icon_from_ext(None)))
-
-            elif tab_type == "init":
+        if tab_type == "icode":
                 self.ui.notebook.setTabIcon(index, getfn.get_app_icon())
-
-            else:
-                self.ui.notebook.setTabIcon(
-                    index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
+        
+        else:
+            self.ui.notebook.setTabIcon(
+                index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
+        
+        if self.is_widget_code_editor(widget):
+            widget.set_title(tab_text)
+            self.ui.notebook.setTabToolTip(index, str(tab_text))
+    
+    def configure_icode(self):
+        if self.ui.notebook.is_widget_in(self.ui.config_ui):
+            self.ui.notebook.close_widget(self.ui.config_ui)
+        else:
+            index = self.ui.notebook.add_tab_and_get_index(self.ui.config_ui, "Settings")
+            self.configure_tab(index = index, tab_type = "icode")
+    
+    def change_minimap_visiblity(self, visiblity:bool) -> None:
+        for notebook in self.ui.notebooks:
+            for i in range(notebook.count()):
+                widget = notebook.widget(i)
+                if self.is_widget_code_editor(widget):
+                    for editor in widget.get_editors():
+                        editor.set_minimap_visiblity(visiblity)
+                
     
     def change_ide_mode(self, mode:int) -> None:
         """Emit a signal to change the performance of icode"""
@@ -462,7 +401,8 @@ class App(Base):
     
     def quit_app(self, window):
         self.save_status()
-    
+        system.end(0)
+        
     def save_status(self):
         settings.save_window(self.ui, self)
     

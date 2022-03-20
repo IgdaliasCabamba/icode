@@ -154,10 +154,10 @@ class AprilRender:
                 <h3 style="color:#f23f57">Sorry <span style="font-size:20pt">\uf6f7</span></h3>
             </nobr>
             <hr>
-            <nobr style="font-size:11pt">
-                I didn't find results due:
-            </nobr>
-            <br>
+            <p style="font-size:12pt">
+                I didn't find results!
+            </p>
+            
         """
     @property
     def readme(self):
