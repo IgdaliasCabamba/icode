@@ -1,4 +1,4 @@
-from .corners import BottomTabCorner, MainTabCorner
+from .corners import MainTabCorner
 from .code_searcher import FindReplace
 from .root import TabData, notebook_corner_style
 from .igui import ITabWidget
@@ -143,29 +143,3 @@ class NoteBookEditor(ITabWidget):
         index = self.indexOf(widget)
         if index > -1:
             self.removeTab(index)
-        
-
-class SideBottomNotebook(ITabWidget):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.parent=parent
-        self.setObjectName("bottom-notebook")
-        self.init_ui()
-    
-    def init_ui(self):
-        self.setDocumentMode(False)
-        self.setMovable(False)
-        self.setTabsClosable(False)
-
-        self.corner = BottomTabCorner(self)
-        self.setCornerWidget(self.corner)
-
-        self.set_drag_and_drop(False)
-        self.set_corner_style(notebook_corner_style)
-    
-    def set_tab_icon(self, icon:object, icon_path:str=False) -> None:
-        pass
-
-    def add_tab_and_get_index(self, widget, text):
-        self.addTab(widget, text)
-        return self.indexOf(widget)

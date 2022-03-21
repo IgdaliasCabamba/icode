@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QFileDialog
 )
 
-from ui.igui import EditorListWidgetItem, InputHistory
+from ui.igui import IListWidgetItem, InputHistory
 from smartpy_api import python_api
 from functions import getfn
 from extension_api import settings
@@ -177,16 +177,18 @@ class PythonEnvs(QFrame):
         if envs:
             self.env_list.clear()
             for item in envs:
-                row = EditorListWidgetItem()
-                row.setText(str(item.executable))
-                row.set_data({"env":item})
-                row.setIcon(self.icons.get_icon("python"))
+                row = IListWidgetItem(
+                    self.icons.get_icon("python"),
+                    str(item.executable),
+                    None,
+                    {"env":item}
+                )
                 self.env_list.addItem(row)
             self.env_list.setCurrentRow(0)
         self.update_size()
     
     def change_env(self, item):
-        self.on_current_env.emit(item.data["env"])
+        self.on_current_env.emit(item.item_data["env"])
         self.hide()
     
     def pick_env(self):

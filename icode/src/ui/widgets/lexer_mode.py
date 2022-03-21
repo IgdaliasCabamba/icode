@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
 )
 
-from ..igui import EditorListWidgetItem, InputHistory
+from ..igui import IListWidgetItem, InputHistory
 
 class LexerMode(QFrame):
     
@@ -82,17 +82,19 @@ class LexerMode(QFrame):
 
     def mirror_in_editor(self, item):
         for editor in self.api.current_editors:
-            editor.set_lexer(item.data["object"])
+            editor.set_lexer(item.item_data["object"])
         self.hide()
         
     def set_langs(self, data=False):    
         if data:
             self.lang_list.clear()
             for lang in data:
-                row = EditorListWidgetItem()
-                row.setText(lang["name"].title())
-                row.setIcon(lang["icon"])
-                row.set_data({"object":lang["lexer"]})
+                row = IListWidgetItem(
+                    lang["icon"],
+                    lang["name"].title(),
+                    None,
+                    {"object":lang["lexer"]}
+                )
                 self.lang_list.addItem(row)
         self.update_size()
     

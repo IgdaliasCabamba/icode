@@ -1,11 +1,12 @@
 from base.system import SYS_NAME, end
 from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import (
     QFrame, QListWidget, QSplitter,
     QStackedLayout, QVBoxLayout, QMenu, QAction, QActionGroup)
     
 from frameworks.iterm import TerminalWidget
-from .igui import TerminalListWidgetItem
+from .igui import IListWidgetItem
 from functions import getfn
 from base.code_api import icode_api
 from functools import partial
@@ -120,7 +121,7 @@ class Terminal(QFrame):
         
     def _create_terminal(self, name, bin):
         new_term = TerminalBase(self, bin, icode_api.get_terminal_color_map())
-        new_term_header = TerminalListWidgetItem(
+        new_term_header = IListWidgetItem(
             self.icons.get_icon("bash"),
             name,
             None,
@@ -129,6 +130,10 @@ class Terminal(QFrame):
                 "index":self.term_index
             }
         )
+        font = QFont()
+        font.setPointSizeF(10.5)
+        new_term_header.setFont(font)
+        
         self.term_header.addItem(new_term_header)
         new_term.header_item = new_term_header
         self.terminals_layout.addWidget(new_term)

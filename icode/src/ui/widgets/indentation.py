@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QLabel
 )
 
-from ..igui import EditorListWidgetItem, InputHistory
+from ..igui import IListWidgetItem, InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn
@@ -80,7 +80,7 @@ class SpaceMode(QFrame):
         for editor in self.api.current_editors:
             new_text = None
             ident_size = editor.tabWidth()
-            action = item.data["action"]
+            action = item.item_data["action"]
             
             if action == 0:
                 editor.setIndentationsUseTabs(False)
@@ -115,10 +115,12 @@ class SpaceMode(QFrame):
         if data:
             self.space_modes.clear()
             for space in data:
-                row = EditorListWidgetItem()
-                row.setText(space["name"].title())
-                row.setIcon(space["icon"])
-                row.set_data({"action":space["action"]})
+                row = IListWidgetItem(
+                    space["icon"],
+                    space["name"].title(),
+                    None,
+                    {"action":space["action"]}   
+                )
                 self.space_modes.addItem(row)
         self.update_size()
         

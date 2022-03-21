@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QColor
 
-from ui.igui import EditorListWidgetItem, InputHistory
+from ui.igui import IListWidgetItem, InputHistory
 from functions import getfn
 
 class SymbolExplorer(QFrame):
@@ -52,36 +52,41 @@ class SymbolExplorer(QFrame):
             self.focus_out.emit(self, event)
     
     def add_row(self, symbol, editor):
-        row=EditorListWidgetItem()
-        row.setText(f"{symbol.name}")
-        row.setToolTip(f"line: {symbol.line_number}, level:{symbol.level}")
-        row.setIcon(self.icons.get_icon(symbol.type))
-        row.set_data({"line":symbol.line_number, "name":symbol.name, "editor":editor})
+        row=IListWidgetItem(
+            self.icons.get_icon(symbol.type),
+            str(symbol.name),
+            f"line: {symbol.line_number}, level:{symbol.level}",
+            {
+                "line":symbol.line_number,
+                "name":symbol.name,
+                "editor":editor
+            }
+        )
         self.symbol_list.addItem(row)
 
     def search_symbol(self, text):
-        if text.startswith("@") and len(text) > 1:
-            href = text.split("@")[1]
-        
-            results = self.symbol_list.findItems(href, Qt.MatchContains)
-    
-            for i in range(self.symbol_list.count()):
-                self.symbol_list.setRowHidden(i, True)
-
-            for row_item in results:
-                i = self.symbol_list.row(row_item)
-                self.symbol_list.setRowHidden(i, False)
+        if text.startswith("@"):
+            if len(text) > 1:
+                href = text.split("@")[1]
             
-            if len(results) > 0:
-                i = self.symbol_list.row(results[0])
-                self.symbol_list.setCurrentRow(i)
+                results = self.symbol_list.findItems(href, Qt.MatchContains)
         
-        elif text.startswith((":",">")):
-            self.api.run_by_id(self, text)
+                for i in range(self.symbol_list.count()):
+                    self.symbol_list.setRowHidden(i, True)
 
+                for row_item in results:
+                    i = self.symbol_list.row(row_item)
+                    self.symbol_list.setRowHidden(i, False)
+                
+                if len(results) > 0:
+                    i = self.symbol_list.row(results[0])
+                    self.symbol_list.setCurrentRow(i)
+            else:
+                for i in range(self.symbol_list.count()):
+                    self.symbol_list.setRowHidden(i, False)
+        
         else:
-            for i in range(self.symbol_list.count()):
-                self.symbol_list.setRowHidden(i, False)
+            self.api.run_by_id(self, text)
         
         self.update_size()
     
@@ -100,12 +105,12 @@ class SymbolExplorer(QFrame):
         self.setFixedHeight(self.symbol_input.size().height()+self.symbol_list.size().height()+20)
 
     def mirror_in_editor(self, item):
-        editor=item.data["editor"]
-        name=item.data["name"]
-        line=item.data["line"]
+        editor=item.item_data["editor"]
+        name=item.item_data["name"]
+        line=item.item_data["line"]
         try:
             
-            line_from, index_from, line_to, index_to = getfn.get_selection_from_item_data(editor, name, line)
+            line_from, index_from, line_to, index_to = getfn.get_selection_from_item.item_data(editor, name, line)
             editor.setCursorPosition(line_from+1, index_to)
             editor.setSelection(line_from, index_from, line_to, index_to)
                 

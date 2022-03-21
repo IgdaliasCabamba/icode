@@ -9,7 +9,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api, visitors
-from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from ui.igui import ScrollLabel, IListWidgetItem, IStandardItem
 from frameworks.qroundprogressbar import QRoundProgressBar
 from smartpy_utils import format_analyze_rank, deep_analyze_doc
 

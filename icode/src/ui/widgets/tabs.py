@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QKeyEvent
 
-from ..igui import EditorListWidgetItem, InputHistory
+from ..igui import InputHistory, IListWidgetItem
 
 class ListWidget(QListWidget):
     
@@ -75,7 +75,7 @@ class TabBrowser(QFrame):
         self.setFixedHeight(self.tab_list.size().height()+10)
 
     def change_tab(self, item):
-        self.notebook.setCurrentWidget(item.data["object"])
+        self.notebook.setCurrentWidget(item.item_data["object"])
         self.hide()
         
     def set_navigation(self, data):
@@ -83,11 +83,12 @@ class TabBrowser(QFrame):
             self.notebook = data["notebook"]
             self.tab_list.clear()
             for tab in data["tabs"]:
-                row = EditorListWidgetItem()
-                row.setText(tab["title"])
-                row.setIcon(tab["icon"])
-                row.setToolTip(tab["tooltip"])
-                row.set_data({"object":tab["widget"], "index":tab["index"]})
+                row = IListWidgetItem(
+                    tab["icon"],
+                    tab["title"],
+                    tab["tooltip"],
+                    {"object":tab["widget"], "index":tab["index"]}
+                )
                 self.tab_list.addItem(row)
         self.update_size()
     

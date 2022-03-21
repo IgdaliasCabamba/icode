@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import (QLabel, QListWidgetItem, QPushButton, QScrollArea, 
                              QTabWidget, QToolButton, QSizePolicy, QLineEdit, QHBoxLayout)
 
 from functions import getfn
-
-from .root import CategoryMixin, TabData
+from .corners import GenericTabCorner
+from .root import CategoryMixin, TabData, notebook_corner_style
 
 class QGithubButton(QFrame):
     def __init__(self, parent):
@@ -151,51 +151,21 @@ class ScrollLabel(QScrollArea):
     def setAlignment(self, alignment):
         self.label.setAlignment(alignment)
 
-class EditorListWidgetItem(QListWidgetItem):
-    def __init__(self, parent = None):
-        super().__init__(parent)
-        self.data = None
-
-    def set_data(self, data):
-        self.data = data
-
-class TerminalListWidgetItem(QListWidgetItem):
-    def __init__(self, icon, text, tooltip=None, item_data=None) -> None:
-        super().__init__()
-        self.setText(text)
-        if icon is not None:
-            self.setIcon(icon)
-        self.setToolTip(tooltip)
-        
-        font = self.font()
-        font.setPointSizeF(10.5)
-        self.setFont(font)
-        
-        self.item_data=item_data
-
 class IListWidgetItem(QListWidgetItem):
-    def __init__(self, icon, text, tooltip=None, item_data=None) -> None:
+    def __init__(self, icon:object, text:str, tooltip:str=None, item_data:dict=None) -> None:
         super().__init__()
         self.setText(text)
         if icon is not None:
             self.setIcon(icon)
         self.setToolTip(tooltip)
         
-        self.item_data=item_data
-
-class DoctorStandardItem(QStandardItem):
-    def __init__(self, icon, text, tooltip=None, item_data=None) -> None:
-        super().__init__()
-        self.setText(text)
-        if icon is not None:
-            self.setIcon(icon)
-        self.setToolTip(tooltip)
-        self.setAutoTristate(False)
-        
-        self.item_data=item_data
+        self.item_data = item_data
+    
+    def set_data(self, data):
+        self.item_data = data
 
 class IStandardItem(QStandardItem):
-    def __init__(self, icon, text, tooltip=None, item_data=None, level=1) -> None:
+    def __init__(self, icon:object, text:str, tooltip:str=None, item_data:dict=None, level:int=1) -> None:
         super().__init__()
         self.setText(text)
         if icon is not None:
@@ -340,14 +310,27 @@ class ITabWidget(QTabWidget, CategoryMixin):
         super().resizeEvent(event)
         self.on_resized.emit()
 
-class IListItem(QListWidgetItem):
-    def __init__(self, name, tip, item_data:dict):
-        super().__init__()
-        self.icon=QIcon(getfn.get_icon_from_ext(name))
-        self.title=name
-        self.tip=tip
-        self.item_data=item_data
+class IGenericNotebook(ITabWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent=parent
+        self.setObjectName("bottom-notebook")
+        self.init_ui()
+    
+    def init_ui(self):
+        self.setDocumentMode(False)
+        self.setMovable(False)
+        self.setTabsClosable(False)
 
-        self.setText(self.title)
-        self.setIcon(self.icon)
-        self.setToolTip(self.tip)
+        self.corner = GenericTabCorner(self)
+        self.setCornerWidget(self.corner)
+
+        self.set_drag_and_drop(False)
+        self.set_corner_style(notebook_corner_style)
+    
+    def set_tab_icon(self, icon:object, icon_path:str=False) -> None:
+        pass
+
+    def add_tab_and_get_index(self, widget, text):
+        self.addTab(widget, text)
+        return self.indexOf(widget)

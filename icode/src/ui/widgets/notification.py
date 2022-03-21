@@ -23,7 +23,7 @@ class Notification(QFrame):
         self.setLayout(self.layout)
         self.setMinimumHeight(90)
         
-        self.lbl_title = QLabel(self.title)
+        self.lbl_title = QLabel(f"<h4>{self.title}</h4>")
         self.lbl_title.setWordWrap(True)
         self.lbl_desc = QLabel(self.desc)
         self.lbl_desc.setWordWrap(True)

@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QLabel, QMenu, QAction, QActionGroup
 )
 
-from .igui import EditorListWidgetItem, InputHistory
+from .igui import InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn

@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from functions import getfn
 from smartpy_api import python_api
-from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from ui.igui import ScrollLabel, IListWidgetItem, IStandardItem
 from smartpy_utils import code_warnings_doc
 
 class CodeWarningsCore(QObject):

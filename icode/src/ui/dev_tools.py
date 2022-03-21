@@ -8,6 +8,7 @@ from pathlib import Path
 from .igui import ScrollLabel, IListWidgetItem
 from base import memory, system
 from data import note_file_path, labels_cache
+from base.char_utils import get_unicon
 
 class NotesCore(QObject):
     def __init__(self, editor):
@@ -115,11 +116,11 @@ class Todos(QFrame):
         color_text = QColor("white")
         if type == "bug":
             color_text = QColor("red")
-            title = "\uf188"+" "+text
+            title = f"{get_unicon('nf', 'fa-bug')} {text}"
             
         elif type == "todo":
-            title = "\uf0ae"+" "+text
             color_text = QColor("blue")
+            title = f"{get_unicon('nf', 'fa-tasks')} {text}"
         
         item = IListWidgetItem(None, title, tooltip, {"line": line, "note":tooltip, "label":type})
         item.setForeground(color_text)
@@ -161,13 +162,13 @@ class Todos(QFrame):
                 note = item.item_data["note"]
                 label = item.item_data["label"]
                 if label.lower() == "todo":
-                    text = "\uf0ae TODO: "
+                    text = f"{get_unicon('nf', 'fa-tasks')} TODO: "
                     style = 210
                 elif label.lower() == "bug":
-                    text = "\uf188 ISSUE: "
+                    text = f"{get_unicon('nf', 'fa-bug')} ISSUE: "
                     style = 202
                 else:
-                    text = "\uf249 NOTE: "
+                    text = f"{get_unicon('nf', 'fa-sticky_note')} NOTE: "
                     style = 206
                 if hasattr(self.editor, "editor"):
                     self.editor.editor.go_to_line(line)
@@ -186,13 +187,13 @@ class Todos(QFrame):
                     if isinstance(labels, list):
                         for label in labels:    
                             if label["label"].lower() == "todo":
-                                text = "\uf0ae TODO: "
+                                text = f"{get_unicon('nf', 'fa-tasks')} TODO: "
                                 style = 210
                             elif label["label"].lower() == "bug":
-                                text = "\uf188 ISSUE: "
+                                text = f"{get_unicon('nf', 'fa-bug')} ISSUE: "
                                 style = 202
                             else:
-                                text = "\uf249 NOTE: "
+                                text = f"{get_unicon('nf', 'fa-sticky_note')} NOTE: "
                                 style = 206
                                 
                             self.editor.editor.display_annotation(int(label["line"]), text+label["desc"], style, "on_text_changed", 0)

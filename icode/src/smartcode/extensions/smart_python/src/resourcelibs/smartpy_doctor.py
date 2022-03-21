@@ -10,7 +10,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api
-from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, IStandardItem
+from ui.igui import ScrollLabel, IListWidgetItem, IStandardItem
 from smartpy_utils import code_doctor_doc
 
 class CodeDoctorCore(QObject):
@@ -25,48 +25,48 @@ class CodeDoctorCore(QObject):
         self.parent.on_get_analyze.connect(self.do_analyze)
     
     def format_diagnosis(self, results, editor):
-        code_metrics = DoctorStandardItem(self.parent.icons.get_icon("code-metric"), 'CODE METRICS', None, None)
-        code_errors = DoctorStandardItem(self.parent.icons.get_icon("code-syntax-error"), 'CODE ERRORS', None, None)
+        code_metrics = IStandardItem(self.parent.icons.get_icon("code-metric"), 'CODE METRICS', None, None)
+        code_errors = IStandardItem(self.parent.icons.get_icon("code-syntax-error"), 'CODE ERRORS', None, None)
 
         if results["analyze"]:
             items_metrics_list = [
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Lines of code: {results["analyze"].loc}',
                     None,
                     None
                     ),
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Source lines of code: {results["analyze"].lloc}',
                     None,
                     None
                     ),
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Logical lines of code: {results["analyze"].sloc}',
                     None,
                     None
                     ),
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Python comment lines: {results["analyze"].comments}',
                     None,
                     None
                     ),
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Lines multi-line strings: {results["analyze"].multi}',
                     None,
                     None
                     ),
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Lines which are just comments: {results["analyze"].single_comments}',
                     None,
                     None
                     ),
-                DoctorStandardItem(
+                IStandardItem(
                     self.parent.icons.get_icon("code-data"),
                     f'Blank lines: {results["analyze"].blank}',
                     None,
@@ -81,7 +81,7 @@ class CodeDoctorCore(QObject):
         if results["syntax_errors"]:
             
             for error in results["syntax_errors"]:
-                row=DoctorStandardItem(
+                row=IStandardItem(
                         self.parent.icons.get_icon("code-error"),
                         f"{error.get_message()}",
                         f"from ({error.line},{error.column}) to ({error.until_line+1},{error.until_column})",
@@ -90,7 +90,7 @@ class CodeDoctorCore(QObject):
                 code_errors.appendRow(row)
 
         else:
-            row=DoctorStandardItem(
+            row=IStandardItem(
                     self.parent.icons.get_icon("good"),
                     f"No errors found",
                     None,

@@ -10,6 +10,7 @@ from qtwidgets import AnimatedToggle
 import base.consts as iconsts
 from data import april_cache
 from functions import getfn
+from base.char_utils import get_unicon
 
 
 class April(QFrame):

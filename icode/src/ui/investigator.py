@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit
 from base.searcher import *
 from data import user_cache
 from functions import getfn, pathlib
-from .igui import HeaderPushButton, InputHistory, Animator, IListItem
+from .igui import HeaderPushButton, InputHistory, Animator, IListWidgetItem
 
 class FindOptions(QMenu):
     def __init__(self, parent=None):
@@ -152,7 +152,7 @@ class Results(QFrame):
         for item in results:
             obj_path=pathlib.Path(item)
             
-            row=IListItem(obj_path.name, item, {"file":item, "query":query})
+            row=IListWidgetItem(getfn.get_qicon(getfn.get_icon_from_ext(obj_path.name)), obj_path.name, item, {"file":item, "query":query})
             
             self.list_view.addItem(row)
         

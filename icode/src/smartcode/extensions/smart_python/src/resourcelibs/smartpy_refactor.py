@@ -9,7 +9,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
-from ui.igui import ScrollLabel, IListWidgetItem, DoctorStandardItem, InputHistory
+from ui.igui import ScrollLabel, IListWidgetItem, InputHistory
 
 class Refactor(QFrame):
     def __init__(self, parent):

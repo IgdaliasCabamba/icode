@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (QButtonGroup, QFrame, QGraphicsDropShadowEffect,
 from .igui import HeaderLabel, HeaderPushButton                             
 from functions import getfn
 from .widgets import Notification
+from base.char_utils import get_unicon
 
 class Notificator(QFrame):
     
@@ -200,7 +201,7 @@ class Notificator(QFrame):
         elif notifications_count > 0 and notifications_count <= 9:
             self.label_info.setText(f"{notifications_count} Notifications")
         else:
-            self.label_info.setText(f"9\uf914 Notifications")
+            self.label_info.setText(f"9{get_unicon('nf', 'mid-plus')}, Notifications")
         
     
     def appear(self):

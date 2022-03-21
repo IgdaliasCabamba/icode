@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QLabel
 )
 
-from ..igui import EditorListWidgetItem, InputHistory
+from ..igui import IListWidgetItem, InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn
@@ -93,7 +93,7 @@ class ApplicationCommandPalette(QFrame):
 
     def execute_command(self, item):
         try:
-            item.data["command"]()
+            item.item_data["command"]()
         except Exception as e:
             print(e)
         self.hide()
@@ -106,10 +106,12 @@ class ApplicationCommandPalette(QFrame):
         if data:
             self.command_list.clear()
             for item in data:
-                row = EditorListWidgetItem()
-                row.setText(item["name"])
-                row.setIcon(item["icon"])
-                row.set_data({"command":item["command"]})
+                row = IListWidgetItem(
+                    item["icon"],
+                    item["name"],
+                    None,
+                    {"command":item["command"]}
+                )
                 self.command_list.addItem(row)
             self.command_list.setCurrentRow(0)
         self.update_size()

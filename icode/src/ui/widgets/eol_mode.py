@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (
     QLabel
 )
 
-from ..igui import EditorListWidgetItem, InputHistory
+from ..igui import IListWidgetItem, InputHistory
 from PyQt5.QtGui import QColor
 
 from functions import getfn
@@ -91,17 +91,19 @@ class EOLMode(QFrame):
     
     def mirror_in_editor(self, item):
         for editor in self.api.current_editors:
-            editor.set_eol_mode(item.data["object"])
+            editor.set_eol_mode(item.item_data["object"])
         self.hide()
     
     def set_eols(self, data=False):    
         if data:
             self.eol_modes.clear()
             for eol in data:
-                row = EditorListWidgetItem()
-                row.setText(eol["name"].title())
-                row.setIcon(eol["icon"])
-                row.set_data({"object":eol["mode"]})
+                row = IListWidgetItem(
+                    eol["icon"],
+                    eol["name"].title(),
+                    None,
+                    {"object":eol["mode"]}
+                )
                 self.eol_modes.addItem(row)
         self.update_size()
     

@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (QFrame, QGraphicsDropShadowEffect, QHBoxLayout,
 from base.april_brain import *
 from .igui import Animator, InputHistory, HeaderPushButton
 from .widgets import CardApril
+from base.char_utils import get_unicon
 
 class AssistantMenu(QMenu):
     def __init__(self, parent=None):
@@ -94,7 +95,12 @@ class AprilFace(QFrame):
         self.vbox = QVBoxLayout(self.widget)
         self.widget.setLayout(self.vbox)
 
-        self.hello_msg=CardApril(self, self.template.readme, "April \uf860", 0)
+        self.hello_msg=CardApril(
+            self,
+            self.template.readme,
+            "April "+get_unicon("nf", "mdi-message"),
+            0
+        )
         self.hello_msg.set_read_only(True)
 
         self.vbox.addWidget(self.hello_msg)

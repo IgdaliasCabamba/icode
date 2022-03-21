@@ -161,7 +161,7 @@ class AprilRender:
         """
     @property
     def readme(self):
-        return """
+        return f"""
             <nobr>
                 <h3>
                     Hello, i'm <span style="color:#11f2c8">A</span><span style="color:#74afd6">p</span><span style="color:#c876e2">r</span><span style="color:#eb58eb">i</span><span style="color:#db58ef">l</span> <span style="font-size:20pt; color:#c958f4">\uf4a2</span>

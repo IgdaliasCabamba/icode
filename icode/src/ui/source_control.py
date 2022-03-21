@@ -242,8 +242,9 @@ class IGit(QFrame):
         self.btn_clone_repository.clicked.connect(self.clone_repository)
         
         self.input_commit_log = InputHistory(self)
-        self.input_commit_log.setPlaceholderText("Type log message here to search")
+        self.input_commit_log.setPlaceholderText("Type log to search, enter to commit")
         self.input_commit_log.textChanged.connect(self.find_commit)
+        self.input_commit_log.returnPressed.connect(self.do_commit)
         self.input_commit_log.setVisible(False)
         
         self.commit_tree = CommitTree(self)
@@ -325,6 +326,9 @@ class IGit(QFrame):
         elif page_id == 1:
             self.status_tree.setVisible(False)
             self.commit_tree.setVisible(True)
+    
+    def do_commit(self):
+        print(self.input_commit_log.text())
     
     def update_headers(self, total, _, __):
         self.lbl_total.setText(f"<p><span style='font-size:15pt'>{get_unicon('dev', 'git')}</span> {str(total)}</p>")

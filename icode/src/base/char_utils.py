@@ -16,7 +16,16 @@ _UNICODE_ICONS = {
     },
     "fae": {
         "bigger": "\ue285"
+    },
+    "nf":{
+        "mdi-plus": "\uf914",
+        "fa-bug": "\uf188",
+        "fa-tasks": "\uf0ae",
+        "fa-sticky_note": "\uf249",
+        "mdi-message": "\uf860",
+        "mdi-hand_pointing_right": "\uf7c6"
     }
+    
 }
 
 

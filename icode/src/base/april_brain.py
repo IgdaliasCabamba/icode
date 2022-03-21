@@ -4,6 +4,7 @@ import json
 import re
 from .templates import AprilRender
 from .april import ask
+from .char_utils import get_unicon
 
 class Brain(QObject):
     
@@ -89,7 +90,7 @@ class Brain(QObject):
                 if related_searches:
                     items=""
                     for i in related_searches:
-                        items+=f"- \uf7c6 {i} \n"
+                        items+=f"- {get_unicon('nf', 'mdi-hand_pointing_right')} {i} \n"
 
                     answer+=f"\n ### Related Searches: \n *** \n {items}"
                 

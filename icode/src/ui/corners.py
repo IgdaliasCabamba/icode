@@ -94,41 +94,23 @@ class MainTabCorner(QFrame):
         self.layout.addWidget(self.btn_split)
         self.layout.addWidget(self.btn_menu)
 
-class BottomTabCorner(QFrame):
+class GenericTabCorner(QFrame):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent=parent
-        self.setObjectName("tab-corner-widget-bottom")
+        self.setObjectName("tab-corner-widget")
         self.icons=getfn.get_smartcode_icons("tab-corner")
         self.parent.currentChanged.connect(self.change_view)
-        self.init_ui()
+        self.widget_dict = {}
+        self.layout=QHBoxLayout(self)
+        self.setLayout(self.layout)
+
+        self.layout.addSpacing(20)
     
     def change_view(self, index) -> None:
         widget=self.parent.widget(index)
         if widget in self.widget_dict.keys():
             self.change_to(widget)
-    
-    def init_ui(self) -> None:
-
-        self.layout=QHBoxLayout(self)
-        self.setLayout(self.layout)
-
-        self.btn_close=QPushButton(self)
-        self.btn_close.setIcon(self.icons.get_icon("close"))
-
-        self.btn_maximize=QPushButton(self)
-        self.btn_maximize.setIcon(self.icons.get_icon("maximize"))
-
-        self.btn_minimize = QPushButton(self)
-        self.btn_minimize.setIcon(self.icons.get_icon("minimize"))
-        self.btn_minimize.setVisible(False)
-
-        self.layout.addSpacing(20)
-        self.layout.addWidget(self.btn_maximize)
-        self.layout.addWidget(self.btn_minimize)
-        self.layout.addWidget(self.btn_close)
-
-        self.widget_dict = {}
     
     def set_visiblity(self, items:list, flag:bool):
         for item in items:
@@ -149,3 +131,27 @@ class BottomTabCorner(QFrame):
             self.layout.insertWidget(0, widget)
         if goto:
             self.change_to(name)
+
+class BottomTabCorner(GenericTabCorner):
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
+        self.parent=parent
+        self.setObjectName("tab-corner-widget-bottom")
+        self.icons=getfn.get_smartcode_icons("tab-corner")
+        self.init_ui()
+    
+    def init_ui(self) -> None:
+        self.btn_close=QPushButton(self)
+        self.btn_close.setIcon(self.icons.get_icon("close"))
+
+        self.btn_maximize=QPushButton(self)
+        self.btn_maximize.setIcon(self.icons.get_icon("maximize"))
+
+        self.btn_minimize = QPushButton(self)
+        self.btn_minimize.setIcon(self.icons.get_icon("minimize"))
+        self.btn_minimize.setVisible(False)
+
+        self.layout.addSpacing(20)
+        self.layout.addWidget(self.btn_maximize)
+        self.layout.addWidget(self.btn_minimize)
+        self.layout.addWidget(self.btn_close)

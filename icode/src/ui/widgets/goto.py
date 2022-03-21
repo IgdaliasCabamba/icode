@@ -6,9 +6,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QGraphicsDropShadowEffect,
     QLabel
 )
-
-from ..igui import EditorListWidgetItem, InputHistory
-from PyQt5.QtGui import QColor
+from ..igui import InputHistory
 
 from functions import getfn
 

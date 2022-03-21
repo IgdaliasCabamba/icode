@@ -5,9 +5,8 @@ from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QPushButton,
 from functions import getfn
 
 from .assistant import AprilFace
-from .code_notebook import SideBottomNotebook
 from .explorer import FileExplorer
-from .igui import HeaderPushButton, QGithubButton
+from .igui import HeaderPushButton, QGithubButton, IGenericNotebook
 from .investigator import Searcher
 from .istore import ExtensionsUi
 from .log_viewer import ProblemLogs
@@ -15,6 +14,7 @@ from .research_space import Labs
 from .source_control import IGit
 from .terminals import Terminal
 from .widgets import Table, WorkSpace
+from .corners import BottomTabCorner
 from .dev_tools import Notes, Todos
 
 
@@ -31,7 +31,9 @@ class SideBottom(QFrame):
         self.setLayout(self.layout)
         self.setMinimumHeight(100)
 
-        self.notebook = SideBottomNotebook(self)
+        self.notebook = IGenericNotebook(self)
+        self.corner = BottomTabCorner(self.notebook)
+        self.notebook.setCornerWidget(self.corner)
 
         # Terminal Widgets
         self.terminal_pick_area = QGithubButton(self)
