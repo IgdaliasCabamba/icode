@@ -1,4 +1,4 @@
-from smartpy_ide_core import DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX
+from smartpy_ide_core import DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX, DEBUG_EXCEPTION_REGEX
 
 DESCRIPTION = """          
     <ul>                   

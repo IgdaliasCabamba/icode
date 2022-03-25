@@ -107,7 +107,7 @@ class CodeWarnings(QFrame):
             self.display.addItem(item)
         
         if self.display.count() > 0:
-            self.fix_bugs_btn.setText(f"Try to FIX {len(data)} Bugs")
+            self.fix_bugs_btn.setText(f"Try to FIX {len(data)} Warnings")
             self.fix_bugs_btn.setVisible(True)
             self.display.setVisible(True)
             self.readme.setVisible(False)

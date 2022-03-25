@@ -32,6 +32,7 @@ class EditorWidgets(QObject):
         self.language_mode_selection = LexerMode(self, self.view)
         self.go_to = GotoLine(self, self.view)
         self.clone_repo = CloneRepo(self, self.view)
+        self.init_repo = InitRepo(self, self.view)
         self.space_mode = SpaceMode(self, self.view)
         self.eol_mode = EOLMode(self, self.view)
         self.tab_browser = TabBrowser(self, self.view)
@@ -40,6 +41,7 @@ class EditorWidgets(QObject):
         self.widget_list.append(self.language_mode_selection)
         self.widget_list.append(self.go_to)
         self.widget_list.append(self.clone_repo)
+        self.widget_list.append(self.init_repo)
         self.widget_list.append(self.space_mode)
         self.widget_list.append(self.eol_mode)
         self.widget_list.append(self.tab_browser)
@@ -206,6 +208,9 @@ class EditorWidgets(QObject):
     
     def do_clone_repo(self):
         self.run_widget(self.clone_repo)
+    
+    def do_init_repo(self):
+        self.run_widget(self.init_repo)
     
     def get_all_commands(self):
         if self.api is not None:

@@ -78,7 +78,7 @@ class EditorView(QFrame):
         self.div_main=Div(self.div)
         
         self.editor_main=Editor(self, self.file)
-        self.editor_main.connector.auto_save_file.connect(self.save_file)
+        self.editor_main.connector.auto_save_file.connect(self.file_saved)
         self.editor_main.verticalScrollBar().valueChanged.connect(self.update_shadow)
         self.editor_main.cursorPositionChanged.connect(lambda: self.update_shadow(self.editor_main.verticalScrollBar().value()))
         self.editor_main.on_focused.connect(self.focused)
@@ -156,18 +156,6 @@ class EditorView(QFrame):
         self.up_info4.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.up_info4.setVisible(False)
         
-        self.up_info5 = QPushButton(self.up_map)
-        self.up_info5.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info5.setVisible(False)
-        
-        self.up_info6 = QPushButton(self.up_map)
-        self.up_info6.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info6.setVisible(False)
-        
-        self.up_info7 = QPushButton(self.up_map)
-        self.up_info7.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info7.setVisible(False)
-        
         self.up_info00 = QPushButton(self.up_map)
         self.up_info00.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.up_info00.setVisible(False)
@@ -183,7 +171,6 @@ class EditorView(QFrame):
         self.up_info03 = QPushButton(self.up_map)
         self.up_info03.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.up_info03.setVisible(False)
-        
         
         self.file_info = QPushButton(self.up_map)
         self.file_info.setIcon(self.icons.get_icon("file"))
@@ -206,9 +193,6 @@ class EditorView(QFrame):
         self.hbox.addWidget(self.up_info2)
         self.hbox.addWidget(self.up_info3)
         self.hbox.addWidget(self.up_info4)
-        self.hbox.addWidget(self.up_info5)
-        self.hbox.addWidget(self.up_info6)
-        self.hbox.addWidget(self.up_info7)
         self.hbox.addWidget(self.up_info00)
         self.hbox.addWidget(self.up_info01)
         self.hbox.addWidget(self.up_info02)
@@ -339,6 +323,15 @@ class EditorView(QFrame):
             filefn.write_to_file(self.editor_main.text(), self.file)
             self.editor_main.save_file(self.file)
             self.editor_mirror.save_file(self.file)
+    
+    def file_saved(self):
+        if self.file is None:
+            self.save_file()
+            
+        else:
+            self.editor_main.save_file(self.file)
+            self.editor_mirror.save_file(self.file)
+        
     
     def load_file(self):
         if self.file is not None:

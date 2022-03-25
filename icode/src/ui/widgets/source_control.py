@@ -126,4 +126,58 @@ class CloneRepo(QFrame):
         self.input_url.setFocus()
         self.setFixedHeight(35)
 
-class ComitCode(QFrame):pass
+class InitRepo(QFrame):
+    focus_out = pyqtSignal(object, object)
+    
+    def __init__(self, api, parent):
+        super().__init__(parent)
+        self.api = api
+        self._parent = parent
+        self.setParent(parent)
+        self.setObjectName("editor-widget")
+        self.init_ui()
+    
+    def init_ui(self):
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(5, 5, 5, 5)
+        self.setLayout(self.layout)
+
+        self.input_name = InputHistory(self)
+        self.input_name.returnPressed.connect(lambda: self.init_repo(self.input_name.text()))
+        self.size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.input_name.setSizePolicy(self.size_policy)
+        self.input_name.setPlaceholderText("Name of repository")
+        self.input_name.setObjectName("child")
+        
+        self.layout.addWidget(self.input_name)
+    
+    def focusOutEvent(self, event):
+        super().focusOutEvent(event)
+        if self.focusWidget() not in self.findChildren(object, "child"):
+            self.focus_out.emit(self, event)
+        
+    def init_repo(self, name:str):
+        home_dir = settings.ipwd()
+        folder = QFileDialog.getExistingDirectory(None, 'Select Location', home_dir)
+        if folder is not None:
+            try:
+                print(folder+os.sep+name)
+                repo = pygit.init_repository(folder+os.sep+name)
+                self.initialized(repo, name)
+            except Exception as e:
+                self.dont_initialized(e)
+    
+    def initialized(self, repo:object, name:str):
+        repo_path = getattr(repo, "workdir", None)
+        btn_open_folder = QPushButton("Open Folder")
+        btn_open_repo = QPushButton("Open Repository")
+        btn_open_folder.clicked.connect(lambda: self.api.api.side_left.explorer.open_folder(repo_path))
+        btn_open_repo.clicked.connect(lambda: self.api.api.side_left.git.load_repository(repo))
+        self.api.api.ui.notificator.new_notification("Repo Initialized", f"The repository{name} was created to {repo_path}", [btn_open_repo, btn_open_folder])
+    
+    def dont_initialized(self, error:str):
+        print(error)
+        
+    def run(self):
+        self.input_name.setFocus()
+        self.setFixedHeight(35)

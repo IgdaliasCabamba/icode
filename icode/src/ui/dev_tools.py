@@ -9,6 +9,7 @@ from .igui import ScrollLabel, IListWidgetItem
 from base import memory, system
 from data import note_file_path, labels_cache
 from base.char_utils import get_unicon
+from base.code_api import icode_api
 
 class NotesCore(QObject):
     def __init__(self, editor):
@@ -113,13 +114,13 @@ class Todos(QFrame):
         self.layout.setCurrentWidget(self.display)
         
         title = text
-        color_text = QColor("white")
+        color_text = QColor(icode_api.get_lexers_frontend()["Label"]["fg"])
         if type == "bug":
-            color_text = QColor("red")
+            color_text = QColor(icode_api.get_lexers_frontend()["Bug"]["fg"])
             title = f"{get_unicon('nf', 'fa-bug')} {text}"
             
         elif type == "todo":
-            color_text = QColor("blue")
+            color_text = QColor(icode_api.get_lexers_frontend()["Todo"]["fg"])
             title = f"{get_unicon('nf', 'fa-tasks')} {text}"
         
         item = IListWidgetItem(None, title, tooltip, {"line": line, "note":tooltip, "label":type})

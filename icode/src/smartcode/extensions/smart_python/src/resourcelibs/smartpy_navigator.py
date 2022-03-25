@@ -110,7 +110,7 @@ class SymbolExplorer(QFrame):
         line=item.item_data["line"]
         try:
             
-            line_from, index_from, line_to, index_to = getfn.get_selection_from_item.item_data(editor, name, line)
+            line_from, index_from, line_to, index_to = getfn.get_selection_from_item_data(editor, name, line)
             editor.setCursorPosition(line_from+1, index_to)
             editor.setSelection(line_from, index_from, line_to, index_to)
                 

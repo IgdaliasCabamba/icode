@@ -1,10 +1,10 @@
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from PyQt5.QtWidgets import QFrame, QPlainTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit, QTreeView, QSplitter, QLabel, QListWidget
 from PyQt5.QtCore import Qt, QThread, QObject, QProcess
-from ui.igui import IStandardItem
-from smartpy_utils import debug_formatter, DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX, code_debug_doc
+from ui.igui import IStandardItem, IListWidgetItem
+from smartpy_utils import debug_formatter, DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX, DEBUG_EXCEPTION_REGEX, code_debug_doc
 from functions import getfn
-
+import webbrowser
 
 class OutputErrors(QFrame):
     def __init__(self, parent):
@@ -20,14 +20,35 @@ class OutputErrors(QFrame):
         desc = QLabel("<h5>Exceptions</h5>")
 
         self.output_errors = QListWidget(self)
+        self.btn_get_help = QPushButton("\uf16c Get Help", self)
+        self.btn_get_help.clicked.connect(self.get_help)
 
         self.layout.addWidget(desc)
         self.layout.addWidget(self.output_errors)
+        self.layout.addWidget(self.btn_get_help)
 
     def clear(self):
         self.output_errors.clear()
-
-
+    
+    def get_help(self):
+        item = self.output_errors.currentItem()
+        exception_name = item.item_data["error"][0][0]
+        if isinstance(exception_name, str):
+            url = f"https://www.google.com/search?q=python {exception_name}"
+            webbrowser.open_new_tab(url)
+        
+    def build(self, stdout):
+        error = DEBUG_EXCEPTION_REGEX.findall(stdout)
+        if error:
+            if len(error[0]) > 2:
+                item = IListWidgetItem(
+                    self.parent.icons.get_icon("code-error"),
+                    error[0][2],
+                    f"<h6 style='color:red'>{error[0][0]}</h6>",
+                    {"error":error},
+                )
+                self.output_errors.addItem(item)
+                
 class OutputTree(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -45,7 +66,7 @@ class OutputTree(QFrame):
         self.output_tree.setModel(self.model)
         self.output_tree.header().hide()
 
-        desc = QLabel("<h5>Object Tree</h5>")
+        desc = QLabel("<h5>Output Tree</h5>")
 
         self.layout.addWidget(desc)
         self.layout.addWidget(self.output_tree)
@@ -58,7 +79,7 @@ class OutputTree(QFrame):
             if len(root_title[0]) > 2:
                 root_item = IStandardItem(
                     self.parent.icons.get_icon("code-error"),
-                    f"Object: {root_title[0][0]} At Line: {root_title[0][1]} On:{root_title[0][2]}",
+                    f"File: {root_title[0][0]} At Line: {root_title[0][1]} On:{root_title[0][2]}",
                     None,
                     None,
                 )
@@ -193,6 +214,7 @@ class Debug(QFrame):
 
     def log(self, stdout):
         self.output_tree.build(stdout)
+        self.output_errors.build(stdout)
 
     def start(self, editor, code, file, interpreter):
         bin = interpreter.executable
@@ -209,6 +231,7 @@ class Debug(QFrame):
         self.output_errors.setVisible(False)
         self.btn_start_debug.setVisible(True)
         self.start_debug_message.setVisible(True)
+        self.clear()
 
     def clear(self):
         self.output_tree.clear()

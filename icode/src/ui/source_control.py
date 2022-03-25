@@ -16,6 +16,8 @@ class GitMenu(QMenu):
     def __init__(self, parent):
         super().__init__(parent)
         
+        self.init_repository = QAction("Init Repository", self)
+        self.addAction(self.init_repository)
         self.open_repository = QAction("Open Repository", self)
         self.addAction(self.open_repository)
         self.clone_repository = QAction("Clone Repository", self)
@@ -203,6 +205,7 @@ class IGit(QFrame):
         self.parent=parent
         self.icons=getfn.get_smartcode_icons("source_control")
         self.repository_menu = GitMenu(self)
+        self.repository_menu.init_repository.triggered.connect(self.init_repository)
         self.repository_menu.clone_repository.triggered.connect(self.clone_repository)
         self.repository_menu.add_all.triggered.connect(self.add_all)
         self.repository = None
@@ -299,6 +302,10 @@ class IGit(QFrame):
     def clone_repository(self):
         self.set_page(0)
         self.parent.parent.editor_widgets.do_clone_repo()
+    
+    def init_repository(self):
+        self.set_page(0)
+        self.parent.parent.editor_widgets.do_init_repo()
     
     def reload(self):
         self.set_page(0)

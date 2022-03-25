@@ -154,7 +154,8 @@
 	"smartsci-*":"code/poligon.png",
 	"smartsci-expand-arrow":"code/expand-arrow.png",
 	"smartsci-forward":"code/forward.png",
-    "smartsci-debug-mark":"code/breakpoint.png",
+    "smartsci-debug-breakpoint":"code/breakpoint.png",
+	"smartsci-debug-mark":"app/location.png",
 	"smartsci-no-data":"images/not_found.svg"
 	
 	//brands logos

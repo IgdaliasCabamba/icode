@@ -7,7 +7,6 @@ from .lexers import *
 import re
 import time
 
-
 class CoEditor(QObject):
 
     on_update_header = pyqtSignal(dict)
@@ -45,10 +44,8 @@ class CoEditor(QObject):
             })
         else:
             widgets = [
-                self.editor.parent.up_info0, self.editor.parent.up_info1,
-                self.editor.parent.up_info2, self.editor.parent.up_info3,
-                self.editor.parent.up_info4, self.editor.parent.up_info5,
-                self.editor.parent.up_info6, self.editor.parent.up_info7
+                self.editor.parent.up_info1, self.editor.parent.up_info2,
+                self.editor.parent.up_info3, self.editor.parent.up_info4
             ]
             path_levels = getfn.get_path_splited(self.editor.idocument.file)
             while len(path_levels) > len(widgets):
