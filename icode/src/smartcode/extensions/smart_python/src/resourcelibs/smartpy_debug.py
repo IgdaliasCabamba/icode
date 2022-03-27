@@ -97,7 +97,6 @@ class OutputTree(QFrame):
     def output_tree_clicked(self):
         pass
 
-
 class ConsoleOutput(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -224,6 +223,7 @@ class Debug(QFrame):
         self.start_debug_message.setVisible(False)
         self.output_tree.setVisible(True)
         self.output_errors.setVisible(True)
+        self.editor=editor
 
     def stop(self):
         self.process_debuger.terminate()
@@ -258,6 +258,7 @@ class Debug(QFrame):
         stdout = bytes(data).decode("utf8")
         self.message(debug_formatter(stdout))
         self.log(stdout)
+        self.track_debug(stdout)
 
     def handle_state(self, state):
         states = {
@@ -299,3 +300,15 @@ class Debug(QFrame):
     def write_input(self):
         command = self.input_text.text() + "\n"
         self.process_debuger.write(command.encode("utf-8"))
+    
+    def track_debug(self, stdout):
+        if self.editor is not None:
+            debug_state = DEBUG_STATUS_REGEX.findall(stdout)
+            if debug_state:
+                if len(debug_state[0]) > 2:
+                    try:
+                        line = int(debug_state[0][1])
+                        print(line)
+                        self.editor.debugger.set_current_line(line)
+                    except Exception as e:
+                        print(e)

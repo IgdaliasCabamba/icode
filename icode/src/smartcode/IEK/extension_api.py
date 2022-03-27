@@ -7,6 +7,7 @@ import textwrap
 from typing import Union
 
 import langserver
+import intellisense
 from PyQt5.Qsci import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *

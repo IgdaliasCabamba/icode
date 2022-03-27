@@ -24,6 +24,7 @@ class Editor(EditorBase):
     on_complete = pyqtSignal(dict)
     on_close_char = pyqtSignal(str)
     on_intellisense = pyqtSignal(object, str)
+    on_clear_annotation = pyqtSignal(list, int, str)
     
     def __init__(self, parent:object, file=Union[str,None]) -> None:
         super().__init__(parent)
@@ -44,6 +45,7 @@ class Editor(EditorBase):
         self.saved_text = None
         self.folded_lines = []
         self.all_cursors_pos = []
+        self._notes = []
         self.annotations_data = {
             "on_fold":[],
             "on_text_changed":[],
@@ -88,6 +90,7 @@ class Editor(EditorBase):
         self.coeditor.on_highlight_selection.connect(self.add_indicator_range)
         self.coeditor.on_highlight_text.connect(self.add_indicator_range)
         self.coeditor.on_clear_indicator_range.connect(self.clear_indicator_range)
+        self.coeditor.on_remove_annotations.connect(self.remove_annotations)
         self.on_key_pressed.connect(self.key_press_event)
 
     @property
@@ -103,9 +106,9 @@ class Editor(EditorBase):
             self.setAutoCompletionSource(QsciScintilla.AcsDocument)
     
     def add_development_environment_component(self, component:object, run:callable)  -> None:
-        self.editor.development_environment_components.append(component)
-        component.moveToThread(self.editor.development_environment_thread)
-        if self.editor.development_environment_thread.isRunning():
+        self.development_environment_components.append(component)
+        component.moveToThread(self.development_environment_thread)
+        if self.development_environment_thread.isRunning():
             run()
 
     def run_schedule(self) -> None:
@@ -186,18 +189,25 @@ class Editor(EditorBase):
     def remove_cursors(self) -> None:
         self.all_cursors_pos.clear()
     
+    def remove_annotations(self, type, annotations):
+        for annotation in annotations:
+            self.annotations_data[type].remove(annotation["note"])
+            self.clearAnnotations(annotation["line"])
+        
     def clear_annotations_by_type(self, type:str) -> None:
         if type in self.annotations_data.keys():
-            for i in self.annotations_data[type]:
-                self.annotations_data[type].remove(i)
-                self.clearAnnotations(i)
+            self.on_clear_annotation.emit(
+                self.annotations_data[type],
+                self.lines(),
+                type
+            )
     
-    def clear_annotations_by_id(self, type:str, id:object) -> None:
+    def clear_annotations_by_line(self, type:str, line:object) -> None:
         if type in self.annotations_data.keys():
-            for i in self.annotations_data[type]:
-                if id == i:
-                    self.annotations_data[type].remove(i)
-                    self.clearAnnotations(i)
+            for note in self.annotations_data[type]:
+                if line == note.row:
+                    self.annotations_data[type].remove(note)
+                    self.clearAnnotations(note.row)
     
     def selection_event(self) -> None:
         row_from, col_from, row_to, col_to = self.getSelection()
@@ -213,20 +223,25 @@ class Editor(EditorBase):
     def display_tooltip(self, data:dict) -> None:
         QToolTip.showText(self.mapToGlobal(data["pos"]), data["text"], self.viewport())
     
-    def display_annotation(self, row:int, note:Union[str, list], type:int, event_to_remove:str, priority:int=0):
+    def display_annotation(self, row:int, note:Union[str, list], type:int, event_to_remove:str, priority:int=0) -> None:
         if priority > 0 and len(self.annotation(row)) > 0:
-            return
+            return None
         
-        if isinstance(note, list) or isinstance(note, QsciStyledText):
-            self.annotate(row, note)
+        annotation = SmartAnnotation(self._notes, note, row)
+        
+        if isinstance(annotation.annotation, list) or isinstance(annotation.annotation, QsciStyledText):
+            self.annotate(row, annotation.annotation)
         else:
-            self.annotate(row, note, type)
+            self.annotate(row, annotation.annotation, type)
             
         if not event_to_remove in self.annotations_data.keys():
             self.annotations_data[event_to_remove] = []
         
-        if not row in self.annotations_data[event_to_remove]:
-            self.annotations_data[event_to_remove].append(row)
+        if not annotation in self.annotations_data[event_to_remove]:
+            self.annotations_data[event_to_remove].append(
+                annotation
+            )
+            self._notes.append(annotation.annotation)
     
     def update_header(self, data:dict) -> None:
         self.editor_view_parent.set_info(data)

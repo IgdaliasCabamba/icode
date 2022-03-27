@@ -139,8 +139,107 @@ class Base(QObject, Core):
         self.logo_icons = getfn.get_smartcode_icons("logo")
         self.command_icons = getfn.get_smartcode_icons("action")
         self.indentation_icons = getfn.get_smartcode_icons("indentation")
-        self.__lexers = []
-        self.__commands = []
+        self.__lexers = [{
+            "name": "python",
+            "lexer": PythonLexer,
+            "icon": getfn.get_lexer_icon_by_name("python")
+        }, {
+            "name": "c",
+            "lexer": CLexer,
+            "icon": getfn.get_lexer_icon_by_name("c")
+        }, {
+            "name": "c++",
+            "lexer": CPPLexer,
+            "icon": getfn.get_lexer_icon_by_name("c++")
+        }, {
+            "name": "css",
+            "lexer": CSSLexer,
+            "icon": getfn.get_lexer_icon_by_name("css")
+        }, {
+            "name": "html",
+            "lexer": HTMLLexer,
+            "icon": getfn.get_lexer_icon_by_name("html")
+        }, {
+            "name": "javaScript",
+            "lexer": JavaScriptLexer,
+            "icon": getfn.get_lexer_icon_by_name("javascript")
+        }, {
+            "name": "json",
+            "lexer": JSONLexer,
+            "icon": getfn.get_lexer_icon_by_name("json")
+        }, {
+            "name": "text",
+            "lexer": NoneLexer,
+            "icon": getfn.get_lexer_icon_by_name("text")
+        }, {
+            "name": "yaml",
+            "lexer": YAMLLexer,
+            "icon": getfn.get_lexer_icon_by_name("yaml")
+        }, {
+            "name": "java",
+            "lexer": JavaLexer,
+            "icon": getfn.get_lexer_icon_by_name("java")
+        }, {
+            "name": "markdown",
+            "lexer": MarkdownLexer,
+            "icon": getfn.get_lexer_icon_by_name("markdown")
+        }]
+        self.__commands = [{
+                "name": "New File\t\tCtrl+N",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.new_file
+            },
+            {
+                "name": "Open File\t\tCtrl+O",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.open_file
+            },
+            {
+                "name": "Save File\t\tCtrl+S",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.save_file
+            },
+            {
+                "name": "Open Folder\tCtrl+K",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.open_folder
+            },
+            {
+                "name": "Open Repository\t",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.open_repository
+            },
+            {
+                "name": "Close File\t\tCtrl+W",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.close_editor
+            },
+            {
+                "name": "Reopen Last Closed Editor\tCtrl+Shift+T",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.reopen_editor
+            },
+            {
+                "name": "Reopen Last Closed Editors",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.reopen_editors
+            },
+            {
+                "name": "Split In Group Horizontal",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.split_in_group_hor
+            },
+            {
+                "name": "Split In Group Vertical",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.split_in_group_ver
+            },
+            {
+                "name": "Join In Group",
+                "icon": self.command_icons.get_icon("run-command"),
+                "command": self.join_in_group
+            },
+        ]
         
     def run_api(self):
         self.editor_widgets.set_api(self)
@@ -149,12 +248,14 @@ class Base(QObject, Core):
         data = {"app": self, "qt_app": self.qt_app}
         plugin.run_ui_plugin(DATA_FILE, data)
         plugin.run_app_plugin(DATA_FILE, data)
-
-    def add_lexer(self, lexer: object) -> None:
-        self.__lexers.append(lexer)
+        
+    def add_lexer(self, lexer_info:dict) -> None:
+        if isinstance(lexer_info, dict):
+            self.__lexers.append(lexer)
     
     def add_command(self, command) -> None:
-        self.__commands.append(command)
+        if isinstance(command, dict):
+            self.__commands.append(command)
     
     def new_editor(self, notebook, file=None):
         if file is None:
@@ -277,63 +378,7 @@ class Base(QObject, Core):
     
     @property
     def commands(self) -> list:
-        return [
-            {
-                "name": "New File\t\tCtrl+N",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.new_file
-            },
-            {
-                "name": "Open File\t\tCtrl+O",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.open_file
-            },
-            {
-                "name": "Save File\t\tCtrl+S",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.save_file
-            },
-            {
-                "name": "Open Folder\tCtrl+K",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.open_folder
-            },
-            {
-                "name": "Open Repository\t",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.open_repository
-            },
-            {
-                "name": "Close File\t\tCtrl+W",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.close_editor
-            },
-            {
-                "name": "Reopen Last Closed Editor\tCtrl+Shift+T",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.reopen_editor
-            },
-            {
-                "name": "Reopen Last Closed Editors",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.reopen_editors
-            },
-            {
-                "name": "Split In Group Horizontal",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.split_in_group_hor
-            },
-            {
-                "name": "Split In Group Vertical",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.split_in_group_ver
-            },
-            {
-                "name": "Join In Group",
-                "icon": self.command_icons.get_icon("run-command"),
-                "command": self.join_in_group
-            },
-        ]
+        return self.__commands
         
     @property
     def eols(self):
@@ -385,48 +430,4 @@ class Base(QObject, Core):
     
     @property
     def lexers(self) -> dict:
-        return [{
-            "name": "python",
-            "lexer": PythonLexer,
-            "icon": getfn.get_lexer_icon_by_name("python")
-        }, {
-            "name": "c",
-            "lexer": CLexer,
-            "icon": getfn.get_lexer_icon_by_name("c")
-        }, {
-            "name": "c++",
-            "lexer": CPPLexer,
-            "icon": getfn.get_lexer_icon_by_name("c++")
-        }, {
-            "name": "css",
-            "lexer": CSSLexer,
-            "icon": getfn.get_lexer_icon_by_name("css")
-        }, {
-            "name": "html",
-            "lexer": HTMLLexer,
-            "icon": getfn.get_lexer_icon_by_name("html")
-        }, {
-            "name": "javaScript",
-            "lexer": JavaScriptLexer,
-            "icon": getfn.get_lexer_icon_by_name("javascript")
-        }, {
-            "name": "json",
-            "lexer": JSONLexer,
-            "icon": getfn.get_lexer_icon_by_name("json")
-        }, {
-            "name": "text",
-            "lexer": NoneLexer,
-            "icon": getfn.get_lexer_icon_by_name("text")
-        }, {
-            "name": "yaml",
-            "lexer": YAMLLexer,
-            "icon": getfn.get_lexer_icon_by_name("yaml")
-        }, {
-            "name": "java",
-            "lexer": JavaLexer,
-            "icon": getfn.get_lexer_icon_by_name("java")
-        }, {
-            "name": "markdown",
-            "lexer": MarkdownLexer,
-            "icon": getfn.get_lexer_icon_by_name("markdown")
-        }]
+        return self.__lexers

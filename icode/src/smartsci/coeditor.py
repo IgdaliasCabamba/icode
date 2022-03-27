@@ -14,6 +14,7 @@ class CoEditor(QObject):
     on_highlight_text = pyqtSignal(int, int, int, int, int, bool)
     on_highlight_selection = pyqtSignal(int, int, int, int, int, bool)
     on_clear_indicator_range = pyqtSignal(int, int, int, int, int, bool)
+    on_remove_annotations = pyqtSignal(str, list)
 
     def __init__(self, parent):
         super().__init__()
@@ -34,6 +35,7 @@ class CoEditor(QObject):
             lambda: self.timer.singleShot(500, self.set_lexer_from_code))
         self.editor.on_close_char.connect(self.close_char)
         self.editor.on_intellisense.connect(self.intellisense_editor)
+        self.editor.on_clear_annotation.connect(self.prepare_annotations_garbage)
 
     def make_headers(self):
         if self.editor.file_path is None:
@@ -189,3 +191,18 @@ class CoEditor(QObject):
             "event-text": string,
             "word":editor.wordAtLineIndex(line, index)
         })
+    
+    def prepare_annotations_garbage(self, annotations_data, lines, type):
+        notes_map = []
+        notes_to_remove = []
+            
+        for line in range(lines):
+            annotation = self.editor.annotation(line)
+            if len(annotation) > 0:
+                notes_map.append({"note":annotation, "line":line})
+            
+        for note in annotations_data:
+            for item in notes_map:
+                if item["note"] == note.content:
+                    notes_to_remove.append({"note":note, "line":item["line"]})
+        self.on_remove_annotations.emit(type, notes_to_remove)
