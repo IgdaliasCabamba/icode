@@ -268,8 +268,9 @@ class ITabWidget(QTabWidget, CategoryMixin):
         self.on_user_event.emit(self)
         
         event.accept()
-        if event.source().parentWidget() != self:
-            return
+        if event.source() is not None:
+            if event.source().parentWidget() != self:
+                return
 
     def dragLeaveEvent(self, event):
         if not self.drag_and_drop:

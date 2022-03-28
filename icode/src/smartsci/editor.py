@@ -1,5 +1,5 @@
 
-from PyQt5.QtCore import QObject, Qt, pyqtSignal
+from PyQt5.QtCore import QObject, Qt, pyqtSignal, QThread
 
 from PyQt5.QtWidgets import (
     QFrame, QHBoxLayout,
@@ -18,7 +18,199 @@ from .editor_core import IFile
 from functions import filefn, getfn
 from . import iconsts, get_unicon
 import settings
+import mimetypes
+from .media_viewer import ImageView
 
+class BreadcrumbController(QObject):
+    on_update_header = pyqtSignal(dict)
+    
+    def __init__(self, parent):
+        super().__init__()
+        self.editor = parent
+    
+    def run(self):
+        self.make_headers(self.editor.editor_main)
+        
+        self.editor.editor_main.on_text_changed.connect(lambda: self.text_changed(self.editor.editor_main))
+        self.editor.editor_main.on_saved.connect(lambda: self.editor_saved(self.editor.editor_main))
+        self.editor.editor_main.idocument.on_changed.connect(lambda: self.make_headers(self.editor.editor_main))
+        
+        self.editor.editor_mirror.on_text_changed.connect(lambda: self.text_changed(self.editor.editor_mirror))
+        self.editor.editor_mirror.on_saved.connect(lambda: self.editor_saved(self.editor.editor_mirror))
+        self.editor.editor_mirror.idocument.on_changed.connect(lambda: self.make_headers(self.editor.editor_mirror))
+        
+        self.editor.file_watcher.on_file_deleted.connect(self.file_deleted)
+        self.editor.file_watcher.on_file_modified.connect(self.file_modified)
+
+    def make_headers(self, editor):
+        if editor.file_path is None:
+            self.on_update_header.emit({
+                "text": " Unsaved",
+                "widget": "first",
+                "last":False
+            })
+        else:
+            widgets = [
+                "second", "third",
+                "fourth", "last"
+            ]
+            path_levels = getfn.get_path_splited(editor.idocument.file)
+            while len(path_levels) > len(widgets):
+                path_levels.pop(0)
+
+            i = 0
+            for path in path_levels:
+                if path.replace(" ", "") == "":
+                    continue
+                if i < len(widgets):
+                    self.on_update_header.emit({
+                        "text": f" {str(path)}",
+                        "widget": widgets[i],
+                        "last": False
+                    })
+                else:
+                    break
+                    self.on_update_header.emit({
+                        "text":f" {str(editor.idocument.file_name)}",
+                        "widget":widgets[i],
+                        "last":True
+                    })
+                i += 1
+        self.on_update_header.emit({
+            "widget": "first",
+            "icon": editor.idocument.icon,
+            "last":False
+        })
+
+    def file_deleted(self, file):
+        self.on_update_header.emit({
+            "text": "D",
+            "widget": "info-file",
+            "type": "red",
+            "last":True
+        })
+
+    def file_modified(self, file):
+        if filefn.read_file(file) != editor.text():
+            self.on_update_header.emit({
+                "text": "M",
+                "widget": "info-file",
+                "type": "red",
+                "last":True
+            })
+
+    def text_changed(self, editor):
+        if editor.file_path is not None:
+            self.on_update_header.emit({
+                "text": "M",
+                "widget": "info-file",
+                "type": "orange",
+                "last":True
+            })
+        else:
+            self.on_update_header.emit({
+                "text": "U",
+                "widget": "info-file",
+                "type": "orange",
+                "last":True
+            })
+
+    def editor_saved(self, editor):
+        self.on_update_header.emit({
+            "text": "S",
+            "widget": "info-file",
+            "type": "green",
+            "last":True
+        })
+    
+
+class Breadcrumbs(QFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.parent = parent
+        self.file_menu = FileMenu(self)
+        self.file_menu.save_file.triggered.connect(self.parent.save_file)
+        self.file_menu.reload_file.triggered.connect(self.parent.load_file)
+        
+        self.setObjectName("up-map")
+        
+        self.hbox = QHBoxLayout(self)
+        self.hbox.setSpacing(0)
+        self.setLayout(self.hbox)
+        
+        self.spacing=QWidget(self)
+        self.spacing.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        
+        self.breadcrumb0 = QPushButton(self)
+        self.breadcrumb0.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb0.setVisible(False)
+        
+        self.breadcrumb1 = QPushButton(self)
+        self.breadcrumb1.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb1.setVisible(False)
+        
+        self.breadcrumb2 = QPushButton(self)
+        self.breadcrumb2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb2.setVisible(False)
+        
+        self.breadcrumb3 = QPushButton(self)
+        self.breadcrumb3.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb3.setVisible(False)
+        
+        self.breadcrumb4 = QPushButton(self)
+        self.breadcrumb4.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb4.setVisible(False)
+        
+        self.breadcrumb00 = QPushButton(self)
+        self.breadcrumb00.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb00.setVisible(False)
+        
+        self.breadcrumb01 = QPushButton(self)
+        self.breadcrumb01.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb01.setVisible(False)
+        
+        self.breadcrumb02 = QPushButton(self)
+        self.breadcrumb02.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb02.setVisible(False)
+        
+        self.breadcrumb03 = QPushButton(self)
+        self.breadcrumb03.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.breadcrumb03.setVisible(False)
+        
+        self.file_info = QPushButton(self)
+        self.file_info.setIcon(self.parent.icons.get_icon("file"))
+        self.file_info.setMenu(self.file_menu)
+        self.file_info.clicked.connect(lambda: self.file_info.showMenu())
+        
+        self.src_ctrl_info = QPushButton(self)
+        self.src_ctrl_info.setIcon(self.parent.icons.get_icon("source_control"))
+        
+        self.warnings_info = QPushButton(self)
+        self.warnings_info.setIcon(self.parent.icons.get_icon("warnings"))
+        self.warnings_info.setStyleSheet("color:yelllow")
+        
+        self.errors_info = QPushButton(self)
+        self.errors_info.setIcon(self.parent.icons.get_icon("errors"))
+        self.errors_info.setStyleSheet("color:red")
+        
+        self.hbox.addWidget(self.breadcrumb0)
+        self.hbox.addWidget(self.breadcrumb1)
+        self.hbox.addWidget(self.breadcrumb2)
+        self.hbox.addWidget(self.breadcrumb3)
+        self.hbox.addWidget(self.breadcrumb4)
+        self.hbox.addWidget(self.breadcrumb00)
+        self.hbox.addWidget(self.breadcrumb01)
+        self.hbox.addWidget(self.breadcrumb02)
+        self.hbox.addWidget(self.breadcrumb03)
+        self.hbox.addWidget(self.spacing)
+        self.hbox.addWidget(self.file_info)
+        self.hbox.addWidget(self.src_ctrl_info)
+        self.hbox.addWidget(self.warnings_info)
+        self.hbox.addWidget(self.errors_info)
+        
+        self.setFixedHeight(iconsts.BREADCRUMB_FIXED_HEIGHT)
+        self.hbox.setContentsMargins(10, 2, 0, 0)
+    
 class FileMenu(QMenu):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -57,12 +249,16 @@ class EditorView(QFrame):
         self._editors = []
         self.icons = getfn.get_smartcode_icons("editor")
         self.file_watcher = IFile(self)
-        self.file_menu = FileMenu(self)
-        self.file_menu.save_file.triggered.connect(self.save_file)
-        self.file_menu.reload_file.triggered.connect(self.load_file)
+        
+        self.view_thread = QThread(self)
+        self.breadcrumb_controller = BreadcrumbController(self)
+        self.breadcrumb_controller.on_update_header.connect(self.set_info)
+        self.breadcrumb_controller.moveToThread(self.view_thread)
+        self.view_thread.started.connect(self.breadcrumb_controller.run)
         
         if self.file is not None:
             self.file_watcher.start_monitoring(str(self.file))
+            print(mimetypes.guess_type(file))
             
         self.init_ui()
 
@@ -123,98 +319,35 @@ class EditorView(QFrame):
         self._editor = self.editor_main
         self._editors.append(self.editor_main)
         self._editors.append(self.editor_mirror)
-
         self.join_in_group()
         
-        self.hbox = QHBoxLayout()
-        self.hbox.setSpacing(0)
-        
-        self.up_map = QFrame(self)
-        self.up_map.setObjectName("up-map")
-        self.up_map.setLayout(self.hbox)
-        
-        self.spacing=QWidget(self)
-        self.spacing.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        
-        self.up_info0 = QPushButton(self.up_map)
-        self.up_info0.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info0.setVisible(False)
-        
-        self.up_info1 = QPushButton(self.up_map)
-        self.up_info1.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info1.setVisible(False)
-        
-        self.up_info2 = QPushButton(self.up_map)
-        self.up_info2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info2.setVisible(False)
-        
-        self.up_info3 = QPushButton(self.up_map)
-        self.up_info3.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info3.setVisible(False)
-        
-        self.up_info4 = QPushButton(self.up_map)
-        self.up_info4.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info4.setVisible(False)
-        
-        self.up_info00 = QPushButton(self.up_map)
-        self.up_info00.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info00.setVisible(False)
-        
-        self.up_info01 = QPushButton(self.up_map)
-        self.up_info01.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info01.setVisible(False)
-        
-        self.up_info02 = QPushButton(self.up_map)
-        self.up_info02.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info02.setVisible(False)
-        
-        self.up_info03 = QPushButton(self.up_map)
-        self.up_info03.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.up_info03.setVisible(False)
-        
-        self.file_info = QPushButton(self.up_map)
-        self.file_info.setIcon(self.icons.get_icon("file"))
-        self.file_info.setMenu(self.file_menu)
-        self.file_info.clicked.connect(lambda: self.file_info.showMenu())
-        
-        self.src_ctrl_info = QPushButton(self.up_map)
-        self.src_ctrl_info.setIcon(self.icons.get_icon("source_control"))
-        
-        self.warnings_info = QPushButton(self.up_map)
-        self.warnings_info.setIcon(self.icons.get_icon("warnings"))
-        self.warnings_info.setStyleSheet("color:yelllow")
-        
-        self.errors_info = QPushButton(self.up_map)
-        self.errors_info.setIcon(self.icons.get_icon("errors"))
-        self.errors_info.setStyleSheet("color:red")
-        
-        self.hbox.addWidget(self.up_info0)
-        self.hbox.addWidget(self.up_info1)
-        self.hbox.addWidget(self.up_info2)
-        self.hbox.addWidget(self.up_info3)
-        self.hbox.addWidget(self.up_info4)
-        self.hbox.addWidget(self.up_info00)
-        self.hbox.addWidget(self.up_info01)
-        self.hbox.addWidget(self.up_info02)
-        self.hbox.addWidget(self.up_info03)
-        self.hbox.addWidget(self.spacing)
-        self.hbox.addWidget(self.file_info)
-        self.hbox.addWidget(self.src_ctrl_info)
-        self.hbox.addWidget(self.warnings_info)
-        self.hbox.addWidget(self.errors_info)
-        
-        self.up_map.setFixedHeight(iconsts.UP_MAP_FIXED_HEIGHT)
+        self.breadcrumbs_widget = Breadcrumbs(self)
         
         self.drop_shadow = QGraphicsDropShadowEffect(self)
-        self.drop_shadow.setBlurRadius(iconsts.UP_MAP_SHADOW_BLURRADIUS_STATE0)
-        self.drop_shadow.setOffset(iconsts.UP_MAP_SHADOW_Y_OFFSET_STATE0, iconsts.UP_MAP_SHADOW_X_OFFSET_STATE0)
+        self.drop_shadow.setBlurRadius(iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
+        self.drop_shadow.setOffset(iconsts.BREADCRUMB_SHADOW_Y_OFFSET_STATE0, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0)
         self.drop_shadow.setColor(QColor(0,0,0))
-        self.up_map.setGraphicsEffect(self.drop_shadow)
-    
-        self.hbox.setContentsMargins(10, 2, 0, 0)
+        self.breadcrumbs_widget.setGraphicsEffect(self.drop_shadow)
         
-        self.layout.addWidget(self.up_map)
+        self.breadcrumbs = {
+            "first":self.breadcrumbs_widget.breadcrumb0,
+            "second":self.breadcrumbs_widget.breadcrumb1,
+            "third":self.breadcrumbs_widget.breadcrumb2,
+            "fourth":self.breadcrumbs_widget.breadcrumb3,
+            "last":self.breadcrumbs_widget.breadcrumb4,
+            "code-first":self.breadcrumbs_widget.breadcrumb00,
+            "code-second":self.breadcrumbs_widget.breadcrumb01,
+            "code-third":self.breadcrumbs_widget.breadcrumb02,
+            "code-last":self.breadcrumbs_widget.breadcrumb03,
+            "info-file":self.breadcrumbs_widget.file_info,
+            "info-git":self.breadcrumbs_widget.src_ctrl_info,
+            "info-warings":self.breadcrumbs_widget.warnings_info,
+            "info-errors":self.breadcrumbs_widget.errors_info
+        }
+        
+        self.layout.addWidget(self.breadcrumbs_widget)
         self.layout.addWidget(self.div)
+        self.view_thread.start()
     
     def set_info(self, data:dict) -> None:
         text = False
@@ -226,7 +359,8 @@ class EditorView(QFrame):
         if "text" in keys:
             text = data["text"]
         if "widget" in keys:
-            widget = data["widget"]
+            if data["widget"] in self.breadcrumbs.keys():
+                widget = self.breadcrumbs[data["widget"]]
         if "type" in keys:
             type = data["type"]
         if "icon" in keys:
@@ -272,13 +406,13 @@ class EditorView(QFrame):
     
     def update_shadow(self, value):
         if value > 2:
-            self.drop_shadow.setBlurRadius(iconsts.UP_MAP_SHADOW_BLURRADIUS_STATE1)
-            self.drop_shadow.setOffset(iconsts.UP_MAP_SHADOW_Y_OFFSET_STATE1, iconsts.UP_MAP_SHADOW_X_OFFSET_STATE1)
+            self.drop_shadow.setBlurRadius(iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE1)
+            self.drop_shadow.setOffset(iconsts.BREADCRUMB_SHADOW_Y_OFFSET_STATE1, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE1)
         else:
             w = self.editor.minimap.size().width()
             y_offset = self.size().width() - w - 200
-            self.drop_shadow.setBlurRadius(iconsts.UP_MAP_SHADOW_BLURRADIUS_STATE0)
-            self.drop_shadow.setOffset(y_offset, iconsts.UP_MAP_SHADOW_X_OFFSET_STATE0)
+            self.drop_shadow.setBlurRadius(iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
+            self.drop_shadow.setOffset(y_offset, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0)
 
     @property
     def editor(self):

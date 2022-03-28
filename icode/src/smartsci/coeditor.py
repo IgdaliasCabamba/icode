@@ -8,8 +8,7 @@ import re
 import time
 
 class CoEditor(QObject):
-
-    on_update_header = pyqtSignal(dict)
+    
     on_change_lexer = pyqtSignal(object)
     on_highlight_text = pyqtSignal(int, int, int, int, int, bool)
     on_highlight_selection = pyqtSignal(int, int, int, int, int, bool)
@@ -23,100 +22,13 @@ class CoEditor(QObject):
         self.last_highlight_word = None
 
     def run(self):
-        self.make_headers()
-        self.editor.idocument.on_changed.connect(self.make_headers)
-        self.editor.on_text_changed.connect(self.text_changed)
-        self.editor.on_saved.connect(self.editor_saved)
         self.editor.on_highlight_sel_request.connect(self.highlight_selection)
         self.editor.on_highlight_match_request.connect(self.highlight_match)
-        self.editor.file_watcher.on_file_deleted.connect(self.file_deleted)
-        self.editor.file_watcher.on_file_modified.connect(self.file_modified)
         self.editor.on_word_added.connect(
             lambda: self.timer.singleShot(500, self.set_lexer_from_code))
         self.editor.on_close_char.connect(self.close_char)
         self.editor.on_intellisense.connect(self.intellisense_editor)
         self.editor.on_clear_annotation.connect(self.prepare_annotations_garbage)
-
-    def make_headers(self):
-        if self.editor.file_path is None:
-            self.on_update_header.emit({
-                "text": " Unsaved",
-                "widget": self.editor.parent.up_info0,
-                "last":False
-            })
-        else:
-            widgets = [
-                self.editor.parent.up_info1, self.editor.parent.up_info2,
-                self.editor.parent.up_info3, self.editor.parent.up_info4
-            ]
-            path_levels = getfn.get_path_splited(self.editor.idocument.file)
-            while len(path_levels) > len(widgets):
-                path_levels.pop(0)
-
-            i = 0
-            for path in path_levels:
-                if path.replace(" ", "") == "":
-                    continue
-                if i < len(widgets):
-                    self.on_update_header.emit({
-                        "text": f" {str(path)}",
-                        "widget": widgets[i],
-                        "last": False
-                    })
-                else:
-                    break
-                    self.on_update_header.emit({
-                        "text":f" {str(self.editor.idocument.file_name)}",
-                        "widget":widgets[i],
-                        "last":True
-                    })
-                i += 1
-        self.on_update_header.emit({
-            "widget": self.editor.parent.up_info0,
-            "icon": self.editor.idocument.icon,
-            "last":False
-        })
-
-    def file_deleted(self, file):
-        self.on_update_header.emit({
-            "text": "D",
-            "widget": self.editor.parent.file_info,
-            "type": "red",
-            "last":True
-        })
-
-    def file_modified(self, file):
-        if filefn.read_file(file) != self.editor.text():
-            self.on_update_header.emit({
-                "text": "M",
-                "widget": self.editor.parent.file_info,
-                "type": "red",
-                "last":True
-            })
-
-    def text_changed(self):
-        if self.editor.file_path is not None:
-            self.on_update_header.emit({
-                "text": "M",
-                "widget": self.editor.parent.file_info,
-                "type": "orange",
-                "last":True
-            })
-        else:
-            self.on_update_header.emit({
-                "text": "U",
-                "widget": self.editor.parent.file_info,
-                "type": "orange",
-                "last":True
-            })
-
-    def editor_saved(self):
-        self.on_update_header.emit({
-            "text": "S",
-            "widget": self.editor.parent.file_info,
-            "type": "green",
-            "last":True
-        })
 
     def close_char(self, char):
         row, col = self.editor.getCursorPosition()

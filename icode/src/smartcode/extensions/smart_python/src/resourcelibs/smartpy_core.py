@@ -120,14 +120,14 @@ class Pyntellisense(QObject):
 
                 self.on_update_header.emit({
                     "text": " " + name,
-                    "widget": self.editor.parent.up_info01,
+                    "widget": "code-first",
                     "type": color_main,
                     "icon": icon1,
                     "last": False
                 })
                 self.on_update_header.emit({
                     "text": " " + child_name,
-                    "widget": self.editor.parent.up_info02,
+                    "widget": "code-second",
                     "type": color_child,
                     "icon": icon2,
                     "last": True

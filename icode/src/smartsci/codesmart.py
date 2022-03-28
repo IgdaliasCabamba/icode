@@ -30,7 +30,6 @@ class Editor(EditorBase):
         super().__init__(parent)
         self.setObjectName("codesmart")
         self.parent=parent
-        self.file_watcher = self.parent.file_watcher
         self.editor_view_parent = parent
         self.menu=self.parent.parent.menu_bar
         self.status_bar=self.parent.parent.status_bar
@@ -85,7 +84,6 @@ class Editor(EditorBase):
     
     def listen_events(self):
         self._listen_sci_events()
-        self.coeditor.on_update_header.connect(self.update_header)
         self.coeditor.on_change_lexer.connect(self.set_lexer)
         self.coeditor.on_highlight_selection.connect(self.add_indicator_range)
         self.coeditor.on_highlight_text.connect(self.add_indicator_range)
@@ -314,7 +312,7 @@ class Editor(EditorBase):
         for line in self.folded_lines:
             if not line in self.contractedFolds():
                 self.folded_lines.remove(line)
-                self.clear_annotations_by_id("on_fold", line)
+                self.clear_annotations_by_line("on_fold", line)
         
     def mouse_press_event(self, event:QMouseEvent) -> None:
         self.on_mouse_pressed.emit(event)

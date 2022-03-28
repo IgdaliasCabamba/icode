@@ -245,7 +245,7 @@ class Debug(QFrame):
             self.process_debuger.start(bin, args)
         else:
             self.label_status.setText(
-                "<h3 style='color:yellow'>ALREADY RUNNING</h3>")
+                "<h5 style='color:yellow'>ALREADY RUNNING</h5>")
 
     def handle_stderr(self):
         data = self.process_debuger.readAllStandardError()
