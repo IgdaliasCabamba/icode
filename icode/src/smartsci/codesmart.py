@@ -1,4 +1,4 @@
-from .editor_core import *
+from .codesmart_core import *
 
 class Editor(EditorBase):
     
@@ -188,9 +188,10 @@ class Editor(EditorBase):
         self.all_cursors_pos.clear()
     
     def remove_annotations(self, type, annotations):
-        for annotation in annotations:
-            self.annotations_data[type].remove(annotation["note"])
-            self.clearAnnotations(annotation["line"])
+        for annotation in annotations: # BUG: ValueError: list.remove(x): x not in list
+            if annotation["note"] in self.annotations_data[type]:
+                self.annotations_data[type].remove()
+                self.clearAnnotations(annotation["line"])
         
     def clear_annotations_by_type(self, type:str) -> None:
         if type in self.annotations_data.keys():
@@ -242,7 +243,7 @@ class Editor(EditorBase):
             self._notes.append(annotation.annotation)
     
     def update_header(self, data:dict) -> None:
-        self.editor_view_parent.set_info(data)
+        self.editor_view_parent.update_breadcrumb(data)
     
     def update_title(self) -> None:
         if self.file_path is None:
@@ -287,7 +288,7 @@ class Editor(EditorBase):
             "file_name":name
         })    
     
-    def copy_this_editor(self, editor:object) -> None:
+    def clone_this_editor(self, editor:object) -> None:
         self.setLexer(editor.lexer())
         self.setDocument(editor.document())
         self.lexer_name = editor.lexer_name

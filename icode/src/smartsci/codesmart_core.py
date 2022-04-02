@@ -13,7 +13,7 @@ from base.system import SYS_NAME
 from functions import filefn, getfn
 
 from . import iconsts
-from .coeditor import *
+from .codesmart_utils import *
 from .idocument import IDocument
 from .imagesci import ImageScintilla
 from .lexers import *
@@ -42,14 +42,16 @@ class SmartAnnotation:
 class KeyBoard:
     def __init__(self, editor):
         self.editor = editor
-        def init_bindings(self):
-            commands = self.editor.standardCommands()
-            command = commands.boundTo(Qt.ControlModifier | Qt.ShiftModifier| Qt.Key_T)
-            if command is not None:
-                command.setKey(Qt.ControlModifier | Qt.ShiftModifier| Qt.Key_B)
+        self.init_bindings()
+        
+    def init_bindings(self):
+        commands = self.editor.standardCommands()
+        command = commands.boundTo(Qt.ControlModifier | Qt.ShiftModifier| Qt.Key_T)
+        if command is not None:
+            command.setKey(Qt.ControlModifier | Qt.ShiftModifier| Qt.Key_B)
             
-            #self.undo_shortcut = QShortcut(Qt.ControlModifier | Qt.Key_Z, self.editor)
-            #self.redo_shortcut = QShortcut(Qt.ControlModifier | Qt.Key_Y, self.editor)
+        #self.undo_shortcut = QShortcut(Qt.ControlModifier | Qt.Key_Z, self.editor)
+        #self.redo_shortcut = QShortcut(Qt.ControlModifier | Qt.Key_Y, self.editor)
 
 
 class Connector(QObject):

@@ -207,6 +207,8 @@ class Searcher(QFrame):
         self.input_find.returnPressed.connect(lambda: self.do_search(0))
         self.input_replace=self.replacer.input_edit
         self.input_replace.returnPressed.connect(lambda: self.do_search(1))
+        self.btn_replace_all = self.replacer.btn_replace_all
+        self.btn_replace_all.clicked.connect(lambda: self.do_search(1))
 
         self.display=Results(self)
 

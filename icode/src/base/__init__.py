@@ -12,3 +12,4 @@ from .styler import *
 from .system import *
 from .memory import *
 from .char_utils import *
+from .icode_http_api import *

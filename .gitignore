@@ -1,7 +1,9 @@
 build/builder/
+build/olds/
 dist/
 get-icode/
 smartenv/
+tools_env/
 icode/src/.cache/
 icode/src/data/
 tests/local/

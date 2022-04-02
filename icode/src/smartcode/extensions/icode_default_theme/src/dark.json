@@ -224,7 +224,7 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Identifier":{
-			"fg":"#dddddd",
+			"fg":"#98d9ff",
 			"bg":"#1e1e1e",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},

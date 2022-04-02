@@ -282,14 +282,14 @@ class PyntellisenseEdition(QObject):
             if len(errors) > 0:
                 self.on_update_header.emit({
                     "text": str(len(errors)),
-                    "widget": self.editor.parent.errors_info,
+                    "widget": "info-errors",
                     "type": "red",
                     "last":True
                 })
             else:
                 self.on_update_header.emit({
                     "text": "0",
-                    "widget": self.editor.parent.errors_info,
+                    "widget": "info-errors",
                     "type": "green",
                     "last":True
                 })

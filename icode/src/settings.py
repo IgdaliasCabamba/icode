@@ -78,30 +78,13 @@ def save_window(window, app):
         childs = []
         for i in range(notebook["widget"].count()):
             widget = notebook["widget"].widget(i)
-            if app.is_widget_code_editor(widget):
-                
-                content_path = str(widget.file)    
-                content = widget.editor.text()
-                selection = widget.editor.getSelection()
-                cursor_pos = widget.editor.getCursorPosition()
-                lexer = widget.editor.lexer_name
-                vbar = widget.editor.verticalScrollBar().value()
-                hbar = widget.editor.horizontalScrollBar().value()
-                if widget.file is None:
-                    content_path = None
-                
+            if widget.objectName() == "editor-frame":                
+            
+                editor_state = widget.save_state()
                 tab_data = notebook["widget"].get_tab_data(i)
                 
                 childs.append({
-                    "editor":{
-                        "path":content_path,
-                        "text":content,
-                        "selection":selection,
-                        "cursor":cursor_pos,
-                        "lexer":lexer,
-                        "hbar":hbar,
-                        "vbar":vbar
-                        },
+                    "editor":editor_state,
                     "notebook":{
                         "title":tab_data.title,
                         "tooltip":tab_data.tooltip,
@@ -198,29 +181,14 @@ def restore_window(window, app, getfn):
             
                 
         for child in childs:
-            
-            lexer_name = child["editor"]["lexer"]
-            file = child["editor"]["path"]
-            code = child["editor"]["text"]
-            cursor = child["editor"]["cursor"]
-            selection = child["editor"]["selection"]
-            scroll_v = child["editor"]["hbar"]
-            scroll_h = child["editor"]["vbar"]
             title = child["notebook"]["title"]
-            icon = getfn.get_icon_from_lexer(lexer_name)
+            icon = getfn.get_icon_from_lexer(child["editor"]["lexer"])
             
-            editor = app.new_editor(notebook, file)
-            if file is None:
-                editor.editor.set_text(code)
+            editor = app.new_editor(notebook, child["editor"]["path"])
+            editor.restore_state(child["editor"])
+            
             index = notebook.add_tab_and_get_index(editor, title)
             notebook.setTabIcon(index, icon)
-            
-            for code_editor in editor.editors:
-                code_editor.set_lexer(getfn.get_lexer_from_name(lexer_name))
-                code_editor.setCursorPosition(cursor[0], cursor[1])
-                code_editor.verticalScrollBar().setValue(scroll_v)
-                code_editor.horizontalScrollBar().setValue(scroll_h)
-                code_editor.setSelection(selection[0], selection[1], selection[2], selection[3])
                 
             app.on_new_editor.emit(editor)
         

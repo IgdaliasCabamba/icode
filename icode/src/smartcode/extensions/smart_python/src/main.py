@@ -245,7 +245,7 @@ class Init(ModelApp):
         notebook.widget_added.connect(self.take_editor)
 
     def take_editor(self, widget) -> None:
-        if self.object_is(widget, "editor-frame"):
+        if isfn.is_widget_code_editor(widget):
             editor1, editor2 = widget.get_editors()
 
             if editor1.lexer_name.lower() == "python":

@@ -3,10 +3,12 @@ appdirs==1.4.4
 attrs==21.4.0
 Automat==20.2.0
 beautifulsoup4==4.10.0
+binaryornot==0.4.4
 cachelib==0.6.0
 certifi==2021.10.8
 cffi==1.15.0
 characteristic==14.3.0
+chardet==4.0.0
 charset-normalizer==2.0.10
 click==8.0.3
 commonmark==0.9.1

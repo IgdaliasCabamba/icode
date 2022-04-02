@@ -6,6 +6,7 @@ icode_packages=[
 "attrs",
 "automat",
 "bs4",
+"binaryornot",
 "cachelib",
 "certifi",
 "characteristic",
@@ -17,6 +18,7 @@ icode_packages=[
 "deprecated",
 "github",
 "hjson",
+"howdoi",
 "hyperlink",
 "idna",
 "importlib_metadata",
@@ -37,6 +39,7 @@ icode_packages=[
 "PyQt5.Qsci",
 "pyquery",
 "qtpy",
+"qtwidgets",
 "requests",
 "shamanld",
 "six",
@@ -47,6 +50,7 @@ icode_packages=[
 "typing_extensions",
 "urllib3",
 "validus",
+"waitress",
 "werkzeug",
 "wikipedia",
 "wrapt",
@@ -65,6 +69,7 @@ from appdirs import *
 from attrs import *
 from automat import *
 from bs4 import *
+from binaryornot import *
 from cachelib import *
 from certifi import *
 from characteristic import *
@@ -77,6 +82,7 @@ from cx_Freeze import *
 from deprecated import *
 from github import *
 from hjson import *
+from howdoi import *
 from hyperlink import *
 from idna import *
 from importlib_metadata import *
@@ -97,6 +103,7 @@ from PyQt5 import *
 from PyQt5.Qsci import *
 from pyquery import *
 from qtpy import *
+from qtwidgets import *
 from requests import *
 from shamanld import *
 from six import *
@@ -108,6 +115,7 @@ from twisted import *
 from typing_extensions import *
 from urllib3 import *
 from validus import *
+from waitress import *
 from werkzeug import *
 from wikipedia import *
 from wrapt import *

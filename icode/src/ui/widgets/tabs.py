@@ -50,6 +50,7 @@ class TabBrowser(QFrame):
         self.tab_list.setIconSize(QSize(16,16))
         self.tab_list.on_select_request.connect(self.select_tab)
         self.tab_list.itemActivated.connect(self.change_tab)
+        self.tab_list.itemClicked.connect(self.item_clicked)
 
         self.layout.addWidget(self.tab_list)
     
@@ -75,8 +76,9 @@ class TabBrowser(QFrame):
         self.setFixedHeight(self.tab_list.size().height()+10)
 
     def change_tab(self, item):
-        self.notebook.setCurrentWidget(item.item_data["object"])
-        self.hide()
+        if item is not None:
+            self.notebook.setCurrentWidget(item.item_data["object"])
+            self.hide()
         
     def set_navigation(self, data):
         if data:
@@ -100,6 +102,9 @@ class TabBrowser(QFrame):
     
     def select_tab(self):
         self.change_tab(self.tab_list.item(self.index))
+    
+    def item_clicked(self, item):
+        self.index = self.tab_list.row(item)
         
     def run(self):
         self.index = 1

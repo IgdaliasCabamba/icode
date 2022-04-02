@@ -1,4 +1,6 @@
-from smartpy_ide_core import DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX, DEBUG_EXCEPTION_REGEX
+from smartpy_ide_core import (BUILTIN_EXCEPTIONS, DEBUG_CONTEXT_REGEX,
+                              DEBUG_EXCEPTION_REGEX, DEBUG_RETURN_REGEX,
+                              DEBUG_STATUS_REGEX)
 
 DESCRIPTION = """          
     <ul>                   
@@ -97,21 +99,40 @@ code_debug_doc = """
             </small>
         """
 
-def format_analyze_rank(rank:str):
+
+def format_analyze_rank(rank: str):
     if rank == "A":
-        return (f"<h2 style='color:#9de35f'>{rank}</h2>", "<strong style='color:#9de35f'>low risk - simple block</strong>")
+        return (
+            f"<h2 style='color:#9de35f'>{rank}</h2>",
+            "<strong style='color:#9de35f'>low risk - simple block</strong>")
     elif rank == "B":
-        return (f"<h2 style='color:#c9e35f'>{rank}</h2>", "<strong style='color:#c9e35f'>low risk - well structured and stable block</strong>")
+        return (
+            f"<h2 style='color:#c9e35f'>{rank}</h2>",
+            "<strong style='color:#c9e35f'>low risk - well structured and stable block</strong>"
+        )
     elif rank == "C":
-        return (f"<h2 style='color:#e3df5f'>{rank}</h2>", "<strong style='color:#e3df5f'>moderate risk - slightly complex block</strong>")
+        return (
+            f"<h2 style='color:#e3df5f'>{rank}</h2>",
+            "<strong style='color:#e3df5f'>moderate risk - slightly complex block</strong>"
+        )
     elif rank == "D":
-        return (f"<h2 style='color:#e3b05f'>{rank}</h2>", "<strong style='color:#e3b05f'>more than moderate risk - more complex block</strong>")
+        return (
+            f"<h2 style='color:#e3b05f'>{rank}</h2>",
+            "<strong style='color:#e3b05f'>more than moderate risk - more complex block</strong>"
+        )
     elif rank == "E":
-        return (f"<h2 style='color:#e37e5f'>{rank}</h2>", "<strong style='color:#e37e5f'>high risk - complex block, alarming</strong>")
+        return (
+            f"<h2 style='color:#e37e5f'>{rank}</h2>",
+            "<strong style='color:#e37e5f'>high risk - complex block, alarming</strong>"
+        )
     elif rank == "F":
-        return (f"<h2 style='color:#e35f5f'>{rank}</h2>", "<strong style='color:#e35f5f'>very high risk - error-prone, unstable block</strong>")
+        return (
+            f"<h2 style='color:#e35f5f'>{rank}</h2>",
+            "<strong style='color:#e35f5f'>very high risk - error-prone, unstable block</strong>"
+        )
     else:
         return (f"<h2>{rank}</h2>", "")
+
 
 def debug_formatter(stdout):
     return stdout + "\n"

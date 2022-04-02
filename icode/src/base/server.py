@@ -240,6 +240,9 @@ class Base(QObject, Core):
                 "command": self.join_in_group
             },
         ]
+    
+    def notify(self, title, text, widgets):
+        self.ui.notificator.new_notification(title, text, widgets)
         
     def run_api(self):
         self.editor_widgets.set_api(self)
@@ -257,12 +260,8 @@ class Base(QObject, Core):
         if isinstance(command, dict):
             self.__commands.append(command)
     
-    def new_editor(self, notebook, file=None):
-        if file is None:
-            editor = EditorView(self, self.ui, notebook)
-        else:
-            editor = EditorView(self, self.ui, notebook, file)
-        
+    def new_editor(self, notebook, file=None, content_type = None):
+        editor = EditorView(self, self.ui, notebook, file, content_type)
         self.configure_editor(editor)
         return editor
     
@@ -290,7 +289,7 @@ class Base(QObject, Core):
         self.on_new_editor.emit(editor)
     
     def copy_editor(self, notebook, tab_data) -> EditorView:
-        editor = self.new_editor(notebook)
+        editor = self.new_editor(notebook, tab_data.widget.file, tab_data.widget.content_type)
         editor.make_deep_copy(tab_data.widget)
         index = notebook.add_tab_and_get_index(editor, tab_data.title)
         notebook.setTabToolTip(index, tab_data.tooltip)
@@ -331,13 +330,6 @@ class Base(QObject, Core):
         self.on_commit_app.emit(1)
         return notebook
 
-    def is_widget_code_editor(self, widget, attr:str=None, value:str=None) -> bool:
-        if hasattr(widget, "objectName"):
-            if widget.objectName() == "editor-frame":
-                if getattr(widget.editor, str(attr), None) == value:
-                    return widget
-        return False
-
     def current_notebook_editor(self, notebook:object = None, attr:str=None, value:object=None) -> Union[object, bool]:
         if not self.are_notebooks_empty():
             if notebook is None:
@@ -345,7 +337,7 @@ class Base(QObject, Core):
             else:
                 widget = notebook.currentWidget()
             if widget is not None:
-                if self.is_widget_code_editor(widget, attr, value):
+                if isfn.is_widget_code_editor(widget, attr, value):
                     return widget.editor
         return False
 
@@ -371,7 +363,7 @@ class Base(QObject, Core):
     def is_file_duplicated(self, file:str, notebook:object) -> bool:
         for i in range(notebook.count()):
             widget = notebook.widget(i)
-            if self.is_widget_code_editor(widget):
+            if isfn.is_widget_code_editor(widget):
                 if str(widget.file) == file:
                     return {"index":i, "widget":widget, "notebook":notebook}
         return False

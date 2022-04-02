@@ -15,10 +15,10 @@ src_path = "src"
 root_path = os.getcwd()
 
 if getattr(sys, 'frozen', False):
-    root_path = os.path.dirname(sys.executable)
+    root_path = os.path.dirname(os.path.realpath(sys.executable))
     os.chdir(root_path+os.sep+src_path)
 else:
-    root_path = os.getcwd()
+    root_path = os.path.dirname(os.path.realpath(__file__))
     os.chdir(root_path+os.sep+src_path)
 
 def finish():

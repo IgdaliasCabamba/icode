@@ -8,7 +8,6 @@ class SearchEngine(QObject):
     def __init__(self, parent):
         super().__init__()
         self.parent=parent
-        self._fifo_stack = []
     
     def run(self):
         self.parent.on_searched.connect(self.search)

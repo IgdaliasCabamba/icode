@@ -6,7 +6,7 @@ from PyQt5.QtGui import QColor
 
 from base.april_brain import *
 
-from ui.chelly import GenericEditor
+from ui.editor import GenericEditor
 import pyperclip
 import textwrap
 import commonmark

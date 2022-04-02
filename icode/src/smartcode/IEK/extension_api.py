@@ -39,7 +39,7 @@ def export(type:str="extension", path:str=""):
 class BaseApi:
     def __init__(self):
         pass
-
+        
     def source_path(self, name:str = "src"):
         return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{self.ext_name}{SYS_SEP}{name}{SYS_SEP}"
     
@@ -163,7 +163,7 @@ class ModelUi(QObject, BaseApi):
         return False
     
     def paint_editor(self, widget, painter):
-        if widget.objectName()=="editor-frame":            
+        if isfn.is_widget_code_editor(widget):
             for editor in widget.editors:
                 editor.on_style_changed.connect(painter)
                 painter(editor)

@@ -268,10 +268,10 @@ class IGit(QFrame):
         try:
             self.repository = repository
             
-            t0=repository.revparse_single('HEAD')
-            t1=repository.revparse_single('HEAD^')
+            #t0=repository.revparse_single('HEAD')
+            #t1=repository.revparse_single('HEAD^')
 
-            out=repository.diff(t0,t1)
+            #out=repository.diff(t0,t1)
             #print(dir(out))
             
             self.btn_clone_repository.setVisible(False)

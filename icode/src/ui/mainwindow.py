@@ -19,7 +19,7 @@ from .April import April
 from .notificator import Notificator
 from .iconfig_ui import ConfigUi
 from frameworks.icodeframe import iwindow
-from smartsci.editor import *
+from smartsci.chelly import *
 
 class MainWindow(QMainWindow):
 

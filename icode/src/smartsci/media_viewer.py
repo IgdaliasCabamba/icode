@@ -1,16 +1,18 @@
 import os
-from PyQt5.QtCore import QPointF, Qt, QRectF, QSizeF, pyqtSignal
+from PyQt5.QtCore import QPointF, Qt, QRectF, QSizeF, pyqtSignal, QTimer
 from PyQt5.QtGui import QPainter, QColor, QImage, QPixmap
-from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene
+from PyQt5.QtWidgets import QApplication, QGraphicsView, QGraphicsPixmapItem, QGraphicsScene, QVBoxLayout, QFrame
 
 class ImageView(QGraphicsView):
     
     on_image_clicked = pyqtSignal(object)
     
     def __init__(self, parent, image):
-        super(ImageView, self).__init__(parent)
-        self.image = image
+        super().__init__(parent)
+        self.setObjectName("media-viewer")
+        self.timer = QTimer(self)
         
+        self.image = image
         self.setCursor(Qt.OpenHandCursor)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
@@ -18,6 +20,7 @@ class ImageView(QGraphicsView):
                             QPainter.SmoothPixmapTransform)
         self.setCacheMode(self.CacheBackground)
         self.setViewportUpdateMode(self.SmartViewportUpdate)
+        
         self._item = QGraphicsPixmapItem()
         self._item.setFlags(QGraphicsPixmapItem.ItemIsFocusable |
                             QGraphicsPixmapItem.ItemIsMovable)
@@ -27,7 +30,11 @@ class ImageView(QGraphicsView):
 
         self.pixmap = None
         self._delta = 0.1
-        self.setPixmap(self.image)
+        self.load()
+    
+    def load(self):
+        self.update()
+        self.timer.singleShot(3600, lambda: self.setPixmap(self.image))
 
     def setPixmap(self, pixmap, fitIn=True):
         if isinstance(pixmap, QPixmap):
@@ -54,18 +61,22 @@ class ImageView(QGraphicsView):
     def fitInView(self, rect, flags=Qt.IgnoreAspectRatio):
         if not self.scene() or rect.isNull():
             return
-        unity = self.transform().mapRect(QRectF(0, 0, 1, 1))
-        self.scale(1 / unity.width(), 1 / unity.height())
-        viewRect = self.viewport().rect()
-        sceneRect = self.transform().mapRect(rect)
-        x_ratio = viewRect.width() / sceneRect.width()
-        y_ratio = viewRect.height() / sceneRect.height()
-        if flags == Qt.KeepAspectRatio:
-            x_ratio = y_ratio = min(x_ratio, y_ratio)
-        elif flags == Qt.KeepAspectRatioByExpanding:
-            x_ratio = y_ratio = max(x_ratio, y_ratio)
-        self.scale(x_ratio, y_ratio)
-        self.centerOn(rect.center())
+        try:
+            unity = self.transform().mapRect(QRectF(0, 0, 1, 1))
+            self.scale(1 / unity.width(), 1 / unity.height())
+            viewRect = self.viewport().rect()
+            sceneRect = self.transform().mapRect(rect)
+            x_ratio = viewRect.width() / sceneRect.width()
+            y_ratio = viewRect.height() / sceneRect.height()
+            if flags == Qt.KeepAspectRatio:
+                x_ratio = y_ratio = min(x_ratio, y_ratio)
+            elif flags == Qt.KeepAspectRatioByExpanding:
+                x_ratio = y_ratio = max(x_ratio, y_ratio)
+            self.scale(x_ratio, y_ratio)
+            self.centerOn(rect.center())
+        
+        except Exception as e:
+            print(e)
 
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
@@ -97,5 +108,20 @@ class ImageView(QGraphicsView):
             self.setDragMode(QGraphicsView.NoDrag)
         elif not self._item.pixmap().isNull():
             self.setDragMode(QGraphicsView.ScrollHandDrag)
-            
-    #w = ImageView(None, image='image.jpg')
+    
+    def get_zoom(self):
+        return self._item.scale()
+    
+class EditorMedia(QFrame):
+    def __init__(self, parent, file):
+        super().__init__(parent)
+        self.setObjectName("editor-media")
+        self.parent = parent
+        self.file = file
+        
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0,0,0,0)
+        self.setLayout(self.layout)
+        
+        self.player = ImageView(self, str(self.file))
+        self.layout.addWidget(self.player)

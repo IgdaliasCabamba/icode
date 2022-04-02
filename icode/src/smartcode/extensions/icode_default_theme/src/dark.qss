@@ -423,8 +423,8 @@ QStatusBar QSizeGrip,
 
 /* Editor */
 #editor-frame,
-#editor-frame #up-map,
-#editor-frame #up-map QPushButton,
+#editor-frame #breadcrumbs,
+#editor-frame #breadcrumbs QPushButton,
 #editor-splitter {background-color: $base;}
 #editor-frame QListView {
     min-width: 360px;
@@ -443,8 +443,12 @@ QStatusBar QSizeGrip,
 }
 #editor-frame QsciScintilla,
 #editor-frame QListView:focus {border: none;}
-#editor-frame #up-map QPushButton{font-size:10pt;}
-
+#editor-frame #breadcrumbs QPushButton{font-size:10pt;}
+#editor-frame #editor-media,
+#editor-frame #editor-media #media-viewer,
+#editor-frame QTextEdit {
+	background: #1e1e1e
+}
 /*---------------------------------------------------------------------------------------*/
 
 /*

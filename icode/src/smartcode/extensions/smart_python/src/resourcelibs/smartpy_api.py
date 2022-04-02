@@ -103,6 +103,7 @@ class PythonApi:
             ide.compound_statements, ide.comparison_negative,
             ide.python_3000_raise_comma, ide.python_3000_not_equal,
             ide.python_3000_backticks)
+            
         data = {"warnings": [], "lines": []}
         for line in range(editor.lines()):
             line_text = editor.text(line)

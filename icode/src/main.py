@@ -172,7 +172,7 @@ class App(Base):
             self.ui.notebook.setTabIcon(
                 index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
         
-        if self.is_widget_code_editor(widget):
+        if isfn.is_widget_code_editor(widget):
             widget.set_title(tab_text)
             self.ui.notebook.setTabToolTip(index, str(tab_text))
     
@@ -187,7 +187,7 @@ class App(Base):
         for notebook in self.ui.notebooks:
             for i in range(notebook.count()):
                 widget = notebook.widget(i)
-                if self.is_widget_code_editor(widget):
+                if isfn.is_widget_code_editor(widget):
                     for editor in widget.get_editors():
                         editor.set_minimap_visiblity(visiblity)
                 
@@ -278,7 +278,7 @@ class App(Base):
     def notebook_tab_changed(self, index):
         """Update widgets to show new tab data"""
         self.editor_widgets.close_all()
-        widget = self.is_widget_code_editor(self.ui.notebook.widget(index))
+        widget = isfn.is_widget_code_editor(self.ui.notebook.widget(index))
             
 
         if index == -1:

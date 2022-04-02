@@ -1,10 +1,17 @@
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtWidgets import QFrame, QPlainTextEdit, QPushButton, QVBoxLayout, QHBoxLayout, QLineEdit, QTreeView, QSplitter, QLabel, QListWidget
-from PyQt5.QtCore import Qt, QThread, QObject, QProcess
-from ui.igui import IStandardItem, IListWidgetItem
-from smartpy_utils import debug_formatter, DEBUG_STATUS_REGEX, DEBUG_RETURN_REGEX, DEBUG_CONTEXT_REGEX, DEBUG_EXCEPTION_REGEX, code_debug_doc
-from functions import getfn
 import webbrowser
+
+from PyQt5.QtCore import QObject, QProcess, Qt, QThread
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit,
+                             QListWidget, QPlainTextEdit, QPushButton,
+                             QSplitter, QTreeView, QVBoxLayout)
+from smartpy_utils import (BUILTIN_EXCEPTIONS, DEBUG_CONTEXT_REGEX,
+                           DEBUG_EXCEPTION_REGEX, DEBUG_RETURN_REGEX,
+                           DEBUG_STATUS_REGEX, code_debug_doc, debug_formatter)
+
+from functions import getfn
+from ui.igui import IListWidgetItem, IStandardItem
+
 
 class OutputErrors(QFrame):
     def __init__(self, parent):
@@ -29,26 +36,28 @@ class OutputErrors(QFrame):
 
     def clear(self):
         self.output_errors.clear()
-    
+
     def get_help(self):
         item = self.output_errors.currentItem()
         exception_name = item.item_data["error"][0][0]
         if isinstance(exception_name, str):
             url = f"https://www.google.com/search?q=python {exception_name}"
             webbrowser.open_new_tab(url)
-        
+
     def build(self, stdout):
         error = DEBUG_EXCEPTION_REGEX.findall(stdout)
         if error:
             if len(error[0]) > 2:
-                item = IListWidgetItem(
-                    self.parent.icons.get_icon("code-error"),
-                    error[0][2],
-                    f"<h6 style='color:red'>{error[0][0]}</h6>",
-                    {"error":error},
-                )
-                self.output_errors.addItem(item)
-                
+                if len(error[0][2]) > 0 and error[0][0] in BUILTIN_EXCEPTIONS:
+                    item = IListWidgetItem(
+                        self.parent.icons.get_icon("code-error"),
+                        error[0][2],
+                        f"<h6 style='color:red'>{error[0][0]}</h6>",
+                        {"error": error},
+                    )
+                    self.output_errors.addItem(item)
+
+
 class OutputTree(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -96,6 +105,7 @@ class OutputTree(QFrame):
 
     def output_tree_clicked(self):
         pass
+
 
 class ConsoleOutput(QFrame):
     def __init__(self, parent):
@@ -223,7 +233,7 @@ class Debug(QFrame):
         self.start_debug_message.setVisible(False)
         self.output_tree.setVisible(True)
         self.output_errors.setVisible(True)
-        self.editor=editor
+        self.editor = editor
 
     def stop(self):
         self.process_debuger.terminate()
@@ -300,7 +310,7 @@ class Debug(QFrame):
     def write_input(self):
         command = self.input_text.text() + "\n"
         self.process_debuger.write(command.encode("utf-8"))
-    
+
     def track_debug(self, stdout):
         if self.editor is not None:
             debug_state = DEBUG_STATUS_REGEX.findall(stdout)

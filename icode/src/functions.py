@@ -678,7 +678,19 @@ class Get:
 
         return None
 
+class Is:
+    def __init__(self):
+        pass
+    
+    def is_widget_code_editor(self, widget, attr:str="", value:str=None) -> bool:
+        if hasattr(widget, "objectName"):
+            if widget.objectName() == "editor-frame":
+                if widget.is_text:
+                    if getattr(widget.editor, str(attr), None) == value:
+                        return widget
+        return False
 
 filefn = File()
 getfn = Get()
 iofn = IO()
+isfn = Is()

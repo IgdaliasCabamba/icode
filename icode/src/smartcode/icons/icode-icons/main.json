@@ -120,6 +120,7 @@
 	"lexer-yaml":"languages/yaml.png",
 	"lexer-markdown":"languages/markdown.png",
 	"lexer-java":"languages/java.png",
+	"lexer-image":"languages/image.png",
 
     //code icons
     "code-file":"code/file-path.png",
@@ -185,6 +186,7 @@
 	"*-backward":"app/left-arrow.png",
 	"*-menu":"app/menu.png",
 	"*-copy":"app/copy.png",
+	"*-image":"app/image.png",
 	
 	"*-windows":"app/windows.png",
 	"*-linux":"app/linux.png",
