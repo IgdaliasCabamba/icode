@@ -7,6 +7,7 @@ from jedi.inference.names import AbstractArbitraryName
 try:
     # https://github.com/python/typeshed/pull/4351 adds pydoc_data
     from pydoc_data import topics  # type: ignore[import]
+
     pydoc_topics: Optional[Dict[str, str]] = topics.topics
 except ImportError:
     # Python 3.6.8 embeddable does not have pydoc_data.
@@ -14,7 +15,7 @@ except ImportError:
 
 
 class KeywordName(AbstractArbitraryName):
-    api_type = 'keyword'
+    api_type = "keyword"
 
     def py__doc__(self):
         return imitate_pydoc(self.string_name)
@@ -26,13 +27,13 @@ def imitate_pydoc(string):
     stuff.
     """
     if pydoc_topics is None:
-        return ''
+        return ""
 
     h = pydoc.help
     with suppress(KeyError):
         # try to access symbols
         string = h.symbols[string]
-        string, _, related = string.partition(' ')
+        string, _, related = string.partition(" ")
 
     def get_target(s):
         return h.topics.get(s, h.keywords.get(s))
@@ -44,9 +45,9 @@ def imitate_pydoc(string):
         # is a tuple now
         label, related = string
     except TypeError:
-        return ''
+        return ""
 
     try:
-        return pydoc_topics[label].strip() if pydoc_topics else ''
+        return pydoc_topics[label].strip() if pydoc_topics else ""
     except KeyError:
-        return ''
+        return ""

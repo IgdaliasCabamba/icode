@@ -8,21 +8,21 @@ from jedi.inference.helpers import is_string
 
 
 CODES = {
-    'attribute-error': (1, AttributeError, 'Potential AttributeError.'),
-    'name-error': (2, NameError, 'Potential NameError.'),
-    'import-error': (3, ImportError, 'Potential ImportError.'),
-    'type-error-too-many-arguments': (4, TypeError, None),
-    'type-error-too-few-arguments': (5, TypeError, None),
-    'type-error-keyword-argument': (6, TypeError, None),
-    'type-error-multiple-values': (7, TypeError, None),
-    'type-error-star-star': (8, TypeError, None),
-    'type-error-star': (9, TypeError, None),
-    'type-error-operation': (10, TypeError, None),
-    'type-error-not-iterable': (11, TypeError, None),
-    'type-error-isinstance': (12, TypeError, None),
-    'type-error-not-subscriptable': (13, TypeError, None),
-    'value-error-too-many-values': (14, ValueError, None),
-    'value-error-too-few-values': (15, ValueError, None),
+    "attribute-error": (1, AttributeError, "Potential AttributeError."),
+    "name-error": (2, NameError, "Potential NameError."),
+    "import-error": (3, ImportError, "Potential ImportError."),
+    "type-error-too-many-arguments": (4, TypeError, None),
+    "type-error-too-few-arguments": (5, TypeError, None),
+    "type-error-keyword-argument": (6, TypeError, None),
+    "type-error-multiple-values": (7, TypeError, None),
+    "type-error-star-star": (8, TypeError, None),
+    "type-error-star": (9, TypeError, None),
+    "type-error-operation": (10, TypeError, None),
+    "type-error-not-iterable": (11, TypeError, None),
+    "type-error-isinstance": (12, TypeError, None),
+    "type-error-not-subscriptable": (13, TypeError, None),
+    "value-error-too-many-values": (14, ValueError, None),
+    "value-error-too-few-values": (15, ValueError, None),
 }
 
 
@@ -50,12 +50,20 @@ class Error:
         return first + str(CODES[self.name][0])
 
     def __str__(self):
-        return '%s:%s:%s: %s %s' % (self.path, self.line, self.column,
-                                    self.code, self.message)
+        return "%s:%s:%s: %s %s" % (
+            self.path,
+            self.line,
+            self.column,
+            self.code,
+            self.message,
+        )
 
     def __eq__(self, other):
-        return (self.path == other.path and self.name == other.name
-                and self._start_pos == other._start_pos)
+        return (
+            self.path == other.path
+            and self.name == other.name
+            and self._start_pos == other._start_pos
+        )
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -64,9 +72,13 @@ class Error:
         return hash((self.path, self._start_pos, self.name))
 
     def __repr__(self):
-        return '<%s %s: %s@%s,%s>' % (self.__class__.__name__,
-                                      self.name, self.path,
-                                      self._start_pos[0], self._start_pos[1])
+        return "<%s %s: %s@%s,%s>" % (
+            self.__class__.__name__,
+            self.name,
+            self.path,
+            self._start_pos[0],
+            self._start_pos[1],
+        )
 
 
 class Warning(Error):
@@ -98,18 +110,20 @@ def _check_for_setattr(instance):
         return False
 
     try:
-        stmt_names = node.get_used_names()['setattr']
+        stmt_names = node.get_used_names()["setattr"]
     except KeyError:
         return False
 
-    return any(node.start_pos < n.start_pos < node.end_pos
-               # Check if it's a function called setattr.
-               and not (n.parent.type == 'funcdef' and n.parent.name == n)
-               for n in stmt_names)
+    return any(
+        node.start_pos < n.start_pos < node.end_pos
+        # Check if it's a function called setattr.
+        and not (n.parent.type == "funcdef" and n.parent.name == n)
+        for n in stmt_names
+    )
 
 
 def add_attribute_error(name_context, lookup_value, name):
-    message = ('AttributeError: %s has no attribute %s.' % (lookup_value, name))
+    message = "AttributeError: %s has no attribute %s." % (lookup_value, name)
     # Check for __getattr__/__getattribute__ existance and issue a warning
     # instead of an error, if that happens.
     typ = Error
@@ -120,7 +134,7 @@ def add_attribute_error(name_context, lookup_value, name):
             typ = Warning
 
     payload = lookup_value, name
-    add(name_context, 'attribute-error', name, message, typ, payload)
+    add(name_context, "attribute-error", name, message, typ, payload)
 
 
 def _check_for_exception_catch(node_context, jedi_name, exception, payload=None):
@@ -131,13 +145,16 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
     it.
     Returns True if the exception was catched.
     """
+
     def check_match(cls, exception):
         if not cls.is_class():
             return False
 
         for python_cls in exception.mro():
-            if cls.py__name__() == python_cls.__name__ \
-                    and cls.parent_context.is_builtins_module():
+            if (
+                cls.py__name__() == python_cls.__name__
+                and cls.parent_context.is_builtins_module()
+            ):
                 return True
         return False
 
@@ -147,8 +164,9 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
         for branch_type in iterator:
             next(iterator)  # The colon
             suite = next(iterator)
-            if branch_type == 'try' \
-                    and not (branch_type.start_pos < jedi_name.start_pos <= suite.end_pos):
+            if branch_type == "try" and not (
+                branch_type.start_pos < jedi_name.start_pos <= suite.end_pos
+            ):
                 return False
 
         for node in obj.get_except_clause_tests():
@@ -158,8 +176,8 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
                 except_classes = node_context.infer_node(node)
                 for cls in except_classes:
                     from jedi.inference.value import iterable
-                    if isinstance(cls, iterable.Sequence) and \
-                            cls.array_type == 'tuple':
+
+                    if isinstance(cls, iterable.Sequence) and cls.array_type == "tuple":
                         # multiple exceptions
                         for lazy_value in cls.py__iter__():
                             for typ in lazy_value.infer():
@@ -172,14 +190,15 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
     def check_hasattr(node, suite):
         try:
             assert suite.start_pos <= jedi_name.start_pos < suite.end_pos
-            assert node.type in ('power', 'atom_expr')
+            assert node.type in ("power", "atom_expr")
             base = node.children[0]
-            assert base.type == 'name' and base.value == 'hasattr'
+            assert base.type == "name" and base.value == "hasattr"
             trailer = node.children[1]
-            assert trailer.type == 'trailer'
+            assert trailer.type == "trailer"
             arglist = trailer.children[1]
-            assert arglist.type == 'arglist'
+            assert arglist.type == "arglist"
             from jedi.inference.arguments import TreeArguments
+
             args = TreeArguments(node_context.inference_state, node_context, arglist)
             unpacked_args = list(args.unpack())
             # Arguments should be very simple
@@ -202,10 +221,10 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
     while obj is not None and not isinstance(obj, (tree.Function, tree.Class)):
         if isinstance(obj, tree.Flow):
             # try/except catch check
-            if obj.type == 'try_stmt' and check_try_for_except(obj, exception):
+            if obj.type == "try_stmt" and check_try_for_except(obj, exception):
                 return True
             # hasattr check
-            if exception == AttributeError and obj.type in ('if_stmt', 'while_stmt'):
+            if exception == AttributeError and obj.type in ("if_stmt", "while_stmt"):
                 if check_hasattr(obj.children[1], obj.children[3]):
                     return True
         obj = obj.parent

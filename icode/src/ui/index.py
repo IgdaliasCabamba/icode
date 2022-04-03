@@ -1,6 +1,12 @@
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import (QCheckBox, QFrame, QHBoxLayout, QLabel,
-                             QPushButton, QVBoxLayout)
+from PyQt5.QtWidgets import (
+    QCheckBox,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+)
 
 from base.icache import CacheManager
 from base.templates import *
@@ -101,7 +107,7 @@ class WelcomeActions(QFrame):
             "#new": self.on_new_clicked,
             "#open-file": self.on_open_file_clicked,
             "#open-folder": self.on_open_folder_clicked,
-            "#show-commands": self.on_show_commands_clicked
+            "#show-commands": self.on_show_commands_clicked,
         }
 
     def init_ui(self) -> None:
@@ -124,8 +130,7 @@ class WelcomeActions(QFrame):
         self.layout.addWidget(self.side_left)
         self.layout.addWidget(self.side_right)
         self.layout.setAlignment(self.side_left, Qt.AlignLeft | Qt.AlignCenter)
-        self.layout.setAlignment(self.side_right,
-                                 Qt.AlignRight | Qt.AlignCenter)
+        self.layout.setAlignment(self.side_right, Qt.AlignRight | Qt.AlignCenter)
 
         self.side_left.linkActivated.connect(self.option_clicked)
 
@@ -160,8 +165,7 @@ class Welcome(QFrame):
         self.actions = WelcomeActions(self)
 
         self.main_link = QLabel(self)
-        self.main_link.setText(
-            "<small><a href='icode.com'>icode.io</a></small>")
+        self.main_link.setText("<small><a href='icode.com'>icode.io</a></small>")
         self.main_link.setAlignment(Qt.AlignCenter)
 
         self.show_on_start = QCheckBox("Show welcome page on startup", self)
@@ -173,7 +177,8 @@ class Welcome(QFrame):
         self.layout.setAlignment(self.show_on_start, Qt.AlignCenter)
         self.icode_message_api.get_raw(
             "http://igdaliascabamba.github.io/get-icode/api/welcome.html",
-            self.show_welcome_message)
+            self.show_welcome_message,
+        )
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)

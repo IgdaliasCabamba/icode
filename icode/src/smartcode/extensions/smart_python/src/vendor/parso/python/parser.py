@@ -17,36 +17,36 @@ class Parser(BaseParser):
     """
 
     node_map = {
-        'expr_stmt': tree.ExprStmt,
-        'classdef': tree.Class,
-        'funcdef': tree.Function,
-        'file_input': tree.Module,
-        'import_name': tree.ImportName,
-        'import_from': tree.ImportFrom,
-        'break_stmt': tree.KeywordStatement,
-        'continue_stmt': tree.KeywordStatement,
-        'return_stmt': tree.ReturnStmt,
-        'raise_stmt': tree.KeywordStatement,
-        'yield_expr': tree.YieldExpr,
-        'del_stmt': tree.KeywordStatement,
-        'pass_stmt': tree.KeywordStatement,
-        'global_stmt': tree.GlobalStmt,
-        'nonlocal_stmt': tree.KeywordStatement,
-        'print_stmt': tree.KeywordStatement,
-        'assert_stmt': tree.AssertStmt,
-        'if_stmt': tree.IfStmt,
-        'with_stmt': tree.WithStmt,
-        'for_stmt': tree.ForStmt,
-        'while_stmt': tree.WhileStmt,
-        'try_stmt': tree.TryStmt,
-        'sync_comp_for': tree.SyncCompFor,
+        "expr_stmt": tree.ExprStmt,
+        "classdef": tree.Class,
+        "funcdef": tree.Function,
+        "file_input": tree.Module,
+        "import_name": tree.ImportName,
+        "import_from": tree.ImportFrom,
+        "break_stmt": tree.KeywordStatement,
+        "continue_stmt": tree.KeywordStatement,
+        "return_stmt": tree.ReturnStmt,
+        "raise_stmt": tree.KeywordStatement,
+        "yield_expr": tree.YieldExpr,
+        "del_stmt": tree.KeywordStatement,
+        "pass_stmt": tree.KeywordStatement,
+        "global_stmt": tree.GlobalStmt,
+        "nonlocal_stmt": tree.KeywordStatement,
+        "print_stmt": tree.KeywordStatement,
+        "assert_stmt": tree.AssertStmt,
+        "if_stmt": tree.IfStmt,
+        "with_stmt": tree.WithStmt,
+        "for_stmt": tree.ForStmt,
+        "while_stmt": tree.WhileStmt,
+        "try_stmt": tree.TryStmt,
+        "sync_comp_for": tree.SyncCompFor,
         # Not sure if this is the best idea, but IMO it's the easiest way to
         # avoid extreme amounts of work around the subtle difference of 2/3
         # grammar in list comoprehensions.
-        'decorator': tree.Decorator,
-        'lambdef': tree.Lambda,
-        'lambdef_nocond': tree.Lambda,
-        'namedexpr_test': tree.NamedExpr,
+        "decorator": tree.Decorator,
+        "lambdef": tree.Lambda,
+        "lambdef_nocond": tree.Lambda,
+        "namedexpr_test": tree.NamedExpr,
     }
     default_node = tree.PythonNode
 
@@ -61,9 +61,10 @@ class Parser(BaseParser):
         PythonTokenTypes.FSTRING_END: tree.FStringEnd,
     }
 
-    def __init__(self, pgen_grammar, error_recovery=True, start_nonterminal='file_input'):
-        super().__init__(pgen_grammar, start_nonterminal,
-                         error_recovery=error_recovery)
+    def __init__(
+        self, pgen_grammar, error_recovery=True, start_nonterminal="file_input"
+    ):
+        super().__init__(pgen_grammar, start_nonterminal, error_recovery=error_recovery)
 
         self.syntax_errors = []
         self._omit_dedent_list = []
@@ -71,7 +72,7 @@ class Parser(BaseParser):
 
     def parse(self, tokens):
         if self._error_recovery:
-            if self._start_nonterminal != 'file_input':
+            if self._start_nonterminal != "file_input":
                 raise NotImplementedError
 
             tokens = self._recovery_tokenize(tokens)
@@ -89,7 +90,7 @@ class Parser(BaseParser):
         try:
             node = self.node_map[nonterminal](children)
         except KeyError:
-            if nonterminal == 'suite':
+            if nonterminal == "suite":
                 # We don't want the INDENT/DEDENT in our parser tree. Those
                 # leaves are just cancer. They are virtual leaves and not real
                 # ones and therefore have pseudo start/end positions and no
@@ -115,15 +116,17 @@ class Parser(BaseParser):
         else:
             last_leaf = None
 
-        if self._start_nonterminal == 'file_input' and \
-                (token.type == PythonTokenTypes.ENDMARKER
-                 or token.type == DEDENT and not last_leaf.value.endswith('\n')
-                 and not last_leaf.value.endswith('\r')):
+        if self._start_nonterminal == "file_input" and (
+            token.type == PythonTokenTypes.ENDMARKER
+            or token.type == DEDENT
+            and not last_leaf.value.endswith("\n")
+            and not last_leaf.value.endswith("\r")
+        ):
             # In Python statements need to end with a newline. But since it's
             # possible (and valid in Python) that there's no newline at the
             # end of a file, we have to recover even if the user doesn't want
             # error recovery.
-            if self.stack[-1].dfa.from_rule == 'simple_stmt':
+            if self.stack[-1].dfa.from_rule == "simple_stmt":
                 try:
                     plan = self.stack[-1].dfa.transitions[PythonTokenTypes.NEWLINE]
                 except KeyError:
@@ -144,9 +147,9 @@ class Parser(BaseParser):
             # file_input, if we detect an error.
             for until_index, stack_node in reversed(list(enumerate(stack))):
                 # `suite` can sometimes be only simple_stmt, not stmt.
-                if stack_node.nonterminal == 'file_input':
+                if stack_node.nonterminal == "file_input":
                     break
-                elif stack_node.nonterminal == 'suite':
+                elif stack_node.nonterminal == "suite":
                     # In the case where we just have a newline we don't want to
                     # do error recovery here. In all other cases, we want to do
                     # error recovery.
@@ -169,17 +172,19 @@ class Parser(BaseParser):
             self.stack[-1].nodes.append(error_leaf)
 
         tos = self.stack[-1]
-        if tos.nonterminal == 'suite':
+        if tos.nonterminal == "suite":
             # Need at least one statement in the suite. This happend with the
             # error recovery above.
             try:
-                tos.dfa = tos.dfa.arcs['stmt']
+                tos.dfa = tos.dfa.arcs["stmt"]
             except KeyError:
                 # We're already in a final state.
                 pass
 
     def _stack_removal(self, start_index):
-        all_nodes = [node for stack_node in self.stack[start_index:] for node in stack_node.nodes]
+        all_nodes = [
+            node for stack_node in self.stack[start_index:] for node in stack_node.nodes
+        ]
 
         if all_nodes:
             node = tree.PythonErrorNode(all_nodes)

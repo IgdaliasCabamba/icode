@@ -1,6 +1,13 @@
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QPushButton,
-                             QSizePolicy, QStackedLayout, QToolButton,
-                             QVBoxLayout)
+from PyQt5.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QStackedLayout,
+    QToolButton,
+    QVBoxLayout,
+)
 
 from functions import getfn
 
@@ -60,26 +67,27 @@ class SideBottom(QFrame):
         self.problem_logs = ProblemLogs(self)
         self.terminal = Terminal(self)
 
-        self.add_widget(self.problem_logs, "PROBLEMS",
-                        [self.btn_clear_problems])
-        self.add_widget(self.terminal, "TERMINAL",
-                        [self.terminal_pick_area, self.btn_remove_terminal])
+        self.add_widget(self.problem_logs, "PROBLEMS", [self.btn_clear_problems])
+        self.add_widget(
+            self.terminal,
+            "TERMINAL",
+            [self.terminal_pick_area, self.btn_remove_terminal],
+        )
 
-        self.notebook.cornerWidget().btn_close.clicked.connect(
-            self.close_panel)
-        self.notebook.cornerWidget().btn_maximize.clicked.connect(
-            self.maximize)
-        self.notebook.cornerWidget().btn_minimize.clicked.connect(
-            self.minimize)
+        self.notebook.cornerWidget().btn_close.clicked.connect(self.close_panel)
+        self.notebook.cornerWidget().btn_maximize.clicked.connect(self.maximize)
+        self.notebook.cornerWidget().btn_minimize.clicked.connect(self.minimize)
 
         self.layout.addWidget(self.notebook)
 
-    def insert_widget(self,
-                      pos: int,
-                      widget: object,
-                      name: str,
-                      components: list = [],
-                      goto: bool = False) -> None:
+    def insert_widget(
+        self,
+        pos: int,
+        widget: object,
+        name: str,
+        components: list = [],
+        goto: bool = False,
+    ) -> None:
         current_widget = None
         if self.notebook.count() > 0:
             current_widget = self.notebook.currentWidget()
@@ -88,11 +96,9 @@ class SideBottom(QFrame):
         if not goto and current_widget is not None:
             self.notebook.setCurrentWidget(current_widget)
 
-    def add_widget(self,
-                   widget: object,
-                   name: str,
-                   components: list = [],
-                   goto: bool = True):
+    def add_widget(
+        self, widget: object, name: str, components: list = [], goto: bool = True
+    ):
         current_widget = None
         if self.notebook.count() > 0:
             current_widget = self.notebook.currentWidget()
@@ -241,7 +247,7 @@ class SideRight(QFrame):
         self.spaces_manager.setContentsMargins(0, 0, 0, 0)
         self.btn_add_label = QPushButton("+")
         self.btn_show_hide_labels = QPushButton("Show")
-        
+
         self.notes = Notes(self)
         self.todos = Todos(self)
 

@@ -10,17 +10,20 @@ from collections import namedtuple
 from shutil import which
 
 from jedi.cache import memoize_method, time_cache
-from jedi.inference.compiled.subprocess import CompiledSubprocess, \
-    InferenceStateSameProcess, InferenceStateSubprocess
+from jedi.inference.compiled.subprocess import (
+    CompiledSubprocess,
+    InferenceStateSameProcess,
+    InferenceStateSubprocess,
+)
 
 import parso
 
-_VersionInfo = namedtuple('VersionInfo', 'major minor micro')
+_VersionInfo = namedtuple("VersionInfo", "major minor micro")
 
-_SUPPORTED_PYTHONS = ['3.9', '3.8', '3.7', '3.6']
-_SAFE_PATHS = ['/usr/bin', '/usr/local/bin']
-_CONDA_VAR = 'CONDA_PREFIX'
-_CURRENT_VERSION = '%s.%s' % (sys.version_info.major, sys.version_info.minor)
+_SUPPORTED_PYTHONS = ["3.9", "3.8", "3.7", "3.6"]
+_SAFE_PATHS = ["/usr/bin", "/usr/local/bin"]
+_CONDA_VAR = "CONDA_PREFIX"
+_CURRENT_VERSION = "%s.%s" % (sys.version_info.major, sys.version_info.minor)
 
 
 class InvalidPythonEnvironment(Exception):
@@ -33,7 +36,7 @@ class InvalidPythonEnvironment(Exception):
 class _BaseEnvironment:
     @memoize_method
     def get_grammar(self):
-        version_string = '%s.%s' % (self.version_info.major, self.version_info.minor)
+        version_string = "%s.%s" % (self.version_info.major, self.version_info.minor)
         return parso.load_grammar(version=version_string)
 
     @property
@@ -59,6 +62,7 @@ class Environment(_BaseEnvironment):
     should not create it directly. Please use create_environment or the other
     functions instead. It is then returned by that function.
     """
+
     _subprocess = None
 
     def __init__(self, executable, env_vars=None):
@@ -72,14 +76,15 @@ class Environment(_BaseEnvironment):
             return self._subprocess
 
         try:
-            self._subprocess = CompiledSubprocess(self._start_executable,
-                                                  env_vars=self._env_vars)
+            self._subprocess = CompiledSubprocess(
+                self._start_executable, env_vars=self._env_vars
+            )
             info = self._subprocess._send(None, _get_info)
         except Exception as exc:
             raise InvalidPythonEnvironment(
-                "Could not get version information for %r: %r" % (
-                    self._start_executable,
-                    exc))
+                "Could not get version information for %r: %r"
+                % (self._start_executable, exc)
+            )
 
         # Since it could change and might not be the same(?) as the one given,
         # set it here.
@@ -99,8 +104,8 @@ class Environment(_BaseEnvironment):
         return self._subprocess
 
     def __repr__(self):
-        version = '.'.join(str(i) for i in self.version_info)
-        return '<%s: %s in %s>' % (self.__class__.__name__, version, self.path)
+        version = ".".join(str(i) for i in self.version_info)
+        return "<%s: %s in %s>" % (self.__class__.__name__, version, self.path)
 
     def get_inference_state_subprocess(self, inference_state):
         return InferenceStateSubprocess(inference_state, self._get_subprocess())
@@ -141,7 +146,7 @@ class InterpreterEnvironment(_SameEnvironmentMixin, _BaseEnvironment):
         return sys.path
 
 
-def _get_virtual_env_from_var(env_var='VIRTUAL_ENV'):
+def _get_virtual_env_from_var(env_var="VIRTUAL_ENV"):
     """Get virtualenv environment from VIRTUAL_ENV environment variable.
 
     It uses `safe=False` with ``create_environment``, because the environment
@@ -164,8 +169,8 @@ def _get_virtual_env_from_var(env_var='VIRTUAL_ENV'):
 
 def _calculate_sha256_for_file(path):
     sha256 = hashlib.sha256()
-    with open(path, 'rb') as f:
-        for block in iter(lambda: f.read(filecmp.BUFSIZE), b''):
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(filecmp.BUFSIZE), b""):
             sha256.update(block)
     return sha256.hexdigest()
 
@@ -193,7 +198,7 @@ def get_default_environment():
 
 def _try_get_same_env():
     env = SameEnvironment()
-    if not os.path.basename(env.executable).lower().startswith('python'):
+    if not os.path.basename(env.executable).lower().startswith("python"):
         # This tries to counter issues with embedding. In some cases (e.g.
         # VIM's Python Mac/Windows, sys.executable is /foo/bar/vim. This
         # happens, because for Mac a function called `_NSGetExecutablePath` is
@@ -208,16 +213,16 @@ def _try_get_same_env():
         # The last option will always work, but leads to potential crashes of
         # Jedi - which is ok, because it happens very rarely and even less,
         # because the code below should work for most cases.
-        if os.name == 'nt':
+        if os.name == "nt":
             # The first case would be a virtualenv and the second a normal
             # Python installation.
-            checks = (r'Scripts\python.exe', 'python.exe')
+            checks = (r"Scripts\python.exe", "python.exe")
         else:
             # For unix it looks like Python is always in a bin folder.
             checks = (
-                'bin/python%s.%s' % (sys.version_info[0], sys.version[1]),
-                'bin/python%s' % (sys.version_info[0]),
-                'bin/python',
+                "bin/python%s.%s" % (sys.version_info[0], sys.version[1]),
+                "bin/python%s" % (sys.version_info[0]),
+                "bin/python",
             )
         for check in checks:
             guess = os.path.join(sys.exec_prefix, check)
@@ -232,7 +237,7 @@ def _try_get_same_env():
 
 
 def get_cached_default_environment():
-    var = os.environ.get('VIRTUAL_ENV') or os.environ.get(_CONDA_VAR)
+    var = os.environ.get("VIRTUAL_ENV") or os.environ.get(_CONDA_VAR)
     environment = _get_cached_default_environment()
 
     # Under macOS in some cases - notably when using Pipenv - the
@@ -338,13 +343,13 @@ def get_system_environment(version, *, env_vars=None):
     :raises: :exc:`.InvalidPythonEnvironment`
     :returns: :class:`.Environment`
     """
-    exe = which('python' + version)
+    exe = which("python" + version)
     if exe:
         if exe == sys.executable:
             return SameEnvironment()
         return Environment(exe)
 
-    if os.name == 'nt':
+    if os.name == "nt":
         for exe in _get_executables_from_windows_registry(version):
             try:
                 return Environment(exe, env_vars=env_vars)
@@ -372,10 +377,10 @@ def _get_executable_path(path, safe=True):
     Returns None if it's not actually a virtual env.
     """
 
-    if os.name == 'nt':
-        python = os.path.join(path, 'Scripts', 'python.exe')
+    if os.name == "nt":
+        python = os.path.join(path, "Scripts", "python.exe")
     else:
-        python = os.path.join(path, 'bin', 'python')
+        python = os.path.join(path, "bin", "python")
     if not os.path.exists(python):
         raise InvalidPythonEnvironment("%s seems to be missing." % python)
 
@@ -389,18 +394,18 @@ def _get_executables_from_windows_registry(version):
 
     # TODO: support Python Anaconda.
     sub_keys = [
-        r'SOFTWARE\Python\PythonCore\{version}\InstallPath',
-        r'SOFTWARE\Wow6432Node\Python\PythonCore\{version}\InstallPath',
-        r'SOFTWARE\Python\PythonCore\{version}-32\InstallPath',
-        r'SOFTWARE\Wow6432Node\Python\PythonCore\{version}-32\InstallPath'
+        r"SOFTWARE\Python\PythonCore\{version}\InstallPath",
+        r"SOFTWARE\Wow6432Node\Python\PythonCore\{version}\InstallPath",
+        r"SOFTWARE\Python\PythonCore\{version}-32\InstallPath",
+        r"SOFTWARE\Wow6432Node\Python\PythonCore\{version}-32\InstallPath",
     ]
     for root_key in [winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE]:
         for sub_key in sub_keys:
             sub_key = sub_key.format(version=version)
             try:
                 with winreg.OpenKey(root_key, sub_key) as key:
-                    prefix = winreg.QueryValueEx(key, '')[0]
-                    exe = os.path.join(prefix, 'python.exe')
+                    prefix = winreg.QueryValueEx(key, "")[0]
+                    exe = os.path.join(prefix, "python.exe")
                     if os.path.isfile(exe):
                         yield exe
             except WindowsError:
@@ -409,8 +414,7 @@ def _get_executables_from_windows_registry(version):
 
 def _assert_safe(executable_path, safe):
     if safe and not _is_safe(executable_path):
-        raise InvalidPythonEnvironment(
-            "The python binary is potentially unsafe.")
+        raise InvalidPythonEnvironment("The python binary is potentially unsafe.")
 
 
 def _is_safe(executable_path):

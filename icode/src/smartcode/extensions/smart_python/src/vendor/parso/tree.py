@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple, Union
 from parso.utils import split_lines
 
 
-def search_ancestor(node: 'NodeOrLeaf', *node_types: str) -> 'Optional[BaseNode]':
+def search_ancestor(node: "NodeOrLeaf", *node_types: str) -> "Optional[BaseNode]":
     """
     Recursively looks at the parents of a node and returns the first found node
     that matches ``node_types``. Returns ``None`` if no matching node is found.
@@ -26,16 +26,17 @@ class NodeOrLeaf:
     """
     The base class for nodes and leaves.
     """
-    __slots__ = ('parent',)
+
+    __slots__ = ("parent",)
     type: str
-    '''
+    """
     The type is a string that typically matches the types of the grammar file.
-    '''
-    parent: 'Optional[BaseNode]'
-    '''
+    """
+    parent: "Optional[BaseNode]"
+    """
     The parent :class:`BaseNode` of this node or leaf.
     None if this is the root node.
-    '''
+    """
 
     def get_root_node(self):
         """
@@ -181,7 +182,7 @@ class NodeOrLeaf:
             e.g. a statement.
         """
 
-    def search_ancestor(self, *node_types: str) -> 'Optional[BaseNode]':
+    def search_ancestor(self, *node_types: str) -> "Optional[BaseNode]":
         """
         Recursively looks at the parents of this node or leaf and returns the
         first found node that matches ``node_types``. Returns ``None`` if no
@@ -236,78 +237,85 @@ class NodeOrLeaf:
         """
         if indent is None:
             newline = False
-            indent_string = ''
+            indent_string = ""
         elif isinstance(indent, int):
             newline = True
-            indent_string = ' ' * indent
+            indent_string = " " * indent
         elif isinstance(indent, str):
             newline = True
             indent_string = indent
         else:
             raise TypeError(f"expect 'indent' to be int, str or None, got {indent!r}")
 
-        def _format_dump(node: NodeOrLeaf, indent: str = '', top_level: bool = True) -> str:
-            result = ''
+        def _format_dump(
+            node: NodeOrLeaf, indent: str = "", top_level: bool = True
+        ) -> str:
+            result = ""
             node_type = type(node).__name__
             if isinstance(node, Leaf):
-                result += f'{indent}{node_type}('
+                result += f"{indent}{node_type}("
                 if isinstance(node, ErrorLeaf):
-                    result += f'{node.token_type!r}, '
+                    result += f"{node.token_type!r}, "
                 elif isinstance(node, TypedLeaf):
-                    result += f'{node.type!r}, '
-                result += f'{node.value!r}, {node.start_pos!r}'
+                    result += f"{node.type!r}, "
+                result += f"{node.value!r}, {node.start_pos!r}"
                 if node.prefix:
-                    result += f', prefix={node.prefix!r}'
-                result += ')'
+                    result += f", prefix={node.prefix!r}"
+                result += ")"
             elif isinstance(node, BaseNode):
-                result += f'{indent}{node_type}('
+                result += f"{indent}{node_type}("
                 if isinstance(node, Node):
-                    result += f'{node.type!r}, '
-                result += '['
+                    result += f"{node.type!r}, "
+                result += "["
                 if newline:
-                    result += '\n'
+                    result += "\n"
                 for child in node.children:
-                    result += _format_dump(child, indent=indent + indent_string, top_level=False)
-                result += f'{indent}])'
+                    result += _format_dump(
+                        child, indent=indent + indent_string, top_level=False
+                    )
+                result += f"{indent}])"
             else:  # pragma: no cover
                 # We shouldn't ever reach here, unless:
                 # - `NodeOrLeaf` is incorrectly subclassed else where
                 # - or a node's children list contains invalid nodes or leafs
                 # Both are unexpected internal errors.
-                raise TypeError(f'unsupported node encountered: {node!r}')
+                raise TypeError(f"unsupported node encountered: {node!r}")
             if not top_level:
                 if newline:
-                    result += ',\n'
+                    result += ",\n"
                 else:
-                    result += ', '
+                    result += ", "
             return result
 
         return _format_dump(self)
 
 
 class Leaf(NodeOrLeaf):
-    '''
+    """
     Leafs are basically tokens with a better API. Leafs exactly know where they
     were defined and what text preceeds them.
-    '''
-    __slots__ = ('value', 'line', 'column', 'prefix')
+    """
+
+    __slots__ = ("value", "line", "column", "prefix")
     prefix: str
 
-    def __init__(self, value: str, start_pos: Tuple[int, int], prefix: str = '') -> None:
+    def __init__(
+        self, value: str, start_pos: Tuple[int, int], prefix: str = ""
+    ) -> None:
         self.value = value
-        '''
+        """
         :py:func:`str` The value of the current token.
-        '''
+        """
         self.start_pos = start_pos
         self.prefix = prefix
-        '''
+        """
         :py:func:`str` Typically a mixture of whitespace and comments. Stuff
         that is syntactically irrelevant for the syntax tree.
-        '''
+        """
         self.parent: Optional[BaseNode] = None
-        '''
+        """
         The parent :class:`BaseNode` of this leaf.
-        '''
+        """
 
     @property
     def start_pos(self) -> Tuple[int, int]:
@@ -357,9 +365,9 @@ class Leaf(NodeOrLeaf):
 
 
 class TypedLeaf(Leaf):
-    __slots__ = ('type',)
+    __slots__ = ("type",)
 
-    def __init__(self, type, value, start_pos, prefix=''):
+    def __init__(self, type, value, start_pos, prefix=""):
         super().__init__(value, start_pos, prefix)
         self.type = type
 
@@ -369,7 +377,8 @@ class BaseNode(NodeOrLeaf):
     The super class for all nodes.
     A node has children, a type and possibly a parent node.
     """
-    __slots__ = ('children',)
+
+    __slots__ = ("children",)
 
     def __init__(self, children: List[NodeOrLeaf]) -> None:
         self.children = children
@@ -377,10 +386,10 @@ class BaseNode(NodeOrLeaf):
         A list of :class:`NodeOrLeaf` child nodes.
         """
         self.parent: Optional[BaseNode] = None
-        '''
+        """
         The parent :class:`BaseNode` of this node.
         None if this is the root node.
-        '''
+        """
         for child in children:
             child.parent = self
 
@@ -414,6 +423,7 @@ class BaseNode(NodeOrLeaf):
             on whitespace or comments before a leaf
         :return: :py:class:`parso.tree.Leaf` at ``position``, or ``None``
         """
+
         def binary_search(lower, upper):
             if lower == upper:
                 element = self.children[lower]
@@ -434,7 +444,7 @@ class BaseNode(NodeOrLeaf):
                 return binary_search(index + 1, upper)
 
         if not ((1, 0) <= position <= self.children[-1].end_pos):
-            raise ValueError('Please provide a position that exists within this node.')
+            raise ValueError("Please provide a position that exists within this node.")
         return binary_search(0, len(self.children) - 1)
 
     def get_first_leaf(self):
@@ -444,14 +454,19 @@ class BaseNode(NodeOrLeaf):
         return self.children[-1].get_last_leaf()
 
     def __repr__(self):
-        code = self.get_code().replace('\n', ' ').replace('\r', ' ').strip()
-        return "<%s: %s@%s,%s>" % \
-            (type(self).__name__, code, self.start_pos[0], self.start_pos[1])
+        code = self.get_code().replace("\n", " ").replace("\r", " ").strip()
+        return "<%s: %s@%s,%s>" % (
+            type(self).__name__,
+            code,
+            self.start_pos[0],
+            self.start_pos[1],
+        )
 
 
 class Node(BaseNode):
     """Concrete implementation for interior nodes."""
-    __slots__ = ('type',)
+
+    __slots__ = ("type",)
 
     def __init__(self, type, children):
         super().__init__(children)
@@ -467,8 +482,9 @@ class ErrorNode(BaseNode):
     was invalid. This basically means that the leaf after this node is where
     Python would mark a syntax error.
     """
+
     __slots__ = ()
-    type = 'error_node'
+    type = "error_node"
 
 
 class ErrorLeaf(Leaf):
@@ -476,13 +492,18 @@ class ErrorLeaf(Leaf):
     A leaf that is either completely invalid in a language (like `$` in Python)
     or is invalid at that position. Like the star in `1 +* 1`.
     """
-    __slots__ = ('token_type',)
-    type = 'error_leaf'
 
-    def __init__(self, token_type, value, start_pos, prefix=''):
+    __slots__ = ("token_type",)
+    type = "error_leaf"
+
+    def __init__(self, token_type, value, start_pos, prefix=""):
         super().__init__(value, start_pos, prefix)
         self.token_type = token_type
 
     def __repr__(self):
-        return "<%s: %s:%s, %s>" % \
-            (type(self).__name__, self.token_type, repr(self.value), self.start_pos)
+        return "<%s: %s:%s, %s>" % (
+            type(self).__name__,
+            self.token_type,
+            repr(self.value),
+            self.start_pos,
+        )

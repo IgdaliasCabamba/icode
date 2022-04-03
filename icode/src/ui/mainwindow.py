@@ -1,9 +1,7 @@
 from weakref import ref
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import (QDesktopWidget, QMainWindow,
-                             QScrollArea, QSplitter,
-                             qApp)
+from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QScrollArea, QSplitter, qApp
 
 import base.consts as iconsts
 from functions import BASE_PATH, SYS_SEP, getfn
@@ -20,6 +18,7 @@ from .notificator import Notificator
 from .iconfig_ui import ConfigUi
 from frameworks.icodeframe import iwindow
 from smartsci.chelly import *
+
 
 class MainWindow(QMainWindow):
 
@@ -74,14 +73,13 @@ class MainWindow(QMainWindow):
 
         self._notebook = NoteBookEditor(self.isplitter, self)
         self._notebook.setVisible(True)
-        
+
         self.config_ui = ConfigUi(self._notebook)
 
         self.welcome = Welcome(self._notebook)
 
         self._current_notebook = self._notebook
-        self._current_notebook.last_tab_closed.connect(
-            self.on_tabbar_last_closed)
+        self._current_notebook.last_tab_closed.connect(self.on_tabbar_last_closed)
         self._current_notebook.on_user_event.connect(self.set_notebook)
 
         self.isplitter.add_notebook(self._current_notebook)
@@ -116,7 +114,7 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.div_main)
 
-    def closeEvent(self, event): 
+    def closeEvent(self, event):
         self.on_close.emit(self)
 
     def _build_window(self):

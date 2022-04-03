@@ -14,7 +14,7 @@ def _get_paths():
     _jedi_path = _d(_d(_d(_d(_d(__file__)))))
     _parso_path = sys.argv[1]
     # The paths are the directory that jedi and parso lie in.
-    return {'jedi': _jedi_path, 'parso': _parso_path}
+    return {"jedi": _jedi_path, "parso": _parso_path}
 
 
 class _ExactImporter(MetaPathFinder):
@@ -32,9 +32,10 @@ class _ExactImporter(MetaPathFinder):
 # Try to import jedi/parso.
 sys.meta_path.insert(0, _ExactImporter(_get_paths()))
 from jedi.inference.compiled import subprocess  # noqa: E402
+
 sys.meta_path.pop(0)
 
 # Retrieve the pickle protocol.
-host_sys_version = [int(x) for x in sys.argv[2].split('.')]
+host_sys_version = [int(x) for x in sys.argv[2].split(".")]
 # And finally start the client.
 subprocess.Listener().listen()

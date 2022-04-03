@@ -33,8 +33,10 @@ def infer_annotation(context, annotation):
     """
     value_set = context.infer_node(annotation)
     if len(value_set) != 1:
-        debug.warning("Inferred typing index %s should lead to 1 object, "
-                      " not %s" % (annotation, value_set))
+        debug.warning(
+            "Inferred typing index %s should lead to 1 object, "
+            " not %s" % (annotation, value_set)
+        )
         return value_set
 
     inferred_value = list(value_set)[0]
@@ -54,8 +56,7 @@ def _infer_annotation_string(context, string, index=None):
     if index is not None:
         value_set = value_set.filter(
             lambda value: (
-                value.array_type == 'tuple'
-                and len(list(value.py__iter__())) >= index
+                value.array_type == "tuple" and len(list(value.py__iter__())) >= index
             )
         ).py__simple_getitem__(index)
     return value_set
@@ -64,12 +65,10 @@ def _infer_annotation_string(context, string, index=None):
 def _get_forward_reference_node(context, string):
     try:
         new_node = context.inference_state.grammar.parse(
-            string,
-            start_symbol='eval_input',
-            error_recovery=False
+            string, start_symbol="eval_input", error_recovery=False
         )
     except ParserSyntaxError:
-        debug.warning('Annotation not parsed: %s' % string)
+        debug.warning("Annotation not parsed: %s" % string)
         return None
     else:
         module = context.tree_node.get_root_node()
@@ -90,10 +89,10 @@ def _split_comment_param_declaration(decl_text):
     try:
         node = parse(decl_text, error_recovery=False).children[0]
     except ParserSyntaxError:
-        debug.warning('Comment annotation is not valid Python: %s' % decl_text)
+        debug.warning("Comment annotation is not valid Python: %s" % decl_text)
         return []
 
-    if node.type in ['name', 'atom_expr', 'power']:
+    if node.type in ["name", "atom_expr", "power"]:
         return [node.get_code().strip()]
 
     params = []
@@ -103,7 +102,7 @@ def _split_comment_param_declaration(decl_text):
         return []
     else:
         for child in children:
-            if child.type in ['name', 'atom_expr', 'power']:
+            if child.type in ["name", "atom_expr", "power"]:
                 params.append(child.get_code().strip())
 
     return params
@@ -116,21 +115,26 @@ def infer_param(function_value, param, ignore_stars=False):
         return values
     inference_state = function_value.inference_state
     if param.star_count == 1:
-        tuple_ = builtin_from_name(inference_state, 'tuple')
-        return ValueSet([GenericClass(
-            tuple_,
-            TupleGenericManager((values,)),
-        )])
-    elif param.star_count == 2:
-        dct = builtin_from_name(inference_state, 'dict')
-        generics = (
-            ValueSet([builtin_from_name(inference_state, 'str')]),
-            values
+        tuple_ = builtin_from_name(inference_state, "tuple")
+        return ValueSet(
+            [
+                GenericClass(
+                    tuple_,
+                    TupleGenericManager((values,)),
+                )
+            ]
         )
-        return ValueSet([GenericClass(
-            dct,
-            TupleGenericManager(generics),
-        )])
+    elif param.star_count == 2:
+        dct = builtin_from_name(inference_state, "dict")
+        generics = (ValueSet([builtin_from_name(inference_state, "str")]), values)
+        return ValueSet(
+            [
+                GenericClass(
+                    dct,
+                    TupleGenericManager(generics),
+                )
+            ]
+        )
     return values
 
 
@@ -143,8 +147,7 @@ def _infer_param(function_value, param):
         # If no Python 3-style annotation, look for a comment annotation.
         # Identify parameters to function in the same sequence as they would
         # appear in a type comment.
-        all_params = [child for child in param.parent.children
-                      if child.type == 'param']
+        all_params = [child for child in param.parent.children if child.type == "param"]
 
         node = param.parent.parent
         comment = parser_utils.get_following_comment_same_line(node)
@@ -162,8 +165,7 @@ def _infer_param(function_value, param):
         # ignore first parameter (assume it's self).
         if len(params_comments) != len(all_params):
             debug.warning(
-                "Comments length != Params length %s %s",
-                params_comments, all_params
+                "Comments length != Params length %s %s", params_comments, all_params
             )
         if function_value.is_bound_method():
             if index == 0:
@@ -175,8 +177,7 @@ def _infer_param(function_value, param):
 
         param_comment = params_comments[index]
         return _infer_annotation_string(
-            function_value.get_default_param_context(),
-            param_comment
+            function_value.get_default_param_context(), param_comment
         )
     # Annotations are like default params and resolve in the same way.
     context = function_value.get_default_param_context()
@@ -192,7 +193,7 @@ def py__annotations__(funcdef):
 
     return_annotation = funcdef.annotation
     if return_annotation:
-        dct['return'] = return_annotation
+        dct["return"] = return_annotation
     return dct
 
 
@@ -217,8 +218,7 @@ def infer_return_types(function, arguments):
             return NO_VALUES
 
         return _infer_annotation_string(
-            function.get_default_param_context(),
-            match.group(1).strip()
+            function.get_default_param_context(), match.group(1).strip()
         ).execute_annotation()
 
     context = function.get_default_param_context()
@@ -231,7 +231,8 @@ def infer_return_types(function, arguments):
 
     return ValueSet.from_sets(
         ann.define_generics(type_var_dict)
-        if isinstance(ann, (DefineGenericBaseClass, TypeVar)) else ValueSet({ann})
+        if isinstance(ann, (DefineGenericBaseClass, TypeVar))
+        else ValueSet({ann})
         for ann in annotation_values
     ).execute_annotation()
 
@@ -266,7 +267,7 @@ def infer_type_vars_for_execution(function, arguments, annotation_dict):
                 actual_value_set = actual_value_set.merge_types_of_iterate()
             elif kind is Parameter.VAR_KEYWORD:
                 # TODO _dict_values is not public.
-                actual_value_set = actual_value_set.try_merge('_dict_values')
+                actual_value_set = actual_value_set.try_merge("_dict_values")
             merge_type_var_dicts(
                 annotation_variable_results,
                 annotation_value_set.infer_type_vars(actual_value_set),
@@ -277,7 +278,7 @@ def infer_type_vars_for_execution(function, arguments, annotation_dict):
 def infer_return_for_callable(arguments, param_values, result_values):
     all_type_vars = {}
     for pv in param_values:
-        if pv.array_type == 'list':
+        if pv.array_type == "list":
             type_var_dict = _infer_type_vars_for_callable(arguments, pv.py__iter__())
             all_type_vars.update(type_var_dict)
 
@@ -359,10 +360,14 @@ def merge_pairwise_generics(annotation_value, annotated_argument_class):
     annotation_generics = annotation_value.get_generics()
     actual_generics = annotated_argument_class.get_generics()
 
-    for annotation_generics_set, actual_generic_set in zip(annotation_generics, actual_generics):
+    for annotation_generics_set, actual_generic_set in zip(
+        annotation_generics, actual_generics
+    ):
         merge_type_var_dicts(
             type_var_dict,
-            annotation_generics_set.infer_type_vars(actual_generic_set.execute_annotation()),
+            annotation_generics_set.infer_type_vars(
+                actual_generic_set.execute_annotation()
+            ),
         )
 
     return type_var_dict
@@ -373,8 +378,9 @@ def find_type_from_comment_hint_for(context, node, name):
 
 
 def find_type_from_comment_hint_with(context, node, name):
-    assert len(node.children[1].children) == 3, \
-        "Can only be here when children[1] is 'foo() as f'"
+    assert (
+        len(node.children[1].children) == 3
+    ), "Can only be here when children[1] is 'foo() as f'"
     varlist = node.children[1].children[2]
     return _find_type_from_comment_hint(context, node, varlist, name)
 
@@ -410,9 +416,9 @@ def _find_type_from_comment_hint(context, node, varlist, name):
 
 def find_unknown_type_vars(context, node):
     def check_node(node):
-        if node.type in ('atom_expr', 'power'):
+        if node.type in ("atom_expr", "power"):
             trailer = node.children[-1]
-            if trailer.type == 'trailer' and trailer.children[0] == '[':
+            if trailer.type == "trailer" and trailer.children[0] == "[":
                 for subscript_node in _unpack_subscriptlist(trailer.children[1]):
                     check_node(subscript_node)
         else:
@@ -432,10 +438,10 @@ def _filter_type_vars(value_set, found=()):
 
 
 def _unpack_subscriptlist(subscriptlist):
-    if subscriptlist.type == 'subscriptlist':
+    if subscriptlist.type == "subscriptlist":
         for subscript in subscriptlist.children[::2]:
-            if subscript.type != 'subscript':
+            if subscript.type != "subscript":
                 yield subscript
     else:
-        if subscriptlist.type != 'subscript':
+        if subscriptlist.type != "subscript":
             yield subscriptlist

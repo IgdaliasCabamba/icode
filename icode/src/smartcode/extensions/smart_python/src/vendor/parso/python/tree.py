@@ -43,29 +43,55 @@ Parser Tree Classes
 """
 
 import re
+
 try:
     from collections.abc import Mapping
 except ImportError:
     from collections import Mapping
 from typing import Tuple
 
-from parso.tree import Node, BaseNode, Leaf, ErrorNode, ErrorLeaf, search_ancestor  # noqa
+from parso.tree import (
+    Node,
+    BaseNode,
+    Leaf,
+    ErrorNode,
+    ErrorLeaf,
+    search_ancestor,
+)  # noqa
 from parso.python.prefix import split_prefix
 from parso.utils import split_lines
 
-_FLOW_CONTAINERS = set(['if_stmt', 'while_stmt', 'for_stmt', 'try_stmt',
-                        'with_stmt', 'async_stmt', 'suite'])
-_RETURN_STMT_CONTAINERS = set(['suite', 'simple_stmt']) | _FLOW_CONTAINERS
+_FLOW_CONTAINERS = set(
+    [
+        "if_stmt",
+        "while_stmt",
+        "for_stmt",
+        "try_stmt",
+        "with_stmt",
+        "async_stmt",
+        "suite",
+    ]
+)
+_RETURN_STMT_CONTAINERS = set(["suite", "simple_stmt"]) | _FLOW_CONTAINERS
 
-_FUNC_CONTAINERS = set(
-    ['suite', 'simple_stmt', 'decorated', 'async_funcdef']
-) | _FLOW_CONTAINERS
+_FUNC_CONTAINERS = (
+    set(["suite", "simple_stmt", "decorated", "async_funcdef"]) | _FLOW_CONTAINERS
+)
 
-_GET_DEFINITION_TYPES = set([
-    'expr_stmt', 'sync_comp_for', 'with_stmt', 'for_stmt', 'import_name',
-    'import_from', 'param', 'del_stmt', 'namedexpr_test',
-])
-_IMPORTS = set(['import_name', 'import_from'])
+_GET_DEFINITION_TYPES = set(
+    [
+        "expr_stmt",
+        "sync_comp_for",
+        "with_stmt",
+        "for_stmt",
+        "import_name",
+        "import_from",
+        "param",
+        "del_stmt",
+        "namedexpr_test",
+    ]
+)
+_IMPORTS = set(["import_name", "import_from"])
 
 
 class DocstringMixin:
@@ -75,11 +101,11 @@ class DocstringMixin:
         """
         Returns the string leaf of a docstring. e.g. ``r'''foo'''``.
         """
-        if self.type == 'file_input':
+        if self.type == "file_input":
             node = self.children[0]
-        elif self.type in ('funcdef', 'classdef'):
-            node = self.children[self.children.index(':') + 1]
-            if node.type == 'suite':  # Normally a suite
+        elif self.type in ("funcdef", "classdef"):
+            node = self.children[self.children.index(":") + 1]
+            if node.type == "suite":  # Normally a suite
                 node = node.children[1]  # -> NEWLINE stmt
         else:  # ExprStmt
             simple_stmt = self.parent
@@ -89,9 +115,9 @@ class DocstringMixin:
                 return None
             node = c[index - 1]
 
-        if node.type == 'simple_stmt':
+        if node.type == "simple_stmt":
             node = node.children[0]
-        if node.type == 'string':
+        if node.type == "string":
             return node
         return None
 
@@ -100,6 +126,7 @@ class PythonMixin:
     """
     Some Python specific utilities.
     """
+
     __slots__ = ()
 
     def get_name_of_position(self, position):
@@ -109,7 +136,7 @@ class PythonMixin:
         """
         for c in self.children:
             if isinstance(c, Leaf):
-                if c.type == 'name' and c.start_pos <= position <= c.end_pos:
+                if c.type == "name" and c.start_pos <= position <= c.end_pos:
                     return c
             else:
                 result = c.get_name_of_position(position)
@@ -131,8 +158,11 @@ class PythonLeaf(PythonMixin, Leaf):
         # TODO it is really ugly that we have to override it. Maybe change
         #   indent error leafs somehow? No idea how, though.
         previous_leaf = self.get_previous_leaf()
-        if previous_leaf is not None and previous_leaf.type == 'error_leaf' \
-                and previous_leaf.token_type in ('INDENT', 'DEDENT', 'ERROR_DEDENT'):
+        if (
+            previous_leaf is not None
+            and previous_leaf.type == "error_leaf"
+            and previous_leaf.token_type in ("INDENT", "DEDENT", "ERROR_DEDENT")
+        ):
             previous_leaf = previous_leaf.get_previous_leaf()
 
         if previous_leaf is None:  # It's the first leaf.
@@ -146,6 +176,7 @@ class _LeafWithoutNewlines(PythonLeaf):
     """
     Simply here to optimize performance.
     """
+
     __slots__ = ()
 
     @property
@@ -172,18 +203,21 @@ class PythonErrorLeaf(ErrorLeaf, PythonLeaf):
 
 class EndMarker(_LeafWithoutNewlines):
     __slots__ = ()
-    type = 'endmarker'
+    type = "endmarker"
 
     def __repr__(self):
         return "<%s: prefix=%s end_pos=%s>" % (
-            type(self).__name__, repr(self.prefix), self.end_pos
+            type(self).__name__,
+            repr(self.prefix),
+            self.end_pos,
         )
 
 
 class Newline(PythonLeaf):
     """Contains NEWLINE and ENDMARKER tokens."""
+
     __slots__ = ()
-    type = 'newline'
+    type = "newline"
 
     def __repr__(self):
         return "<%s: %s>" % (type(self).__name__, repr(self.value))
@@ -194,12 +228,17 @@ class Name(_LeafWithoutNewlines):
     A string. Sometimes it is important to know if the string belongs to a name
     or not.
     """
-    type = 'name'
+
+    type = "name"
     __slots__ = ()
 
     def __repr__(self):
-        return "<%s: %s@%s,%s>" % (type(self).__name__, self.value,
-                                   self.line, self.column)
+        return "<%s: %s@%s,%s>" % (
+            type(self).__name__,
+            self.value,
+            self.line,
+            self.column,
+        )
 
     def is_definition(self, include_setitem=False):
         """
@@ -218,18 +257,18 @@ class Name(_LeafWithoutNewlines):
         node = self.parent
         type_ = node.type
 
-        if type_ in ('funcdef', 'classdef'):
+        if type_ in ("funcdef", "classdef"):
             if self == node.name:
                 return node
             return None
 
-        if type_ == 'except_clause':
-            if self.get_previous_sibling() == 'as':
+        if type_ == "except_clause":
+            if self.get_previous_sibling() == "as":
                 return node.parent  # The try_stmt.
             return None
 
         while node is not None:
-            if node.type == 'suite':
+            if node.type == "suite":
                 return None
             if node.type in _GET_DEFINITION_TYPES:
                 if self in node.get_defined_names(include_setitem):
@@ -246,12 +285,12 @@ class Literal(PythonLeaf):
 
 
 class Number(Literal):
-    type = 'number'
+    type = "number"
     __slots__ = ()
 
 
 class String(Literal):
-    type = 'string'
+    type = "string"
     __slots__ = ()
 
     @property
@@ -259,12 +298,8 @@ class String(Literal):
         return re.match(r'\w*(?=[\'"])', self.value).group(0)
 
     def _get_payload(self):
-        match = re.search(
-            r'''('{3}|"{3}|'|")(.*)$''',
-            self.value,
-            flags=re.DOTALL
-        )
-        return match.group(2)[:-len(match.group(1))]
+        match = re.search(r"""('{3}|"{3}|'|")(.*)$""", self.value, flags=re.DOTALL)
+        return match.group(2)[: -len(match.group(1))]
 
 
 class FStringString(PythonLeaf):
@@ -272,7 +307,8 @@ class FStringString(PythonLeaf):
     f-strings contain f-string expressions and normal python strings. These are
     the string parts of f-strings.
     """
-    type = 'fstring_string'
+
+    type = "fstring_string"
     __slots__ = ()
 
 
@@ -281,7 +317,8 @@ class FStringStart(PythonLeaf):
     f-strings contain f-string expressions and normal python strings. These are
     the string parts of f-strings.
     """
-    type = 'fstring_start'
+
+    type = "fstring_start"
     __slots__ = ()
 
 
@@ -290,7 +327,8 @@ class FStringEnd(PythonLeaf):
     f-strings contain f-string expressions and normal python strings. These are
     the string parts of f-strings.
     """
-    type = 'fstring_end'
+
+    type = "fstring_end"
     __slots__ = ()
 
 
@@ -310,12 +348,12 @@ class _StringComparisonMixin:
 
 
 class Operator(_LeafWithoutNewlines, _StringComparisonMixin):
-    type = 'operator'
+    type = "operator"
     __slots__ = ()
 
 
 class Keyword(_LeafWithoutNewlines, _StringComparisonMixin):
-    type = 'keyword'
+    type = "keyword"
     __slots__ = ()
 
 
@@ -325,6 +363,7 @@ class Scope(PythonBaseNode, DocstringMixin):
     text file.
     A Scope is either a function, class or lambda.
     """
+
     __slots__ = ()
 
     def __init__(self, children):
@@ -334,19 +373,19 @@ class Scope(PythonBaseNode, DocstringMixin):
         """
         Returns a generator of `funcdef` nodes.
         """
-        return self._search_in_scope('funcdef')
+        return self._search_in_scope("funcdef")
 
     def iter_classdefs(self):
         """
         Returns a generator of `classdef` nodes.
         """
-        return self._search_in_scope('classdef')
+        return self._search_in_scope("classdef")
 
     def iter_imports(self):
         """
         Returns a generator of `import_name` and `import_from` nodes.
         """
-        return self._search_in_scope('import_name', 'import_from')
+        return self._search_in_scope("import_name", "import_from")
 
     def _search_in_scope(self, *names):
         def scan(children):
@@ -368,10 +407,14 @@ class Scope(PythonBaseNode, DocstringMixin):
         try:
             name = self.name.value
         except AttributeError:
-            name = ''
+            name = ""
 
-        return "<%s: %s@%s-%s>" % (type(self).__name__, name,
-                                   self.start_pos[0], self.end_pos[0])
+        return "<%s: %s@%s-%s>" % (
+            type(self).__name__,
+            name,
+            self.start_pos[0],
+            self.end_pos[0],
+        )
 
 
 class Module(Scope):
@@ -380,8 +423,9 @@ class Module(Scope):
     Depending on the underlying parser this may be a full module or just a part
     of a module.
     """
-    __slots__ = ('_used_names',)
-    type = 'file_input'
+
+    __slots__ = ("_used_names",)
+    type = "file_input"
 
     def __init__(self, children):
         super().__init__(children)
@@ -397,10 +441,10 @@ class Module(Scope):
         # just return all future imports. If people want to scan for issues
         # they should use the API.
         for imp in self.iter_imports():
-            if imp.type == 'import_from' and imp.level == 0:
+            if imp.type == "import_from" and imp.level == 0:
                 for path in imp.get_paths():
                     names = [name.value for name in path]
-                    if len(names) == 2 and names[0] == '__future__':
+                    if len(names) == 2 and names[0] == "__future__":
                         yield names[1]
 
     def get_used_names(self):
@@ -416,7 +460,7 @@ class Module(Scope):
                 try:
                     children = node.children
                 except AttributeError:
-                    if node.type == 'name':
+                    if node.type == "name":
                         arr = dct.setdefault(node.value, [])
                         arr.append(node)
                 else:
@@ -429,7 +473,7 @@ class Module(Scope):
 
 
 class Decorator(PythonBaseNode):
-    type = 'decorator'
+    type = "decorator"
     __slots__ = ()
 
 
@@ -448,11 +492,11 @@ class ClassOrFunc(Scope):
         :rtype: list of :class:`Decorator`
         """
         decorated = self.parent
-        if decorated.type == 'async_funcdef':
+        if decorated.type == "async_funcdef":
             decorated = decorated.parent
 
-        if decorated.type == 'decorated':
-            if decorated.children[0].type == 'decorators':
+        if decorated.type == "decorated":
+            if decorated.children[0].type == "decorators":
                 return decorated.children[0].children
             else:
                 return decorated.children[:1]
@@ -464,7 +508,8 @@ class Class(ClassOrFunc):
     """
     Used to store the parsed contents of a python class.
     """
-    type = 'classdef'
+
+    type = "classdef"
     __slots__ = ()
 
     def __init__(self, children):
@@ -475,10 +520,10 @@ class Class(ClassOrFunc):
         Returns the `arglist` node that defines the super classes. It returns
         None if there are no arguments.
         """
-        if self.children[2] != '(':  # Has no parentheses
+        if self.children[2] != "(":  # Has no parentheses
             return None
         else:
-            if self.children[3] == ')':  # Empty parentheses
+            if self.children[3] == ")":  # Empty parentheses
                 return None
             else:
                 return self.children[3]
@@ -500,12 +545,12 @@ def _create_params(parent, argslist_list):
     except IndexError:
         return []
 
-    if first.type in ('name', 'fpdef'):
+    if first.type in ("name", "fpdef"):
         return [Param([first], parent)]
-    elif first == '*':
+    elif first == "*":
         return [first]
     else:  # argslist is a `typedargslist` or a `varargslist`.
-        if first.type == 'tfpdef':
+        if first.type == "tfpdef":
             children = [first]
         else:
             children = first.children
@@ -513,13 +558,14 @@ def _create_params(parent, argslist_list):
         start = 0
         # Start with offset 1, because the end is higher.
         for end, child in enumerate(children + [None], 1):
-            if child is None or child == ',':
+            if child is None or child == ",":
                 param_children = children[start:end]
                 if param_children:  # Could as well be comma and then end.
-                    if param_children[0] == '*' \
-                            and (len(param_children) == 1
-                                 or param_children[1] == ',') \
-                            or param_children[0] == '/':
+                    if (
+                        param_children[0] == "*"
+                        and (len(param_children) == 1 or param_children[1] == ",")
+                        or param_children[0] == "/"
+                    ):
                         for p in param_children:
                             p.parent = parent
                         new_children += param_children
@@ -543,7 +589,8 @@ class Function(ClassOrFunc):
         3. -> (if annotation is also present)
         4. annotation (if present)
     """
-    type = 'funcdef'
+
+    type = "funcdef"
 
     def __init__(self, children):
         super().__init__(children)
@@ -561,7 +608,7 @@ class Function(ClassOrFunc):
         """
         Returns a list of `Param()`.
         """
-        return [p for p in self._get_param_nodes() if p.type == 'param']
+        return [p for p in self._get_param_nodes() if p.type == "param"]
 
     @property
     def name(self):
@@ -571,16 +618,17 @@ class Function(ClassOrFunc):
         """
         Returns a generator of `yield_expr`.
         """
+
         def scan(children):
             for element in children:
-                if element.type in ('classdef', 'funcdef', 'lambdef'):
+                if element.type in ("classdef", "funcdef", "lambdef"):
                     continue
 
                 try:
                     nested_children = element.children
                 except AttributeError:
-                    if element.value == 'yield':
-                        if element.parent.type == 'yield_expr':
+                    if element.value == "yield":
+                        if element.parent.type == "yield_expr":
                             yield element.parent
                         else:
                             yield element
@@ -593,10 +641,14 @@ class Function(ClassOrFunc):
         """
         Returns a generator of `return_stmt`.
         """
+
         def scan(children):
             for element in children:
-                if element.type == 'return_stmt' \
-                        or element.type == 'keyword' and element.value == 'return':
+                if (
+                    element.type == "return_stmt"
+                    or element.type == "keyword"
+                    and element.value == "return"
+                ):
                     yield element
                 if element.type in _RETURN_STMT_CONTAINERS:
                     yield from scan(element.children)
@@ -607,10 +659,14 @@ class Function(ClassOrFunc):
         """
         Returns a generator of `raise_stmt`. Includes raise statements inside try-except blocks
         """
+
         def scan(children):
             for element in children:
-                if element.type == 'raise_stmt' \
-                        or element.type == 'keyword' and element.value == 'raise':
+                if (
+                    element.type == "raise_stmt"
+                    or element.type == "keyword"
+                    and element.value == "raise"
+                ):
                     yield element
                 if element.type in _RETURN_STMT_CONTAINERS:
                     yield from scan(element.children)
@@ -648,7 +704,8 @@ class Lambda(Function):
         -2. <Operator: :>
         -1. Node() representing body
     """
-    type = 'lambdef'
+
+    type = "lambdef"
     __slots__ = ()
 
     def __init__(self, children):
@@ -687,7 +744,7 @@ class Flow(PythonBaseNode):
 
 
 class IfStmt(Flow):
-    type = 'if_stmt'
+    type = "if_stmt"
     __slots__ = ()
 
     def get_test_nodes(self):
@@ -700,7 +757,7 @@ class IfStmt(Flow):
                 pass
         """
         for i, c in enumerate(self.children):
-            if c in ('elif', 'if'):
+            if c in ("elif", "if"):
                 yield self.children[i + 1]
 
     def get_corresponding_test_node(self, node):
@@ -724,7 +781,7 @@ class IfStmt(Flow):
         Checks if a node is defined after `else`.
         """
         for c in self.children:
-            if c == 'else':
+            if c == "else":
                 if node.start_pos > c.start_pos:
                     return True
         else:
@@ -732,12 +789,12 @@ class IfStmt(Flow):
 
 
 class WhileStmt(Flow):
-    type = 'while_stmt'
+    type = "while_stmt"
     __slots__ = ()
 
 
 class ForStmt(Flow):
-    type = 'for_stmt'
+    type = "for_stmt"
     __slots__ = ()
 
     def get_testlist(self):
@@ -751,7 +808,7 @@ class ForStmt(Flow):
 
 
 class TryStmt(Flow):
-    type = 'try_stmt'
+    type = "try_stmt"
     __slots__ = ()
 
     def get_except_clause_tests(self):
@@ -760,14 +817,14 @@ class TryStmt(Flow):
         Returns ``[None]`` for except clauses without an exception given.
         """
         for node in self.children:
-            if node.type == 'except_clause':
+            if node.type == "except_clause":
                 yield node.children[1]
-            elif node == 'except':
+            elif node == "except":
                 yield None
 
 
 class WithStmt(Flow):
-    type = 'with_stmt'
+    type = "with_stmt"
     __slots__ = ()
 
     def get_defined_names(self, include_setitem=False):
@@ -778,14 +835,14 @@ class WithStmt(Flow):
         names = []
         for with_item in self.children[1:-2:2]:
             # Check with items for 'as' names.
-            if with_item.type == 'with_item':
+            if with_item.type == "with_item":
                 names += _defined_names(with_item.children[2], include_setitem)
         return names
 
     def get_test_node_from_name(self, name):
         node = name.search_ancestor("with_item")
         if node is None:
-            raise ValueError('The name is not actually part of a with statement.')
+            raise ValueError("The name is not actually part of a with statement.")
         return node.children[0]
 
 
@@ -806,18 +863,18 @@ class Import(PythonBaseNode):
 
         for path in self.get_paths():
             if name in path:
-                return path[:path.index(name) + 1]
-        raise ValueError('Name should be defined in the import itself')
+                return path[: path.index(name) + 1]
+        raise ValueError("Name should be defined in the import itself")
 
     def is_nested(self):
         return False  # By default, sub classes may overwrite this behavior
 
     def is_star_import(self):
-        return self.children[-1] == '*'
+        return self.children[-1] == "*"
 
 
 class ImportFrom(Import):
-    type = 'import_from'
+    type = "import_from"
     __slots__ = ()
 
     def get_defined_names(self, include_setitem=False):
@@ -830,16 +887,17 @@ class ImportFrom(Import):
 
     def _aliases(self):
         """Mapping from alias to its corresponding name."""
-        return dict((alias, name) for name, alias in self._as_name_tuples()
-                    if alias is not None)
+        return dict(
+            (alias, name) for name, alias in self._as_name_tuples() if alias is not None
+        )
 
     def get_from_names(self):
         for n in self.children[1:]:
-            if n not in ('.', '...'):
+            if n not in (".", "..."):
                 break
-        if n.type == 'dotted_name':  # from x.y import
+        if n.type == "dotted_name":  # from x.y import
             return n.children[::2]
-        elif n == 'import':  # from . import
+        elif n == "import":  # from . import
             return []
         else:  # from x import
             return [n]
@@ -849,7 +907,7 @@ class ImportFrom(Import):
         """The level parameter of ``__import__``."""
         level = 0
         for n in self.children[1:]:
-            if n in ('.', '...'):
+            if n in (".", "..."):
                 level += len(n.value)
             else:
                 break
@@ -857,17 +915,17 @@ class ImportFrom(Import):
 
     def _as_name_tuples(self):
         last = self.children[-1]
-        if last == ')':
+        if last == ")":
             last = self.children[-2]
-        elif last == '*':
+        elif last == "*":
             return  # No names defined directly.
 
-        if last.type == 'import_as_names':
+        if last.type == "import_as_names":
             as_names = last.children[::2]
         else:
             as_names = [last]
         for as_name in as_names:
-            if as_name.type == 'name':
+            if as_name.type == "name":
                 yield as_name, None
             else:
                 yield as_name.children[::2]  # yields x, y -> ``x as y``
@@ -881,14 +939,15 @@ class ImportFrom(Import):
         """
         dotted = self.get_from_names()
 
-        if self.children[-1] == '*':
+        if self.children[-1] == "*":
             return [dotted]
         return [dotted + [name] for name, alias in self._as_name_tuples()]
 
 
 class ImportName(Import):
     """For ``import_name`` nodes. Covers normal imports without ``from``."""
-    type = 'import_name'
+
+    type = "import_name"
     __slots__ = ()
 
     def get_defined_names(self, include_setitem=False):
@@ -910,18 +969,18 @@ class ImportName(Import):
     def _dotted_as_names(self):
         """Generator of (list(path), alias) where alias may be None."""
         dotted_as_names = self.children[1]
-        if dotted_as_names.type == 'dotted_as_names':
+        if dotted_as_names.type == "dotted_as_names":
             as_names = dotted_as_names.children[::2]
         else:
             as_names = [dotted_as_names]
 
         for as_name in as_names:
-            if as_name.type == 'dotted_as_name':
+            if as_name.type == "dotted_as_name":
                 alias = as_name.children[2]
                 as_name = as_name.children[0]
             else:
                 alias = None
-            if as_name.type == 'name':
+            if as_name.type == "name":
                 yield [as_name], alias
             else:
                 # dotted_names
@@ -934,15 +993,23 @@ class ImportName(Import):
 
             import foo.bar
         """
-        return bool([1 for path, alias in self._dotted_as_names()
-                    if alias is None and len(path) > 1])
+        return bool(
+            [
+                1
+                for path, alias in self._dotted_as_names()
+                if alias is None and len(path) > 1
+            ]
+        )
 
     def _aliases(self):
         """
         :return list of Name: Returns all the alias
         """
-        return dict((alias, path[-1]) for path, alias in self._dotted_as_names()
-                    if alias is not None)
+        return dict(
+            (alias, path[-1])
+            for path, alias in self._dotted_as_names()
+            if alias is not None
+        )
 
 
 class KeywordStatement(PythonBaseNode):
@@ -953,6 +1020,7 @@ class KeywordStatement(PythonBaseNode):
     `pass`, `continue` and `break` are not in there, because they are just
     simple keywords and the parser reduces it to a keyword.
     """
+
     __slots__ = ()
 
     @property
@@ -961,7 +1029,7 @@ class KeywordStatement(PythonBaseNode):
         Keyword statements start with the keyword and end with `_stmt`. You can
         crosscheck this with the Python grammar.
         """
-        return '%s_stmt' % self.keyword
+        return "%s_stmt" % self.keyword
 
     @property
     def keyword(self):
@@ -969,9 +1037,9 @@ class KeywordStatement(PythonBaseNode):
 
     def get_defined_names(self, include_setitem=False):
         keyword = self.keyword
-        if keyword == 'del':
+        if keyword == "del":
             return _defined_names(self.children[1], include_setitem)
-        if keyword in ('global', 'nonlocal'):
+        if keyword in ("global", "nonlocal"):
             return self.children[1::2]
         return []
 
@@ -996,7 +1064,7 @@ class ReturnStmt(KeywordStatement):
 
 
 class YieldExpr(PythonBaseNode):
-    type = 'yield_expr'
+    type = "yield_expr"
     __slots__ = ()
 
 
@@ -1006,22 +1074,22 @@ def _defined_names(current, include_setitem):
     list comprehensions.
     """
     names = []
-    if current.type in ('testlist_star_expr', 'testlist_comp', 'exprlist', 'testlist'):
+    if current.type in ("testlist_star_expr", "testlist_comp", "exprlist", "testlist"):
         for child in current.children[::2]:
             names += _defined_names(child, include_setitem)
-    elif current.type in ('atom', 'star_expr'):
+    elif current.type in ("atom", "star_expr"):
         names += _defined_names(current.children[1], include_setitem)
-    elif current.type in ('power', 'atom_expr'):
-        if current.children[-2] != '**':  # Just if there's no operation
+    elif current.type in ("power", "atom_expr"):
+        if current.children[-2] != "**":  # Just if there's no operation
             trailer = current.children[-1]
-            if trailer.children[0] == '.':
+            if trailer.children[0] == ".":
                 names.append(trailer.children[1])
-            elif trailer.children[0] == '[' and include_setitem:
+            elif trailer.children[0] == "[" and include_setitem:
                 for node in current.children[-2::-1]:
-                    if node.type == 'trailer':
+                    if node.type == "trailer":
                         names.append(node.children[1])
                         break
-                    if node.type == 'name':
+                    if node.type == "name":
                         names.append(node)
                         break
     else:
@@ -1030,7 +1098,7 @@ def _defined_names(current, include_setitem):
 
 
 class ExprStmt(PythonBaseNode, DocstringMixin):
-    type = 'expr_stmt'
+    type = "expr_stmt"
     __slots__ = ()
 
     def get_defined_names(self, include_setitem=False):
@@ -1038,19 +1106,19 @@ class ExprStmt(PythonBaseNode, DocstringMixin):
         Returns a list of `Name` defined before the `=` sign.
         """
         names = []
-        if self.children[1].type == 'annassign':
+        if self.children[1].type == "annassign":
             names = _defined_names(self.children[0], include_setitem)
         return [
             name
             for i in range(0, len(self.children) - 2, 2)
-            if '=' in self.children[i + 1].value
+            if "=" in self.children[i + 1].value
             for name in _defined_names(self.children[i], include_setitem)
         ] + names
 
     def get_rhs(self):
         """Returns the right-hand-side of the equals."""
         node = self.children[-1]
-        if node.type == 'annassign':
+        if node.type == "annassign":
             if len(node.children) == 4:
                 node = node.children[3]
             else:
@@ -1062,7 +1130,7 @@ class ExprStmt(PythonBaseNode, DocstringMixin):
         Returns a generator of `+=`, `=`, etc. or None if there is no operation.
         """
         first = self.children[1]
-        if first.type == 'annassign':
+        if first.type == "annassign":
             if len(first.children) <= 2:
                 return  # No operator is available, it's just PEP 484.
 
@@ -1073,7 +1141,7 @@ class ExprStmt(PythonBaseNode, DocstringMixin):
 
 
 class NamedExpr(PythonBaseNode):
-    type = 'namedexpr_test'
+    type = "namedexpr_test"
 
     def get_defined_names(self, include_setitem=False):
         return _defined_names(self.children[0], include_setitem)
@@ -1085,7 +1153,8 @@ class Param(PythonBaseNode):
     Python grammar defines no ``param`` node. It defines it in a different way
     that is not really suited to working with parameters.
     """
-    type = 'param'
+
+    type = "param"
 
     def __init__(self, children, parent=None):
         super().__init__(children)
@@ -1098,7 +1167,7 @@ class Param(PythonBaseNode):
         `**foo`.
         """
         first = self.children[0]
-        if first in ('*', '**'):
+        if first in ("*", "**"):
             return len(first.value)
         return 0
 
@@ -1108,9 +1177,9 @@ class Param(PythonBaseNode):
         The default is the test node that appears after the `=`. Is `None` in
         case no default is present.
         """
-        has_comma = self.children[-1] == ','
+        has_comma = self.children[-1] == ","
         try:
-            if self.children[-2 - int(has_comma)] == '=':
+            if self.children[-2 - int(has_comma)] == "=":
                 return self.children[-1 - int(has_comma)]
         except IndexError:
             return None
@@ -1122,7 +1191,7 @@ class Param(PythonBaseNode):
         no annotation is present.
         """
         tfpdef = self._tfpdef()
-        if tfpdef.type == 'tfpdef':
+        if tfpdef.type == "tfpdef":
             assert tfpdef.children[1] == ":"
             assert len(tfpdef.children) == 3
             annotation = tfpdef.children[2]
@@ -1134,7 +1203,7 @@ class Param(PythonBaseNode):
         """
         tfpdef: see e.g. grammar36.txt.
         """
-        offset = int(self.children[0] in ('*', '**'))
+        offset = int(self.children[0] in ("*", "**"))
         return self.children[offset]
 
     @property
@@ -1142,7 +1211,7 @@ class Param(PythonBaseNode):
         """
         The `Name` leaf of the param.
         """
-        if self._tfpdef().type == 'tfpdef':
+        if self._tfpdef().type == "tfpdef":
             return self._tfpdef().children[0]
         else:
             return self._tfpdef()
@@ -1157,14 +1226,14 @@ class Param(PythonBaseNode):
         """
         index = self.parent.children.index(self)
         try:
-            keyword_only_index = self.parent.children.index('*')
+            keyword_only_index = self.parent.children.index("*")
             if index > keyword_only_index:
                 # Skip the ` *, `
                 index -= 2
         except ValueError:
             pass
         try:
-            keyword_only_index = self.parent.children.index('/')
+            keyword_only_index = self.parent.children.index("/")
             if index > keyword_only_index:
                 # Skip the ` /, `
                 index -= 2
@@ -1176,7 +1245,7 @@ class Param(PythonBaseNode):
         """
         Returns the function/lambda of a parameter.
         """
-        return self.search_ancestor('funcdef', 'lambdef')
+        return self.search_ancestor("funcdef", "lambdef")
 
     def get_code(self, include_prefix=True, include_comma=True):
         """
@@ -1189,20 +1258,17 @@ class Param(PythonBaseNode):
             return super().get_code(include_prefix)
 
         children = self.children
-        if children[-1] == ',':
+        if children[-1] == ",":
             children = children[:-1]
-        return self._get_code_for_children(
-            children,
-            include_prefix=include_prefix
-        )
+        return self._get_code_for_children(children, include_prefix=include_prefix)
 
     def __repr__(self):
-        default = '' if self.default is None else '=%s' % self.default.get_code()
-        return '<%s: %s>' % (type(self).__name__, str(self._tfpdef()) + default)
+        default = "" if self.default is None else "=%s" % self.default.get_code()
+        return "<%s: %s>" % (type(self).__name__, str(self._tfpdef()) + default)
 
 
 class SyncCompFor(PythonBaseNode):
-    type = 'sync_comp_for'
+    type = "sync_comp_for"
     __slots__ = ()
 
     def get_defined_names(self, include_setitem=False):
@@ -1222,6 +1288,7 @@ class UsedNamesMapping(Mapping):
     """
     This class exists for the sole purpose of creating an immutable dict.
     """
+
     def __init__(self, dct):
         self._dict = dct
 

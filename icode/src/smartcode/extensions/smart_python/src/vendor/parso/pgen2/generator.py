@@ -44,10 +44,12 @@ class Grammar(Generic[_TokenTypeT]):
     dfas.
     """
 
-    def __init__(self,
-                 start_nonterminal: str,
-                 rule_to_dfas: Mapping[str, Sequence['DFAState[_TokenTypeT]']],
-                 reserved_syntax_strings: Mapping[str, 'ReservedString']):
+    def __init__(
+        self,
+        start_nonterminal: str,
+        rule_to_dfas: Mapping[str, Sequence["DFAState[_TokenTypeT]"]],
+        reserved_syntax_strings: Mapping[str, "ReservedString"],
+    ):
         self.nonterminal_to_dfas = rule_to_dfas
         self.reserved_syntax_strings = reserved_syntax_strings
         self.start_nonterminal = start_nonterminal
@@ -58,12 +60,13 @@ class DFAPlan:
     Plans are used for the parser to create stack nodes and do the proper
     DFA state transitions.
     """
-    def __init__(self, next_dfa: 'DFAState', dfa_pushes: Sequence['DFAState'] = []):
+
+    def __init__(self, next_dfa: "DFAState", dfa_pushes: Sequence["DFAState"] = []):
         self.next_dfa = next_dfa
         self.dfa_pushes = dfa_pushes
 
     def __repr__(self):
-        return '%s(%s, %s)' % (self.__class__.__name__, self.next_dfa, self.dfa_pushes)
+        return "%s(%s, %s)" % (self.__class__.__name__, self.next_dfa, self.dfa_pushes)
 
 
 class DFAState(Generic[_TokenTypeT]):
@@ -76,6 +79,7 @@ class DFAState(Generic[_TokenTypeT]):
     transitions are then calculated to connect the DFA state machines that have
     different nonterminals.
     """
+
     def __init__(self, from_rule: str, nfa_set: Set[NFAState], final: NFAState):
         assert isinstance(nfa_set, set)
         assert isinstance(next(iter(nfa_set)), NFAState)
@@ -119,8 +123,10 @@ class DFAState(Generic[_TokenTypeT]):
         return True
 
     def __repr__(self):
-        return '<%s: %s is_final=%s>' % (
-            self.__class__.__name__, self.from_rule, self.is_final
+        return "<%s: %s is_final=%s>" % (
+            self.__class__.__name__,
+            self.from_rule,
+            self.is_final,
         )
 
 
@@ -135,7 +141,7 @@ class ReservedString:
         self.value = value
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.value)
+        return "%s(%s)" % (self.__class__.__name__, self.value)
 
 
 def _simplify_dfas(dfas):
@@ -269,9 +275,7 @@ def generate_grammar(bnf_grammar: str, token_namespace) -> Grammar:
                     dfa_state.nonterminal_arcs[terminal_or_nonterminal] = next_dfa
                 else:
                     transition = _make_transition(
-                        token_namespace,
-                        reserved_strings,
-                        terminal_or_nonterminal
+                        token_namespace, reserved_strings, terminal_or_nonterminal
                     )
                     dfa_state.transitions[transition] = DFAPlan(next_dfa)
 
@@ -325,17 +329,16 @@ def _calculate_tree_traversal(nonterminal_to_dfas):
                         prev_plan = transitions[transition]
                         # Make sure these are sorted so that error messages are
                         # at least deterministic
-                        choices = sorted([
-                            (
-                                prev_plan.dfa_pushes[0].from_rule
-                                if prev_plan.dfa_pushes
-                                else prev_plan.next_dfa.from_rule
-                            ),
-                            (
-                                pushes[0].from_rule
-                                if pushes else next_dfa.from_rule
-                            ),
-                        ])
+                        choices = sorted(
+                            [
+                                (
+                                    prev_plan.dfa_pushes[0].from_rule
+                                    if prev_plan.dfa_pushes
+                                    else prev_plan.next_dfa.from_rule
+                                ),
+                                (pushes[0].from_rule if pushes else next_dfa.from_rule),
+                            ]
+                        )
                         raise ValueError(
                             "Rule %s is ambiguous; given a %s token, we "
                             "can't determine if we should evaluate %s or %s."
@@ -343,7 +346,8 @@ def _calculate_tree_traversal(nonterminal_to_dfas):
                                 (
                                     dfa_state.from_rule,
                                     transition,
-                                ) + tuple(choices)
+                                )
+                                + tuple(choices)
                             )
                         )
                     transitions[transition] = DFAPlan(next_dfa, pushes)
@@ -370,7 +374,9 @@ def _calculate_first_plans(nonterminal_to_dfas, first_plans, nonterminal):
         try:
             first_plans2 = first_plans[nonterminal2]
         except KeyError:
-            first_plans2 = _calculate_first_plans(nonterminal_to_dfas, first_plans, nonterminal2)
+            first_plans2 = _calculate_first_plans(
+                nonterminal_to_dfas, first_plans, nonterminal2
+            )
         else:
             if first_plans2 is None:
                 raise ValueError("left recursion for rule %r" % nonterminal)

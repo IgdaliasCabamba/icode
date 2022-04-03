@@ -7,19 +7,21 @@ import os
 _sep = os.path.sep
 if os.path.altsep is not None:
     _sep += os.path.altsep
-_path_re = re.compile(r'(?:\.[^{0}]+|[{0}]__init__\.py)$'.format(re.escape(_sep)))
+_path_re = re.compile(r"(?:\.[^{0}]+|[{0}]__init__\.py)$".format(re.escape(_sep)))
 del _sep
 
 
 def to_list(func):
     def wrapper(*args, **kwargs):
         return list(func(*args, **kwargs))
+
     return wrapper
 
 
 def to_tuple(func):
     def wrapper(*args, **kwargs):
         return tuple(func(*args, **kwargs))
+
     return wrapper
 
 
@@ -61,12 +63,14 @@ def reraise_uncaught(func):
     `AttributeError` to `UncaughtAttributeError` to avoid unexpected catch.
     This helps us noticing bugs earlier and facilitates debugging.
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwds):
         try:
             return func(*args, **kwds)
         except AttributeError as e:
             raise UncaughtAttributeError(e) from e
+
     return wrapper
 
 

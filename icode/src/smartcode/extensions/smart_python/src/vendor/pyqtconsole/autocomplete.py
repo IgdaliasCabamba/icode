@@ -112,9 +112,10 @@ class AutoComplete(QObject):
             cr.setWidth(popup_width)
             self.completer.complete(cr)
         elif self.mode == COMPLETE_MODE.INLINE:
-            cl = columnize(words, colsep='  |  ')
+            cl = columnize(words, colsep="  |  ")
             self.parent()._insert_output_text(
-                '\n\n' + cl + '\n', lf=True, keep_buffer=True)
+                "\n\n" + cl + "\n", lf=True, keep_buffer=True
+            )
 
     def hide_completion_suggestions(self):
         if self.completing():
@@ -123,8 +124,7 @@ class AutoComplete(QObject):
 
     def completing(self):
         if self.mode == COMPLETE_MODE.DROPDOWN:
-            return (self.completer.popup() and
-                    self.completer.popup().isVisible())
+            return self.completer.popup() and self.completer.popup().isVisible()
         else:
             return False
 
@@ -135,12 +135,12 @@ class AutoComplete(QObject):
         # overwrite the . when we are inserting the completion. Its not the .
         # operator If the buffer starts with a . (dot), but something else
         # perhaps terminal specific so do nothing.
-        if '.' in _buffer and _buffer[0] != '.':
-            idx = _buffer.rfind('.') + 1
+        if "." in _buffer and _buffer[0] != ".":
+            idx = _buffer.rfind(".") + 1
             _buffer = _buffer[idx:]
 
         if self.mode == COMPLETE_MODE.DROPDOWN:
-            self.parent().insert_input_text(completion[len(_buffer):])
+            self.parent().insert_input_text(completion[len(_buffer) :])
         elif self.mode == COMPLETE_MODE.INLINE:
             self.parent().clear_input_buffer()
             self.parent().insert_input_text(completion)
@@ -148,7 +148,7 @@ class AutoComplete(QObject):
             words = self.parent().get_completions(completion)
 
             if len(words) == 1:
-                self.parent().insert_input_text(' ')
+                self.parent().insert_input_text(" ")
 
     def update_completion(self, key):
         if self.completing():

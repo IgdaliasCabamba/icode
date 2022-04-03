@@ -1,6 +1,6 @@
 from extension_api import *
 
-make_dirs([os.path.join(BASE_PATH, '.cache', 'jedi')])
+make_dirs([os.path.join(BASE_PATH, ".cache", "jedi")])
 
 export(path="smart_python.src")
 export(path="smart_python.src.vendor")
@@ -24,13 +24,15 @@ from smartpy_warning import *
 pylang_server_data = get_pylang_server()
 
 py_server = langserver.icenter.run_new_server(
-    pylang_server_data["run"], {
+    pylang_server_data["run"],
+    {
         "name": SERVER_NAME,
         "mode": "TCP4",
         "service": pylang_server_data["service"],
         "host": pylang_server_data["host"],
         "port": pylang_server_data["port"],
-    })
+    },
+)
 
 
 class Init(ModelApp):
@@ -47,7 +49,7 @@ class Init(ModelApp):
             "editors": [],
             "autocompleters": [],
             "live_tipers": [],
-            "ide_utils": []
+            "ide_utils": [],
         }
         self.smartpy_intellisense = intellisense.IIntellisense(self)
 
@@ -86,13 +88,13 @@ class Init(ModelApp):
         self.btn_add_pycell.setIcon(corner_icons.get_icon("add"))
         self.btn_add_pycell.clicked.connect(lambda: self.py_console.add_cell())
 
-        self.ui.side_bottom.insert_widget(1, self.py_console, "PYCONSOLE",
-                                          [self.btn_add_pycell])
+        self.ui.side_bottom.insert_widget(
+            1, self.py_console, "PYCONSOLE", [self.btn_add_pycell]
+        )
 
         # Editor Widgets
         self.python_envs = self.ui.editor_widgets.addWidgetObject(PythonEnvs)
-        self.symbol_navigator = self.ui.editor_widgets.addWidgetObject(
-            SymbolExplorer)
+        self.symbol_navigator = self.ui.editor_widgets.addWidgetObject(SymbolExplorer)
 
         # Lab Widgets
         space = self.ui.side_right.new_space("smart_python")
@@ -100,9 +102,9 @@ class Init(ModelApp):
         self.btn_open_pylab = QPushButton("Open")
         self.btn_open_pylab.setObjectName("btn-open-pylab")
         self.pylab_desc = DESCRIPTION
-        self.ui.side_left.labs.new_work_space("Python", "smart_python",
-                                              self.pylab_desc,
-                                              self.btn_open_pylab)
+        self.ui.side_left.labs.new_work_space(
+            "Python", "smart_python", self.pylab_desc, self.btn_open_pylab
+        )
 
         self.code_tree = CodeTree(None)
         self.btn_run_tree = QPushButton()
@@ -127,8 +129,7 @@ class Init(ModelApp):
         self.btn_run_warnings.setObjectName("Button")
         self.btn_run_warnings.setProperty("style-bg", "transparent")
         self.btn_run_warnings.setIcon(corner_icons.get_icon("start"))
-        table3 = self.ui.side_right.new_table("Code Warnings",
-                                              self.code_warnings)
+        table3 = self.ui.side_right.new_table("Code Warnings", self.code_warnings)
         table3.add_header_widget(self.btn_run_warnings)
         table3.setMinimumSize(300, 360)
 
@@ -146,8 +147,7 @@ class Init(ModelApp):
         self.btn_run_analyze.setObjectName("Button")
         self.btn_run_analyze.setProperty("style-bg", "transparent")
         self.btn_run_analyze.setIcon(corner_icons.get_icon("start"))
-        table5 = self.ui.side_right.new_table("Deep Analyze",
-                                              self.deep_analyze)
+        table5 = self.ui.side_right.new_table("Deep Analyze", self.deep_analyze)
         table5.add_header_widget(self.btn_run_analyze)
         table5.setMinimumSize(200, 300)
 
@@ -187,19 +187,23 @@ class Init(ModelApp):
         self.do_on(self.show_envs, "interpreter", "clicked")
         self.do_on(self.show_envs, "python_env", "triggered")
         self.do_on(self.show_goto_symbol, "goto_symbol", "triggered")
-        self.do_on(lambda: self.app.open_research_space("smart_python"),
-                   "btn_open_pylab", "clicked")
+        self.do_on(
+            lambda: self.app.open_research_space("smart_python"),
+            "btn_open_pylab",
+            "clicked",
+        )
         self.do_on(self.run_code_tree, "btn_run_tree", "clicked")
         self.do_on(self.run_code_doctor, "btn_run_doctor", "clicked")
         self.do_on(self.run_code_warnings, "btn_run_warnings", "clicked")
         self.do_on(self.run_code_analyze, "btn_run_analyze", "clicked")
-        self.do_on(self.run_code_doctor, "code_doctor", "btn_get_diagnosis",
-                   "clicked")
-        self.do_on(self.run_code_warnings, "code_warnings", "btn_get_warnings",
-                   "clicked")
+        self.do_on(self.run_code_doctor, "code_doctor", "btn_get_diagnosis", "clicked")
+        self.do_on(
+            self.run_code_warnings, "code_warnings", "btn_get_warnings", "clicked"
+        )
         self.do_on(self.fix_bugs, "code_warnings", "on_fix_bugs_clicked")
-        self.do_on(self.run_code_analyze, "deep_analyze", "btn_get_diagnosis",
-                   "clicked")
+        self.do_on(
+            self.run_code_analyze, "deep_analyze", "btn_get_diagnosis", "clicked"
+        )
         self.do_on(self.add_env, "python_envs", "on_env_added")
         self.do_on(self.set_current_env, "python_envs", "on_current_env")
         self.do_on(self.start_debugging, "btn_start_debug", "clicked")
@@ -285,12 +289,10 @@ class Init(ModelApp):
         autocomplete.on_error.connect(self.repair)
         autocomplete.on_load_completions.connect(self.add_completions)
         autocomplete.on_show_help.connect(self.show_help)
-        autocomplete.on_remove_dead_completion.connect(
-            self.remove_completion_entry)
+        autocomplete.on_remove_dead_completion.connect(self.remove_completion_entry)
         live_tips.on_annotation_request.connect(editor.display_annotation)
         live_tips.on_add_indicator_range.connect(editor.add_indicator_range)
-        live_tips.on_clear_indicator_range.connect(
-            editor.clear_indicator_range)
+        live_tips.on_clear_indicator_range.connect(editor.clear_indicator_range)
         live_tips.on_update_header.connect(editor.update_header)
         ide_utils.on_update_header.connect(editor.update_header)
         ide_utils.on_tooltip_request.connect(editor.display_tooltip)
@@ -328,7 +330,7 @@ class Init(ModelApp):
             broke.stop()
 
     def show_help(self, editor, row, suggestion) -> None:
-        #editor.display_annotation(row, suggestion, 210, "on_lines_changed", 1)
+        # editor.display_annotation(row, suggestion, 210, "on_lines_changed", 1)
         pass
 
     def add_completions(self, lexer_api, completions) -> None:
@@ -361,10 +363,11 @@ class Init(ModelApp):
             self.deep_analyze.do_analyze(editor.text(), editor)
 
     def adjust_code(self, editor=None) -> None:
-        """Straighten the Python code """
+        """Straighten the Python code"""
         if editor is None or isinstance(editor, bool):
-            editor = self.app.current_notebook_editor(self.ui.notebook,
-                                                      "lexer_name", "python")
+            editor = self.app.current_notebook_editor(
+                self.ui.notebook, "lexer_name", "python"
+            )
 
         if editor is None or isinstance(editor, bool):
             return
@@ -376,8 +379,9 @@ class Init(ModelApp):
 
     def adjust_imports(self) -> None:
         """Sort the imported Python libs in code by name"""
-        editor = self.app.current_notebook_editor(self.ui.notebook,
-                                                  "lexer_name", "python")
+        editor = self.app.current_notebook_editor(
+            self.ui.notebook, "lexer_name", "python"
+        )
         if editor is None or isinstance(editor, bool):
             return
         code_smell = editor.text()
@@ -393,8 +397,7 @@ class Init(ModelApp):
     def start_debugging(self):
         editor = self.app.current_notebook_editor(None, "lexer_name", "python")
         if editor:
-            self.debug.start(editor, editor.text(), editor.file_path,
-                             self._current_env)
+            self.debug.start(editor, editor.text(), editor.file_path, self._current_env)
 
     def stop_debugging(self):
         self.debug.stop()

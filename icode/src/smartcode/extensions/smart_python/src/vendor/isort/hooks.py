@@ -17,7 +17,9 @@ def get_output(command: List[str]) -> str:
     :param str command: the command to run
     :returns: the stdout output of the command
     """
-    result = subprocess.run(command, stdout=subprocess.PIPE, check=True)  # nosec - trusted input
+    result = subprocess.run(
+        command, stdout=subprocess.PIPE, check=True
+    )  # nosec - trusted input
     return result.stdout.decode()
 
 
@@ -32,7 +34,10 @@ def get_lines(command: List[str]) -> List[str]:
 
 
 def git_hook(
-    strict: bool = False, modify: bool = False, lazy: bool = False, settings_file: str = ""
+    strict: bool = False,
+    modify: bool = False,
+    lazy: bool = False,
+    settings_file: str = "",
 ) -> int:
     """Git pre-commit hook to check staged files for isort errors
 
@@ -54,7 +59,14 @@ def git_hook(
     :return number of errors if in strict mode, 0 otherwise.
     """
     # Get list of files modified and staged
-    diff_cmd = ["git", "diff-index", "--cached", "--name-only", "--diff-filter=ACMRTUXB", "HEAD"]
+    diff_cmd = [
+        "git",
+        "diff-index",
+        "--cached",
+        "--name-only",
+        "--diff-filter=ACMRTUXB",
+        "HEAD",
+    ]
     if lazy:
         diff_cmd.remove("--cached")
 

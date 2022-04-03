@@ -57,24 +57,28 @@ class BaseName:
     """
     The base class for all definitions, completions and signatures.
     """
+
     _mapping = {
-        'posixpath': 'os.path',
-        'riscospath': 'os.path',
-        'ntpath': 'os.path',
-        'os2emxpath': 'os.path',
-        'macpath': 'os.path',
-        'genericpath': 'os.path',
-        'posix': 'os',
-        '_io': 'io',
-        '_functools': 'functools',
-        '_collections': 'collections',
-        '_socket': 'socket',
-        '_sqlite3': 'sqlite3',
+        "posixpath": "os.path",
+        "riscospath": "os.path",
+        "ntpath": "os.path",
+        "os2emxpath": "os.path",
+        "macpath": "os.path",
+        "genericpath": "os.path",
+        "posix": "os",
+        "_io": "io",
+        "_functools": "functools",
+        "_collections": "collections",
+        "_socket": "socket",
+        "_sqlite3": "sqlite3",
     }
 
-    _tuple_mapping = dict((tuple(k.split('.')), v) for (k, v) in {
-        'argparse._ActionsContainer': 'argparse.ArgumentParser',
-    }.items())
+    _tuple_mapping = dict(
+        (tuple(k.split(".")), v)
+        for (k, v) in {
+            "argparse._ActionsContainer": "argparse.ArgumentParser",
+        }.items()
+    )
 
     def __init__(self, inference_state, name):
         self._inference_state = inference_state
@@ -179,8 +183,11 @@ class BaseName:
         if tree_name is not None:
             # TODO move this to their respective names.
             definition = tree_name.get_definition()
-            if definition is not None and definition.type == 'import_from' and \
-                    tree_name.is_definition():
+            if (
+                definition is not None
+                and definition.type == "import_from"
+                and tree_name.is_definition()
+            ):
                 resolve = True
 
         if isinstance(self._name, SubModuleName) or resolve:
@@ -293,14 +300,14 @@ class BaseName:
             parses all libraries starting with ``a``.
         """
         if isinstance(self._name, ImportName) and fast:
-            return ''
+            return ""
         doc = self._get_docstring()
         if raw:
             return doc
 
         signature_text = self._get_docstring_signature()
         if signature_text and doc:
-            return signature_text + '\n\n' + doc
+            return signature_text + "\n\n" + doc
         else:
             return signature_text + doc
 
@@ -308,7 +315,7 @@ class BaseName:
         return self._name.py__doc__()
 
     def _get_docstring_signature(self):
-        return '\n'.join(
+        return "\n".join(
             signature.to_string()
             for signature in self._get_signatures(for_docstring=True)
         )
@@ -344,22 +351,22 @@ class BaseName:
         """
         typ = self.type
         tree_name = self._name.tree_name
-        if typ == 'param':
-            return typ + ' ' + self._name.to_string()
-        if typ in ('function', 'class', 'module', 'instance') or tree_name is None:
-            if typ == 'function':
+        if typ == "param":
+            return typ + " " + self._name.to_string()
+        if typ in ("function", "class", "module", "instance") or tree_name is None:
+            if typ == "function":
                 # For the description we want a short and a pythonic way.
-                typ = 'def'
-            return typ + ' ' + self._name.get_public_name()
+                typ = "def"
+            return typ + " " + self._name.get_public_name()
 
         definition = tree_name.get_definition(include_setitem=True) or tree_name
         # Remove the prefix, because that's not what we want for get_code
         # here.
         txt = definition.get_code(include_prefix=False)
         # Delete comments:
-        txt = re.sub(r'#[^\n]+\n', ' ', txt)
+        txt = re.sub(r"#[^\n]+\n", " ", txt)
         # Delete multi spaces/newlines
-        txt = re.sub(r'\s+', ' ', txt).strip()
+        txt = re.sub(r"\s+", " ", txt).strip()
         return txt
 
     @property
@@ -399,7 +406,7 @@ class BaseName:
         except KeyError:
             pass
 
-        return '.'.join(names)
+        return ".".join(names)
 
     def is_stub(self):
         """
@@ -418,11 +425,17 @@ class BaseName:
         tree_name = self._name.tree_name
         if tree_name is None:
             return False
-        return tree_name.is_definition() and tree_name.parent.type == 'trailer'
+        return tree_name.is_definition() and tree_name.parent.type == "trailer"
 
-    @debug.increase_indent_cm('goto on name')
-    def goto(self, *, follow_imports=False, follow_builtin_imports=False,
-             only_stubs=False, prefer_stubs=False):
+    @debug.increase_indent_cm("goto on name")
+    def goto(
+        self,
+        *,
+        follow_imports=False,
+        follow_builtin_imports=False,
+        only_stubs=False,
+        prefer_stubs=False
+    ):
 
         """
         Like :meth:`.Script.goto` (also supports the same params), but does it
@@ -447,10 +460,11 @@ class BaseName:
             only_stubs=only_stubs,
             prefer_stubs=prefer_stubs,
         )
-        return [self if n == self._name else Name(self._inference_state, n)
-                for n in names]
+        return [
+            self if n == self._name else Name(self._inference_state, n) for n in names
+        ]
 
-    @debug.increase_indent_cm('infer on name')
+    @debug.increase_indent_cm("infer on name")
     def infer(self, *, only_stubs=False, prefer_stubs=False):
         """
         Like :meth:`.Script.infer`, it can be useful to understand which type
@@ -483,8 +497,10 @@ class BaseName:
             prefer_stubs=prefer_stubs,
         )
         resulting_names = [c.name for c in values]
-        return [self if n == self._name else Name(self._inference_state, n)
-                for n in resulting_names]
+        return [
+            self if n == self._name else Name(self._inference_state, n)
+            for n in resulting_names
+        ]
 
     def parent(self):
         """
@@ -495,7 +511,10 @@ class BaseName:
         if not self._name.is_value_name:
             return None
 
-        if self.type in ('function', 'class', 'param') and self._name.tree_name is not None:
+        if (
+            self.type in ("function", "class", "param")
+            and self._name.tree_name is not None
+        ):
             # Since the parent_context doesn't really match what the user
             # thinks of that the parent is here, we do these cases separately.
             # The reason for this is the following:
@@ -506,7 +525,9 @@ class BaseName:
             # - param: The parent_context of a param is not its function but
             #   e.g. the outer class or module.
             cls_or_func_node = self._name.tree_name.get_definition()
-            parent = search_ancestor(cls_or_func_node, 'funcdef', 'classdef', 'file_input')
+            parent = search_ancestor(
+                cls_or_func_node, "funcdef", "classdef", "file_input"
+            )
             context = self._get_module_context().create_value(parent).as_context()
         else:
             context = self._name.parent_context
@@ -522,7 +543,7 @@ class BaseName:
     def __repr__(self):
         return "<%s %sname=%r, description=%r>" % (
             self.__class__.__name__,
-            'full_' if self.full_name else '',
+            "full_" if self.full_name else "",
             self.full_name or self.name,
             self.description,
         )
@@ -538,19 +559,19 @@ class BaseName:
                      builtin.
         """
         if not self._name.is_value_name:
-            return ''
+            return ""
 
         lines = self._name.get_root_context().code_lines
         if lines is None:
             # Probably a builtin module, just ignore in that case.
-            return ''
+            return ""
 
         index = self._name.start_pos[0] - 1
         start_index = max(index - before, 0)
-        return ''.join(lines[start_index:index + after + 1])
+        return "".join(lines[start_index : index + after + 1])
 
     def _get_signatures(self, for_docstring=False):
-        if for_docstring and self._name.api_type == 'statement' and not self.is_stub():
+        if for_docstring and self._name.api_type == "statement" and not self.is_stub():
             # For docstrings we don't resolve signatures if they are simple
             # statements and not stubs. This is a speed optimization.
             return []
@@ -571,10 +592,7 @@ class BaseName:
 
         :rtype: list of :class:`BaseSignature`
         """
-        return [
-            BaseSignature(self._inference_state, s)
-            for s in self._get_signatures()
-        ]
+        return [BaseSignature(self._inference_state, s) for s in self._get_signatures()]
 
     def execute(self):
         """
@@ -603,8 +621,10 @@ class Completion(BaseName):
     ``Completion`` objects are returned from :meth:`.Script.complete`. They
     provide additional information about a completion.
     """
-    def __init__(self, inference_state, name, stack, like_name_length,
-                 is_fuzzy, cached_name=None):
+
+    def __init__(
+        self, inference_state, name, stack, like_name_length, is_fuzzy, cached_name=None
+    ):
         super().__init__(inference_state, name)
 
         self._like_name_length = like_name_length
@@ -617,14 +637,13 @@ class Completion(BaseName):
         self._same_name_completions = []
 
     def _complete(self, like_name):
-        append = ''
-        if settings.add_bracket_after_function \
-                and self.type == 'function':
-            append = '('
+        append = ""
+        if settings.add_bracket_after_function and self.type == "function":
+            append = "("
 
         name = self._name.get_public_name()
         if like_name:
-            name = name[self._like_name_length:]
+            name = name[self._like_name_length :]
         return name + append
 
     @property
@@ -683,7 +702,7 @@ class Completion(BaseName):
             return completion_cache.get_docstring(
                 self._cached_name,
                 self._name.get_public_name(),
-                lambda: self._get_cache()
+                lambda: self._get_cache(),
             )
         return super()._get_docstring()
 
@@ -692,7 +711,7 @@ class Completion(BaseName):
             return completion_cache.get_docstring_signature(
                 self._cached_name,
                 self._name.get_public_name(),
-                lambda: self._get_cache()
+                lambda: self._get_cache(),
             )
         return super()._get_docstring_signature()
 
@@ -713,7 +732,7 @@ class Completion(BaseName):
             return completion_cache.get_type(
                 self._cached_name,
                 self._name.get_public_name(),
-                lambda: self._get_cache()
+                lambda: self._get_cache(),
             )
 
         return super().type
@@ -737,7 +756,7 @@ class Completion(BaseName):
         return self._like_name_length
 
     def __repr__(self):
-        return '<%s: %s>' % (type(self).__name__, self._name.get_public_name())
+        return "<%s: %s>" % (type(self).__name__, self._name.get_public_name())
 
 
 class Name(BaseName):
@@ -745,6 +764,7 @@ class Name(BaseName):
     *Name* objects are returned from many different APIs including
     :meth:`.Script.goto` or :meth:`.Script.infer`.
     """
+
     def __init__(self, inference_state, definition):
         super().__init__(inference_state, definition)
 
@@ -758,7 +778,7 @@ class Name(BaseName):
         defs = self._name.infer()
         return sorted(
             unite(defined_names(self._inference_state, d.as_context()) for d in defs),
-            key=lambda s: s._name.start_pos or (0, 0)
+            key=lambda s: s._name.start_pos or (0, 0),
         )
 
     def is_definition(self):
@@ -772,16 +792,20 @@ class Name(BaseName):
             return self._name.tree_name.is_definition()
 
     def __eq__(self, other):
-        return self._name.start_pos == other._name.start_pos \
-            and self.module_path == other.module_path \
-            and self.name == other.name \
+        return (
+            self._name.start_pos == other._name.start_pos
+            and self.module_path == other.module_path
+            and self.name == other.name
             and self._inference_state == other._inference_state
+        )
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash((self._name.start_pos, self.module_path, self.name, self._inference_state))
+        return hash(
+            (self._name.start_pos, self.module_path, self.name, self._inference_state)
+        )
 
 
 class BaseSignature(Name):
@@ -789,6 +813,7 @@ class BaseSignature(Name):
     These signatures are returned by :meth:`BaseName.get_signatures`
     calls.
     """
+
     def __init__(self, inference_state, signature):
         super().__init__(inference_state, signature.name)
         self._signature = signature
@@ -801,8 +826,10 @@ class BaseSignature(Name):
 
         :rtype: list of :class:`.ParamName`
         """
-        return [ParamName(self._inference_state, n)
-                for n in self._signature.get_param_names(resolve_stars=True)]
+        return [
+            ParamName(self._inference_state, n)
+            for n in self._signature.get_param_names(resolve_stars=True)
+        ]
 
     def to_string(self):
         """
@@ -819,6 +846,7 @@ class Signature(BaseSignature):
     A full signature object is the return value of
     :meth:`.Script.get_signatures`.
     """
+
     def __init__(self, inference_state, signature, call_details):
         super().__init__(inference_state, signature)
         self._call_details = call_details
@@ -847,7 +875,7 @@ class Signature(BaseSignature):
         return self._call_details.bracket_leaf.start_pos
 
     def __repr__(self):
-        return '<%s: index=%r %s>' % (
+        return "<%s: index=%r %s>" % (
             type(self).__name__,
             self.index,
             self._signature.to_string(),
@@ -869,7 +897,9 @@ class ParamName(Name):
             executed and classes are returned instead of instances.
         :rtype: list of :class:`.Name`
         """
-        return _values_to_definitions(self._name.infer_annotation(ignore_stars=True, **kwargs))
+        return _values_to_definitions(
+            self._name.infer_annotation(ignore_stars=True, **kwargs)
+        )
 
     def to_string(self):
         """

@@ -7,10 +7,11 @@ from PyQt5.QtWidgets import (
 
 from ..igui import IListWidgetItem, InputHistory
 
+
 class LexerMode(QFrame):
-    
+
     focus_out = pyqtSignal(object, object)
-    
+
     def __init__(self, api, parent):
         super().__init__(parent)
         self.api = api
@@ -18,7 +19,7 @@ class LexerMode(QFrame):
         self.setParent(parent)
         self.setObjectName("editor-widget")
         self.init_ui()
-    
+
     def init_ui(self):
 
         self.layout = QVBoxLayout(self)
@@ -33,12 +34,12 @@ class LexerMode(QFrame):
 
         self.lang_list = QListWidget(self)
         self.lang_list.setObjectName("child")
-        self.lang_list.setIconSize(QSize(16,16))
+        self.lang_list.setIconSize(QSize(16, 16))
         self.lang_list.itemActivated.connect(self.mirror_in_editor)
 
         self.layout.addWidget(self.lang_input)
         self.layout.addWidget(self.lang_list)
-    
+
     def focusOutEvent(self, event):
         super().focusOutEvent(event)
         if self.focusWidget() not in self.findChildren(object, "child"):
@@ -46,16 +47,16 @@ class LexerMode(QFrame):
 
     def search_lang(self, text):
         if len(text) > 1:
-        
+
             results = self.lang_list.findItems(text, Qt.MatchContains)
-    
+
             for i in range(self.lang_list.count()):
                 self.lang_list.setRowHidden(i, True)
 
             for row_item in results:
                 i = self.lang_list.row(row_item)
                 self.lang_list.setRowHidden(i, False)
-            
+
             if len(results) > 0:
                 i = self.lang_list.row(results[0])
                 self.lang_list.setCurrentRow(i)
@@ -63,9 +64,9 @@ class LexerMode(QFrame):
         else:
             for i in range(self.lang_list.count()):
                 self.lang_list.setRowHidden(i, False)
-        
+
         self.update_size()
-    
+
     def select_language(self):
         items = self.lang_list.selectedItems()
         for item in items:
@@ -77,27 +78,26 @@ class LexerMode(QFrame):
             if not self.lang_list.isRowHidden(i):
                 height += self.lang_list.sizeHintForRow(i)
 
-        self.lang_list.setFixedHeight(height+10)
-        self.setFixedHeight(self.lang_input.size().height()+self.lang_list.size().height()+20)
+        self.lang_list.setFixedHeight(height + 10)
+        self.setFixedHeight(
+            self.lang_input.size().height() + self.lang_list.size().height() + 20
+        )
 
     def mirror_in_editor(self, item):
         for editor in self.api.current_editors:
             editor.set_lexer(item.item_data["object"])
         self.hide()
-        
-    def set_langs(self, data=False):    
+
+    def set_langs(self, data=False):
         if data:
             self.lang_list.clear()
             for lang in data:
                 row = IListWidgetItem(
-                    lang["icon"],
-                    lang["name"].title(),
-                    None,
-                    {"object":lang["lexer"]}
+                    lang["icon"], lang["name"].title(), None, {"object": lang["lexer"]}
                 )
                 self.lang_list.addItem(row)
         self.update_size()
-    
+
     def run(self):
         self.lang_list.setCurrentRow(0)
         self.lang_input.setFocus()

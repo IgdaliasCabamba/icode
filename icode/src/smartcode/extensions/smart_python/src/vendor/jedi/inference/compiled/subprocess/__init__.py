@@ -20,32 +20,35 @@ from jedi._compatibility import pickle_dump, pickle_load
 from jedi import debug
 from jedi.cache import memoize_method
 from jedi.inference.compiled.subprocess import functions
-from jedi.inference.compiled.access import DirectObjectAccess, AccessPath, \
-    SignatureParam
+from jedi.inference.compiled.access import (
+    DirectObjectAccess,
+    AccessPath,
+    SignatureParam,
+)
 from jedi.api.exceptions import InternalError
 
 
-_MAIN_PATH = os.path.join(os.path.dirname(__file__), '__main__.py')
+_MAIN_PATH = os.path.join(os.path.dirname(__file__), "__main__.py")
 PICKLE_PROTOCOL = 4
 
 
 def _GeneralizedPopen(*args, **kwargs):
-    if os.name == 'nt':
+    if os.name == "nt":
         try:
             # Was introduced in Python 3.7.
             CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW
         except AttributeError:
             CREATE_NO_WINDOW = 0x08000000
-        kwargs['creationflags'] = CREATE_NO_WINDOW
+        kwargs["creationflags"] = CREATE_NO_WINDOW
     # The child process doesn't need file descriptors except 0, 1, 2.
     # This is unix only.
-    kwargs['close_fds'] = 'posix' in sys.builtin_module_names
+    kwargs["close_fds"] = "posix" in sys.builtin_module_names
 
     return subprocess.Popen(*args, **kwargs)
 
 
 def _enqueue_output(out, queue_):
-    for line in iter(out.readline, b''):
+    for line in iter(out.readline, b""):
         queue_.put(line)
 
 
@@ -55,8 +58,8 @@ def _add_stderr_to_debug(stderr_queue):
         # stderr contents.
         try:
             line = stderr_queue.get_nowait()
-            line = line.decode('utf-8', 'replace')
-            debug.warning('stderr output: %s' % line.rstrip('\n'))
+            line = line.decode("utf-8", "replace")
+            debug.warning("stderr output: %s" % line.rstrip("\n"))
         except queue.Empty:
             break
 
@@ -110,6 +113,7 @@ class InferenceStateSameProcess(_InferenceStateProcess):
     as InferenceStateSubprocess and does the same thing without using a subprocess.
     This is necessary for the Interpreter process.
     """
+
     def __getattr__(self, name):
         return partial(_get_function(name), self._inference_state_weakref())
 
@@ -173,7 +177,7 @@ class CompiledSubprocess:
 
     def __repr__(self):
         pid = os.getpid()
-        return '<%s _executable=%r, is_crashed=%r, pid=%r>' % (
+        return "<%s _executable=%r, is_crashed=%r, pid=%r>" % (
             self.__class__.__name__,
             self._executable,
             self.is_crashed,
@@ -182,34 +186,30 @@ class CompiledSubprocess:
 
     @memoize_method
     def _get_process(self):
-        debug.dbg('Start environment subprocess %s', self._executable)
-        parso_path = sys.modules['parso'].__file__
+        debug.dbg("Start environment subprocess %s", self._executable)
+        parso_path = sys.modules["parso"].__file__
         args = (
             self._executable,
             _MAIN_PATH,
             os.path.dirname(os.path.dirname(parso_path)),
-            '.'.join(str(x) for x in sys.version_info[:3]),
+            ".".join(str(x) for x in sys.version_info[:3]),
         )
         process = _GeneralizedPopen(
             args,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=self._env_vars
+            env=self._env_vars,
         )
         self._stderr_queue = queue.Queue()
         self._stderr_thread = t = Thread(
-            target=_enqueue_output,
-            args=(process.stderr, self._stderr_queue)
+            target=_enqueue_output, args=(process.stderr, self._stderr_queue)
         )
         t.daemon = True
         t.start()
         # Ensure the subprocess is properly cleaned up when the object
         # is garbage collected.
-        self._cleanup_callable = weakref.finalize(self,
-                                                  _cleanup_process,
-                                                  process,
-                                                  t)
+        self._cleanup_callable = weakref.finalize(self, _cleanup_process, process, t)
         return process
 
     def run(self, inference_state, function, args=(), kwargs={}):
@@ -241,24 +241,27 @@ class CompiledSubprocess:
             pickle_dump(data, self._get_process().stdin, PICKLE_PROTOCOL)
         except BrokenPipeError:
             self._kill()
-            raise InternalError("The subprocess %s was killed. Maybe out of memory?"
-                                % self._executable)
+            raise InternalError(
+                "The subprocess %s was killed. Maybe out of memory?" % self._executable
+            )
 
         try:
             is_exception, traceback, result = pickle_load(self._get_process().stdout)
         except EOFError as eof_error:
             try:
-                stderr = self._get_process().stderr.read().decode('utf-8', 'replace')
+                stderr = self._get_process().stderr.read().decode("utf-8", "replace")
             except Exception as exc:
-                stderr = '<empty/not available (%r)>' % exc
+                stderr = "<empty/not available (%r)>" % exc
             self._kill()
             _add_stderr_to_debug(self._stderr_queue)
             raise InternalError(
-                "The subprocess %s has crashed (%r, stderr=%s)." % (
+                "The subprocess %s has crashed (%r, stderr=%s)."
+                % (
                     self._executable,
                     eof_error,
                     stderr,
-                ))
+                )
+            )
 
         _add_stderr_to_debug(self._stderr_queue)
 
@@ -294,11 +297,12 @@ class Listener:
             inference_state = self._inference_states[inference_state_id]
         except KeyError:
             from jedi import InterpreterEnvironment
+
             inference_state = InferenceState(
                 # The project is not actually needed. Nothing should need to
                 # access it.
                 project=None,
-                environment=InterpreterEnvironment()
+                environment=InterpreterEnvironment(),
             )
             self._inference_states[inference_state_id] = inference_state
         return inference_state
@@ -315,10 +319,14 @@ class Listener:
             args = list(args)
             for i, arg in enumerate(args):
                 if isinstance(arg, AccessHandle):
-                    args[i] = inference_state.compiled_subprocess.get_access_handle(arg.id)
+                    args[i] = inference_state.compiled_subprocess.get_access_handle(
+                        arg.id
+                    )
             for key, value in kwargs.items():
                 if isinstance(value, AccessHandle):
-                    kwargs[key] = inference_state.compiled_subprocess.get_access_handle(value.id)
+                    kwargs[key] = inference_state.compiled_subprocess.get_access_handle(
+                        value.id
+                    )
 
             return function(inference_state, *args, **kwargs)
 
@@ -326,7 +334,7 @@ class Listener:
         stdout = sys.stdout
         # Mute stdout. Nobody should actually be able to write to it,
         # because stdout is used for IPC.
-        sys.stdout = open(os.devnull, 'w')
+        sys.stdout = open(os.devnull, "w")
         stdin = sys.stdin
         stdout = stdout.buffer
         stdin = stdin.buffer
@@ -359,8 +367,8 @@ class AccessHandle:
         try:
             detail = self.access
         except AttributeError:
-            detail = '#' + str(self.id)
-        return '<%s of %s>' % (self.__class__.__name__, detail)
+            detail = "#" + str(self.id)
+        return "<%s of %s>" % (self.__class__.__name__, detail)
 
     def __getstate__(self):
         return self.id
@@ -369,7 +377,7 @@ class AccessHandle:
         self.id = state
 
     def __getattr__(self, name):
-        if name in ('id', 'access') or name.startswith('_'):
+        if name in ("id", "access") or name.startswith("_"):
             raise AttributeError("Something went wrong with unpickling")
 
         # print('getattr', name, file=sys.stderr)
@@ -382,9 +390,13 @@ class AccessHandle:
         around.
         """
         if args and isinstance(args[0], slice):
-            return self._subprocess.get_compiled_method_return(self.id, name, *args, **kwargs)
+            return self._subprocess.get_compiled_method_return(
+                self.id, name, *args, **kwargs
+            )
         return self._cached_results(name, *args, **kwargs)
 
     @memoize_method
     def _cached_results(self, name, *args, **kwargs):
-        return self._subprocess.get_compiled_method_return(self.id, name, *args, **kwargs)
+        return self._subprocess.get_compiled_method_return(
+            self.id, name, *args, **kwargs
+        )

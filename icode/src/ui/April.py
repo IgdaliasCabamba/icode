@@ -1,10 +1,17 @@
-from PyQt5.QtCore import (QEasingCurve, QPoint, QPropertyAnimation, QTimer,
-                          pyqtSignal)
+from PyQt5.QtCore import QEasingCurve, QPoint, QPropertyAnimation, QTimer, pyqtSignal
 from PyQt5.QtGui import QColor
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import (QButtonGroup, QFormLayout, QFrame,
-                             QGraphicsDropShadowEffect, QLabel, QPushButton,
-                             QRadioButton, QTabWidget, QVBoxLayout)
+from PyQt5.QtWidgets import (
+    QButtonGroup,
+    QFormLayout,
+    QFrame,
+    QGraphicsDropShadowEffect,
+    QLabel,
+    QPushButton,
+    QRadioButton,
+    QTabWidget,
+    QVBoxLayout,
+)
 from qtwidgets import AnimatedToggle
 
 import base.consts as iconsts
@@ -68,9 +75,11 @@ class April(QFrame):
         self.form = QFormLayout()
 
         self.remember_drink_water = AnimatedToggle(
-            checked_color="#FFB000", pulse_checked_color="#44FFB000")
+            checked_color="#FFB000", pulse_checked_color="#44FFB000"
+        )
         self.remember_correct_posture = AnimatedToggle(
-            checked_color="#FFB000", pulse_checked_color="#44FFB000")
+            checked_color="#FFB000", pulse_checked_color="#44FFB000"
+        )
         self.remember_drink_water.setMaximumWidth(70)
         self.remember_correct_posture.setMaximumWidth(70)
 
@@ -103,25 +112,33 @@ class April(QFrame):
     def alert_water(self):
         if self.remember_drink_water.isChecked():
             btn_thanks = QPushButton("Thanks")
-            self.parent.notificator.new_notification(title="Your health",
-                                                     desc=f"Drink Water please",
-                                                     widgets=[btn_thanks],
-                                                     kill_action=btn_thanks.clicked)
+            self.parent.notificator.new_notification(
+                title="Your health",
+                desc=f"Drink Water please",
+                widgets=[btn_thanks],
+                kill_action=btn_thanks.clicked,
+            )
 
     def alert_posture(self):
         if self.remember_correct_posture.isChecked():
             btn_thanks = QPushButton("Thanks")
-            self.parent.notificator.new_notification(title="Your health",
-                                                     desc=f"Right your posture please",
-                                                     widgets=[btn_thanks],
-                                                     kill_action=btn_thanks.clicked)
+            self.parent.notificator.new_notification(
+                title="Your health",
+                desc=f"Right your posture please",
+                widgets=[btn_thanks],
+                kill_action=btn_thanks.clicked,
+            )
 
     def change_mode(self, btn):
         self.mode = self.mode_values[btn.objectName()]
         self.on_mode_changed.emit(self.mode)
 
     def update_position(self):
-        y = (self.parent.geometry().height() - self.geometry().height()) - self.parent.status_bar.geometry().height() - 10
+        y = (
+            (self.parent.geometry().height() - self.geometry().height())
+            - self.parent.status_bar.geometry().height()
+            - 10
+        )
         w = self.parent.geometry().width() / 2
         x = int(w - self.geometry().width() / 2)
         self.move(x, y)

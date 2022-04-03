@@ -9,7 +9,7 @@ class AbstractLazyValue:
         self.max = max
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.data)
+        return "<%s: %s>" % (self.__class__.__name__, self.data)
 
     def infer(self):
         raise NotImplementedError
@@ -17,12 +17,14 @@ class AbstractLazyValue:
 
 class LazyKnownValue(AbstractLazyValue):
     """data is a Value."""
+
     def infer(self):
         return ValueSet([self.data])
 
 
 class LazyKnownValues(AbstractLazyValue):
     """data is a ValueSet."""
+
     def infer(self):
         return self.data
 
@@ -44,7 +46,7 @@ class LazyTreeValue(AbstractLazyValue):
         self._predefined_names = dict(context.predefined_names)
 
     def infer(self):
-        with monkeypatch(self.context, 'predefined_names', self._predefined_names):
+        with monkeypatch(self.context, "predefined_names", self._predefined_names):
             return self.context.infer_node(self.data)
 
 
@@ -57,5 +59,6 @@ def get_merged_lazy_value(lazy_values):
 
 class MergedLazyValues(AbstractLazyValue):
     """data is a list of lazy values."""
+
     def infer(self):
         return ValueSet.from_sets(l.infer() for l in self.data)

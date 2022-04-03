@@ -1,15 +1,34 @@
 from PyQt5.Qsci import QsciScintilla
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
-                             QFrame, QHBoxLayout, QLabel,
-                             QMainWindow, QMenu, QMenuBar, QPushButton,
-                             QScrollArea, QSizePolicy, QSplitter,
-                             QStackedLayout, QStatusBar, QTabWidget, QToolBar,
-                             QToolButton, QVBoxLayout, QWidget, qApp)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QComboBox,
+    QDesktopWidget,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QMenuBar,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSplitter,
+    QStackedLayout,
+    QStatusBar,
+    QTabWidget,
+    QToolBar,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+    qApp,
+)
 from functions import getfn
 from .igui import QGithubButton
 from .menus import IndentSizeMenu
+
 
 class ToolBar(QToolBar):
     def __init__(self, parent) -> None:
@@ -26,8 +45,7 @@ class ToolBar(QToolBar):
         self.icons = getfn.get_smartcode_icons("toolbar")
 
         self.spacing = QWidget(self)
-        self.spacing.setSizePolicy(QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
+        self.spacing.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.explorer = QAction(self.icons.get_icon("explorer"), "", self)
         self.explorer.setCheckable(True)
@@ -69,8 +87,8 @@ class ToolBar(QToolBar):
         self.add_action(self.config)
 
         self.actionTriggered.connect(self.mark_action)
-    
-    def add_action(self, action:object) -> None:
+
+    def add_action(self, action: object) -> None:
         self.actions_list.append(action)
         self.addAction(action)
 
@@ -78,6 +96,7 @@ class ToolBar(QToolBar):
         for act in self.actions_list:
             if act != action:
                 act.setChecked(False)
+
 
 class StatusBar(QStatusBar):
     def __init__(self, parent=None) -> None:
@@ -97,14 +116,14 @@ class StatusBar(QStatusBar):
         self.notify.setIcon(self.icons.get_icon("notify"))
         self.lang = QPushButton(self)
         self.encode = QPushButton(self)
-        
+
         self.eol_box = QGithubButton(self)
         self.end_line_seq = QPushButton(self.eol_box)
         self.eol_visiblity = QPushButton(self.eol_box)
         self.eol_visiblity.setIcon(self.icons.get_icon("show"))
         self.eol_box.set_widget_primary(self.end_line_seq)
         self.eol_box.set_widget_secondary(self.eol_visiblity)
-        
+
         self.indentation_box = QGithubButton(self)
         self.indentation = QPushButton(self.indentation_box)
         self.indentation_size = QPushButton(self.indentation_box)
@@ -112,7 +131,7 @@ class StatusBar(QStatusBar):
         self.indentation_size.clicked.connect(lambda: self.indentation_size.showMenu())
         self.indentation_box.set_widget_primary(self.indentation)
         self.indentation_box.set_widget_secondary(self.indentation_size)
-        
+
         self.line_col = QPushButton(self)
 
         self.warnings = QPushButton(self)
@@ -121,14 +140,14 @@ class StatusBar(QStatusBar):
         self.errors.setIcon(self.icons.get_icon("errors"))
         self.source_control = QPushButton(self)
         self.source_control.setIcon(self.icons.get_icon("source_control"))
-        
+
         self.april = QPushButton(self)
         self.april.setIcon(self.icons.get_icon("april"))
 
         self.add_status_widget(self.source_control)
         self.add_status_widget(self.errors)
         self.add_status_widget(self.warnings)
-        
+
         self.add_widget(self.april)
 
         self.add_editor_widget(self.line_col)
@@ -137,25 +156,25 @@ class StatusBar(QStatusBar):
         self.add_editor_widget(self.eol_box)
         self.add_editor_widget(self.lang)
         self.add_widget(self.notify)
-        
+
         self.widgets["editor"] = self.editor_widgets
-        self.widgets["app"] = self.app_widgets      
+        self.widgets["app"] = self.app_widgets
 
         self.main_view()
-    
-    def add_widget(self, widget:object, category="permanent") -> None:
+
+    def add_widget(self, widget: object, category="permanent") -> None:
         if category in self.widgets.keys():
             self.widgets[category].append(widget)
         else:
-            self.widgets[category]=[widget]
-            
+            self.widgets[category] = [widget]
+
         self.addPermanentWidget(widget)
-    
-    def add_editor_widget(self, widget:object) -> None:
+
+    def add_editor_widget(self, widget: object) -> None:
         self.editor_widgets.append(widget)
         self.addPermanentWidget(widget)
-    
-    def add_status_widget(self, widget:object) -> None:
+
+    def add_status_widget(self, widget: object) -> None:
         self.app_widgets.append(widget)
         self.addWidget(widget)
 
@@ -165,13 +184,13 @@ class StatusBar(QStatusBar):
     def editor_view(self):
         self.update_visiblity("editor", True)
 
-    def update_visiblity(self, category:str, value:bool) -> None:
+    def update_visiblity(self, category: str, value: bool) -> None:
         for widget in self.widgets[category]:
-            widget.setVisible(value)        
+            widget.setVisible(value)
 
-    def open_folder_mode(self, flag:bool = True):
+    def open_folder_mode(self, flag: bool = True):
         self.setProperty("folder_open", flag)
         self.style().polish(self)
-    
-    def toggle_eol_visiblity(self, mode:str):
+
+    def toggle_eol_visiblity(self, mode: str):
         self.eol_visiblity.setIcon(self.icons.get_icon(mode))

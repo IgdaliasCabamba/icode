@@ -22,13 +22,14 @@ from radon.raw import analyze
 from radon.visitors import ComplexityVisitor
 from radon import visitors
 
+
 class EnvApi(QSettings):
-    def __init__(self, file_with_path:str, format=QSettings.IniFormat):
+    def __init__(self, file_with_path: str, format=QSettings.IniFormat):
         super().__init__(file_with_path, format)
         self._python_envs = [jedi.get_default_environment()]
 
-        if 'PYTHONPATH' in os.environ:
-            envs = os.environ['PYTHONPATH'].split(os.pathsep)
+        if "PYTHONPATH" in os.environ:
+            envs = os.environ["PYTHONPATH"].split(os.pathsep)
             if envs:
                 for env in envs:
                     self._python_envs.append(jedi.create_environment(str(env)))
@@ -40,22 +41,22 @@ class EnvApi(QSettings):
             except Exception as e:
                 print(e)
                 pass
-    
-    def add_env(self, env_path:str) -> list:
+
+    def add_env(self, env_path: str) -> list:
         env = self.create_env(env_path)
         if env:
             self._python_envs.append(env)
         self.save_envs()
-    
+
     @property
     def python_envs(self) -> list:
         return self._python_envs
-    
+
     def clear_envs(self) -> list:
         self._python_envs.clear()
         return self._python_envs
-    
-    def remove_env(self, name:str) -> list:
+
+    def remove_env(self, name: str) -> list:
         for env in self._python_envs:
             if env.executable == name:
                 self._python_envs.remove(env)
@@ -67,43 +68,50 @@ class EnvApi(QSettings):
         except Exception as e:
             print(e)
         return False
-    
+
     def restore_envs(self) -> None:
         return self.value("envs")
-    
+
     def save_envs(self) -> None:
         key = "envs"
         base_list = self.value(key)
         if not isinstance(base_list, list):
             base_list = []
-                
+
         for env in self._python_envs:
             base_list.append(env.executable)
-                
+
         self.setValue(key, base_list)
+
 
 class PythonApi:
     def __init__(self):
         pass
-    
+
     def get_env(self, path: str):
         try:
             return jedi.create_environment(path)
         except:
             pass
         return None
-    
+
     def get_code_warnings(self, editor) -> dict:
         return_functions_tuple = (ide.tabs_obsolete, ide.trailing_whitespace)
         yield_functions_tuple = (
-            ide.extraneous_whitespace, ide.whitespace_around_keywords,
+            ide.extraneous_whitespace,
+            ide.whitespace_around_keywords,
             ide.missing_whitespace_after_import_keyword,
-            ide.missing_whitespace, ide.whitespace_around_operator,
-            ide.whitespace_around_comma, ide.imports_on_separate_lines,
-            ide.compound_statements, ide.comparison_negative,
-            ide.python_3000_raise_comma, ide.python_3000_not_equal,
-            ide.python_3000_backticks)
-            
+            ide.missing_whitespace,
+            ide.whitespace_around_operator,
+            ide.whitespace_around_comma,
+            ide.imports_on_separate_lines,
+            ide.compound_statements,
+            ide.comparison_negative,
+            ide.python_3000_raise_comma,
+            ide.python_3000_not_equal,
+            ide.python_3000_backticks,
+        )
+
         data = {"warnings": [], "lines": []}
         for line in range(editor.lines()):
             line_text = editor.text(line)
@@ -128,7 +136,7 @@ class PythonApi:
                         data["lines"].append(line)
 
         return data
-    
+
     def get_python_diagnosis(self, code) -> dict:
 
         errors = jedi.Script(code=code, path=None).get_syntax_errors()
@@ -144,7 +152,7 @@ class PythonApi:
         results = {
             "analyze": analyze_result,
             "complexity": complexity_result,
-            "syntax_errors": errors
+            "syntax_errors": errors,
         }
         return results
 
@@ -157,7 +165,7 @@ class PythonApi:
 
     def get_straighten_code(self, code):
         try:
-            return yapf_api.FormatCode(code, style_config='pep8')[0]
+            return yapf_api.FormatCode(code, style_config="pep8")[0]
         except Exception as e:
             print(e)
             return None
@@ -168,17 +176,17 @@ class PythonApi:
         except Exception as e:
             print(e)
             return None
-    
+
     def get_code_analyze(self, code):
         try:
             return cc_visit(code)
         except Exception as e:
             print(e)
             return None
-    
-    def get_analyze_rank(self, complexity:int) -> str:
+
+    def get_analyze_rank(self, complexity: int) -> str:
         return cc_rank(complexity)
-    
+
     def get_python_node_tree(self, python_code, sort_way="name"):
         try:
             # Node object
@@ -196,8 +204,9 @@ class PythonApi:
                 nonlocal python_node_tree
                 new_node = None
                 if isinstance(ast_node, ast.ClassDef):
-                    new_node = PythonNode(ast_node.name, "class",
-                                          ast_node.lineno, level)
+                    new_node = PythonNode(
+                        ast_node.name, "class", ast_node.lineno, level
+                    )
                     for child_node in ast_node.body:
                         result = parse_node(child_node, level + 1, new_node)
                         if result != None:
@@ -206,11 +215,11 @@ class PythonApi:
                                     new_node.children.append(n)
                             else:
                                 new_node.children.append(result)
-                    new_node.children = sorted(new_node.children,
-                                               key=lambda x: x.name)
+                    new_node.children = sorted(new_node.children, key=lambda x: x.name)
                 elif isinstance(ast_node, ast.FunctionDef):
-                    new_node = PythonNode(ast_node.name, "function",
-                                          ast_node.lineno, level)
+                    new_node = PythonNode(
+                        ast_node.name, "function", ast_node.lineno, level
+                    )
                     for child_node in ast_node.body:
                         result = parse_node(child_node, level + 1, new_node)
                         if result != None:
@@ -219,14 +228,14 @@ class PythonApi:
                                     new_node.children.append(n)
                             else:
                                 new_node.children.append(result)
-                    new_node.children = sorted(new_node.children,
-                                               key=lambda x: x.name)
+                    new_node.children = sorted(new_node.children, key=lambda x: x.name)
                 elif isinstance(ast_node, ast.Import):
-                    new_node = PythonNode(ast_node.names[0].name, "import",
-                                          ast_node.lineno, level)
-                elif isinstance(ast_node,
-                                ast.Assign) and (level == 0
-                                                 or parent_node == None):
+                    new_node = PythonNode(
+                        ast_node.names[0].name, "import", ast_node.lineno, level
+                    )
+                elif isinstance(ast_node, ast.Assign) and (
+                    level == 0 or parent_node == None
+                ):
                     # Globals that do are not defined with the 'global' keyword,
                     # but are defined on the top level
                     new_nodes = []
@@ -235,13 +244,15 @@ class PythonApi:
                             name = target.id
                             if not (name in globals_list):
                                 new_nodes.append(
-                                    PythonNode(name, "global_variable",
-                                               ast_node.lineno, level))
+                                    PythonNode(
+                                        name, "global_variable", ast_node.lineno, level
+                                    )
+                                )
                                 globals_list.append(name)
                     return new_nodes
-                elif isinstance(ast_node,
-                                ast.AnnAssign) and (level == 0
-                                                    or parent_node == None):
+                elif isinstance(ast_node, ast.AnnAssign) and (
+                    level == 0 or parent_node == None
+                ):
                     # Type annotated globals
                     new_nodes = []
                     target = ast_node.target
@@ -249,8 +260,10 @@ class PythonApi:
                         name = target.id
                         if not (name in globals_list):
                             new_nodes.append(
-                                PythonNode(name, "global_variable",
-                                           ast_node.lineno, level))
+                                PythonNode(
+                                    name, "global_variable", ast_node.lineno, level
+                                )
+                            )
                             globals_list.append(name)
                     return new_nodes
                 elif isinstance(ast_node, ast.Global):
@@ -259,28 +272,29 @@ class PythonApi:
                     for name in ast_node.names:
                         if not (name in globals_list):
                             python_node_tree.append(
-                                PythonNode(name, "global_variable",
-                                           ast_node.lineno, level))
+                                PythonNode(
+                                    name, "global_variable", ast_node.lineno, level
+                                )
+                            )
                             globals_list.append(name)
                 else:
                     if parent_node != None and hasattr(ast_node, "body"):
                         for child_node in ast_node.body:
-                            result = parse_node(child_node, level + 1,
-                                                parent_node)
+                            result = parse_node(child_node, level + 1, parent_node)
                             if result != None:
                                 if isinstance(result, list):
                                     for n in result:
                                         parent_node.children.append(n)
                                 else:
                                     parent_node.children.append(result)
-                        parent_node.children = sorted(parent_node.children,
-                                                      key=lambda x: x.name)
+                        parent_node.children = sorted(
+                            parent_node.children, key=lambda x: x.name
+                        )
                     else:
                         new_nodes = []
                         if hasattr(ast_node, "body"):
                             for child_node in ast_node.body:
-                                result = parse_node(child_node, level + 1,
-                                                    None)
+                                result = parse_node(child_node, level + 1, None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -289,8 +303,7 @@ class PythonApi:
                                         new_nodes.append(result)
                         if hasattr(ast_node, "orelse"):
                             for child_node in ast_node.orelse:
-                                result = parse_node(child_node, level + 1,
-                                                    None)
+                                result = parse_node(child_node, level + 1, None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -299,8 +312,7 @@ class PythonApi:
                                         new_nodes.append(result)
                         if hasattr(ast_node, "finalbody"):
                             for child_node in ast_node.finalbody:
-                                result = parse_node(child_node, level + 1,
-                                                    None)
+                                result = parse_node(child_node, level + 1, None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -309,8 +321,7 @@ class PythonApi:
                                         new_nodes.append(result)
                         if hasattr(ast_node, "handlers"):
                             for child_node in ast_node.handlers:
-                                result = parse_node(child_node, level + 1,
-                                                    None)
+                                result = parse_node(child_node, level + 1, None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -338,16 +349,15 @@ class PythonApi:
 
             # Sort the node list
             if sort_way == "name":
-                python_node_tree = sorted(python_node_tree,
-                                          key=lambda x: x.name)
+                python_node_tree = sorted(python_node_tree, key=lambda x: x.name)
             elif sort_way == "number":
-                python_node_tree = sorted(python_node_tree,
-                                          key=lambda x: x.line_number)
+                python_node_tree = sorted(python_node_tree, key=lambda x: x.line_number)
 
             return python_node_tree
 
         except SyntaxError:
             return False
+
 
 python_api = PythonApi()
 envs_api = EnvApi("")

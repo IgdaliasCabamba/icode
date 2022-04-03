@@ -38,6 +38,7 @@ class HelperValueMixin:
 
     def execute_with_values(self, *value_list):
         from jedi.inference.arguments import ValuesArguments
+
         arguments = ValuesArguments([ValueSet([value]) for value in value_list])
         return self.inference_state.execute(self, arguments)
 
@@ -59,18 +60,21 @@ class HelperValueMixin:
         # This covers the case where a stub files are incomplete.
         if self.is_stub():
             from jedi.inference.gradual.conversion import convert_values
+
             for c in convert_values(ValueSet({self})):
                 yield from c.get_filters()
 
     def goto(self, name_or_str, name_context=None, analysis_errors=True):
         from jedi.inference import finder
+
         filters = self._get_value_filters(name_or_str)
         names = finder.filter_name(filters, name_or_str)
-        debug.dbg('context.goto %s in (%s): %s', name_or_str, self, names)
+        debug.dbg("context.goto %s in (%s): %s", name_or_str, self, names)
         return names
 
-    def py__getattribute__(self, name_or_str, name_context=None, position=None,
-                           analysis_errors=True):
+    def py__getattribute__(
+        self, name_or_str, name_context=None, position=None, analysis_errors=True
+    ):
         """
         :param position: Position of the last statement -> tuple of line, column
         """
@@ -85,44 +89,51 @@ class HelperValueMixin:
         if not names and not values and analysis_errors:
             if isinstance(name_or_str, Name):
                 from jedi.inference import analysis
-                analysis.add_attribute_error(
-                    name_context, self, name_or_str)
-        debug.dbg('context.names_to_types: %s -> %s', names, values)
+
+                analysis.add_attribute_error(name_context, self, name_or_str)
+        debug.dbg("context.names_to_types: %s -> %s", names, values)
         return values
 
     def py__await__(self):
         await_value_set = self.py__getattribute__("__await__")
         if not await_value_set:
-            debug.warning('Tried to run __await__ on value %s', self)
+            debug.warning("Tried to run __await__ on value %s", self)
         return await_value_set.execute_with_values()
 
     def py__name__(self):
         return self.name.string_name
 
     def iterate(self, contextualized_node=None, is_async=False):
-        debug.dbg('iterate %s', self)
+        debug.dbg("iterate %s", self)
         if is_async:
             from jedi.inference.lazy_value import LazyKnownValues
+
             # TODO if no __aiter__ values are there, error should be:
             # TypeError: 'async for' requires an object with __aiter__ method, got int
-            return iter([
-                LazyKnownValues(
-                    self.py__getattribute__('__aiter__').execute_with_values()
-                        .py__getattribute__('__anext__').execute_with_values()
-                        .py__getattribute__('__await__').execute_with_values()
+            return iter(
+                [
+                    LazyKnownValues(
+                        self.py__getattribute__("__aiter__")
+                        .execute_with_values()
+                        .py__getattribute__("__anext__")
+                        .execute_with_values()
+                        .py__getattribute__("__await__")
+                        .execute_with_values()
                         .py__stop_iteration_returns()
-                )  # noqa: E124
-            ])
+                    )  # noqa: E124
+                ]
+            )
         return self.py__iter__(contextualized_node)
 
     def is_sub_class_of(self, class_value):
-        with debug.increase_indent_cm('subclass matching of %s <=> %s' % (self, class_value),
-                                      color='BLUE'):
+        with debug.increase_indent_cm(
+            "subclass matching of %s <=> %s" % (self, class_value), color="BLUE"
+        ):
             for cls in self.py__mro__():
                 if cls.is_same_class(class_value):
-                    debug.dbg('matched subclass True', color='BLUE')
+                    debug.dbg("matched subclass True", color="BLUE")
                     return True
-            debug.dbg('matched subclass False', color='BLUE')
+            debug.dbg("matched subclass False", color="BLUE")
             return False
 
     def is_same_class(self, class2):
@@ -140,11 +151,12 @@ class Value(HelperValueMixin):
     """
     To be implemented by subclasses.
     """
+
     tree_node = None
     # Possible values: None, tuple, list, dict and set. Here to deal with these
     # very important containers.
     array_type = None
-    api_type = 'not_defined_please_report_bug'
+    api_type = "not_defined_please_report_bug"
 
     def __init__(self, inference_state, parent_context=None):
         self.inference_state = inference_state
@@ -152,12 +164,13 @@ class Value(HelperValueMixin):
 
     def py__getitem__(self, index_value_set, contextualized_node):
         from jedi.inference import analysis
+
         # TODO this value is probably not right.
         analysis.add(
             contextualized_node.context,
-            'type-error-not-subscriptable',
+            "type-error-not-subscriptable",
             contextualized_node.node,
-            message="TypeError: '%s' object is not subscriptable" % self
+            message="TypeError: '%s' object is not subscriptable" % self,
         )
         return NO_VALUES
 
@@ -167,11 +180,13 @@ class Value(HelperValueMixin):
     def py__iter__(self, contextualized_node=None):
         if contextualized_node is not None:
             from jedi.inference import analysis
+
             analysis.add(
                 contextualized_node.context,
-                'type-error-not-iterable',
+                "type-error-not-iterable",
                 contextualized_node.node,
-                message="TypeError: '%s' object is not iterable" % self)
+                message="TypeError: '%s' object is not iterable" % self,
+            )
         return iter([])
 
     def py__next__(self, contextualized_node=None):
@@ -218,7 +233,7 @@ class Value(HelperValueMixin):
         try:
             self.tree_node.get_doc_node
         except AttributeError:
-            return ''
+            return ""
         else:
             return clean_scope_docstring(self.tree_node)
 
@@ -261,7 +276,9 @@ class Value(HelperValueMixin):
         return self.parent_context.is_stub()
 
     def _as_context(self):
-        raise NotImplementedError('Not all values need to be converted to contexts: %s', self)
+        raise NotImplementedError(
+            "Not all values need to be converted to contexts: %s", self
+        )
 
     @property
     def name(self):
@@ -315,11 +332,13 @@ class _ValueWrapperBase(HelperValueMixin):
     @safe_property
     def name(self):
         from jedi.inference.names import ValueName
+
         wrapped_name = self._wrapped_value.name
         if wrapped_name.tree_name is not None:
             return ValueName(self, wrapped_name.tree_name)
         else:
             from jedi.inference.compiled import CompiledValueName
+
             return CompiledValueName(self, wrapped_name.string_name)
 
     @classmethod
@@ -328,7 +347,7 @@ class _ValueWrapperBase(HelperValueMixin):
         return cls(*args, **kwargs)
 
     def __getattr__(self, name):
-        assert name != '_wrapped_value', 'Problem with _get_wrapped_value'
+        assert name != "_wrapped_value", "Problem with _get_wrapped_value"
         return getattr(self._wrapped_value, name)
 
 
@@ -336,11 +355,11 @@ class LazyValueWrapper(_ValueWrapperBase):
     @safe_property
     @memoize_method
     def _wrapped_value(self):
-        with debug.increase_indent_cm('Resolve lazy value wrapper'):
+        with debug.increase_indent_cm("Resolve lazy value wrapper"):
             return self._get_wrapped_value()
 
     def __repr__(self):
-        return '<%s>' % (self.__class__.__name__)
+        return "<%s>" % (self.__class__.__name__)
 
     def _get_wrapped_value(self):
         raise NotImplementedError
@@ -351,7 +370,7 @@ class ValueWrapper(_ValueWrapperBase):
         self._wrapped_value = wrapped_value
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self._wrapped_value)
+        return "%s(%s)" % (self.__class__.__name__, self._wrapped_value)
 
 
 class TreeValue(Value):
@@ -360,7 +379,7 @@ class TreeValue(Value):
         self.tree_node = tree_node
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.tree_node)
+        return "<%s: %s>" % (self.__class__.__name__, self.tree_node)
 
 
 class ContextualizedNode:
@@ -375,7 +394,7 @@ class ContextualizedNode:
         return self.context.infer_node(self.node)
 
     def __repr__(self):
-        return '<%s: %s in %s>' % (self.__class__.__name__, self.node, self.context)
+        return "<%s: %s in %s>" % (self.__class__.__name__, self.node, self.context)
 
 
 def _getitem(value, index_values, contextualized_node):
@@ -397,11 +416,8 @@ def _getitem(value, index_values, contextualized_node):
     # Therefore we now iterate through all the values and just take
     # all results.
     if unused_values or not index_values:
-        result |= value.py__getitem__(
-            ValueSet(unused_values),
-            contextualized_node
-        )
-    debug.dbg('py__getitem__ result: %s', result)
+        result |= value.py__getitem__(ValueSet(unused_values), contextualized_node)
+    debug.dbg("py__getitem__ result: %s", result)
     return result
 
 
@@ -446,7 +462,7 @@ class ValueSet:
         return len(self._set)
 
     def __repr__(self):
-        return 'S{%s}' % (', '.join(str(s) for s in self._set))
+        return "S{%s}" % (", ".join(str(s) for s in self._set))
 
     def filter(self, filter_func):
         return self.__class__(filter(filter_func, self._set))
@@ -454,9 +470,9 @@ class ValueSet:
     def __getattr__(self, name):
         def mapper(*args, **kwargs):
             return self.from_sets(
-                getattr(value, name)(*args, **kwargs)
-                for value in self._set
+                getattr(value, name)(*args, **kwargs) for value in self._set
             )
+
         return mapper
 
     def __eq__(self, other):
@@ -473,23 +489,30 @@ class ValueSet:
 
     def iterate(self, contextualized_node=None, is_async=False):
         from jedi.inference.lazy_value import get_merged_lazy_value
-        type_iters = [c.iterate(contextualized_node, is_async=is_async) for c in self._set]
+
+        type_iters = [
+            c.iterate(contextualized_node, is_async=is_async) for c in self._set
+        ]
         for lazy_values in zip_longest(*type_iters):
-            yield get_merged_lazy_value(
-                [l for l in lazy_values if l is not None]
-            )
+            yield get_merged_lazy_value([l for l in lazy_values if l is not None])
 
     def execute(self, arguments):
-        return ValueSet.from_sets(c.inference_state.execute(c, arguments) for c in self._set)
+        return ValueSet.from_sets(
+            c.inference_state.execute(c, arguments) for c in self._set
+        )
 
     def execute_with_values(self, *args, **kwargs):
-        return ValueSet.from_sets(c.execute_with_values(*args, **kwargs) for c in self._set)
+        return ValueSet.from_sets(
+            c.execute_with_values(*args, **kwargs) for c in self._set
+        )
 
     def goto(self, *args, **kwargs):
         return reduce(add, [c.goto(*args, **kwargs) for c in self._set], [])
 
     def py__getattribute__(self, *args, **kwargs):
-        return ValueSet.from_sets(c.py__getattribute__(*args, **kwargs) for c in self._set)
+        return ValueSet.from_sets(
+            c.py__getattribute__(*args, **kwargs) for c in self._set
+        )
 
     def get_item(self, *args, **kwargs):
         return ValueSet.from_sets(_getitem(c, *args, **kwargs) for c in self._set)
@@ -517,18 +540,18 @@ class ValueSet:
         if len(type_hints) == 1:
             return type_hints[0]
 
-        optional = 'None' in type_hints
+        optional = "None" in type_hints
         if optional:
-            type_hints.remove('None')
+            type_hints.remove("None")
 
         if len(type_hints) == 0:
             return None
         elif len(type_hints) == 1:
             s = type_hints[0]
         else:
-            s = 'Union[%s]' % ', '.join(type_hints)
+            s = "Union[%s]" % ", ".join(type_hints)
         if optional:
-            s = 'Optional[%s]' % s
+            s = "Optional[%s]" % s
         return s
 
     def infer_type_vars(self, value_set):

@@ -1,7 +1,16 @@
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QSize, QThread
-from PyQt5.QtWidgets import (QFrame, QGridLayout, QFileDialog, QHBoxLayout,
-                             QListWidget, QPushButton, QSizePolicy,
-                             QVBoxLayout, QGraphicsDropShadowEffect, QLabel)
+from PyQt5.QtWidgets import (
+    QFrame,
+    QGridLayout,
+    QFileDialog,
+    QHBoxLayout,
+    QListWidget,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QGraphicsDropShadowEffect,
+    QLabel,
+)
 from ..igui import InputHistory
 from PyQt5.QtGui import QColor
 
@@ -94,9 +103,9 @@ class CloneRepo(QFrame):
 
         self.input_url = InputHistory(self)
         self.input_url.returnPressed.connect(
-            lambda: self.clone_repo(self.input_url.text()))
-        self.size_policy = QSizePolicy(QSizePolicy.Expanding,
-                                       QSizePolicy.Expanding)
+            lambda: self.clone_repo(self.input_url.text())
+        )
+        self.size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.input_url.setSizePolicy(self.size_policy)
         self.input_url.setPlaceholderText("Url to repository")
         self.input_url.setObjectName("child")
@@ -110,8 +119,7 @@ class CloneRepo(QFrame):
 
     def clone_repo(self, url: str):
         home_dir = settings.ipwd()
-        folder = QFileDialog.getExistingDirectory(None, 'Select Location',
-                                                  home_dir)
+        folder = QFileDialog.getExistingDirectory(None, "Select Location", home_dir)
         if folder is not None:
             self.on_clone_request.emit(url, folder)
 
@@ -120,12 +128,16 @@ class CloneRepo(QFrame):
         btn_open_folder = QPushButton("Open Folder")
         btn_open_repo = QPushButton("Open Repository")
         btn_open_folder.clicked.connect(
-            lambda: self.api.api.side_left.explorer.open_folder(repo_path))
+            lambda: self.api.api.side_left.explorer.open_folder(repo_path)
+        )
         btn_open_repo.clicked.connect(
-            lambda: self.api.api.side_left.git.load_repository(repo))
-        self.api.api.notify("Repo Cloned",
-                            f"The repository{name} was cloned to {repo_path}",
-                            [btn_open_repo, btn_open_folder])
+            lambda: self.api.api.side_left.git.load_repository(repo)
+        )
+        self.api.api.notify(
+            "Repo Cloned",
+            f"The repository{name} was cloned to {repo_path}",
+            [btn_open_repo, btn_open_folder],
+        )
 
     def dont_cloned(self, error: str):
         print(error)
@@ -153,9 +165,9 @@ class InitRepo(QFrame):
 
         self.input_name = InputHistory(self)
         self.input_name.returnPressed.connect(
-            lambda: self.init_repo(self.input_name.text()))
-        self.size_policy = QSizePolicy(QSizePolicy.Expanding,
-                                       QSizePolicy.Expanding)
+            lambda: self.init_repo(self.input_name.text())
+        )
+        self.size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.input_name.setSizePolicy(self.size_policy)
         self.input_name.setPlaceholderText("Name of repository")
         self.input_name.setObjectName("child")
@@ -169,8 +181,7 @@ class InitRepo(QFrame):
 
     def init_repo(self, name: str):
         home_dir = settings.ipwd()
-        folder = QFileDialog.getExistingDirectory(None, 'Select Location',
-                                                  home_dir)
+        folder = QFileDialog.getExistingDirectory(None, "Select Location", home_dir)
         if folder is not None:
             try:
                 print(folder + os.sep + name)
@@ -184,13 +195,16 @@ class InitRepo(QFrame):
         btn_open_folder = QPushButton("Open Folder")
         btn_open_repo = QPushButton("Open Repository")
         btn_open_folder.clicked.connect(
-            lambda: self.api.api.side_left.explorer.open_folder(repo_path))
+            lambda: self.api.api.side_left.explorer.open_folder(repo_path)
+        )
         btn_open_repo.clicked.connect(
-            lambda: self.api.api.side_left.git.load_repository(repo))
+            lambda: self.api.api.side_left.git.load_repository(repo)
+        )
         self.api.api.notify(
             "Repo Initialized",
             f"The repository{name} was created to {repo_path}",
-            [btn_open_repo, btn_open_folder])
+            [btn_open_repo, btn_open_folder],
+        )
 
     def dont_initialized(self, error: str):
         print(error)

@@ -39,25 +39,25 @@ MethodDescriptorType = type(str.replace)
 WrapperDescriptorType = type(set.__iter__)
 # `object.__subclasshook__` is an already executed descriptor.
 object_class_dict = type.__dict__["__dict__"].__get__(object)
-ClassMethodDescriptorType = type(object_class_dict['__subclasshook__'])
+ClassMethodDescriptorType = type(object_class_dict["__subclasshook__"])
 
 _sentinel = object()
 
 # Maps Python syntax to the operator module.
 COMPARISON_OPERATORS = {
-    '==': op.eq,
-    '!=': op.ne,
-    'is': op.is_,
-    'is not': op.is_not,
-    '<': op.lt,
-    '<=': op.le,
-    '>': op.gt,
-    '>=': op.ge,
+    "==": op.eq,
+    "!=": op.ne,
+    "is": op.is_,
+    "is not": op.is_not,
+    "<": op.lt,
+    "<=": op.le,
+    ">": op.gt,
+    ">=": op.ge,
 }
 
 _OPERATORS = {
-    '+': op.add,
-    '-': op.sub,
+    "+": op.add,
+    "-": op.sub,
 }
 _OPERATORS.update(COMPARISON_OPERATORS)
 
@@ -94,8 +94,8 @@ def safe_getattr(obj, name, default=_sentinel):
 
 
 SignatureParam = namedtuple(
-    'SignatureParam',
-    'name has_default default default_string has_annotation annotation annotation_string kind_name'
+    "SignatureParam",
+    "name has_default default default_string has_annotation annotation annotation_string kind_name",
 )
 
 
@@ -103,8 +103,9 @@ def shorten_repr(func):
     def wrapper(self):
         r = func(self)
         if len(r) > 50:
-            r = r[:50] + '..'
+            r = r[:50] + ".."
         return r
+
     return wrapper
 
 
@@ -152,14 +153,18 @@ def create_access_path(inference_state, obj):
 
 def get_api_type(obj):
     if inspect.isclass(obj):
-        return 'class'
+        return "class"
     elif inspect.ismodule(obj):
-        return 'module'
-    elif inspect.isbuiltin(obj) or inspect.ismethod(obj) \
-            or inspect.ismethoddescriptor(obj) or inspect.isfunction(obj):
-        return 'function'
+        return "module"
+    elif (
+        inspect.isbuiltin(obj)
+        or inspect.ismethod(obj)
+        or inspect.ismethoddescriptor(obj)
+        or inspect.isfunction(obj)
+    ):
+        return "function"
     # Everything else...
-    return 'instance'
+    return "instance"
 
 
 class DirectObjectAccess:
@@ -168,7 +173,7 @@ class DirectObjectAccess:
         self._obj = obj
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.get_repr())
+        return "%s(%s)" % (self.__class__.__name__, self.get_repr())
 
     def _create_access(self, obj):
         return create_access(self._inference_state, obj)
@@ -186,11 +191,12 @@ class DirectObjectAccess:
             return None
 
     def py__doc__(self):
-        return inspect.getdoc(self._obj) or ''
+        return inspect.getdoc(self._obj) or ""
 
     def py__name__(self):
-        if not _is_class_instance(self._obj) or \
-                inspect.ismethoddescriptor(self._obj):  # slots
+        if not _is_class_instance(self._obj) or inspect.ismethoddescriptor(
+            self._obj
+        ):  # slots
             cls = self._obj
         else:
             try:
@@ -221,7 +227,7 @@ class DirectObjectAccess:
         return self._create_access_path(self._obj[index])
 
     def py__iter__list(self):
-        if not hasattr(self._obj, '__getitem__'):
+        if not hasattr(self._obj, "__getitem__"):
             return None
 
         if type(self._obj) not in ALLOWED_GETITEM_TYPES:
@@ -243,11 +249,10 @@ class DirectObjectAccess:
         return [self._create_access_path(base) for base in self._obj.__bases__]
 
     def py__path__(self):
-        paths = getattr(self._obj, '__path__', None)
+        paths = getattr(self._obj, "__path__", None)
         # Avoid some weird hacks that would just fail, because they cannot be
         # used by pickle.
-        if not isinstance(paths, list) \
-                or not all(isinstance(p, str) for p in paths):
+        if not isinstance(paths, list) or not all(isinstance(p, str) for p in paths):
             return None
         return paths
 
@@ -256,14 +261,14 @@ class DirectObjectAccess:
         if inspect.ismodule(self._obj):
             return repr(self._obj)
         # Try to avoid execution of the property.
-        if safe_getattr(self._obj, '__module__', default='') == 'builtins':
+        if safe_getattr(self._obj, "__module__", default="") == "builtins":
             return repr(self._obj)
 
         type_ = type(self._obj)
         if type_ == type:
             return type.__repr__(self._obj)
 
-        if safe_getattr(type_, '__module__', default='') == 'builtins':
+        if safe_getattr(type_, "__module__", default="") == "builtins":
             # Allow direct execution of repr for builtins.
             return repr(self._obj)
         return object.__repr__(self._obj)
@@ -285,7 +290,7 @@ class DirectObjectAccess:
 
     def get_qualified_names(self):
         def try_to_get_name(obj):
-            return getattr(obj, '__qualname__', getattr(obj, '__name__', None))
+            return getattr(obj, "__qualname__", getattr(obj, "__name__", None))
 
         if self.is_module():
             return ()
@@ -294,7 +299,7 @@ class DirectObjectAccess:
             name = try_to_get_name(type(self._obj))
             if name is None:
                 return ()
-        return tuple(name.split('.'))
+        return tuple(name.split("."))
 
     def dir(self):
         return dir(self._obj)
@@ -380,7 +385,10 @@ class DirectObjectAccess:
         return [self._create_access(module), access]
 
     def get_safe_value(self):
-        if type(self._obj) in (bool, bytes, float, int, str, slice) or self._obj is None:
+        if (
+            type(self._obj) in (bool, bytes, float, int, str, slice)
+            or self._obj is None
+        ):
             return self._obj
         raise ValueError("Object is type %s and not simple" % type(self._obj))
 
@@ -389,7 +397,7 @@ class DirectObjectAccess:
 
     def get_array_type(self):
         if isinstance(self._obj, dict):
-            return 'dict'
+            return "dict"
         return None
 
     def get_key_paths(self):
@@ -405,7 +413,9 @@ class DirectObjectAccess:
         return [self._create_access_path(k) for k in iter_partial_keys()]
 
     def get_access_path_tuples(self):
-        accesses = [create_access(self._inference_state, o) for o in self._get_objects_path()]
+        accesses = [
+            create_access(self._inference_state, o) for o in self._get_objects_path()
+        ]
         return [(access.py__name__(), access) for access in accesses]
 
     def _get_objects_path(self):
@@ -450,16 +460,17 @@ class DirectObjectAccess:
         """
         name = None
         args = ()
-        if safe_getattr(self._obj, '__module__', default='') == 'typing':
-            m = re.match(r'typing.(\w+)\[', repr(self._obj))
+        if safe_getattr(self._obj, "__module__", default="") == "typing":
+            m = re.match(r"typing.(\w+)\[", repr(self._obj))
             if m is not None:
                 name = m.group(1)
 
                 import typing
+
                 if sys.version_info >= (3, 8):
                     args = typing.get_args(self._obj)
                 else:
-                    args = safe_getattr(self._obj, '__args__', default=None)
+                    args = safe_getattr(self._obj, "__args__", default=None)
         return name, tuple(self._create_access_path(arg) for arg in args)
 
     def needs_type_completions(self):
@@ -478,8 +489,9 @@ class DirectObjectAccess:
                 has_annotation=p.annotation is not p.empty,
                 annotation=self._create_access_path(p.annotation),
                 annotation_string=self._annotation_to_str(p.annotation),
-                kind_name=str(p.kind)
-            ) for p in self._get_signature().parameters.values()
+                kind_name=str(p.kind),
+            )
+            for p in self._get_signature().parameters.values()
         ]
 
     def _get_signature(self):
@@ -494,7 +506,7 @@ class DirectObjectAccess:
 
     def get_return_annotation(self):
         try:
-            o = self._obj.__annotations__.get('return')
+            o = self._obj.__annotations__.get("return")
         except AttributeError:
             return None
 
@@ -502,7 +514,7 @@ class DirectObjectAccess:
             return None
 
         try:
-            o = typing.get_type_hints(self._obj).get('return')
+            o = typing.get_type_hints(self._obj).get("return")
         except Exception:
             pass
 
@@ -516,10 +528,7 @@ class DirectObjectAccess:
         Used to return a couple of infos that are needed when accessing the sub
         objects of an objects
         """
-        tuples = dict(
-            (name, self.is_allowed_getattr(name))
-            for name in self.dir()
-        )
+        tuples = dict((name, self.is_allowed_getattr(name)) for name in self.dir())
         return self.needs_type_completions(), tuples
 
 
@@ -532,4 +541,8 @@ def _is_class_instance(obj):
     else:
         # The isinstance check for cls is just there so issubclass doesn't
         # raise an exception.
-        return cls != type and isinstance(cls, type) and not issubclass(cls, NOT_CLASS_TYPES)
+        return (
+            cls != type
+            and isinstance(cls, type)
+            and not issubclass(cls, NOT_CLASS_TYPES)
+        )

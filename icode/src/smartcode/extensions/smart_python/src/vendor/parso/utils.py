@@ -8,15 +8,15 @@ from typing import NamedTuple, Sequence, Union
 # not in Python. In Python only \r (Carriage Return, 0xD) and \n (Line Feed,
 # 0xA) are allowed to split lines.
 _NON_LINE_BREAKS = (
-    '\v',  # Vertical Tabulation 0xB
-    '\f',  # Form Feed 0xC
-    '\x1C',  # File Separator
-    '\x1D',  # Group Separator
-    '\x1E',  # Record Separator
-    '\x85',  # Next Line (NEL - Equivalent to CR+LF.
-             # Used to mark end-of-line on some IBM mainframes.)
-    '\u2028',  # Line Separator
-    '\u2029',  # Paragraph Separator
+    "\v",  # Vertical Tabulation 0xB
+    "\f",  # Form Feed 0xC
+    "\x1C",  # File Separator
+    "\x1D",  # Group Separator
+    "\x1E",  # Record Separator
+    "\x85",  # Next Line (NEL - Equivalent to CR+LF.
+    # Used to mark end-of-line on some IBM mainframes.)
+    "\u2028",  # Line Separator
+    "\u2029",  # Paragraph Separator
 )
 
 
@@ -63,15 +63,15 @@ def split_lines(string: str, keepends: bool = False) -> Sequence[str]:
         # The stdlib's implementation of the end is inconsistent when calling
         # it with/without keepends. One time there's an empty string in the
         # end, one time there's none.
-        if string.endswith('\n') or string.endswith('\r') or string == '':
-            lst.append('')
+        if string.endswith("\n") or string.endswith("\r") or string == "":
+            lst.append("")
         return lst
     else:
-        return re.split(r'\n|\r\n|\r', string)
+        return re.split(r"\n|\r\n|\r", string)
 
 
 def python_bytes_to_unicode(
-    source: Union[str, bytes], encoding: str = 'utf-8', errors: str = 'strict'
+    source: Union[str, bytes], encoding: str = "utf-8", errors: str = "strict"
 ) -> str:
     """
     Checks for unicode BOMs and PEP 263 encoding declarations. Then returns a
@@ -81,6 +81,7 @@ def python_bytes_to_unicode(
     :param errors: See :py:meth:`bytes.decode` documentation. ``errors`` can be
         ``'strict'``, ``'replace'`` or ``'ignore'``.
     """
+
     def detect_encoding():
         """
         For the implementation of encoding definitions in Python, look at:
@@ -90,15 +91,14 @@ def python_bytes_to_unicode(
         byte_mark = literal_eval(r"b'\xef\xbb\xbf'")
         if source.startswith(byte_mark):
             # UTF-8 byte-order mark
-            return 'utf-8'
+            return "utf-8"
 
-        first_two_lines = re.match(br'(?:[^\r\n]*(?:\r\n|\r|\n)){0,2}', source).group(0)
-        possible_encoding = re.search(br"coding[=:]\s*([-\w.]+)",
-                                      first_two_lines)
+        first_two_lines = re.match(rb"(?:[^\r\n]*(?:\r\n|\r|\n)){0,2}", source).group(0)
+        possible_encoding = re.search(rb"coding[=:]\s*([-\w.]+)", first_two_lines)
         if possible_encoding:
             e = possible_encoding.group(1)
             if not isinstance(e, str):
-                e = str(e, 'ascii', 'replace')
+                e = str(e, "ascii", "replace")
             return e
         else:
             # the default if nothing else has been set -> PEP 263
@@ -113,12 +113,12 @@ def python_bytes_to_unicode(
         # Cast to unicode
         return str(source, encoding, errors)
     except LookupError:
-        if errors == 'replace':
+        if errors == "replace":
             # This is a weird case that can happen if the given encoding is not
             # a valid encoding. This usually shouldn't happen with provided
             # encodings, but can happen if somebody uses encoding declarations
             # like `# coding: foo-8`.
-            return str(source, 'utf-8', errors)
+            return str(source, "utf-8", errors)
         raise
 
 
@@ -128,7 +128,8 @@ def version_info() -> Version:
     ``sys.version_info``.
     """
     from parso import __version__
-    tupl = re.findall(r'[a-z]+|\d+', __version__)
+
+    tupl = re.findall(r"[a-z]+|\d+", __version__)
     return Version(*[x if i == 3 else int(x) for i, x in enumerate(tupl)])
 
 
@@ -160,10 +161,12 @@ class PythonVersionInfo(_PythonVersionInfo):
 
 
 def _parse_version(version) -> PythonVersionInfo:
-    match = re.match(r'(\d+)(?:\.(\d{1,2})(?:\.\d+)?)?((a|b|rc)\d)?$', version)
+    match = re.match(r"(\d+)(?:\.(\d{1,2})(?:\.\d+)?)?((a|b|rc)\d)?$", version)
     if match is None:
-        raise ValueError('The given version is not in the right format. '
-                         'Use something like "3.8" or "3".')
+        raise ValueError(
+            "The given version is not in the right format. "
+            'Use something like "3.8" or "3".'
+        )
 
     major = int(match.group(1))
     minor = match.group(2)
@@ -175,7 +178,9 @@ def _parse_version(version) -> PythonVersionInfo:
         elif major == 3:
             minor = "6"
         else:
-            raise NotImplementedError("Sorry, no support yet for those fancy new/old versions.")
+            raise NotImplementedError(
+                "Sorry, no support yet for those fancy new/old versions."
+            )
     minor = int(minor)
     return PythonVersionInfo(major, minor)
 
@@ -187,7 +192,7 @@ def parse_version_string(version: str = None) -> PythonVersionInfo:
     decimal.
     """
     if version is None:
-        version = '%s.%s' % sys.version_info[:2]
+        version = "%s.%s" % sys.version_info[:2]
     if not isinstance(version, str):
         raise TypeError('version must be a string like "3.8"')
 

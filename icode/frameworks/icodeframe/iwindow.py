@@ -1,10 +1,18 @@
 from PyQt5.QtCore import Qt, QMetaObject, pyqtSignal as Signal, pyqtSlot as Slot, QSize
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QToolButton,
-                            QLabel, QDesktopWidget, QSizePolicy)
+from PyQt5.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QToolButton,
+    QLabel,
+    QDesktopWidget,
+    QSizePolicy,
+)
 from ._utils import QT_VERSION, PLATFORM, _FL_STYLESHEET
 
+
 class WindowDragger(QWidget):
-    
+
     dragMax = Signal()
     doubleClicked = Signal()
 
@@ -25,10 +33,9 @@ class WindowDragger(QWidget):
         if self._mousePressed:
             self.setCursor(Qt.ClosedHandCursor)
             self._window.on_btnRestore_clicked()
-            self._window.move(self._windowPos +
-                              (event.globalPos() - self._mousePos))
+            self._window.move(self._windowPos + (event.globalPos() - self._mousePos))
             if self._window.pos().y() < 0:
-                self._mousePressed=False
+                self._mousePressed = False
                 self.setCursor(Qt.ArrowCursor)
                 self.dragMax.emit()
 
@@ -41,17 +48,18 @@ class WindowDragger(QWidget):
 
 
 class ModernWindow(QWidget):
-
-    def __init__(self, w:object, window_style:str, window_type:str = "window", parent=None):
+    def __init__(
+        self, w: object, window_style: str, window_type: str = "window", parent=None
+    ):
         super().__init__(parent)
         self.setObjectName("modern-window")
-        
-        self.icon=None
+
+        self.icon = None
         self._w = w
         self.window_style = window_style.lower()
         self.window_type = window_type.lower()
-        self.main_h_is_pressed=False
-        self.main_w_is_pressed=False
+        self.main_h_is_pressed = False
+        self.main_w_is_pressed = False
         self.allowed_buttons = []
         self.setupUi()
 
@@ -73,50 +81,51 @@ class ModernWindow(QWidget):
         self.vboxWindow.setContentsMargins(0, 0, 0, 0)
 
         self.windowFrame = QWidget(self)
-        self.windowFrame.mouseMoveEvent=self.on_main_move
-        self.windowFrame.mousePressEvent=self.on_main_press
-        self.windowFrame.mouseReleaseEvent=self.on_main_release
-        self.windowFrame.setObjectName('windowFrame')
+        self.windowFrame.mouseMoveEvent = self.on_main_move
+        self.windowFrame.mousePressEvent = self.on_main_press
+        self.windowFrame.mouseReleaseEvent = self.on_main_release
+        self.windowFrame.setObjectName("windowFrame")
 
         self.vboxFrame = QVBoxLayout(self.windowFrame)
         self.vboxFrame.setContentsMargins(0, 0, 0, 0)
         self.vboxFrame.setSpacing(0)
 
         self.titleBar = WindowDragger(self, self.windowFrame)
-        self.titleBar.setObjectName('titleBar')
-        self.titleBar.setSizePolicy(QSizePolicy(QSizePolicy.Preferred,
-                                                QSizePolicy.Fixed))
+        self.titleBar.setObjectName("titleBar")
+        self.titleBar.setSizePolicy(
+            QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        )
 
         self.hboxTitle = QHBoxLayout(self.titleBar)
         self.hboxTitle.setContentsMargins(0, 0, 0, 0)
 
-        self.lblTitle = QLabel('Title')
-        self.lblTitle.setObjectName('lblTitle')
+        self.lblTitle = QLabel("Title")
+        self.lblTitle.setObjectName("lblTitle")
         self.lblTitle.setAlignment(Qt.AlignCenter)
 
         spButtons = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-        self.toolMenu=QToolButton(self.titleBar)
+        self.toolMenu = QToolButton(self.titleBar)
         self.toolMenu.setObjectName("btnMenu")
-        self.toolMenu.setIconSize(QSize(20,20))
+        self.toolMenu.setIconSize(QSize(20, 20))
         self.toolMenu.setPopupMode(QToolButton.DelayedPopup)
         self.toolMenu.clicked.connect(self.on_toolMenu_clicked)
         self.toolMenu.setSizePolicy(spButtons)
 
         self.btnMinimize = QToolButton(self.titleBar)
-        self.btnMinimize.setObjectName('btnMinimize')
+        self.btnMinimize.setObjectName("btnMinimize")
         self.btnMinimize.setSizePolicy(spButtons)
 
         self.btnRestore = QToolButton(self.titleBar)
-        self.btnRestore.setObjectName('btnRestore')
+        self.btnRestore.setObjectName("btnRestore")
         self.btnRestore.setSizePolicy(spButtons)
 
         self.btnMaximize = QToolButton(self.titleBar)
-        self.btnMaximize.setObjectName('btnMaximize')
+        self.btnMaximize.setObjectName("btnMaximize")
         self.btnMaximize.setSizePolicy(spButtons)
 
         self.btnClose = QToolButton(self.titleBar)
-        self.btnClose.setObjectName('btnClose')
+        self.btnClose.setObjectName("btnClose")
         self.btnClose.setSizePolicy(spButtons)
 
         self.vboxFrame.addWidget(self.titleBar)
@@ -141,8 +150,14 @@ class ModernWindow(QWidget):
             self.hboxTitle.addWidget(self.btnMaximize)
             self.hboxTitle.addWidget(self.btnClose)
 
-        self.setWindowFlags(Qt.Window | Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowCloseButtonHint |
-                            Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint)
+        self.setWindowFlags(
+            Qt.Window
+            | Qt.FramelessWindowHint
+            | Qt.WindowSystemMenuHint
+            | Qt.WindowCloseButtonHint
+            | Qt.WindowMinimizeButtonHint
+            | Qt.WindowMaximizeButtonHint
+        )
 
         self.setStyleSheet(_FL_STYLESHEET)
 
@@ -163,14 +178,14 @@ class ModernWindow(QWidget):
         else:
             self._w.close()
             event.setAccepted(self._w.isHidden())
-    
+
     def center(self) -> None:
         app_geo = self.frameGeometry()
         screen_center = QDesktopWidget().availableGeometry().center()
         app_geo.moveCenter(screen_center)
         self.move(app_geo.topLeft())
-    
-    def set_allowed_buttons(self, buttons_set:set):
+
+    def set_allowed_buttons(self, buttons_set: set):
         self.allowed_buttons.clear()
         if "close" in buttons_set:
             self.allowed_buttons.append(self.btnClose)
@@ -183,19 +198,19 @@ class ModernWindow(QWidget):
         if "max" in buttons_set or "restore" in buttons_set:
             self.allowed_buttons.append(self.btnMaximize)
             self.allowed_buttons.append(self.btnRestore)
-        else:pass
+        else:
+            pass
         # TODO
-        
-            
-    def set_window_title(self, title:str) -> None:
+
+    def set_window_title(self, title: str) -> None:
         self.lblTitle.setText(title)
-        
-    def setWindowMenu(self, menu) ->None:
+
+    def setWindowMenu(self, menu) -> None:
         self.toolMenu.setMenu(menu)
-    
-    def setWindowIcon(self, icon) ->None:
-        self.icon=icon
-    
+
+    def setWindowIcon(self, icon) -> None:
+        self.icon = icon
+
     def setMenuIcon(self, icon) -> None:
         self.toolMenu.setIcon(icon)
 
@@ -207,7 +222,7 @@ class ModernWindow(QWidget):
         btns = {
             Qt.WindowCloseButtonHint: self.btnClose,
             Qt.WindowMinimizeButtonHint: self.btnMinimize,
-            Qt.WindowMaximizeButtonHint: self.btnMaximize
+            Qt.WindowMaximizeButtonHint: self.btnMaximize,
         }
         button = btns.get(hint)
 
@@ -226,7 +241,12 @@ class ModernWindow(QWidget):
         else:
             button.setEnabled(state)
 
-        allButtons = [self.btnClose, self.btnMinimize, self.btnMaximize, self.btnRestore]
+        allButtons = [
+            self.btnClose,
+            self.btnMinimize,
+            self.btnMaximize,
+            self.btnRestore,
+        ]
         if True in [b.isEnabled() for b in allButtons]:
             for b in allButtons:
                 b.setVisible(True)
@@ -241,7 +261,11 @@ class ModernWindow(QWidget):
             self.lblTitle.setContentsMargins(0, 2, 0, 0)
 
     def setWindowFlag(self, Qt_WindowType, on=True):
-        buttonHints = [Qt.WindowCloseButtonHint, Qt.WindowMinimizeButtonHint, Qt.WindowMaximizeButtonHint]
+        buttonHints = [
+            Qt.WindowCloseButtonHint,
+            Qt.WindowMinimizeButtonHint,
+            Qt.WindowMaximizeButtonHint,
+        ]
 
         if Qt_WindowType in buttonHints:
             self._setWindowButtonState(Qt_WindowType, on)
@@ -249,7 +273,11 @@ class ModernWindow(QWidget):
             super().setWindowFlag(Qt_WindowType, on)
 
     def setWindowFlags(self, Qt_WindowFlags):
-        buttonHints = [Qt.WindowCloseButtonHint, Qt.WindowMinimizeButtonHint, Qt.WindowMaximizeButtonHint]
+        buttonHints = [
+            Qt.WindowCloseButtonHint,
+            Qt.WindowMinimizeButtonHint,
+            Qt.WindowMaximizeButtonHint,
+        ]
         for hint in buttonHints:
             self._setWindowButtonState(hint, bool(Qt_WindowFlags & hint))
 
@@ -294,7 +322,7 @@ class ModernWindow(QWidget):
             self.on_btnMaximize_clicked()
         else:
             self.on_btnRestore_clicked()
-    
+
     @Slot()
     def on_titleBar_dragMax(self):
         if not bool(self.windowState() & Qt.WindowMaximized):
@@ -305,32 +333,32 @@ class ModernWindow(QWidget):
     @Slot()
     def on_toolMenu_clicked(self):
         self.toolMenu.showMenu()
-    
+
     def on_main_move(self, event):
         if self.main_w_is_pressed:
-            w=event.pos().x()
-            self.resize(w,self.geometry().height())
-        
+            w = event.pos().x()
+            self.resize(w, self.geometry().height())
+
         elif self.main_h_is_pressed:
-            h=event.pos().y()
-            self.resize(self.geometry().width(),h)
+            h = event.pos().y()
+            self.resize(self.geometry().width(), h)
 
     def on_main_press(self, event):
         maximized = bool(self.windowState() & Qt.WindowMaximized)
         if not maximized:
-        
-            w,h=event.pos().x(),event.pos().y()
-            
+
+            w, h = event.pos().x(), event.pos().y()
+
             if self.geometry().height() - h < 10:
                 self.setCursor(Qt.SizeVerCursor)
-                self.main_h_is_pressed=True
-            
+                self.main_h_is_pressed = True
+
             elif w <= 10 or self.geometry().width() - w < 10:
                 self.setCursor(Qt.SizeHorCursor)
-                self.main_w_is_pressed=True
-    
+                self.main_w_is_pressed = True
+
     def on_main_release(self, event):
-        self.main_is_pressed=False
-        self.main_h_is_pressed=False
-        self.main_w_is_pressed=False
+        self.main_is_pressed = False
+        self.main_h_is_pressed = False
+        self.main_w_is_pressed = False
         self.setCursor(Qt.ArrowCursor)

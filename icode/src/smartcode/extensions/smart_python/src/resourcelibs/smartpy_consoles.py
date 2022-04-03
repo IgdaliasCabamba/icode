@@ -2,16 +2,23 @@ from extension_api import *
 from PyQt5.QtGui import QFontMetrics
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
-    QFrame, QHBoxLayout,
-    QListWidget, QPushButton,
-    QScrollArea, QSplitter,
-    QStackedLayout, QVBoxLayout,
-    QGraphicsDropShadowEffect, QSizePolicy)
-    
+    QFrame,
+    QHBoxLayout,
+    QListWidget,
+    QPushButton,
+    QScrollArea,
+    QSplitter,
+    QStackedLayout,
+    QVBoxLayout,
+    QGraphicsDropShadowEffect,
+    QSizePolicy,
+)
+
 from functions import getfn
 from pyqtconsole.console import PythonConsole
 import pyqtconsole.highlighter as hl
 from base.code_api import icode_api
+
 
 class SmartPythonConsole(QFrame):
     def __init__(self, parent):
@@ -19,33 +26,35 @@ class SmartPythonConsole(QFrame):
         self.parent = parent
         self.setObjectName("Frame")
         self.color_map = icode_api.get_generic_lexer_styles()
-        self.icons=getfn.get_smartcode_icons("console")
+        self.icons = getfn.get_smartcode_icons("console")
         self.init_ui()
-    
+
     def init_ui(self):
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
         self.setMinimumHeight(180)
 
-        self.console = PythonConsole(formats={
-            'keyword':    hl.format(self.color_map["keyword"][0]),
-            'operator':   hl.format(self.color_map["operator"][0]),
-            'brace':      hl.format(self.color_map["brace"][0]),
-            'defclass':   hl.format(self.color_map["class-function"][0]),
-            'string':     hl.format(self.color_map["string"][0]),
-            'string2':    hl.format(self.color_map["string2"][0]),
-            'comment':    hl.format(self.color_map["comment"][0]),
-            'self':       hl.format(self.color_map["self"][0]),
-            'numbers':    hl.format(self.color_map["numbers"][0]),
-            'inprompt':   hl.format(self.color_map["inprompt"][0]),
-            'outprompt':  hl.format(self.color_map["outprompt"][0]),
-        })
+        self.console = PythonConsole(
+            formats={
+                "keyword": hl.format(self.color_map["keyword"][0]),
+                "operator": hl.format(self.color_map["operator"][0]),
+                "brace": hl.format(self.color_map["brace"][0]),
+                "defclass": hl.format(self.color_map["class-function"][0]),
+                "string": hl.format(self.color_map["string"][0]),
+                "string2": hl.format(self.color_map["string2"][0]),
+                "comment": hl.format(self.color_map["comment"][0]),
+                "self": hl.format(self.color_map["self"][0]),
+                "numbers": hl.format(self.color_map["numbers"][0]),
+                "inprompt": hl.format(self.color_map["inprompt"][0]),
+                "outprompt": hl.format(self.color_map["outprompt"][0]),
+            }
+        )
         self.console.eval_in_thread()
         self.console.setObjectName("Frame")
         self.console.setProperty("style-border-radius", "mid")
         self.console.setProperty("style-bg", "mid")
         self.console.setProperty("style-pad", "small")
-        
+
         self.console.edit.setObjectName("TextArea")
         self.console.edit.setProperty("style-bg", "mid")
         self.console.edit.setProperty("style-pad", "small")
@@ -53,11 +62,7 @@ class SmartPythonConsole(QFrame):
         self.gde = QGraphicsDropShadowEffect(self)
         self.gde.setBlurRadius(15)
         self.gde.setOffset(0, 0)
-        self.gde.setColor(
-            getfn.get_qcolor(
-                icode_api.get_drop_shadow_color()
-                )
-            )
+        self.gde.setColor(getfn.get_qcolor(icode_api.get_drop_shadow_color()))
         self.setGraphicsEffect(self.gde)
         self.layout.addWidget(self.console)
 
@@ -98,7 +103,7 @@ class SmartPythonConsole(QFrame):
 
     def clear_console(self):
         self.console.clear_input_buffer()
-    
+
     def run_current_code(self):
         notebook = self.parent.parent.parent.notebook
         if notebook.count() > 0:
@@ -106,39 +111,40 @@ class SmartPythonConsole(QFrame):
             if widget.objectName() == "editor-frame":
                 self.console.insert_input_text(widget.editor.text())
 
+
 class PyConsole(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
         self.setObjectName("Frame")
         self.init_ui()
-    
+
     def init_ui(self):
         self.layout = QVBoxLayout(self)
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
-        
+
         self.widget = QFrame(self)
         self.widget.setObjectName("Frame")
         self.widget.setProperty("style-bg", "transparent")
-        
-        self.vbox = QVBoxLayout(self.widget) 
+
+        self.vbox = QVBoxLayout(self.widget)
         self.vbox.setSpacing(10)
 
         self.widget.setLayout(self.vbox)
 
-        self.scroll_area=QScrollArea(self)
+        self.scroll_area = QScrollArea(self)
         self.scroll_area.setObjectName("Area")
         self.scroll_area.setProperty("style-bg", "transparent")
         self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.scroll_area.setWidgetResizable(True)
         self.scroll_area.setWidget(self.widget)
-        
+
         self.layout.addWidget(self.scroll_area)
 
         self.add_cell()
-    
+
     def add_cell(self):
         console = SmartPythonConsole(self)
         self.vbox.addWidget(console)

@@ -1,6 +1,6 @@
-'''This module contains all high-level helpers function that allow to work with
+"""This module contains all high-level helpers function that allow to work with
 Cyclomatic Complexity
-'''
+"""
 
 import math
 
@@ -13,7 +13,7 @@ ALPHA = lambda block: block.name
 
 
 def cc_rank(cc):
-    r'''Rank the complexity score from A to F, where A stands for the simplest
+    r"""Rank the complexity score from A to F, where A stands for the simplest
     and best score and F the most complex and worst one:
 
     ============= =====================================================
@@ -36,20 +36,18 @@ def cc_rank(cc):
 
     where ``H(s)`` stands for the Heaviside Step Function.
     The rank is then associated to a letter (0 = A, 5 = F).
-    '''
+    """
     if cc < 0:
-        raise ValueError('Complexity must be a non-negative value')
-    return chr(
-        min(int(math.ceil(cc / 10.0) or 1) - (1, 0)[5 - cc < 0], 5) + 65
-    )
+        raise ValueError("Complexity must be a non-negative value")
+    return chr(min(int(math.ceil(cc / 10.0) or 1) - (1, 0)[5 - cc < 0], 5) + 65)
 
 
 def average_complexity(blocks):
-    '''Compute the average Cyclomatic complexity from the given blocks.
+    """Compute the average Cyclomatic complexity from the given blocks.
     Blocks must be either :class:`~radon.visitors.Function` or
     :class:`~radon.visitors.Class`. If the block list is empty, then 0 is
     returned.
-    '''
+    """
     size = len(blocks)
     if size == 0:
         return 0
@@ -57,7 +55,7 @@ def average_complexity(blocks):
 
 
 def sorted_results(blocks, order=SCORE):
-    '''Given a ComplexityVisitor instance, returns a list of sorted blocks
+    """Given a ComplexityVisitor instance, returns a list of sorted blocks
     with respect to complexity. A block is a either
     :class:`~radon.visitors.Function` object or a
     :class:`~radon.visitors.Class` object.
@@ -71,38 +69,38 @@ def sorted_results(blocks, order=SCORE):
         * `SCORE`: sorty by score (descending).
 
     Default is `SCORE`.
-    '''
+    """
     return sorted(blocks, key=order)
 
 
 def add_inner_blocks(blocks):
-    '''Process a list of blocks by adding all closures and inner classes as
+    """Process a list of blocks by adding all closures and inner classes as
     top-level blocks.
-    '''
+    """
     new_blocks = []
     all_blocks = blocks[:]
     while all_blocks:
         block = all_blocks.pop()
         new_blocks.append(block)
-        for inner_block in ('closures', 'inner_classes'):
+        for inner_block in ("closures", "inner_classes"):
             for i_block in getattr(block, inner_block, ()):
-                named = i_block._replace(name=block.name + '.' + i_block.name)
+                named = i_block._replace(name=block.name + "." + i_block.name)
                 all_blocks.append(named)
-                for meth in getattr(named, 'methods', ()):
+                for meth in getattr(named, "methods", ()):
                     m_named = meth._replace(classname=named.name)
                     all_blocks.append(m_named)
     return new_blocks
 
 
 def cc_visit(code, **kwargs):
-    '''Visit the given code with :class:`~radon.visitors.ComplexityVisitor`.
+    """Visit the given code with :class:`~radon.visitors.ComplexityVisitor`.
     All the keyword arguments are directly passed to the visitor.
-    '''
+    """
     return cc_visit_ast(code2ast(code), **kwargs)
 
 
 def cc_visit_ast(ast_node, **kwargs):
-    '''Visit the AST node with :class:`~radon.visitors.ComplexityVisitor`. All
+    """Visit the AST node with :class:`~radon.visitors.ComplexityVisitor`. All
     the keyword arguments are directly passed to the visitor.
-    '''
+    """
     return ComplexityVisitor.from_ast(ast_node, **kwargs).blocks

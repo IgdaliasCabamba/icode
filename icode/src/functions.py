@@ -24,6 +24,7 @@ class IO:
     """
     IO functions to control tasks related to data input and output in the operating system
     """
+
     def __init__(self) -> None:
         pass
 
@@ -62,15 +63,18 @@ class File(IO):
     """
     File functions to control tasks related to writing and reading files in the operating system
     """
+
     def __init__(self):
         pass
 
-    def find_files_with_text(self,
-                             search_text,
-                             search_dir,
-                             case_sensitive=False,
-                             search_subdirs=True,
-                             break_on_find=False):
+    def find_files_with_text(
+        self,
+        search_text,
+        search_dir,
+        case_sensitive=False,
+        search_subdirs=True,
+        break_on_find=False,
+    ):
 
         path = pathlib.Path(search_dir)
         if not path.is_dir():
@@ -114,15 +118,18 @@ class File(IO):
 
         return return_file_list
 
-    def replace_text_in_files(self,
-                              search_text,
-                              replace_text,
-                              search_dir,
-                              case_sensitive=False,
-                              search_subdirs=True):
+    def replace_text_in_files(
+        self,
+        search_text,
+        replace_text,
+        search_dir,
+        case_sensitive=False,
+        search_subdirs=True,
+    ):
 
-        found_files = self.find_files_with_text(search_text, search_dir,
-                                                case_sensitive, search_subdirs)
+        found_files = self.find_files_with_text(
+            search_text, search_dir, case_sensitive, search_subdirs
+        )
         if found_files == None:
             return []
 
@@ -141,11 +148,9 @@ class File(IO):
 
         return found_files
 
-    def find_files_by_name(self,
-                           search_filename,
-                           search_dir,
-                           case_sensitive=False,
-                           search_subdirs=True):
+    def find_files_by_name(
+        self, search_filename, search_dir, case_sensitive=False, search_subdirs=True
+    ):
         path = pathlib.Path(search_dir)
 
         if not path.is_dir():
@@ -181,15 +186,17 @@ class File(IO):
         file = pathlib.Path(file_with_path)
         if file.is_file():
             text = file.read_text()
-            text = text.replace('\t', ' ' * 4)
+            text = text.replace("\t", " " * 4)
             file.write_text(text)
 
     def test_text_file(self, file_with_path):
         try:
-            file = open(file_with_path,
-                        "r",
-                        encoding=locale.getpreferredencoding(),
-                        errors="strict")
+            file = open(
+                file_with_path,
+                "r",
+                encoding=locale.getpreferredencoding(),
+                errors="strict",
+            )
             for line in itertools.islice(file, 10):
                 line = line
             file.readlines()
@@ -198,14 +205,18 @@ class File(IO):
             return locale.getpreferredencoding()
         except:
             test_encodings = [
-                "utf-8", "ascii", "utf-16", "utf-32", "iso-8859-1", "latin-1"
+                "utf-8",
+                "ascii",
+                "utf-16",
+                "utf-32",
+                "iso-8859-1",
+                "latin-1",
             ]
             for current_encoding in test_encodings:
                 try:
-                    file = open(file_with_path,
-                                "r",
-                                encoding=current_encoding,
-                                errors="strict")
+                    file = open(
+                        file_with_path, "r", encoding=current_encoding, errors="strict"
+                    )
 
                     for line in itertools.islice(file, 10):
                         line = line
@@ -243,20 +254,23 @@ class File(IO):
         binary_text = self.test_binary_file(file_with_path)
         if binary_text != None:
             cleaned_binary_text = binary_text.replace(b"\x00", b"")
-            return cleaned_binary_text.decode(encoding="utf-8",
-                                              errors="replace")
+            return cleaned_binary_text.decode(encoding="utf-8", errors="replace")
         else:
             test_encodings = [
-                "utf-8", "cp1250", "ascii", "utf-16", "utf-32", "iso-8859-1",
-                "latin-1"
+                "utf-8",
+                "cp1250",
+                "ascii",
+                "utf-16",
+                "utf-32",
+                "iso-8859-1",
+                "latin-1",
             ]
             for current_encoding in test_encodings:
                 try:
 
-                    with open(file_with_path,
-                              "r",
-                              encoding=current_encoding,
-                              errors="strict") as file:
+                    with open(
+                        file_with_path, "r", encoding=current_encoding, errors="strict"
+                    ) as file:
 
                         text = file.read()
 
@@ -289,13 +303,10 @@ class File(IO):
     def write_to_file(self, text, file_with_path, encoding="utf-8"):
         try:
             if encoding != "utf-8":
-                byte_string = bytearray(text,
-                                        encoding=encoding,
-                                        errors="replace")
+                byte_string = bytearray(text, encoding=encoding, errors="replace")
                 text = codecs.decode(byte_string, encoding, "replace")
 
-            with open(file_with_path, "w", newline="",
-                      encoding=encoding) as file:
+            with open(file_with_path, "w", newline="", encoding=encoding) as file:
                 file.write(text)
                 file.close()
 
@@ -308,13 +319,18 @@ class Get:
     """
     Application functions set, all core functions of icode
     """
+
     def __init__(self):
         self.update_apis()
         self.io = IO()
 
     def update_apis(self):
-        self.theme = f"{settings.get_icons_package()}{SYS_SEP}{settings.get_icons_theme()}"
-        self.icon_path = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{self.theme}{SYS_SEP}"
+        self.theme = (
+            f"{settings.get_icons_package()}{SYS_SEP}{settings.get_icons_theme()}"
+        )
+        self.icon_path = (
+            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{self.theme}{SYS_SEP}"
+        )
 
     def get_adjusted_path(self, path):
         try:
@@ -342,13 +358,13 @@ class Get:
 
     @staticmethod
     def get_native_font():
-        font = QFont('Courier New', iconsts.APP_BASE_FONT_SIZE)
+        font = QFont("Courier New", iconsts.APP_BASE_FONT_SIZE)
         if SYS_NAME.startswith("linux"):
             font = QFont("DejaVu Sans Mono", iconsts.APP_BASE_FONT_SIZE)
         elif SYS_NAME.startswith("darwin"):
             font = QFont("Menlo", iconsts.APP_BASE_FONT_SIZE)
         elif SYS_NAME.startswith("win"):
-            font = QFont('Consolas', iconsts.APP_BASE_FONT_SIZE)
+            font = QFont("Consolas", iconsts.APP_BASE_FONT_SIZE)
         return font
 
     @staticmethod
@@ -371,7 +387,7 @@ class Get:
             return True
         else:
             # TODO
-            #a = re.finditer()
+            # a = re.finditer()
             return False
 
     @staticmethod
@@ -379,15 +395,15 @@ class Get:
         return text.replace(old_char, new_char)
 
     @staticmethod
-    def get_expanded_tab_text(txt: str,
-                              tabWidth: int = iconsts.EXPANDED_TAB_WIDTH
-                              ) -> str:
+    def get_expanded_tab_text(
+        txt: str, tabWidth: int = iconsts.EXPANDED_TAB_WIDTH
+    ) -> str:
         out = []
-        for line in txt.split('\n'):
+        for line in txt.split("\n"):
             try:
                 while True:
-                    i = line.index('\t')
-                    if (tabWidth > 0):
+                    i = line.index("\t")
+                    if tabWidth > 0:
                         pad = " " * (tabWidth - (i % tabWidth))
                     else:
                         pad = ""
@@ -398,20 +414,16 @@ class Get:
 
     @staticmethod
     def get_tab_to_space(text, tab_count: int = 1, space_count: int = 4):
-        new_text = re.sub("\t{" + str(tab_count) + "}", " " * space_count,
-                          text)
+        new_text = re.sub("\t{" + str(tab_count) + "}", " " * space_count, text)
         return new_text
 
     @staticmethod
     def get_space_to_tab(text, space_count: int = 4, tab_count: int = 1):
-        new_text = re.sub("[ ]{" + str(space_count) + "}", "\t" * tab_count,
-                          text)
+        new_text = re.sub("[ ]{" + str(space_count) + "}", "\t" * tab_count, text)
         return new_text
 
     @staticmethod
-    def get_space_to_tab_in_file(filename,
-                                 space_count: int = 4,
-                                 tab_count: int = 1):
+    def get_space_to_tab_in_file(filename, space_count: int = 4, tab_count: int = 1):
         with open(filename, "r") as file:
             filedata = file.read()
 
@@ -423,9 +435,7 @@ class Get:
         return filedata
 
     @staticmethod
-    def get_tab_to_space_in_file(filename,
-                                 tab_count: int = 1,
-                                 space_count: int = 4):
+    def get_tab_to_space_in_file(filename, tab_count: int = 1, space_count: int = 4):
         with open(filename, "r") as file:
             filedata = file.read()
 
@@ -437,13 +447,11 @@ class Get:
         return filedata
 
     @staticmethod
-    def get_code_with_identation(code: str, old_char: str,
-                                 new_char: str) -> str:
+    def get_code_with_identation(code: str, old_char: str, new_char: str) -> str:
         return re.sub(old_char, new_char, code)
 
     @staticmethod
-    def get_file_with_identation(file: str, old_char: str,
-                                 new_char: str) -> str:
+    def get_file_with_identation(file: str, old_char: str, new_char: str) -> str:
         pass
 
     @staticmethod
@@ -536,8 +544,17 @@ class Get:
 
     def get_lexer_from_instance(self, lexer_instance):
         lexers = [
-            CLexer, CPPLexer, CSSLexer, HTMLLexer, JSONLexer, JavaScriptLexer,
-            PythonLexer, JavaLexer, YAMLLexer, MarkdownLexer, NoneLexer
+            CLexer,
+            CPPLexer,
+            CSSLexer,
+            HTMLLexer,
+            JSONLexer,
+            JavaScriptLexer,
+            PythonLexer,
+            JavaLexer,
+            YAMLLexer,
+            MarkdownLexer,
+            NoneLexer,
         ]
         if lexer_instance is None:
             return NoneLexer
@@ -573,7 +590,9 @@ class Get:
             return icon
 
         except Exception as e:
-            print(f"{area} icon by name error: {e}", )
+            print(
+                f"{area} icon by name error: {e}",
+            )
 
         return None
 
@@ -618,7 +637,9 @@ class Get:
             return None
 
     def get_default_icons(self, icon):
-        return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}{icon}"
+        return (
+            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}{icon}"
+        )
 
     def get_app_icon(self) -> object:
         return self.get_qicon(
@@ -663,7 +684,7 @@ class Get:
         if area == "index":
             return {
                 "logo": self.get_default_icons("logo.svg"),
-                "python": self.get_default_icons("python.svg")
+                "python": self.get_default_icons("python.svg"),
             }
 
         return IconMaker(self.icon_path, api, area)
@@ -678,17 +699,19 @@ class Get:
 
         return None
 
+
 class Is:
     def __init__(self):
         pass
-    
-    def is_widget_code_editor(self, widget, attr:str="", value:str=None) -> bool:
+
+    def is_widget_code_editor(self, widget, attr: str = "", value: str = None) -> bool:
         if hasattr(widget, "objectName"):
             if widget.objectName() == "editor-frame":
                 if widget.is_text:
                     if getattr(widget.editor, str(attr), None) == value:
                         return widget
         return False
+
 
 filefn = File()
 getfn = Get()

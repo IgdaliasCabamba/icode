@@ -1,6 +1,12 @@
 from jedi.inference.cache import inference_state_method_cache
-from jedi.inference.base_value import ValueSet, NO_VALUES, Value, \
-    iterator_to_value_set, LazyValueWrapper, ValueWrapper
+from jedi.inference.base_value import (
+    ValueSet,
+    NO_VALUES,
+    Value,
+    iterator_to_value_set,
+    LazyValueWrapper,
+    ValueWrapper,
+)
 from jedi.inference.compiled import builtin_from_name
 from jedi.inference.value.klass import ClassFilter
 from jedi.inference.value.klass import ClassMixin
@@ -14,6 +20,7 @@ class _BoundTypeVarName(AbstractNameDefinition):
     """
     This type var was bound to a certain type, e.g. int.
     """
+
     def __init__(self, type_var, value_set):
         self._type_var = type_var
         self.parent_context = type_var.parent_context
@@ -24,17 +31,23 @@ class _BoundTypeVarName(AbstractNameDefinition):
             for value in self._value_set:
                 # Replace any with the constraints if they are there.
                 from jedi.inference.gradual.typing import AnyClass
+
                 if isinstance(value, AnyClass):
                     yield from self._type_var.constraints
                 else:
                     yield value
+
         return ValueSet(iter_())
 
     def py__name__(self):
         return self._type_var.py__name__()
 
     def __repr__(self):
-        return '<%s %s -> %s>' % (self.__class__.__name__, self.py__name__(), self._value_set)
+        return "<%s %s -> %s>" % (
+            self.__class__.__name__,
+            self.py__name__(),
+            self._value_set,
+        )
 
 
 class _TypeVarFilter:
@@ -48,6 +61,7 @@ class _TypeVarFilter:
 
     In this example we would have two type vars given: A and B
     """
+
     def __init__(self, generics, type_vars):
         self._generics = generics
         self._type_vars = type_vars
@@ -69,9 +83,7 @@ class _TypeVarFilter:
 
 class _AnnotatedClassContext(ClassContext):
     def get_filters(self, *args, **kwargs):
-        filters = super().get_filters(
-            *args, **kwargs
-        )
+        filters = super().get_filters(*args, **kwargs)
         yield from filters
 
         # The type vars can only be looked up if it's a global search and
@@ -92,6 +104,7 @@ class DefineGenericBaseClass(LazyValueWrapper):
 
     def define_generics(self, type_var_dict):
         from jedi.inference.gradual.type_var import TypeVar
+
         changed = False
         new_generics = []
         for generic_set in self.get_generics():
@@ -112,9 +125,13 @@ class DefineGenericBaseClass(LazyValueWrapper):
             # cached results.
             return ValueSet([self])
 
-        return ValueSet([self._create_instance_with_generics(
-            TupleGenericManager(tuple(new_generics))
-        )])
+        return ValueSet(
+            [
+                self._create_instance_with_generics(
+                    TupleGenericManager(tuple(new_generics))
+                )
+            ]
+        )
 
     def is_same_class(self, other):
         if not isinstance(other, DefineGenericBaseClass):
@@ -143,11 +160,12 @@ class DefineGenericBaseClass(LazyValueWrapper):
                 # not in the best shape.
                 for cls1 in class_set1.gather_annotation_classes()
                 for cls2 in class_set2.gather_annotation_classes()
-            ) for class_set1, class_set2 in zip(given_params1, given_params2)
+            )
+            for class_set1, class_set2 in zip(given_params1, given_params2)
         )
 
     def __repr__(self):
-        return '<%s: %s%s>' % (
+        return "<%s: %s%s>" % (
             self.__class__.__name__,
             self._wrapped_value,
             list(self.get_generics()),
@@ -161,6 +179,7 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
         class Foo(Generic[T]): ...
         my_foo_int_cls = Foo[int]
     """
+
     def __init__(self, class_value, generics_manager):
         super().__init__(generics_manager)
         self._class_value = class_value
@@ -177,14 +196,14 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
         n = dict(list="List", dict="Dict", set="Set", tuple="Tuple").get(n, n)
         s = n + self._generics_manager.get_type_hint()
         if add_class_info:
-            return 'Type[%s]' % s
+            return "Type[%s]" % s
         return s
 
     def get_type_var_filter(self):
         return _TypeVarFilter(self.get_generics(), self.list_type_vars())
 
     def py__call__(self, arguments):
-        instance, = super().py__call__(arguments)
+        (instance,) = super().py__call__(arguments)
         return ValueSet([_GenericInstanceWrapper(instance)])
 
     def _as_context(self):
@@ -208,11 +227,14 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
 
     def infer_type_vars(self, value_set):
         # Circular
-        from jedi.inference.gradual.annotation import merge_pairwise_generics, merge_type_var_dicts
+        from jedi.inference.gradual.annotation import (
+            merge_pairwise_generics,
+            merge_type_var_dicts,
+        )
 
         annotation_name = self.py__name__()
         type_var_dict = {}
-        if annotation_name == 'Iterable':
+        if annotation_name == "Iterable":
             annotation_generics = self.get_generics()
             if annotation_generics:
                 return annotation_generics[0].infer_type_vars(
@@ -228,7 +250,7 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
                 else:
                     continue
 
-                if py_class.api_type != 'class':
+                if py_class.api_type != "class":
                     # Functions & modules don't have an MRO and we're not
                     # expecting a Callable (those are handled separately within
                     # TypingClassValueWithIndex).
@@ -277,15 +299,14 @@ class _LazyGenericBaseClass:
 
     def _remap_type_vars(self, base):
         from jedi.inference.gradual.type_var import TypeVar
+
         filter = self._class_value.get_type_var_filter()
         for type_var_set in base.get_generics():
             new = NO_VALUES
             for type_var in type_var_set:
                 if isinstance(type_var, TypeVar):
                     names = filter.get(type_var.py__name__())
-                    new |= ValueSet.from_sets(
-                        name.infer() for name in names
-                    )
+                    new |= ValueSet.from_sets(name.infer() for name in names)
                 else:
                     # Mostly will be type vars, except if in some cases
                     # a concrete type will already be there. In that
@@ -294,20 +315,20 @@ class _LazyGenericBaseClass:
             yield new
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self._lazy_base_class)
+        return "<%s: %s>" % (self.__class__.__name__, self._lazy_base_class)
 
 
 class _GenericInstanceWrapper(ValueWrapper):
     def py__stop_iteration_returns(self):
         for cls in self._wrapped_value.class_value.py__mro__():
-            if cls.py__name__() == 'Generator':
+            if cls.py__name__() == "Generator":
                 generics = cls.get_generics()
                 try:
                     return generics[2].execute_annotation()
                 except IndexError:
                     pass
-            elif cls.py__name__() == 'Iterator':
-                return ValueSet([builtin_from_name(self.inference_state, 'None')])
+            elif cls.py__name__() == "Iterator":
+                return ValueSet([builtin_from_name(self.inference_state, "None")])
         return self._wrapped_value.py__stop_iteration_returns()
 
     def get_type_hint(self, add_class_info=True):
@@ -324,13 +345,11 @@ class _PseudoTreeNameClass(Value):
     this class. Essentially this class makes it possible to goto that `Tuple`
     name, without affecting anything else negatively.
     """
-    api_type = 'class'
+
+    api_type = "class"
 
     def __init__(self, parent_context, tree_name):
-        super().__init__(
-            parent_context.inference_state,
-            parent_context
-        )
+        super().__init__(parent_context.inference_state, parent_context)
         self._tree_name = tree_name
 
     @property
@@ -354,7 +373,7 @@ class _PseudoTreeNameClass(Value):
     def py__class__(self):
         # This might not be 100% correct, but it is good enough. The details of
         # the typing library are not really an issue for Jedi.
-        return builtin_from_name(self.inference_state, 'type')
+        return builtin_from_name(self.inference_state, "type")
 
     @property
     def name(self):
@@ -364,7 +383,7 @@ class _PseudoTreeNameClass(Value):
         return (self._tree_name.value,)
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self._tree_name.value)
+        return "%s(%s)" % (self.__class__.__name__, self._tree_name.value)
 
 
 class BaseTypingValue(LazyValueWrapper):
@@ -381,7 +400,7 @@ class BaseTypingValue(LazyValueWrapper):
         return _PseudoTreeNameClass(self.parent_context, self._tree_name)
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self._tree_name.value)
+        return "%s(%s)" % (self.__class__.__name__, self._tree_name.value)
 
 
 class BaseTypingClassWithGenerics(DefineGenericBaseClass):
@@ -395,8 +414,11 @@ class BaseTypingClassWithGenerics(DefineGenericBaseClass):
         return _PseudoTreeNameClass(self.parent_context, self._tree_name)
 
     def __repr__(self):
-        return '%s(%s%s)' % (self.__class__.__name__, self._tree_name.value,
-                             self._generics_manager)
+        return "%s(%s%s)" % (
+            self.__class__.__name__,
+            self._tree_name.value,
+            self._generics_manager,
+        )
 
 
 class BaseTypingInstance(LazyValueWrapper):
@@ -421,8 +443,10 @@ class BaseTypingInstance(LazyValueWrapper):
         return ValueName(self, self._tree_name)
 
     def _get_wrapped_value(self):
-        object_, = builtin_from_name(self.inference_state, 'object').execute_annotation()
+        (object_,) = builtin_from_name(
+            self.inference_state, "object"
+        ).execute_annotation()
         return object_
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self._generics_manager)
+        return "<%s: %s>" % (self.__class__.__name__, self._generics_manager)

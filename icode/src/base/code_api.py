@@ -2,10 +2,11 @@ from .system import *
 import settings
 import frameworks.jedit2 as ijson
 
+
 class Code:
     def __init__(self):
         pass
-        
+
     @staticmethod
     def get_theme_in_json():
         ext = settings.get_theme()
@@ -19,13 +20,13 @@ class Code:
                 print(e)
 
         return None
-    
+
     def get_editor_settings(self):
         return ijson.load(settings.EDITOR_FILE)
-    
+
     def get_terminals(self):
         return ijson.load(settings.TERMINALS_FILE)
-    
+
     def get_terminal_emulators(self):
         return ijson.load(settings.TERMINALS_FILE)["emulators"]
 
@@ -53,5 +54,6 @@ class Code:
         data = self.get_theme_in_json()
         if data:
             return data["editor-styles"]
+
 
 icode_api = Code()

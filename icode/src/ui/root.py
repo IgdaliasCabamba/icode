@@ -9,6 +9,7 @@ notebook_corner_style = """
 		}
 	"""
 
+
 @dataclass
 class TabData:
     title: str
@@ -19,51 +20,46 @@ class TabData:
 
 
 class CategoryMixin(object):
+    def __init__(self, **kwargs):
+        super(CategoryMixin, self).__init__(**kwargs)
+        self._categories = set()
 
-	def __init__(self, **kwargs):
-		super(CategoryMixin, self).__init__(**kwargs)
-		self._categories = set()
+    def categories(self):
+        return self._categories
 
-	def categories(self):
-		return self._categories
+    def add_category(self, c):
+        if c in self._categories:
+            return
+        self._categories.add(c)
 
-	def add_category(self, c):
-		if c in self._categories:
-			return
-		self._categories.add(c)
+    def remove_category(self, c):
+        if c not in self._categories:
+            return
+        self._categories.remove(c)
 
-	def remove_category(self, c):
-		if c not in self._categories:
-			return
-		self._categories.remove(c)
 
 class consts:
-	UP = 0
-    
-	DOWN = 1
+    UP = 0
 
-	LEFT = 2
+    DOWN = 1
 
-	RIGHT = 3
+    LEFT = 2
 
-	ORIENTATIONS = {
-		UP: Qt.Vertical,
-		DOWN: Qt.Vertical,
-		LEFT: Qt.Horizontal,
-		RIGHT: Qt.Horizontal
-	}
+    RIGHT = 3
 
-	MOVES = {
-		UP: -1,
-		DOWN: 1,
-		LEFT: -1,
-		RIGHT: 1
-	}
+    ORIENTATIONS = {
+        UP: Qt.Vertical,
+        DOWN: Qt.Vertical,
+        LEFT: Qt.Horizontal,
+        RIGHT: Qt.Horizontal,
+    }
+
+    MOVES = {UP: -1, DOWN: 1, LEFT: -1, RIGHT: 1}
 
 
 def parent_tab_widget(widget):
-	while widget:
-		if hasattr(widget, 'categories') and 'tabwidget' in widget.categories():
-			break
-		widget = widget.parent()
-	return widget
+    while widget:
+        if hasattr(widget, "categories") and "tabwidget" in widget.categories():
+            break
+        widget = widget.parent()
+    return widget

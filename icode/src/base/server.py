@@ -12,6 +12,7 @@ from typing import Union
 
 plugin = Plugin()
 
+
 class Core(object):
 
     on_new_notebook = pyqtSignal(object)
@@ -28,22 +29,32 @@ class Core(object):
 
     def run(self) -> None:
         self.menu.file.new_file.triggered.connect(self.new_file)
-        self.menu.file.new_notebook_vertical.triggered.connect(lambda: self.new_editor_notebook(Qt.Vertical))
-        self.menu.file.new_notebook_horizontal.triggered.connect(lambda: self.new_editor_notebook(Qt.Horizontal))
+        self.menu.file.new_notebook_vertical.triggered.connect(
+            lambda: self.new_editor_notebook(Qt.Vertical)
+        )
+        self.menu.file.new_notebook_horizontal.triggered.connect(
+            lambda: self.new_editor_notebook(Qt.Horizontal)
+        )
         self.menu.file.open_file.triggered.connect(self.open_file)
         self.menu.file.save_file.triggered.connect(self.save_file)
         self.menu.file.save_all.triggered.connect(self.save_all)
         self.menu.file.open_folder.triggered.connect(self.open_folder)
         self.menu.file.close_editor.triggered.connect(self.close_editor)
-        self.menu.file.open_recent_menu.open_last_closed_tab.triggered.connect(self.reopen_editor)
-        self.menu.file.open_recent_menu.open_last_closed_tabs.triggered.connect(self.reopen_editors)
+        self.menu.file.open_recent_menu.open_last_closed_tab.triggered.connect(
+            self.reopen_editor
+        )
+        self.menu.file.open_recent_menu.open_last_closed_tabs.triggered.connect(
+            self.reopen_editors
+        )
 
         self.menu.edit.find.triggered.connect(self.find_in_editor)
         self.menu.edit.replace_.triggered.connect(self.replace_in_editor)
 
         self.menu.view.command_palette.triggered.connect(self.show_command_palette)
         self.menu.view.languages.triggered.connect(self.show_langs)
-        self.menu.view.minimap.triggered.connect(lambda: self.change_minimap_visiblity(self.menu.view.minimap.isChecked()))
+        self.menu.view.minimap.triggered.connect(
+            lambda: self.change_minimap_visiblity(self.menu.view.minimap.isChecked())
+        )
 
         self.menu.go.goto_line.triggered.connect(self.show_goto_line)
         self.menu.go.goto_tab.triggered.connect(self.show_goto_tab)
@@ -68,7 +79,9 @@ class Core(object):
         self.ui.index.actions.on_new_clicked.connect(self.new_file)
         self.ui.index.actions.on_open_file_clicked.connect(self.open_file)
         self.ui.index.actions.on_open_folder_clicked.connect(self.open_folder)
-        self.ui.index.actions.on_show_commands_clicked.connect(self.show_command_palette)
+        self.ui.index.actions.on_show_commands_clicked.connect(
+            self.show_command_palette
+        )
 
         self.ui.welcome.actions.on_open_recent_folder.connect(self.open_dir)
         self.ui.welcome.actions.on_new_clicked.connect(self.new_file)
@@ -78,11 +91,15 @@ class Core(object):
         self.side_left.explorer.on_file_clicked.connect(self.open_file_from_explorer)
         self.side_left.explorer.on_open_folder_request.connect(self.open_folder)
         self.side_left.explorer.btn_close_folder.clicked.connect(self.close_folder)
-        self.side_left.searcher.display.on_open_file_request.connect(self.open_file_from_search)
+        self.side_left.searcher.display.on_open_file_request.connect(
+            self.open_file_from_search
+        )
         self.side_left.git.btn_open_repository.clicked.connect(self.open_repository)
-        self.side_left.git.repository_menu.open_repository.triggered.connect(self.open_repository)
+        self.side_left.git.repository_menu.open_repository.triggered.connect(
+            self.open_repository
+        )
         self.side_left.labs.on_open_workspace.connect(self.open_research_space)
-        
+
         self.side_right.btn_close_lab.clicked.connect(self.close_lab)
 
         self.ui.isplitter.on_last_tab_closed.connect(self.last_tab_closed)
@@ -93,9 +110,8 @@ class Core(object):
         self.on_new_notebook.connect(self.configure_notebook)
         self.on_commit_app.connect(self.commit_app)
 
-        self.side_left.explorer.on_path_changed.connect(
-            self.explorer_path_changed)
-        
+        self.side_left.explorer.on_path_changed.connect(self.explorer_path_changed)
+
         self.april.on_mode_changed.connect(self.change_ide_mode)
 
         self.configure_notebook(self.ui.notebook)
@@ -109,15 +125,18 @@ class Core(object):
         notebook.on_tab_added.connect(self.toggle_main_views)
         notebook.on_tab_droped.connect(self.tab_droped)
         notebook.cornerWidget().menu.split_in_group_ver.triggered.connect(
-            self.split_in_group_ver)
+            self.split_in_group_ver
+        )
         notebook.cornerWidget().menu.split_in_group_hor.triggered.connect(
-            self.split_in_group_hor)
-        notebook.cornerWidget().menu.join_in_group.triggered.connect(
-            self.join_in_group)
+            self.split_in_group_hor
+        )
+        notebook.cornerWidget().menu.join_in_group.triggered.connect(self.join_in_group)
         notebook.cornerWidget().btn_split.on_split_vertical.connect(
-            self.split_notebook_ver)
+            self.split_notebook_ver
+        )
         notebook.cornerWidget().btn_split.on_split_horizontal.connect(
-            self.split_notebook_hor)
+            self.split_notebook_hor
+        )
 
     def build_components(self):
         if self.last_repository is not None:
@@ -125,13 +144,16 @@ class Core(object):
 
         if self.last_folder is not None:
             self.restore_folder(self.last_folder)
-        
+
         self.update_components()
-        
+
     def update_components(self):
         self.welcome_widget.set_last_folders(self.last_folders)
-        self.menu.file.open_recent_menu.set_recent_files(self.last_files, self.open_file)
-            
+        self.menu.file.open_recent_menu.set_recent_files(
+            self.last_files, self.open_file
+        )
+
+
 class Base(QObject, Core):
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -139,137 +161,146 @@ class Base(QObject, Core):
         self.logo_icons = getfn.get_smartcode_icons("logo")
         self.command_icons = getfn.get_smartcode_icons("action")
         self.indentation_icons = getfn.get_smartcode_icons("indentation")
-        self.__lexers = [{
-            "name": "python",
-            "lexer": PythonLexer,
-            "icon": getfn.get_lexer_icon_by_name("python")
-        }, {
-            "name": "c",
-            "lexer": CLexer,
-            "icon": getfn.get_lexer_icon_by_name("c")
-        }, {
-            "name": "c++",
-            "lexer": CPPLexer,
-            "icon": getfn.get_lexer_icon_by_name("c++")
-        }, {
-            "name": "css",
-            "lexer": CSSLexer,
-            "icon": getfn.get_lexer_icon_by_name("css")
-        }, {
-            "name": "html",
-            "lexer": HTMLLexer,
-            "icon": getfn.get_lexer_icon_by_name("html")
-        }, {
-            "name": "javaScript",
-            "lexer": JavaScriptLexer,
-            "icon": getfn.get_lexer_icon_by_name("javascript")
-        }, {
-            "name": "json",
-            "lexer": JSONLexer,
-            "icon": getfn.get_lexer_icon_by_name("json")
-        }, {
-            "name": "text",
-            "lexer": NoneLexer,
-            "icon": getfn.get_lexer_icon_by_name("text")
-        }, {
-            "name": "yaml",
-            "lexer": YAMLLexer,
-            "icon": getfn.get_lexer_icon_by_name("yaml")
-        }, {
-            "name": "java",
-            "lexer": JavaLexer,
-            "icon": getfn.get_lexer_icon_by_name("java")
-        }, {
-            "name": "markdown",
-            "lexer": MarkdownLexer,
-            "icon": getfn.get_lexer_icon_by_name("markdown")
-        }]
-        self.__commands = [{
+        self.__lexers = [
+            {
+                "name": "python",
+                "lexer": PythonLexer,
+                "icon": getfn.get_lexer_icon_by_name("python"),
+            },
+            {"name": "c", "lexer": CLexer, "icon": getfn.get_lexer_icon_by_name("c")},
+            {
+                "name": "c++",
+                "lexer": CPPLexer,
+                "icon": getfn.get_lexer_icon_by_name("c++"),
+            },
+            {
+                "name": "css",
+                "lexer": CSSLexer,
+                "icon": getfn.get_lexer_icon_by_name("css"),
+            },
+            {
+                "name": "html",
+                "lexer": HTMLLexer,
+                "icon": getfn.get_lexer_icon_by_name("html"),
+            },
+            {
+                "name": "javaScript",
+                "lexer": JavaScriptLexer,
+                "icon": getfn.get_lexer_icon_by_name("javascript"),
+            },
+            {
+                "name": "json",
+                "lexer": JSONLexer,
+                "icon": getfn.get_lexer_icon_by_name("json"),
+            },
+            {
+                "name": "text",
+                "lexer": NoneLexer,
+                "icon": getfn.get_lexer_icon_by_name("text"),
+            },
+            {
+                "name": "yaml",
+                "lexer": YAMLLexer,
+                "icon": getfn.get_lexer_icon_by_name("yaml"),
+            },
+            {
+                "name": "java",
+                "lexer": JavaLexer,
+                "icon": getfn.get_lexer_icon_by_name("java"),
+            },
+            {
+                "name": "markdown",
+                "lexer": MarkdownLexer,
+                "icon": getfn.get_lexer_icon_by_name("markdown"),
+            },
+        ]
+        self.__commands = [
+            {
                 "name": "New File\t\tCtrl+N",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.new_file
+                "command": self.new_file,
             },
             {
                 "name": "Open File\t\tCtrl+O",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.open_file
+                "command": self.open_file,
             },
             {
                 "name": "Save File\t\tCtrl+S",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.save_file
+                "command": self.save_file,
             },
             {
                 "name": "Open Folder\tCtrl+K",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.open_folder
+                "command": self.open_folder,
             },
             {
                 "name": "Open Repository\t",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.open_repository
+                "command": self.open_repository,
             },
             {
                 "name": "Close File\t\tCtrl+W",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.close_editor
+                "command": self.close_editor,
             },
             {
                 "name": "Reopen Last Closed Editor\tCtrl+Shift+T",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.reopen_editor
+                "command": self.reopen_editor,
             },
             {
                 "name": "Reopen Last Closed Editors",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.reopen_editors
+                "command": self.reopen_editors,
             },
             {
                 "name": "Split In Group Horizontal",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.split_in_group_hor
+                "command": self.split_in_group_hor,
             },
             {
                 "name": "Split In Group Vertical",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.split_in_group_ver
+                "command": self.split_in_group_ver,
             },
             {
                 "name": "Join In Group",
                 "icon": self.command_icons.get_icon("run-command"),
-                "command": self.join_in_group
+                "command": self.join_in_group,
             },
         ]
-    
+
     def notify(self, title, text, widgets):
         self.ui.notificator.new_notification(title, text, widgets)
-        
+
     def run_api(self):
         self.editor_widgets.set_api(self)
-    
+
     def load_plugins(self):
         data = {"app": self, "qt_app": self.qt_app}
         plugin.run_ui_plugin(DATA_FILE, data)
         plugin.run_app_plugin(DATA_FILE, data)
-        
-    def add_lexer(self, lexer_info:dict) -> None:
+
+    def add_lexer(self, lexer_info: dict) -> None:
         if isinstance(lexer_info, dict):
             self.__lexers.append(lexer)
-    
+
     def add_command(self, command) -> None:
         if isinstance(command, dict):
             self.__commands.append(command)
-    
-    def new_editor(self, notebook, file=None, content_type = None):
+
+    def new_editor(self, notebook, file=None, content_type=None):
         editor = EditorView(self, self.ui, notebook, file, content_type)
         self.configure_editor(editor)
         return editor
-    
-    def new_editor_notebook(self, orientation:int) -> None:
+
+    def new_editor_notebook(self, orientation: int) -> None:
         self.tabs_count += 1
         notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
         self.new_file(notebook)
-    
+
     def new_file(self, notebook=False) -> EditorView:
         if isinstance(notebook, bool):
             notebook = self.ui.notebook
@@ -283,20 +314,22 @@ class Base(QObject, Core):
         self.configure_editor(editor)
         self.on_commit_app.emit(1)
         return editor
-    
+
     def configure_editor(self, editor):
         editor.on_tab_content_changed.connect(self.update_tab)
         self.on_new_editor.emit(editor)
-    
+
     def copy_editor(self, notebook, tab_data) -> EditorView:
-        editor = self.new_editor(notebook, tab_data.widget.file, tab_data.widget.content_type)
+        editor = self.new_editor(
+            notebook, tab_data.widget.file, tab_data.widget.content_type
+        )
         editor.make_deep_copy(tab_data.widget)
         index = notebook.add_tab_and_get_index(editor, tab_data.title)
         notebook.setTabToolTip(index, tab_data.tooltip)
         notebook.setTabIcon(index, tab_data.icon)
         return editor
-    
-    def create_editor_from_file(self, code_file:str) -> EditorView:
+
+    def create_editor_from_file(self, code_file: str) -> EditorView:
         editor = EditorView(self, self.ui, self.ui.notebook, code_file)
         index = self.ui.notebook.add_tab_and_get_index(editor, code_file.name)
         self.configure_tab(index, code_file)
@@ -304,8 +337,10 @@ class Base(QObject, Core):
         self.files_opened.append(code_file)
         self.on_commit_app.emit(1)
         return editor
-    
-    def create_new_notebook(self, orientation:int, widget=None, copy:bool=True) -> NoteBookEditor:
+
+    def create_new_notebook(
+        self, orientation: int, widget=None, copy: bool = True
+    ) -> NoteBookEditor:
         """Create a new notebook and split in mainwindow"""
         if widget is None:
             widget = self.ui.notebook
@@ -319,7 +354,7 @@ class Base(QObject, Core):
 
         self.on_new_notebook.emit(notebook)
         self.ui.set_notebook(notebook)
-        
+
         if copy:
             self.copy_editor(notebook, tab_data)
 
@@ -330,7 +365,9 @@ class Base(QObject, Core):
         self.on_commit_app.emit(1)
         return notebook
 
-    def current_notebook_editor(self, notebook:object = None, attr:str=None, value:object=None) -> Union[object, bool]:
+    def current_notebook_editor(
+        self, notebook: object = None, attr: str = None, value: object = None
+    ) -> Union[object, bool]:
         if not self.are_notebooks_empty():
             if notebook is None:
                 widget = self.ui.notebook.currentWidget()
@@ -359,67 +396,74 @@ class Base(QObject, Core):
             if widget:
                 return True
         return False
-    
-    def is_file_duplicated(self, file:str, notebook:object) -> bool:
+
+    def is_file_duplicated(self, file: str, notebook: object) -> bool:
         for i in range(notebook.count()):
             widget = notebook.widget(i)
             if isfn.is_widget_code_editor(widget):
                 if str(widget.file) == file:
-                    return {"index":i, "widget":widget, "notebook":notebook}
+                    return {"index": i, "widget": widget, "notebook": notebook}
         return False
-    
+
     @property
     def commands(self) -> list:
         return self.__commands
-        
+
     @property
     def eols(self):
-        return [{
-            "name": r"Windows (\r\n)",
-            "mode": 0,
-            "icon": self.logo_icons.get_icon("windows")
-        }, {
-            "name": r"Unix (\n)",
-            "mode": 2,
-            "icon": self.logo_icons.get_icon("linux")
-        }, {
-            "name": r"MacOs (\r)",
-            "mode": 1,
-            "icon": self.logo_icons.get_icon("macos")
-        }]
-    
+        return [
+            {
+                "name": r"Windows (\r\n)",
+                "mode": 0,
+                "icon": self.logo_icons.get_icon("windows"),
+            },
+            {
+                "name": r"Unix (\n)",
+                "mode": 2,
+                "icon": self.logo_icons.get_icon("linux"),
+            },
+            {
+                "name": r"MacOs (\r)",
+                "mode": 1,
+                "icon": self.logo_icons.get_icon("macos"),
+            },
+        ]
+
     @property
     def tabs_navigation(self):
         notebook = self.ui.notebook
-        return {
-            "notebook":notebook,
-            "tabs":notebook.get_navigation()
-        }
-    
+        return {"notebook": notebook, "tabs": notebook.get_navigation()}
+
     @property
     def indentations(self):
-        return [{
-            "name": "Indent Using Spaces",
-            "action": 0,
-            "icon": self.indentation_icons.get_icon("spaces")
-        }, {
-            "name": "Indent Using Tabs",
-            "action": 1,
-            "icon": self.indentation_icons.get_icon("tabs")
-        }, {
-            "name": "Detect Indentation from Content",
-            "action": 2,
-            "icon": self.indentation_icons.get_icon("auto")
-        }, {
-            "name": "Convert Indentation To Tabs",
-            "action": 3,
-            "icon": self.indentation_icons.get_icon("tabs")
-        }, {
-            "name": "Convert Indentation to Spaces",
-            "action": 4,
-            "icon": self.indentation_icons.get_icon("spaces")
-        }]
-    
+        return [
+            {
+                "name": "Indent Using Spaces",
+                "action": 0,
+                "icon": self.indentation_icons.get_icon("spaces"),
+            },
+            {
+                "name": "Indent Using Tabs",
+                "action": 1,
+                "icon": self.indentation_icons.get_icon("tabs"),
+            },
+            {
+                "name": "Detect Indentation from Content",
+                "action": 2,
+                "icon": self.indentation_icons.get_icon("auto"),
+            },
+            {
+                "name": "Convert Indentation To Tabs",
+                "action": 3,
+                "icon": self.indentation_icons.get_icon("tabs"),
+            },
+            {
+                "name": "Convert Indentation to Spaces",
+                "action": 4,
+                "icon": self.indentation_icons.get_icon("spaces"),
+            },
+        ]
+
     @property
     def lexers(self) -> dict:
         return self.__lexers

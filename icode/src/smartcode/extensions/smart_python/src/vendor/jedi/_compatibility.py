@@ -19,7 +19,7 @@ def cast_path(string):
     soon anyway, just go with always strings.
     """
     if isinstance(string, bytes):
-        return str(string, encoding='UTF-8', errors='replace')
+        return str(string, encoding="UTF-8", errors="replace")
     return str(string)
 
 
@@ -29,7 +29,7 @@ def pickle_load(file):
     # Python on Windows don't throw EOF errors for pipes. So reraise them with
     # the correct type, which is caught upwards.
     except OSError:
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             raise EOFError()
         raise
 
@@ -43,6 +43,6 @@ def pickle_dump(data, file, protocol):
     # Python on Windows don't throw EPIPE errors for pipes. So reraise them with
     # the correct type and error number.
     except OSError:
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             raise IOError(errno.EPIPE, "Broken pipe")
         raise

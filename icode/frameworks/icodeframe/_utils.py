@@ -1,17 +1,19 @@
 import sys
 from os.path import join, dirname, abspath
-import PyQt5.QtCore 
+import PyQt5.QtCore
 import platform
 
-QT_VERSION = tuple(int(v) for v in PyQt5.QtCore.PYQT_VERSION_STR.split('.'))
+QT_VERSION = tuple(int(v) for v in PyQt5.QtCore.PYQT_VERSION_STR.split("."))
 """ tuple: Qt version. """
 
 PLATFORM = platform.system()
 
+
 def resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
+    if hasattr(sys, "_MEIPASS"):
         return join(sys._MEIPASS, dirname(abspath(__file__)), relative_path)
     return join(dirname(abspath(__file__)), relative_path)
+
 
 _FL_STYLESHEET = """
 #windowFrame {

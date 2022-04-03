@@ -98,6 +98,7 @@ class Script:
         references works well, because the right folder is searched. There are
         also ways to modify the sys path and other things.
     """
+
     def __init__(self, code=None, *, path=None, environment=None, project=None):
         self._orig_path = path
         # An empty path (also empty string) should always result in no path.
@@ -108,26 +109,28 @@ class Script:
 
         if code is None:
             # TODO add a better warning than the traceback!
-            with open(path, 'rb') as f:
+            with open(path, "rb") as f:
                 code = f.read()
 
         if project is None:
             # Load the Python grammar of the current interpreter.
-            project = get_default_project(None if self.path is None else self.path.parent)
+            project = get_default_project(
+                None if self.path is None else self.path.parent
+            )
 
         self._inference_state = InferenceState(
             project, environment=environment, script_path=self.path
         )
-        debug.speed('init')
+        debug.speed("init")
         self._module_node, code = self._inference_state.parse_and_get_code(
             code=code,
             path=self.path,
-            use_latest_grammar=path and path.suffix == '.pyi',
+            use_latest_grammar=path and path.suffix == ".pyi",
             cache=False,  # No disk cache, because the current script often changes.
             diff_cache=settings.fast_parser,
             cache_path=settings.cache_directory,
         )
-        debug.speed('parsed')
+        debug.speed("parsed")
         self._code_lines = parso.split_lines(code, keepends=True)
         self._code = code
 
@@ -142,8 +145,7 @@ class Script:
         is_package = False
         if self.path is not None:
             import_names, is_p = transform_path_to_dotted(
-                self._inference_state.get_sys_path(add_parent_paths=False),
-                self.path
+                self._inference_state.get_sys_path(add_parent_paths=False), self.path
             )
             if import_names is not None:
                 names = import_names
@@ -153,29 +155,30 @@ class Script:
             file_io = None
         else:
             file_io = KnownContentFileIO(cast_path(self.path), self._code)
-        if self.path is not None and self.path.suffix == '.pyi':
+        if self.path is not None and self.path.suffix == ".pyi":
             # We are in a stub file. Try to load the stub properly.
             stub_module = load_proper_stub_module(
                 self._inference_state,
                 self._inference_state.latest_grammar,
                 file_io,
                 names,
-                self._module_node
+                self._module_node,
             )
             if stub_module is not None:
                 return stub_module
 
         if names is None:
-            names = ('__main__',)
+            names = ("__main__",)
 
         module = ModuleValue(
-            self._inference_state, self._module_node,
+            self._inference_state,
+            self._module_node,
             file_io=file_io,
             string_names=names,
             code_lines=self._code_lines,
             is_package=is_package,
         )
-        if names[0] not in ('builtins', 'typing'):
+        if names[0] not in ("builtins", "typing"):
             # These modules are essential for Jedi, so don't overwrite them.
             self._inference_state.module_cache.add(names, ValueSet([module]))
         return module
@@ -184,7 +187,7 @@ class Script:
         return self._get_module().as_context()
 
     def __repr__(self):
-        return '<%s: %s %r>' % (
+        return "<%s: %s %r>" % (
             self.__class__.__name__,
             repr(self._orig_path),
             self._inference_state.environment,
@@ -205,10 +208,14 @@ class Script:
             before magic methods and name mangled names that start with ``__``.
         :rtype: list of :class:`.Completion`
         """
-        with debug.increase_indent_cm('complete'):
+        with debug.increase_indent_cm("complete"):
             completion = Completion(
-                self._inference_state, self._get_module_context(), self._code_lines,
-                (line, column), self.get_signatures, fuzzy=fuzzy,
+                self._inference_state,
+                self._get_module_context(),
+                self._code_lines,
+                (line, column),
+                self.get_signatures,
+                fuzzy=fuzzy,
             )
             return completion.complete()
 
@@ -233,12 +240,15 @@ class Script:
         leaf = self._module_node.get_name_of_position(pos)
         if leaf is None:
             leaf = self._module_node.get_leaf_for_position(pos)
-            if leaf is None or leaf.type == 'string':
+            if leaf is None or leaf.type == "string":
                 return []
-            if leaf.end_pos == (line, column) and leaf.type == 'operator':
+            if leaf.end_pos == (line, column) and leaf.type == "operator":
                 next_ = leaf.get_next_leaf()
-                if next_.start_pos == leaf.end_pos \
-                        and next_.type in ('number', 'string', 'keyword'):
+                if next_.start_pos == leaf.end_pos and next_.type in (
+                    "number",
+                    "string",
+                    "keyword",
+                ):
                     leaf = next_
 
         context = self._get_module_context().create_context(leaf)
@@ -257,8 +267,16 @@ class Script:
         return helpers.sorted_definitions(set(defs))
 
     @validate_line_column
-    def goto(self, line=None, column=None, *, follow_imports=False, follow_builtin_imports=False,
-             only_stubs=False, prefer_stubs=False):
+    def goto(
+        self,
+        line=None,
+        column=None,
+        *,
+        follow_imports=False,
+        follow_builtin_imports=False,
+        only_stubs=False,
+        prefer_stubs=False
+    ):
         """
         Goes to the name that defined the object under the cursor. Optionally
         you can follow imports.
@@ -276,7 +294,9 @@ class Script:
         if tree_name is None:
             # Without a name we really just want to jump to the result e.g.
             # executed by `foo()`, if we the cursor is after `)`.
-            return self.infer(line, column, only_stubs=only_stubs, prefer_stubs=prefer_stubs)
+            return self.infer(
+                line, column, only_stubs=only_stubs, prefer_stubs=prefer_stubs
+            )
         name = self._get_module_context().create_name(tree_name)
 
         # Make it possible to goto the super class function/attribute
@@ -368,12 +388,13 @@ class Script:
         if definitions:
             return definitions
         leaf = self._module_node.get_leaf_for_position((line, column))
-        if leaf is not None and leaf.type in ('keyword', 'operator', 'error_leaf'):
+        if leaf is not None and leaf.type in ("keyword", "operator", "error_leaf"):
+
             def need_pydoc():
-                if leaf.value in ('(', ')', '[', ']'):
-                    if leaf.parent.type == 'trailer':
+                if leaf.value in ("(", ")", "[", "]"):
+                    if leaf.parent.type == "trailer":
                         return False
-                    if leaf.parent.type == 'atom':
+                    if leaf.parent.type == "atom":
                         return False
                 grammar = self._inference_state.grammar
                 # This parso stuff is not public, but since I control it, this
@@ -400,20 +421,23 @@ class Script:
         :rtype: list of :class:`.Name`
         """
 
-        def _references(include_builtins=True, scope='project'):
-            if scope not in ('project', 'file'):
+        def _references(include_builtins=True, scope="project"):
+            if scope not in ("project", "file"):
                 raise ValueError('Only the scopes "file" and "project" are allowed')
             tree_name = self._module_node.get_name_of_position((line, column))
             if tree_name is None:
                 # Must be syntax
                 return []
 
-            names = find_references(self._get_module_context(), tree_name, scope == 'file')
+            names = find_references(
+                self._get_module_context(), tree_name, scope == "file"
+            )
 
             definitions = [classes.Name(self._inference_state, n) for n in names]
-            if not include_builtins or scope == 'file':
+            if not include_builtins or scope == "file":
                 definitions = [d for d in definitions if not d.in_builtin_module()]
             return helpers.sorted_definitions(definitions)
+
         return _references(**kwargs)
 
     @validate_line_column
@@ -444,14 +468,16 @@ class Script:
             context,
             call_details.bracket_leaf,
             self._code_lines,
-            pos
+            pos,
         )
-        debug.speed('func_call followed')
+        debug.speed("func_call followed")
 
         # TODO here we use stubs instead of the actual values. We should use
         # the signatures from stubs, but the actual values, probably?!
-        return [classes.Signature(self._inference_state, signature, call_details)
-                for signature in definitions.get_signatures()]
+        return [
+            classes.Signature(self._inference_state, signature, call_details)
+            for signature in definitions.get_signatures()
+        ]
 
     @validate_line_column
     def get_context(self, line=None, column=None):
@@ -463,14 +489,14 @@ class Script:
         """
         pos = (line, column)
         leaf = self._module_node.get_leaf_for_position(pos, include_prefixes=True)
-        if leaf.start_pos > pos or leaf.type == 'endmarker':
+        if leaf.start_pos > pos or leaf.type == "endmarker":
             previous_leaf = leaf.get_previous_leaf()
             if previous_leaf is not None:
                 leaf = previous_leaf
 
         module_context = self._get_module_context()
 
-        n = tree.search_ancestor(leaf, 'funcdef', 'classdef')
+        n = tree.search_ancestor(leaf, "funcdef", "classdef")
         if n is not None and n.start_pos < pos <= n.children[-1].start_pos:
             # This is a bit of a special case. The context of a function/class
             # name/param/keyword is always it's parent context, not the
@@ -484,7 +510,7 @@ class Script:
             context = context.parent_context  # comprehensions
 
         definition = classes.Name(self._inference_state, context.name)
-        while definition.type != 'module':
+        while definition.type != "module":
             name = definition._name  # TODO private access
             tree_name = name.tree_name
             if tree_name is not None:  # Happens with lambdas.
@@ -501,22 +527,24 @@ class Script:
         try:
             for node in get_executable_nodes(self._module_node):
                 context = module.create_context(node)
-                if node.type in ('funcdef', 'classdef'):
+                if node.type in ("funcdef", "classdef"):
                     # Resolve the decorators.
-                    tree_name_to_values(self._inference_state, context, node.children[1])
+                    tree_name_to_values(
+                        self._inference_state, context, node.children[1]
+                    )
                 elif isinstance(node, tree.Import):
                     import_names = set(node.get_defined_names())
                     if node.is_nested():
                         import_names |= set(path[-1] for path in node.get_paths())
                     for n in import_names:
                         imports.infer_import(context, n)
-                elif node.type == 'expr_stmt':
+                elif node.type == "expr_stmt":
                     types = context.infer_node(node)
                     for testlist in node.children[:-1:2]:
                         # Iterate tuples.
                         unpack_tuple_to_dict(context, types, testlist)
                 else:
-                    if node.type == 'name':
+                    if node.type == "name":
                         defs = self._inference_state.infer(context, node)
                     else:
                         defs = infer_call_of_leaf(context, node)
@@ -578,7 +606,9 @@ class Script:
         return refactoring.rename(self._inference_state, definitions, new_name)
 
     @validate_line_column
-    def extract_variable(self, line, column, *, new_name, until_line=None, until_column=None):
+    def extract_variable(
+        self, line, column, *, new_name, until_line=None, until_column=None
+    ):
         """
         Moves an expression to a new statemenet.
 
@@ -612,12 +642,18 @@ class Script:
                 until_column = len(self._code_lines[until_line - 1])
             until_pos = until_line, until_column
         return extract_variable(
-            self._inference_state, self.path, self._module_node,
-            new_name, (line, column), until_pos
+            self._inference_state,
+            self.path,
+            self._module_node,
+            new_name,
+            (line, column),
+            until_pos,
         )
 
     @validate_line_column
-    def extract_function(self, line, column, *, new_name, until_line=None, until_column=None):
+    def extract_function(
+        self, line, column, *, new_name, until_line=None, until_column=None
+    ):
         """
         Moves an expression to a new function.
 
@@ -659,8 +695,12 @@ class Script:
                 until_column = len(self._code_lines[until_line - 1])
             until_pos = until_line, until_column
         return extract_function(
-            self._inference_state, self.path, self._get_module_context(),
-            new_name, (line, column), until_pos
+            self._inference_state,
+            self.path,
+            self._get_module_context(),
+            new_name,
+            (line, column),
+            until_pos,
         )
 
     def inline(self, line=None, column=None):
@@ -680,7 +720,9 @@ class Script:
         :raises: :exc:`.RefactoringError`
         :rtype: :class:`.Refactoring`
         """
-        names = [d._name for d in self.get_references(line, column, include_builtins=True)]
+        names = [
+            d._name for d in self.get_references(line, column, include_builtins=True)
+        ]
         return refactoring.inline(self._inference_state, names)
 
 
@@ -707,6 +749,7 @@ class Interpreter(Script):
     :param namespaces: A list of namespace dictionaries such as the one
         returned by :func:`globals` and :func:`locals`.
     """
+
     _allow_descriptor_getattr_default = True
 
     def __init__(self, code, namespaces, **kwds):
@@ -715,24 +758,30 @@ class Interpreter(Script):
         except Exception:
             raise TypeError("namespaces must be a non-empty list of dicts.")
 
-        environment = kwds.get('environment', None)
+        environment = kwds.get("environment", None)
         if environment is None:
             environment = InterpreterEnvironment()
         else:
             if not isinstance(environment, InterpreterEnvironment):
-                raise TypeError("The environment needs to be an InterpreterEnvironment subclass.")
+                raise TypeError(
+                    "The environment needs to be an InterpreterEnvironment subclass."
+                )
 
-        super().__init__(code, environment=environment,
-                         project=Project(Path.cwd()), **kwds)
+        super().__init__(
+            code, environment=environment, project=Project(Path.cwd()), **kwds
+        )
         self.namespaces = namespaces
-        self._inference_state.allow_descriptor_getattr = self._allow_descriptor_getattr_default
+        self._inference_state.allow_descriptor_getattr = (
+            self._allow_descriptor_getattr_default
+        )
 
     @cache.memoize_method
     def _get_module_context(self):
         tree_module_value = ModuleValue(
-            self._inference_state, self._module_node,
+            self._inference_state,
+            self._module_node,
             file_io=KnownContentFileIO(str(self.path), self._code),
-            string_names=('__main__',),
+            string_names=("__main__",),
             code_lines=self._code_lines,
         )
         return interpreter.MixedModuleContext(
@@ -754,8 +803,9 @@ def preload_module(*modules):
         Script(s).complete(1, len(s))
 
 
-def set_debug_function(func_cb=debug.print_to_stdout, warnings=True,
-                       notices=True, speed=True):
+def set_debug_function(
+    func_cb=debug.print_to_stdout, warnings=True, notices=True, speed=True
+):
     """
     Define a callback debug function to get all the debug messages.
 

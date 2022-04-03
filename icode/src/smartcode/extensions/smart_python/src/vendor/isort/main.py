@@ -65,7 +65,9 @@ Visit https://pycqa.github.io/isort/ for complete information about how to use i
 
 
 class SortAttempt:
-    def __init__(self, incorrectly_sorted: bool, skipped: bool, supported_encoding: bool) -> None:
+    def __init__(
+        self, incorrectly_sorted: bool, skipped: bool, supported_encoding: bool
+    ) -> None:
         self.incorrectly_sorted = incorrectly_sorted
         self.skipped = skipped
         self.supported_encoding = supported_encoding
@@ -84,7 +86,9 @@ def sort_imports(
     try:
         if check:
             try:
-                incorrectly_sorted = not api.check_file(file_name, config=config, **kwargs)
+                incorrectly_sorted = not api.check_file(
+                    file_name, config=config, **kwargs
+                )
             except FileSkipped:
                 skipped = True
             return SortAttempt(incorrectly_sorted, skipped, True)
@@ -125,7 +129,9 @@ def _print_hard_fail(
         "If encountered, please open an issue: https://github.com/PyCQA/isort/issues/new"
     )
     printer = create_terminal_printer(
-        color=config.color_output, error=config.format_error, success=config.format_success
+        color=config.color_output,
+        error=config.format_error,
+        success=config.format_success,
     )
     printer.error(message)
 
@@ -324,7 +330,9 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
 
     target_group.add_argument(
-        "files", nargs="*", help="One or more Python source files that need their imports sorted."
+        "files",
+        nargs="*",
+        help="One or more Python source files that need their imports sorted.",
     )
     target_group.add_argument(
         "--filter-files",
@@ -879,7 +887,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         help=argparse.SUPPRESS,
     )
     deprecated_group.add_argument(
-        "-rc", dest="deprecated_flags", action="append_const", const="-rc", help=argparse.SUPPRESS
+        "-rc",
+        dest="deprecated_flags",
+        action="append_const",
+        const="-rc",
+        help=argparse.SUPPRESS,
     )
     deprecated_group.add_argument(
         "--dont-skip",
@@ -889,7 +901,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         help=argparse.SUPPRESS,
     )
     deprecated_group.add_argument(
-        "-ns", dest="deprecated_flags", action="append_const", const="-ns", help=argparse.SUPPRESS
+        "-ns",
+        dest="deprecated_flags",
+        action="append_const",
+        const="-ns",
+        help=argparse.SUPPRESS,
     )
     deprecated_group.add_argument(
         "--apply",
@@ -919,7 +935,9 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> Dict[str, Any]:
             argv[index] = f"-{arg}"
 
     parser = _build_arg_parser()
-    arguments = {key: value for key, value in vars(parser.parse_args(argv)).items() if value}
+    arguments = {
+        key: value for key, value in vars(parser.parse_args(argv)).items() if value
+    }
     if remapped_deprecated_args:
         arguments["remapped_deprecated_args"] = remapped_deprecated_args
     if "dont_order_by_type" in arguments:
@@ -965,7 +983,9 @@ def identify_imports_main(
         "Use `-` as the first argument to represent stdin."
     )
     parser.add_argument(
-        "files", nargs="+", help="One or more Python source files that need their imports sorted."
+        "files",
+        nargs="+",
+        help="One or more Python source files that need their imports sorted.",
     )
     parser.add_argument(
         "--top-only",
@@ -1043,7 +1063,9 @@ def identify_imports_main(
             print(str(identified_import))
 
 
-def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = None) -> None:
+def main(
+    argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = None
+) -> None:
     arguments = parse_args(argv)
     if arguments.get("show_version"):
         print(ASCII_ART)
@@ -1107,7 +1129,11 @@ def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = 
 
     config = Config(**config_dict)
     if show_config:
-        print(json.dumps(config.__dict__, indent=4, separators=(",", ": "), default=_preconvert))
+        print(
+            json.dumps(
+                config.__dict__, indent=4, separators=(",", ": "), default=_preconvert
+            )
+        )
         return
     if file_names == ["-"]:
         file_path = Path(stream_filename) if stream_filename else None
@@ -1140,7 +1166,9 @@ def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = 
                 sys.stdout.write(input_stream.read())
     elif "/" in file_names and not allow_root:
         printer = create_terminal_printer(
-            color=config.color_output, error=config.format_error, success=config.format_success
+            color=config.color_output,
+            error=config.format_error,
+            success=config.format_success,
         )
         printer.error("it is dangerous to operate recursively on '/'")
         printer.error("use --allow-root to override this failsafe")
@@ -1148,7 +1176,9 @@ def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = 
     else:
         if stream_filename:
             printer = create_terminal_printer(
-                color=config.color_output, error=config.format_error, success=config.format_success
+                color=config.color_output,
+                error=config.format_error,
+                success=config.format_success,
             )
             printer.error("Filename override is intended only for stream (-) sorting.")
             sys.exit(1)
@@ -1178,7 +1208,9 @@ def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = 
         if jobs:
             import multiprocessing
 
-            executor = multiprocessing.Pool(jobs if jobs > 0 else multiprocessing.cpu_count())
+            executor = multiprocessing.Pool(
+                jobs if jobs > 0 else multiprocessing.cpu_count()
+            )
             attempt_iterator = executor.imap(
                 functools.partial(
                     sort_imports,
@@ -1217,9 +1249,7 @@ def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = 
             if arguments.get("check", False) and incorrectly_sorted:
                 wrong_sorted_files = True
             if sort_attempt.skipped:
-                num_skipped += (
-                    1  # pragma: no cover - shouldn't happen, due to skip in iter_source_code
-                )
+                num_skipped += 1  # pragma: no cover - shouldn't happen, due to skip in iter_source_code
 
             if not sort_attempt.supported_encoding:
                 num_invalid_encoding += 1
@@ -1275,7 +1305,9 @@ def main(argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = 
 
     if no_valid_encodings:
         printer = create_terminal_printer(
-            color=config.color_output, error=config.format_error, success=config.format_success
+            color=config.color_output,
+            error=config.format_error,
+            success=config.format_success,
         )
         printer.error("No valid encodings.")
         sys.exit(1)

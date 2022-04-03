@@ -14,24 +14,24 @@ class _SignatureMixin:
                 kind = n.get_kind()
                 is_positional |= kind == Parameter.POSITIONAL_ONLY
                 if is_positional and kind != Parameter.POSITIONAL_ONLY:
-                    yield '/'
+                    yield "/"
                     is_positional = False
 
                 if kind == Parameter.VAR_POSITIONAL:
                     is_kw_only = True
                 elif kind == Parameter.KEYWORD_ONLY and not is_kw_only:
-                    yield '*'
+                    yield "*"
                     is_kw_only = True
 
                 yield n.to_string()
 
             if is_positional:
-                yield '/'
+                yield "/"
 
-        s = self.name.string_name + '(' + ', '.join(param_strings()) + ')'
+        s = self.name.string_name + "(" + ", ".join(param_strings()) + ")"
         annotation = self.annotation_string
         if annotation:
-            s += ' -> ' + annotation
+            s += " -> " + annotation
         return s
 
 
@@ -46,7 +46,7 @@ class AbstractSignature(_SignatureMixin):
 
     @property
     def annotation_string(self):
-        return ''
+        return ""
 
     def get_param_names(self, resolve_stars=False):
         param_names = self._function_value.get_param_names()
@@ -62,8 +62,12 @@ class AbstractSignature(_SignatureMixin):
 
     def __repr__(self):
         if self.value is self._function_value:
-            return '<%s: %s>' % (self.__class__.__name__, self.value)
-        return '<%s: %s, %s>' % (self.__class__.__name__, self.value, self._function_value)
+            return "<%s: %s>" % (self.__class__.__name__, self.value)
+        return "<%s: %s, %s>" % (
+            self.__class__.__name__,
+            self.value,
+            self._function_value,
+        )
 
 
 class TreeSignature(AbstractSignature):
@@ -86,7 +90,7 @@ class TreeSignature(AbstractSignature):
     def annotation_string(self):
         a = self._annotation
         if a is None:
-            return ''
+            return ""
         return a.get_code(include_prefix=False)
 
     @memoize_method
@@ -94,6 +98,7 @@ class TreeSignature(AbstractSignature):
         params = self._function_value.get_param_names()
         if resolve_stars:
             from jedi.inference.star_args import process_params
+
             params = process_params(params)
         if self.is_bound:
             return params[1:]
@@ -101,22 +106,36 @@ class TreeSignature(AbstractSignature):
 
     def matches_signature(self, arguments):
         from jedi.inference.param import get_executed_param_names_and_issues
-        executed_param_names, issues = \
-            get_executed_param_names_and_issues(self._function_value, arguments)
+
+        executed_param_names, issues = get_executed_param_names_and_issues(
+            self._function_value, arguments
+        )
         if issues:
             return False
 
-        matches = all(executed_param_name.matches_signature()
-                      for executed_param_name in executed_param_names)
+        matches = all(
+            executed_param_name.matches_signature()
+            for executed_param_name in executed_param_names
+        )
         if debug.enable_notice:
             tree_node = self._function_value.tree_node
             signature = parser_utils.get_signature(tree_node)
             if matches:
-                debug.dbg("Overloading match: %s@%s (%s)",
-                          signature, tree_node.start_pos[0], arguments, color='BLUE')
+                debug.dbg(
+                    "Overloading match: %s@%s (%s)",
+                    signature,
+                    tree_node.start_pos[0],
+                    arguments,
+                    color="BLUE",
+                )
             else:
-                debug.dbg("Overloading no match: %s@%s (%s)",
-                          signature, tree_node.start_pos[0], arguments, color='BLUE')
+                debug.dbg(
+                    "Overloading no match: %s@%s (%s)",
+                    signature,
+                    tree_node.start_pos[0],
+                    arguments,
+                    color="BLUE",
+                )
         return matches
 
 
@@ -138,9 +157,7 @@ class BuiltinSignature(AbstractSignature):
 
     def bind(self, value):
         return BuiltinSignature(
-            value, self._return_string,
-            function_value=self.value,
-            is_bound=True
+            value, self._return_string, function_value=self.value, is_bound=True
         )
 
 

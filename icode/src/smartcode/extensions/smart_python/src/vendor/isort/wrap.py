@@ -16,7 +16,9 @@ def import_statement(
     multi_line_output: Optional[Modes] = None,
 ) -> str:
     """Returns a multi-line wrapped form of the provided from import statement."""
-    formatter = formatter_from_string((multi_line_output or config.multi_line_output).name)
+    formatter = formatter_from_string(
+        (multi_line_output or config.multi_line_output).name
+    )
     dynamic_indent = " " * (len(import_start) + 1)
     indent = config.indent
     line_length = config.wrap_length or config.line_length
@@ -40,7 +42,11 @@ def import_statement(
         else:
             minimum_length = 0
         new_import_statement = statement
-        while len(lines[-1]) < minimum_length and len(lines) == line_count and line_length > 10:
+        while (
+            len(lines[-1]) < minimum_length
+            and len(lines) == line_count
+            and line_length > 10
+        ):
             statement = new_import_statement
             line_length -= 1
             new_import_statement = formatter(
@@ -71,9 +77,9 @@ def line(content: str, line_separator: str, config: Config = DEFAULT_CONFIG) -> 
             line_without_comment, comment = content.split("#", 1)
         for splitter in ("import ", ".", "as "):
             exp = r"\b" + re.escape(splitter) + r"\b"
-            if re.search(exp, line_without_comment) and not line_without_comment.strip().startswith(
-                splitter
-            ):
+            if re.search(
+                exp, line_without_comment
+            ) and not line_without_comment.strip().startswith(splitter):
                 line_parts = re.split(exp, line_without_comment)
                 if comment and not (config.use_parentheses and "noqa" in comment):
                     _comma_maybe = (
@@ -106,7 +112,9 @@ def line(content: str, line_separator: str, config: Config = DEFAULT_CONFIG) -> 
                     if splitter == "as ":
                         output = f"{content}{splitter}{cont_line.lstrip()}"
                     else:
-                        _comma = "," if config.include_trailing_comma and not comment else ""
+                        _comma = (
+                            "," if config.include_trailing_comma and not comment else ""
+                        )
 
                         if wrap_mode in (
                             Modes.VERTICAL_HANGING_INDENT,  # type: ignore

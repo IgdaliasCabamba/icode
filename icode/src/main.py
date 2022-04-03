@@ -6,8 +6,9 @@ faulthandler.enable()
 
 from base import *
 
+
 class App(Base):
-    def __init__(self, ui:object, qt_app:object) -> None:
+    def __init__(self, ui: object, qt_app: object) -> None:
         super().__init__(None)
         self.qt_app = qt_app
         self.ui = ui
@@ -26,8 +27,8 @@ class App(Base):
         self.side_right = self.ui.side_right
         self.editor_widgets = self.ui.editor_widgets
         self.april = self.ui.april
-        self.run() #running the server
-        self.run_api() #setting the api for external services as widgets
+        self.run()  # running the server
+        self.run_api()  # setting the api for external services as widgets
         self.run_ui()
         self.load_plugins()
         self.build_components()
@@ -36,15 +37,16 @@ class App(Base):
     def run_ui(self) -> None:
         """Organize the main widgets in current notebook"""
         self.welcome_widget = self.ui.welcome
-        index = self.ui.notebook.add_tab_and_get_index(self.welcome_widget, f"# Get Started")
-        self.configure_tab(index = index, tab_type = "icode")
+        index = self.ui.notebook.add_tab_and_get_index(
+            self.welcome_widget, f"# Get Started"
+        )
+        self.configure_tab(index=index, tab_type="icode")
         self.on_new_tab.emit(self.welcome_widget)
-    
+
         self.ui.config_ui.setVisible(False)
         self.ui.notebook.close_widget(self.ui.config_ui)
-        
 
-    def open_file_from_search(self, file:str, query:str) -> None:
+    def open_file_from_search(self, file: str, query: str) -> None:
         if file is not None:
             self.open_file(file)
             try:
@@ -53,7 +55,7 @@ class App(Base):
             except Exception as e:
                 print(e)
 
-    def open_file_from_explorer(self, file_with_path:str) -> None:
+    def open_file_from_explorer(self, file_with_path: str) -> None:
         self.open_file(file_with_path)
 
     def open_file(self, file_with_path=False) -> None:
@@ -68,10 +70,10 @@ class App(Base):
                 else:
                     self.create_editor_from_file(code_file)
                     editor_cache.save_to_list(str(file_with_path), "files")
-                
+
         else:
             home_dir = settings.ipwd()
-            files = QFileDialog.getOpenFileNames(None, 'Open File', home_dir)
+            files = QFileDialog.getOpenFileNames(None, "Open File", home_dir)
             if files[0]:
                 for file in files[0]:
                     code_file = Path(file)
@@ -81,9 +83,9 @@ class App(Base):
                         editor_cache.save_to_list(str(file), "files")
                     else:
                         duplicate["notebook"].setCurrentWidget(duplicate["widget"])
-        
+
         self.on_commit_app.emit(0)
-    
+
     def open_dir(self, dir=None) -> None:
         if dir is not None:
             folder = self.ui.side_left.explorer.open_folder(dir)
@@ -91,7 +93,7 @@ class App(Base):
                 self.tool_bar.explorer.trigger()
             self.status_bar.open_folder_mode()
             settings.icwd(folder)
-    
+
     def explorer_path_changed(self, folder_with_path):
         editor_cache.save_to_list(str(folder_with_path), "folders")
 
@@ -103,7 +105,7 @@ class App(Base):
             self.status_bar.open_folder_mode()
         self.on_commit_app.emit(0)
         settings.icwd(folder)
-    
+
     def open_repository(self, repository=None):
         if not isinstance(repository, str) or repository is None:
             repository = self.ui.side_left.git.open_repository()
@@ -128,7 +130,7 @@ class App(Base):
     def reopen_editors(self):
         for notebook in self.ui.notebooks:
             notebook.open_last_closed_tab()
-    
+
     def reopen_editor(self):
         self.ui.notebook.open_last_closed_tab()
 
@@ -136,7 +138,7 @@ class App(Base):
         if isinstance(self.ui.notebook.currentWidget(), EditorView):
             self.ui.notebook.currentWidget().save_file()
         self.on_commit_app.emit(1)
-    
+
     def save_all(self):
         for notebook in self.ui.notebooks:
             for i in range(notebook.count()):
@@ -162,51 +164,53 @@ class App(Base):
             widget = self.ui.notebook.currentWidget()
             if widget.objectName() == "editor-frame":
                 self.ui.notebook.find_replace.do_replace()
-    
-    def configure_tab(self, index:int, tab_text:str="", tab_type:str=""):
+
+    def configure_tab(self, index: int, tab_text: str = "", tab_type: str = ""):
         widget = self.ui.notebook.widget(index)
         if tab_type == "icode":
-                self.ui.notebook.setTabIcon(index, getfn.get_app_icon())
-        
+            self.ui.notebook.setTabIcon(index, getfn.get_app_icon())
+
         else:
             self.ui.notebook.setTabIcon(
-                index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
-        
+                index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text))
+            )
+
         if isfn.is_widget_code_editor(widget):
             widget.set_title(tab_text)
             self.ui.notebook.setTabToolTip(index, str(tab_text))
-    
+
     def configure_icode(self):
         if self.ui.notebook.is_widget_in(self.ui.config_ui):
             self.ui.notebook.close_widget(self.ui.config_ui)
         else:
-            index = self.ui.notebook.add_tab_and_get_index(self.ui.config_ui, "Settings")
-            self.configure_tab(index = index, tab_type = "icode")
-    
-    def change_minimap_visiblity(self, visiblity:bool) -> None:
+            index = self.ui.notebook.add_tab_and_get_index(
+                self.ui.config_ui, "Settings"
+            )
+            self.configure_tab(index=index, tab_type="icode")
+
+    def change_minimap_visiblity(self, visiblity: bool) -> None:
         for notebook in self.ui.notebooks:
             for i in range(notebook.count()):
                 widget = notebook.widget(i)
                 if isfn.is_widget_code_editor(widget):
                     for editor in widget.get_editors():
                         editor.set_minimap_visiblity(visiblity)
-                
-    
-    def change_ide_mode(self, mode:int) -> None:
+
+    def change_ide_mode(self, mode: int) -> None:
         """Emit a signal to change the performance of icode"""
         self.on_change_ide_mode.emit(mode)
-    
+
     def call_april(self):
         """Show/Hide April"""
         self.ui.april.appear()
-    
+
     def show_notifications(self):
         """Show/Hide Notifications Panel"""
         self.ui.notificator.appear()
-    
+
     def show_goto_tab(self):
         self.editor_widgets.do_goto_tab()
-    
+
     def show_goto_line(self):
         self.editor_widgets.do_goto_line()
 
@@ -215,13 +219,13 @@ class App(Base):
 
     def show_command_palette(self):
         self.editor_widgets.do_commands()
-    
+
     def show_space_mode(self):
         self.editor_widgets.do_space_mode()
-    
+
     def show_eol_mode(self):
         self.editor_widgets.do_eol_mode()
-    
+
     def toggle_eol_visiblity(self):
         editor = self.has_notebook_editor()
         if editor:
@@ -246,26 +250,26 @@ class App(Base):
             title = data["data"]["first_line"]
 
             if len(title) > iconsts.MAX_TITLE_LENGTH:
-                title = title[0:iconsts.MAX_TITLE_LENGTH]
+                title = title[0 : iconsts.MAX_TITLE_LENGTH]
                 title += "..."
 
-            self.ui.notebook.setTabText(
-                index, title + " " + str(data["widget"].title))
+            self.ui.notebook.setTabText(index, title + " " + str(data["widget"].title))
         else:
             self.ui.notebook.setTabText(index, data["data"]["name"])
 
         self.ui.notebook.setTabToolTip(index, data["data"]["tooltip"])
         self.ui.notebook.setTabIcon(index, data["data"]["icon"])
         self.ui.set_window_title(
-            f"{self.ui.notebook.tabText(index)} - Intelligent Code")
+            f"{self.ui.notebook.tabText(index)} - Intelligent Code"
+        )
 
     def last_tab_closed(self):
         """Display home screen when no have more tabs to show in any notebook"""
         self.toggle_main_views()
 
     def notebook_tab_closed(self, widget):
-        pass    
-    
+        pass
+
     def set_current_editor(self, widget):
         """Set the current editor and change icode current working dir in memory"""
         file = widget.file
@@ -279,18 +283,17 @@ class App(Base):
         """Update widgets to show new tab data"""
         self.editor_widgets.close_all()
         widget = isfn.is_widget_code_editor(self.ui.notebook.widget(index))
-            
 
         if index == -1:
             tab_text = ""
         else:
             tab_text = self.ui.notebook.tabText(index) + " - "
-            
+
             if widget:
                 self.set_current_editor(widget)
-                widget.editor.update_status_bar()            
+                widget.editor.update_status_bar()
                 self.status_bar.editor_view()
-                
+
             else:
                 self.ui.notebook.find_replace.hide_all()
                 self.status_bar.main_view()
@@ -336,7 +339,7 @@ class App(Base):
         """When some tabbar close the last tab"""
         self.ui.isplitter.notebook_last_tab_closed()
 
-    def open_research_space(self, area:str) -> None:
+    def open_research_space(self, area: str) -> None:
         """Turn visible the side right(labs) and change current workspace"""
         self.side_right.set_space(area)
         self.side_right.setVisible(True)
@@ -346,12 +349,12 @@ class App(Base):
 
     def close_lab(self):
         self.side_right.setVisible(False)
-    
-    def split_notebook_hor(self, widget:QWidget) -> None:
+
+    def split_notebook_hor(self, widget: QWidget) -> None:
         """Create a new notebook and split horizontally, like a vscode"""
         self.create_new_notebook(Qt.Horizontal, widget)
 
-    def split_notebook_ver(self, widget:QWidget) -> None:
+    def split_notebook_ver(self, widget: QWidget) -> None:
         """Create a new notebook and split vertically, like a vscode"""
         self.create_new_notebook(Qt.Vertical, widget)
 
@@ -372,8 +375,8 @@ class App(Base):
         widget = self.has_notebook_editor()
         if widget:
             widget.join_in_group()
-    
-    def enter_repository(self, repository, opened:bool=True) -> None:
+
+    def enter_repository(self, repository, opened: bool = True) -> None:
         """
         Make the application create the enviroment for source control,
         change visual aspects and save the repository in cache
@@ -389,35 +392,37 @@ class App(Base):
             if repo_path is not None:
                 self.status_bar.open_folder_mode()
                 self.status_bar.source_control.setText(
-                    f"{pathlib.Path(repo_path).name}{repo_branch}")
+                    f"{pathlib.Path(repo_path).name}{repo_branch}"
+                )
                 self.ui.side_left.explorer.goto_folder(repo_path)
                 if opened:
                     if not self.ui.side_left.git.isVisible():
                         self.tool_bar.igit.trigger()
                     editor_cache.save_to_list(str(repo_path), "repositorys")
-    
+
     def open_app(self):
         print("Status: ", True)
-    
+
     def quit_app(self, window):
         self.save_status()
         system.end(0)
-        
+
     def save_status(self):
         settings.save_window(self.ui, self)
-    
-    def commit_app(self, command:int=0):
+
+    def commit_app(self, command: int = 0):
         if command == 0:
             self.last_files = editor_cache.get_all_from_list("files")
             self.last_folders = editor_cache.get_all_from_list("folders")
             self.update_components()
-        
+
         elif command == 1:
             self.save_status()
-        
+
         elif command == 2:
             self.update_components()
             self.save_status()
+
 
 def run(args=None, call_out=None) -> None:
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
@@ -437,5 +442,6 @@ def run(args=None, call_out=None) -> None:
     exe.show_()
     sys.exit(qapp.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     run()

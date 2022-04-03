@@ -16,7 +16,7 @@ def _lazy_colorama_init():
 
 
 try:
-    if os.name == 'nt':
+    if os.name == "nt":
         # Does not work on Windows, as pyreadline and colorama interfere
         raise ImportError
     else:
@@ -46,13 +46,15 @@ try:
             _inited = True
 
 except ImportError:
+
     class Fore:  # type: ignore[no-redef]
-        RED = ''
-        GREEN = ''
-        YELLOW = ''
-        MAGENTA = ''
-        RESET = ''
-        BLUE = ''
+        RED = ""
+        GREEN = ""
+        YELLOW = ""
+        MAGENTA = ""
+        RESET = ""
+        BLUE = ""
+
 
 NOTICE = object()
 WARNING = object()
@@ -75,53 +77,55 @@ def reset_time():
 
 
 def increase_indent(func):
-    """Decorator for makin """
+    """Decorator for makin"""
+
     def wrapper(*args, **kwargs):
         with increase_indent_cm():
             return func(*args, **kwargs)
+
     return wrapper
 
 
 @contextmanager
-def increase_indent_cm(title=None, color='MAGENTA'):
+def increase_indent_cm(title=None, color="MAGENTA"):
     global _debug_indent
     if title:
-        dbg('Start: ' + title, color=color)
+        dbg("Start: " + title, color=color)
     _debug_indent += 1
     try:
         yield
     finally:
         _debug_indent -= 1
         if title:
-            dbg('End: ' + title, color=color)
+            dbg("End: " + title, color=color)
 
 
-def dbg(message, *args, color='GREEN'):
-    """ Looks at the stack, to see if a debug message should be printed. """
+def dbg(message, *args, color="GREEN"):
+    """Looks at the stack, to see if a debug message should be printed."""
     assert color
 
     if debug_function and enable_notice:
-        i = ' ' * _debug_indent
+        i = " " * _debug_indent
         _lazy_colorama_init()
-        debug_function(color, i + 'dbg: ' + message % tuple(repr(a) for a in args))
+        debug_function(color, i + "dbg: " + message % tuple(repr(a) for a in args))
 
 
 def warning(message, *args, **kwargs):
-    format = kwargs.pop('format', True)
+    format = kwargs.pop("format", True)
     assert not kwargs
 
     if debug_function and enable_warning:
-        i = ' ' * _debug_indent
+        i = " " * _debug_indent
         if format:
             message = message % tuple(repr(a) for a in args)
-        debug_function('RED', i + 'warning: ' + message)
+        debug_function("RED", i + "warning: " + message)
 
 
 def speed(name):
     if debug_function and enable_speed:
         now = time.time()
-        i = ' ' * _debug_indent
-        debug_function('YELLOW', i + 'speed: ' + '%s %s' % (name, now - _start_time))
+        i = " " * _debug_indent
+        debug_function("YELLOW", i + "speed: " + "%s %s" % (name, now - _start_time))
 
 
 def print_to_stdout(color, str_out):

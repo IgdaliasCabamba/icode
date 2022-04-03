@@ -1,7 +1,7 @@
-'''
+"""
 Decorators are not really values, however we need some wrappers to improve
 docstrings and other things around decorators.
-'''
+"""
 
 from jedi.inference.base_value import ValueWrapper, ValueSet
 

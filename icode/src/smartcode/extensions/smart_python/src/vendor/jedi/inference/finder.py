@@ -45,13 +45,13 @@ def _remove_del_stmt(names):
     for name in names:
         if name.tree_name is not None:
             definition = name.tree_name.get_definition()
-            if definition is not None and definition.type == 'del_stmt':
+            if definition is not None and definition.type == "del_stmt":
                 continue
         yield name
 
 
 def check_flow_information(value, flow, search_name, pos):
-    """ Try to find out the type of a variable just with the information that
+    """Try to find out the type of a variable just with the information that
     is given by the flows: e.g. It is also responsible for assert checks.::
 
         if isinstance(k, str):
@@ -70,20 +70,19 @@ def check_flow_information(value, flow, search_name, pos):
             names = module_node.get_used_names()[search_name.value]
         except KeyError:
             return None
-        names = reversed([
-            n for n in names
-            if flow.start_pos <= n.start_pos < (pos or flow.end_pos)
-        ])
+        names = reversed(
+            [n for n in names if flow.start_pos <= n.start_pos < (pos or flow.end_pos)]
+        )
 
         for name in names:
-            ass = search_ancestor(name, 'assert_stmt')
+            ass = search_ancestor(name, "assert_stmt")
             if ass is not None:
                 result = _check_isinstance_type(value, ass.assertion, search_name)
                 if result is not None:
                     return result
 
-    if flow.type in ('if_stmt', 'while_stmt'):
-        potential_ifs = [c for c in flow.children[1::4] if c != ':']
+    if flow.type in ("if_stmt", "while_stmt"):
+        potential_ifs = [c for c in flow.children[1::4] if c != ":"]
         for if_test in reversed(potential_ifs):
             if search_name.start_pos > if_test.end_pos:
                 return _check_isinstance_type(value, if_test, search_name)
@@ -91,11 +90,15 @@ def check_flow_information(value, flow, search_name, pos):
 
 
 def _get_isinstance_trailer_arglist(node):
-    if node.type in ('power', 'atom_expr') and len(node.children) == 2:
+    if node.type in ("power", "atom_expr") and len(node.children) == 2:
         # This might be removed if we analyze and, etc
         first, trailer = node.children
-        if first.type == 'name' and first.value == 'isinstance' \
-                and trailer.type == 'trailer' and trailer.children[0] == '(':
+        if (
+            first.type == "name"
+            and first.value == "isinstance"
+            and trailer.type == "trailer"
+            and trailer.children[0] == "("
+        ):
             return trailer
     return None
 
@@ -125,7 +128,10 @@ def _check_isinstance_type(value, node, search_name):
 
     value_set = NO_VALUES
     for cls_or_tup in lazy_cls.infer():
-        if isinstance(cls_or_tup, iterable.Sequence) and cls_or_tup.array_type == 'tuple':
+        if (
+            isinstance(cls_or_tup, iterable.Sequence)
+            and cls_or_tup.array_type == "tuple"
+        ):
             for lazy_value in cls_or_tup.py__iter__():
                 value_set |= lazy_value.infer().execute_with_values()
         else:
@@ -134,10 +140,10 @@ def _check_isinstance_type(value, node, search_name):
 
 
 def _get_call_string(node):
-    if node.parent.type == 'atom_expr':
+    if node.parent.type == "atom_expr":
         return _get_call_string(node.parent)
 
-    code = ''
+    code = ""
     leaf = node.get_first_leaf()
     end = node.get_last_leaf().end_pos
     while leaf.start_pos < end:

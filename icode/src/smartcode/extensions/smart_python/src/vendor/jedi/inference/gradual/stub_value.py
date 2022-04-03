@@ -34,10 +34,9 @@ class StubModuleValue(ModuleValue):
         return names
 
     def _get_stub_filters(self, origin_scope):
-        return [StubFilter(
-            parent_context=self.as_context(),
-            origin_scope=origin_scope
-        )] + list(self.iter_star_filters())
+        return [
+            StubFilter(parent_context=self.as_context(), origin_scope=origin_scope)
+        ] + list(self.iter_star_filters())
 
     def get_filters(self, origin_scope=None):
         filters = super().get_filters(origin_scope)
@@ -86,12 +85,12 @@ class StubFilter(ParserTreeFilter):
         # Imports in stub files are only public if they have an "as"
         # export.
         definition = name.get_definition()
-        if definition.type in ('import_from', 'import_name'):
-            if name.parent.type not in ('import_as_name', 'dotted_as_name'):
+        if definition.type in ("import_from", "import_name"):
+            if name.parent.type not in ("import_as_name", "dotted_as_name"):
                 return False
         n = name.value
         # TODO rewrite direct return
-        if n.startswith('_') and not (n.startswith('__') and n.endswith('__')):
+        if n.startswith("_") and not (n.startswith("__") and n.endswith("__")):
             return False
         return True
 

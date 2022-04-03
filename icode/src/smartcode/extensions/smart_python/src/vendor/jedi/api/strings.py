@@ -18,48 +18,56 @@ _sentinel = object()
 
 
 class StringName(AbstractArbitraryName):
-    api_type = 'string'
+    api_type = "string"
     is_value_name = False
 
 
 def complete_dict(module_context, code_lines, leaf, position, string, fuzzy):
     bracket_leaf = leaf
-    if bracket_leaf != '[':
+    if bracket_leaf != "[":
         bracket_leaf = leaf.get_previous_leaf()
 
-    cut_end_quote = ''
+    cut_end_quote = ""
     if string:
-        cut_end_quote = get_quote_ending(string, code_lines, position, invert_result=True)
+        cut_end_quote = get_quote_ending(
+            string, code_lines, position, invert_result=True
+        )
 
-    if bracket_leaf == '[':
+    if bracket_leaf == "[":
         if string is None and leaf is not bracket_leaf:
             string = cut_value_at_position(leaf, position)
 
         context = module_context.create_context(bracket_leaf)
         before_bracket_leaf = bracket_leaf.get_previous_leaf()
-        if before_bracket_leaf.type in ('atom', 'trailer', 'name'):
+        if before_bracket_leaf.type in ("atom", "trailer", "name"):
             values = infer_call_of_leaf(context, before_bracket_leaf)
-            return list(_completions_for_dicts(
-                module_context.inference_state,
-                values,
-                '' if string is None else string,
-                cut_end_quote,
-                fuzzy=fuzzy,
-            ))
+            return list(
+                _completions_for_dicts(
+                    module_context.inference_state,
+                    values,
+                    "" if string is None else string,
+                    cut_end_quote,
+                    fuzzy=fuzzy,
+                )
+            )
     return []
 
 
-def _completions_for_dicts(inference_state, dicts, literal_string, cut_end_quote, fuzzy):
+def _completions_for_dicts(
+    inference_state, dicts, literal_string, cut_end_quote, fuzzy
+):
     for dict_key in sorted(_get_python_keys(dicts), key=lambda x: repr(x)):
         dict_key_str = _create_repr_string(literal_string, dict_key)
         if dict_key_str.startswith(literal_string):
-            name = StringName(inference_state, dict_key_str[:-len(cut_end_quote) or None])
+            name = StringName(
+                inference_state, dict_key_str[: -len(cut_end_quote) or None]
+            )
             yield Completion(
                 inference_state,
                 name,
                 stack=None,
                 like_name_length=len(literal_string),
-                is_fuzzy=fuzzy
+                is_fuzzy=fuzzy,
             )
 
 
@@ -78,7 +86,7 @@ def _create_repr_string(literal_string, dict_key):
 
 def _get_python_keys(dicts):
     for dct in dicts:
-        if dct.array_type == 'dict':
+        if dct.array_type == "dict":
             for key in dct.get_key_values():
                 dict_key = key.get_safe_value(default=_sentinel)
                 if dict_key is not _sentinel:
@@ -93,16 +101,16 @@ def _get_string_prefix_and_quote(string):
 
 
 def _matches_quote_at_position(code_lines, quote, position):
-    string = code_lines[position[0] - 1][position[1]:position[1] + len(quote)]
+    string = code_lines[position[0] - 1][position[1] : position[1] + len(quote)]
     return string == quote
 
 
 def get_quote_ending(string, code_lines, position, invert_result=False):
     _, quote = _get_string_prefix_and_quote(string)
     if quote is None:
-        return ''
+        return ""
 
     # Add a quote only if it's not already there.
     if _matches_quote_at_position(code_lines, quote, position) != invert_result:
-        return ''
+        return ""
     return quote

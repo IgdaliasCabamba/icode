@@ -3,13 +3,13 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from .root import CategoryMixin, consts
 
+
 class Splitter(QSplitter):
-    
     def __init__(self, **kwargs):
         super(Splitter, self).__init__(**kwargs)
 
     def child_at(self, pos):
-        
+
         if not self.rect().contains(pos):
             return None
         for i in range(self.count()):
@@ -18,7 +18,7 @@ class Splitter(QSplitter):
                     return w
 
     def parent_manager(self):
-     
+
         w = self.parent()
         while not isinstance(w, ISplitter):
             w = w.parent()
@@ -57,16 +57,16 @@ class ISplitter(QFrame, CategoryMixin):
         self.notebooks_list = []
         self.splited_widgets = []
         self.index = 0
-        
+
         self.root = self.SplitterClass(orientation=Qt.Horizontal)
 
         layout = QStackedLayout(self)
         self.setLayout(layout)
         layout.addWidget(self.root)
 
-        self.add_category('splitmanager')
-    
-    def add_notebook(self, notebook:QTabWidget):
+        self.add_category("splitmanager")
+
+    def add_notebook(self, notebook: QTabWidget):
         self.notebooks_list.append(notebook)
 
     def splitAt(self, current_widget, direction, new_widget) -> None:
@@ -75,7 +75,7 @@ class ISplitter(QFrame, CategoryMixin):
             idx = 0
         else:
             assert self.isAncestorOf(current_widget)
-            
+
             if hasattr(current_widget.parent, "root"):
                 parent = current_widget.parent.root
             else:
@@ -124,24 +124,26 @@ class ISplitter(QFrame, CategoryMixin):
 
             if refocus:
                 current_widget.setFocus()
-        
-        self.index+=1
+
+        self.index += 1
         self.add_splited_widget(self.index, current_widget, direction, new_widget)
         self.update_size()
-    
+
     def add_splited_widget(self, id, ref, direction, new_widget):
         ref_id = None
-        
+
         for item in self.splited_widgets:
             if id == item["id"]:
                 return
-        
+
         for item in self.splited_widgets:
             if ref is not None:
                 if ref == item["ref"]:
                     ref_id = item["id"]
-                
-        self.splited_widgets.append({"id":id, "ref":ref_id, "direction":direction, "widget":new_widget})
+
+        self.splited_widgets.append(
+            {"id": id, "ref": ref_id, "direction": direction, "widget": new_widget}
+        )
 
     def update_size(self) -> None:
         x = []
@@ -159,11 +161,11 @@ class ISplitter(QFrame, CategoryMixin):
     def is_empty(self) -> bool:
         x = 0
         for notebook in self.notebooks_list:
-            if notebook.count() > 0 :
+            if notebook.count() > 0:
                 continue
             else:
-                x+=1
-    
+                x += 1
+
         if x == len(self.notebooks_list):
             return True
         return False

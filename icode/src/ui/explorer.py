@@ -2,9 +2,18 @@ import pathlib
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QFileDialog, QFileSystemModel, QFrame,
-                             QHBoxLayout, QLabel, QLineEdit, QPushButton,
-                             QTreeView, QVBoxLayout, QAbstractItemView)
+from PyQt5.QtWidgets import (
+    QFileDialog,
+    QFileSystemModel,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTreeView,
+    QVBoxLayout,
+    QAbstractItemView,
+)
 
 from functions import filefn, getfn
 
@@ -24,7 +33,7 @@ class FileExplorer(QFrame):
         self.is_expanded = False
         self.icons = getfn.get_smartcode_icons("explorer")
         self.init_ui()
-    
+
     @property
     def folder(self):
         return self._folder
@@ -32,7 +41,7 @@ class FileExplorer(QFrame):
     def init_ui(self):
 
         self.model = QFileSystemModel(self)
-        self.model.setRootPath('')
+        self.model.setRootPath("")
         self.tree = QTreeView(self)
         self.tree.clicked.connect(self.on_tree_clicked)
         self.tree.setModel(self.model)
@@ -59,13 +68,13 @@ class FileExplorer(QFrame):
         self.btn_close_folder.setObjectName("explorer-header-button")
         self.btn_close_folder.setIcon(self.icons.get_icon("close"))
         self.btn_close_folder.setVisible(False)
-        
+
         self.btn_open_folder = HeaderPushButton(self)
         self.btn_open_folder.clicked.connect(lambda: self.on_open_folder_request.emit())
         self.btn_open_folder.setObjectName("explorer-header-button")
         self.btn_open_folder.setIcon(self.icons.get_icon("open"))
         self.btn_open_folder.setVisible(False)
-        
+
         self.btn_expand_collapse = HeaderPushButton(self)
         self.btn_expand_collapse.clicked.connect(self.expand_collapse)
         self.btn_expand_collapse.setObjectName("explorer-header-button")
@@ -94,9 +103,9 @@ class FileExplorer(QFrame):
             if self._folder is None:
                 home_dir = str(pathlib.Path.home())
 
-            path = QFileDialog.getExistingDirectory(None, 'Open Folder',
-                                                    home_dir,
-                                                    QFileDialog.ShowDirsOnly)
+            path = QFileDialog.getExistingDirectory(
+                None, "Open Folder", home_dir, QFileDialog.ShowDirsOnly
+            )
             if path == "":
                 return None
 
@@ -127,7 +136,7 @@ class FileExplorer(QFrame):
         self.btn_expand_collapse.setVisible(False)
         self.btn_open_dir.setVisible(True)
         self._folder = None
-    
+
     def expand_collapse(self):
         if self.is_expanded:
             self.collapse()
@@ -136,7 +145,7 @@ class FileExplorer(QFrame):
 
     def expand(self):
         p = pathlib.Path(self.model.rootPath())
-        
+
         subdirs = [f for f in p.iterdir() if f.is_dir()]
         for directory in subdirs:
             item = self.model.index(directory.name, 0)
@@ -144,7 +153,7 @@ class FileExplorer(QFrame):
                 self.tree.expand(item)
         self.is_expanded = True
         self.btn_expand_collapse.setIcon(self.icons.get_icon("collapse"))
-    
+
     def collapse(self):
         p = pathlib.Path(self.model.rootPath())
 
@@ -154,7 +163,7 @@ class FileExplorer(QFrame):
             self.tree.collapse(item)
         self.is_expanded = False
         self.btn_expand_collapse.setIcon(self.icons.get_icon("expand"))
-    
+
     def select_first(self):
         p = pathlib.Path(self.model.rootPath())
         ls = [f for f in p.iterdir()]

@@ -1,14 +1,35 @@
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QAction, QApplication, QComboBox, QDesktopWidget,
-                             QFileDialog, QFrame, QHBoxLayout, QLabel,
-                             QMainWindow, QMenu, QMenuBar, QPushButton,
-                             QScrollArea, QSizePolicy, QSplitter,
-                             QStackedLayout, QStatusBar, QTabWidget, QToolBar,
-                             QToolButton, QVBoxLayout, QWidget, qApp, QActionGroup)
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QComboBox,
+    QDesktopWidget,
+    QFileDialog,
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMenu,
+    QMenuBar,
+    QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSplitter,
+    QStackedLayout,
+    QStatusBar,
+    QTabWidget,
+    QToolBar,
+    QToolButton,
+    QVBoxLayout,
+    QWidget,
+    qApp,
+    QActionGroup,
+)
 
 from functions import getfn
 from functools import partial
+
 
 class IndentSizeMenu(QMenu):
     def __init__(self, parent=None) -> None:
@@ -19,7 +40,7 @@ class IndentSizeMenu(QMenu):
     def build(self) -> None:
         self.setTitle("")
         self.group = QActionGroup(self)
-        
+
         self.min = QAction("2", self)
         self.min.setCheckable(True)
         self.normal = QAction("4", self)
@@ -29,21 +50,23 @@ class IndentSizeMenu(QMenu):
         self.large.setCheckable(True)
         self.toolarge = QAction("16", self)
         self.toolarge.setCheckable(True)
-        
+
         self.group.addAction(self.min)
         self.group.addAction(self.normal)
         self.group.addAction(self.large)
         self.group.addAction(self.toolarge)
-        
+
         self.addAction(self.min)
         self.addAction(self.normal)
         self.addAction(self.large)
         self.addAction(self.toolarge)
 
+
 class ToolsMenu(QMenu):
     """
     ToolsMenu: a menu for external tools menus, such as extensions menus
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -57,6 +80,7 @@ class OpenRecentSubMenu(QMenu):
     """
     OpenRecentSubMenu: a menu for recent files opened in editor
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -66,48 +90,48 @@ class OpenRecentSubMenu(QMenu):
     def build(self) -> None:
         self.setTitle("Open Recent")
 
-        self.open_last_closed_tab = QAction(
-            "Reopen Closed Editor\tCtrl+Shift+T")
+        self.open_last_closed_tab = QAction("Reopen Closed Editor\tCtrl+Shift+T")
         self.open_last_closed_tab.setShortcut("Ctrl+Shift+T")
-        
-        self.open_last_closed_tabs = QAction(
-            "Reopen Closed Editors")
-    
+
+        self.open_last_closed_tabs = QAction("Reopen Closed Editors")
+
         self.update_menu()
-    
-    def set_recent_files(self, files:list, method:object):
+
+    def set_recent_files(self, files: list, method: object):
         self.update_menu()
-        
+
         if isinstance(files, list):
             files.reverse()
             added = []
             max = len(files)
             if max > 15:
                 max = 15
-            
+
             index_ref = 1
-            
+
             for i in range(max):
                 file = files[i]
                 if file not in added:
                     action = QAction(file, self)
-                    action.setShortcut("Ctrl+Shift+"+str(index_ref))
+                    action.setShortcut("Ctrl+Shift+" + str(index_ref))
                     action.triggered.connect(partial(method, file))
                     self.addAction(action)
                     self.current_actions.append(action)
                     added.append(file)
-                    index_ref+=1
-    
+                    index_ref += 1
+
     def update_menu(self):
         self.clear()
         self.addAction(self.open_last_closed_tab)
         self.addAction(self.open_last_closed_tabs)
         self.addSeparator()
-            
+
+
 class HelpMenu(QMenu):
     """
     HelpMenu: a menu for help actions such as useful links
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -141,6 +165,7 @@ class RunMenu(QMenu):
     """
     RunMenu: a menu for run actions such as debug and run python code or file
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -161,6 +186,7 @@ class GoMenu(QMenu):
     """
     GoMenu: a menu for go actions such as go to line, go to symbol and more
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -168,7 +194,7 @@ class GoMenu(QMenu):
 
     def build(self) -> None:
         self.setTitle("Go")
-        
+
         self.addSeparator()
 
         self.goto_file = QAction("Goto File\tCtrl+P", self)
@@ -178,7 +204,7 @@ class GoMenu(QMenu):
         self.goto_line = QAction("Goto Line\tCtrl+G", self)
         self.goto_line.setShortcut("Ctrl+G")
         self.addAction(self.goto_line)
-        
+
         self.goto_tab = QAction("Goto Tab\tCtrl+Tab", self)
         self.goto_tab.setShortcut("Ctrl+Tab")
         self.addAction(self.goto_tab)
@@ -188,6 +214,7 @@ class ViewMenu(QMenu):
     """
     ViewMenu: a menu for change visibility of some (main) widgets
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -221,18 +248,20 @@ class ViewMenu(QMenu):
         self.addAction(self.left)
         self.right = QAction("Side Right", self)
         self.addAction(self.right)
-        
+
         self.addSeparator()
-        
+
         self.minimap = QAction("Mini Map", self)
         self.minimap.setCheckable(True)
         self.minimap.setChecked(True)
         self.addAction(self.minimap)
 
+
 class SelectionMenu(QMenu):
     """
     SelectionMenu: a menu for selecting actions on editor
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -246,6 +275,7 @@ class EditMenu(QMenu):
     """
     SelectionMenu: a menu for editing actions on editor, it also has actions for formatting code
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -271,11 +301,13 @@ class EditMenu(QMenu):
         self.replace_ = QAction("Replace", self)
         self.replace_.setShortcut("Ctrl+H")
         self.addAction(self.replace_)
-        
+
+
 class FileMenu(QMenu):
     """
     SelectionMenu: a menu for file actions such as open, close, save, and create
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -287,7 +319,7 @@ class FileMenu(QMenu):
         self.new_file = QAction("New File\tCtrl+N", self)
         self.new_file.setShortcut("Ctrl+N")
         self.addAction(self.new_file)
-        
+
         self.new_menu = QMenu(self)
         self.new_menu.setTitle("New")
         self.new_notebook_vertical = QAction("New Notebook Vertical", self)
@@ -339,6 +371,7 @@ class MenuBar(QMenu):
     """
     Custom Menu Bar for Icode, when user choose the custom or icode window style
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -367,6 +400,7 @@ class NMenuBar(QMenuBar):
     """
     Native Menu Bar for Icode, when user choose the native window style
     """
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent

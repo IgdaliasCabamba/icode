@@ -13,7 +13,7 @@ class FileIO:
         # We would like to read unicode here, but we cannot, because we are not
         # sure if it is a valid unicode file. Therefore just read whatever is
         # here.
-        with open(self.path, 'rb') as f:
+        with open(self.path, "rb") as f:
             return f.read()
 
     def get_last_modified(self):
@@ -26,7 +26,7 @@ class FileIO:
             return None
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.path)
+        return "%s(%s)" % (self.__class__.__name__, self.path)
 
 
 class KnownContentFileIO(FileIO):

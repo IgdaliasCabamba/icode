@@ -27,16 +27,23 @@ ad
 load
 """
 
-__version__ = '0.18.0'
+__version__ = "0.18.0"
 
 from jedi.api import Script, Interpreter, set_debug_function, preload_module
 from jedi import settings
-from jedi.api.environment import find_virtualenvs, find_system_environments, \
-    get_default_environment, InvalidPythonEnvironment, create_environment, \
-    get_system_environment, InterpreterEnvironment
+from jedi.api.environment import (
+    find_virtualenvs,
+    find_system_environments,
+    get_default_environment,
+    InvalidPythonEnvironment,
+    create_environment,
+    get_system_environment,
+    InterpreterEnvironment,
+)
 from jedi.api.project import Project, get_default_project
 from jedi.api.exceptions import InternalError, RefactoringError
 
 # Finally load the internal plugins. This is only internal.
 from jedi.plugins import registry
+
 del registry

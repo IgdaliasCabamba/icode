@@ -10,7 +10,7 @@ from jedi.inference.imports import load_module_from_path
 from jedi.inference.filters import ParserTreeFilter
 from jedi.inference.gradual.conversion import convert_names
 
-_IGNORE_FOLDERS = ('.tox', '.venv', 'venv', '__pycache__')
+_IGNORE_FOLDERS = (".tox", ".venv", "venv", "__pycache__")
 
 _OPENED_FILE_LIMIT = 2000
 """
@@ -38,15 +38,12 @@ def _resolve_names(definition_names, avoid_names=()):
             # names when importing something like `import foo.bar.baz`.
             yield name
 
-        if name.api_type == 'module':
+        if name.api_type == "module":
             yield from _resolve_names(name.goto(), definition_names)
 
 
 def _dictionarize(names):
-    return dict(
-        (n if n.tree_name is None else n.tree_name, n)
-        for n in names
-    )
+    return dict((n if n.tree_name is None else n.tree_name, n) for n in names)
 
 
 def _find_defining_names(module_context, tree_name):
@@ -54,18 +51,25 @@ def _find_defining_names(module_context, tree_name):
 
     for name in list(found_names):
         # Convert from/to stubs, because those might also be usages.
-        found_names |= set(convert_names(
-            [name],
-            only_stubs=not name.get_root_context().is_stub(),
-            prefer_stub_to_compiled=False
-        ))
+        found_names |= set(
+            convert_names(
+                [name],
+                only_stubs=not name.get_root_context().is_stub(),
+                prefer_stub_to_compiled=False,
+            )
+        )
 
     found_names |= set(_find_global_variables(found_names, tree_name.value))
     for name in list(found_names):
-        if name.api_type == 'param' or name.tree_name is None \
-                or name.tree_name.parent.type == 'trailer':
+        if (
+            name.api_type == "param"
+            or name.tree_name is None
+            or name.tree_name.parent.type == "trailer"
+        ):
             continue
-        found_names |= set(_add_names_in_same_context(name.parent_context, name.string_name))
+        found_names |= set(
+            _add_names_in_same_context(name.parent_context, name.string_name)
+        )
     return set(_resolve_names(found_names))
 
 
@@ -128,11 +132,12 @@ def find_references(module_context, tree_name, only_in_module=False):
     module_contexts = [module_context]
     if not only_in_module:
         module_contexts.extend(
-            m for m in set(d.get_root_context() for d in found_names)
+            m
+            for m in set(d.get_root_context() for d in found_names)
             if m != module_context and m.tree_node is not None
         )
     # For param no search for other modules is necessary.
-    if only_in_module or any(n.api_type == 'param' for n in found_names):
+    if only_in_module or any(n.api_type == "param" for n in found_names):
         potential_modules = module_contexts
     else:
         potential_modules = get_module_contexts_containing_name(
@@ -170,7 +175,7 @@ def _check_fs(inference_state, file_io, regex):
         code = file_io.read()
     except FileNotFoundError:
         return None
-    code = python_bytes_to_unicode(code, errors='replace')
+    code = python_bytes_to_unicode(code, errors="replace")
     if not regex.search(code):
         return None
     new_file_io = KnownContentFileIO(file_io.path, code)
@@ -184,11 +189,11 @@ def gitignored_lines(folder_io, file_io):
     ignored_paths = set()
     ignored_names = set()
     for l in file_io.read().splitlines():
-        if not l or l.startswith(b'#'):
+        if not l or l.startswith(b"#"):
             continue
 
-        p = l.decode('utf-8', 'ignore')
-        if p.startswith('/'):
+        p = l.decode("utf-8", "ignore")
+        if p.startswith("/"):
             name = p[1:]
             if name.endswith(os.path.sep):
                 name = name[:-1]
@@ -204,13 +209,12 @@ def recurse_find_python_folders_and_files(folder_io, except_paths=()):
         # Delete folders that we don't want to iterate over.
         for file_io in file_ios:
             path = file_io.path
-            if path.suffix in ('.py', '.pyi'):
+            if path.suffix in (".py", ".pyi"):
                 if path not in except_paths:
                     yield None, file_io
 
-            if path.name == '.gitignore':
-                ignored_paths, ignored_names = \
-                    gitignored_lines(root_folder_io, file_io)
+            if path.name == ".gitignore":
+                ignored_paths, ignored_names = gitignored_lines(root_folder_io, file_io)
                 except_paths |= ignored_paths
 
         folder_ios[:] = [
@@ -224,7 +228,9 @@ def recurse_find_python_folders_and_files(folder_io, except_paths=()):
 
 
 def recurse_find_python_files(folder_io, except_paths=()):
-    for folder_io, file_io in recurse_find_python_folders_and_files(folder_io, except_paths):
+    for folder_io, file_io in recurse_find_python_folders_and_files(
+        folder_io, except_paths
+    ):
         if file_io is not None:
             yield file_io
 
@@ -250,8 +256,9 @@ def _find_python_files_in_sys_path(inference_state, module_contexts):
             folder_io = folder_io.get_parent_folder()
 
 
-def get_module_contexts_containing_name(inference_state, module_contexts, name,
-                                        limit_reduction=1):
+def get_module_contexts_containing_name(
+    inference_state, module_contexts, name, limit_reduction=1
+):
     """
     Search a name in the directories of modules.
 
@@ -270,8 +277,9 @@ def get_module_contexts_containing_name(inference_state, module_contexts, name,
         return
 
     file_io_iterator = _find_python_files_in_sys_path(inference_state, module_contexts)
-    yield from search_in_file_ios(inference_state, file_io_iterator, name,
-                                  limit_reduction=limit_reduction)
+    yield from search_in_file_ios(
+        inference_state, file_io_iterator, name, limit_reduction=limit_reduction
+    )
 
 
 def search_in_file_ios(inference_state, file_io_iterator, name, limit_reduction=1):
@@ -279,7 +287,7 @@ def search_in_file_ios(inference_state, file_io_iterator, name, limit_reduction=
     open_limit = _OPENED_FILE_LIMIT / limit_reduction
     file_io_count = 0
     parsed_file_count = 0
-    regex = re.compile(r'\b' + re.escape(name) + r'\b')
+    regex = re.compile(r"\b" + re.escape(name) + r"\b")
     for file_io in file_io_iterator:
         file_io_count += 1
         m = _check_fs(inference_state, file_io, regex)
@@ -287,9 +295,9 @@ def search_in_file_ios(inference_state, file_io_iterator, name, limit_reduction=
             parsed_file_count += 1
             yield m
             if parsed_file_count >= parse_limit:
-                dbg('Hit limit of parsed files: %s', parse_limit)
+                dbg("Hit limit of parsed files: %s", parse_limit)
                 break
 
         if file_io_count >= open_limit:
-            dbg('Hit limit of opened files: %s', open_limit)
+            dbg("Hit limit of opened files: %s", open_limit)
             break

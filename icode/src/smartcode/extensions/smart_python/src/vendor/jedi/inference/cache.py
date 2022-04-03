@@ -11,15 +11,19 @@ _NO_DEFAULT = object()
 _RECURSION_SENTINEL = object()
 
 
-def _memoize_default(default=_NO_DEFAULT, inference_state_is_first_arg=False,
-                     second_arg_is_inference_state=False):
-    """ This is a typical memoization decorator, BUT there is one difference:
+def _memoize_default(
+    default=_NO_DEFAULT,
+    inference_state_is_first_arg=False,
+    second_arg_is_inference_state=False,
+):
+    """This is a typical memoization decorator, BUT there is one difference:
     To prevent recursion it sets defaults.
 
     Preventing recursion is in this case the much bigger use than speed. I
     don't think, that there is a big speed difference, but there are many cases
     where recursion could happen (think about a = b; b = a).
     """
+
     def func(function):
         def wrapper(obj, *args, **kwargs):
             # TODO These checks are kind of ugly and slow.
@@ -44,6 +48,7 @@ def _memoize_default(default=_NO_DEFAULT, inference_state_is_first_arg=False,
                 rv = function(obj, *args, **kwargs)
                 memo[key] = rv
                 return rv
+
         return wrapper
 
     return func
@@ -51,7 +56,9 @@ def _memoize_default(default=_NO_DEFAULT, inference_state_is_first_arg=False,
 
 def inference_state_function_cache(default=_NO_DEFAULT):
     def decorator(func):
-        return _memoize_default(default=default, inference_state_is_first_arg=True)(func)
+        return _memoize_default(default=default, inference_state_is_first_arg=True)(
+            func
+        )
 
     return decorator
 
@@ -76,6 +83,7 @@ class CachedMetaClass(type):
     class initializations. Either you do it this way or with decorators, but
     with decorators you lose class access (isinstance, etc).
     """
+
     @inference_state_as_method_param_cache()
     def __call__(self, *args, **kwargs):
         return super().__call__(*args, **kwargs)
@@ -86,6 +94,7 @@ def inference_state_method_generator_cache():
     This is a special memoizer. It memoizes generators and also checks for
     recursion errors and returns no further iterator elemends in that case.
     """
+
     def func(function):
         @wraps(function)
         def wrapper(obj, *args, **kwargs):
@@ -109,7 +118,7 @@ def inference_state_method_generator_cache():
                 try:
                     next_element = cached_lst[i]
                     if next_element is _RECURSION_SENTINEL:
-                        debug.warning('Found a generator recursion for %s' % obj)
+                        debug.warning("Found a generator recursion for %s" % obj)
                         # This means we have hit a recursion.
                         return
                 except IndexError:
@@ -121,6 +130,7 @@ def inference_state_method_generator_cache():
                     cached_lst[-1] = next_element
                 yield next_element
                 i += 1
+
         return wrapper
 
     return func

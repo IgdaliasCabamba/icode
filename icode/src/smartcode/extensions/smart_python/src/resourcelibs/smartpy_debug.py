@@ -2,12 +2,27 @@ import webbrowser
 
 from PyQt5.QtCore import QObject, QProcess, Qt, QThread
 from PyQt5.QtGui import QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import (QFrame, QHBoxLayout, QLabel, QLineEdit,
-                             QListWidget, QPlainTextEdit, QPushButton,
-                             QSplitter, QTreeView, QVBoxLayout)
-from smartpy_utils import (BUILTIN_EXCEPTIONS, DEBUG_CONTEXT_REGEX,
-                           DEBUG_EXCEPTION_REGEX, DEBUG_RETURN_REGEX,
-                           DEBUG_STATUS_REGEX, code_debug_doc, debug_formatter)
+from PyQt5.QtWidgets import (
+    QFrame,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QPlainTextEdit,
+    QPushButton,
+    QSplitter,
+    QTreeView,
+    QVBoxLayout,
+)
+from smartpy_utils import (
+    BUILTIN_EXCEPTIONS,
+    DEBUG_CONTEXT_REGEX,
+    DEBUG_EXCEPTION_REGEX,
+    DEBUG_RETURN_REGEX,
+    DEBUG_STATUS_REGEX,
+    code_debug_doc,
+    debug_formatter,
+)
 
 from functions import getfn
 from ui.igui import IListWidgetItem, IStandardItem
@@ -96,7 +111,10 @@ class OutputTree(QFrame):
                     if len(child_title[0]) > 1:
                         child_item = IStandardItem(
                             self.parent.icons.get_icon("return"),
-                            f"{child_title[0][1]}", None, None)
+                            f"{child_title[0][1]}",
+                            None,
+                            None,
+                        )
                         root_item.appendRow(child_item)
                 self.model.appendRow(root_item)
 
@@ -143,8 +161,7 @@ class Debug(QFrame):
         self.parent = parent
         self.setObjectName("debug")
         self.process_debuger = QProcess(self)
-        self.process_debuger.readyReadStandardOutput.connect(
-            self.handle_stdout)
+        self.process_debuger.readyReadStandardOutput.connect(self.handle_stdout)
         self.process_debuger.readyReadStandardError.connect(self.handle_stderr)
         self.process_debuger.stateChanged.connect(self.handle_state)
         self.process_debuger.finished.connect(self.process_finished)
@@ -254,13 +271,12 @@ class Debug(QFrame):
         if state == QProcess.NotRunning:
             self.process_debuger.start(bin, args)
         else:
-            self.label_status.setText(
-                "<h5 style='color:yellow'>ALREADY RUNNING</h5>")
+            self.label_status.setText("<h5 style='color:yellow'>ALREADY RUNNING</h5>")
 
     def handle_stderr(self):
         data = self.process_debuger.readAllStandardError()
         stderr = bytes(data).decode("utf8")
-        #self.message(stderr)
+        # self.message(stderr)
         self.label_status.setText(f"<h5 style='color:red'>{stderr}</h5>")
 
     def handle_stdout(self):
@@ -274,14 +290,13 @@ class Debug(QFrame):
         states = {
             QProcess.NotRunning: "<h5>Not running</h5>",
             QProcess.Starting: "<h5 style='color:yellow'>Starting</h5>",
-            QProcess.Running: "<h5 style='color:green'>Running</h5>"
+            QProcess.Running: "<h5 style='color:green'>Running</h5>",
         }
         state_name = states[state]
         self.label_status.setText(state_name)
 
     def process_finished(self):
-        self.label_status.setText(
-            "<h5 style='color:green'>Process finished</h5>")
+        self.label_status.setText("<h5 style='color:green'>Process finished</h5>")
 
     def next_frame(self):
         command = "n" + "\n"

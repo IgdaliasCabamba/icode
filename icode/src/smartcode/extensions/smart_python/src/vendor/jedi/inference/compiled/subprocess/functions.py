@@ -75,7 +75,7 @@ def _get_init_path(directory_path):
     None.
     """
     for suffix in all_suffixes():
-        path = os.path.join(directory_path, '__init__' + suffix)
+        path = os.path.join(directory_path, "__init__" + suffix)
         if os.path.exists(path):
             return path
     return None
@@ -104,16 +104,16 @@ def _iter_module_names(inference_state, paths):
             if dir_entry.is_dir():
                 # pycache is obviously not an interesting namespace. Also the
                 # name must be a valid identifier.
-                if name != '__pycache__' and name.isidentifier():
+                if name != "__pycache__" and name.isidentifier():
                     yield name
             else:
-                if name.endswith('.pyi'):  # Stub files
+                if name.endswith(".pyi"):  # Stub files
                     modname = name[:-4]
                 else:
                     modname = inspect.getmodulename(name)
 
-                if modname and '.' not in modname:
-                    if modname != '__init__':
+                if modname and "." not in modname:
+                    if modname != "__init__":
                         yield modname
 
 
@@ -148,14 +148,18 @@ def _find_module(string, path=None, full_name=None, is_global_search=True):
             if loader is None and not spec.has_location:
                 # This is a namespace package.
                 full_name = string if not path else full_name
-                implicit_ns_info = ImplicitNSInfo(full_name, spec.submodule_search_locations._path)
+                implicit_ns_info = ImplicitNSInfo(
+                    full_name, spec.submodule_search_locations._path
+                )
                 return implicit_ns_info, True
             break
 
     return _find_module_py33(string, path, loader)
 
 
-def _find_module_py33(string, path=None, loader=None, full_name=None, is_global_search=True):
+def _find_module_py33(
+    string, path=None, loader=None, full_name=None, is_global_search=True
+):
     loader = loader or importlib.machinery.PathFinder.find_module(string, path)
 
     if loader is None and path is None:  # Fallback to find builtins
@@ -226,12 +230,12 @@ def _get_source(loader, fullname):
     try:
         return loader.get_data(path)
     except OSError:
-        raise ImportError('source not available through get_data()',
-                          name=fullname)
+        raise ImportError("source not available through get_data()", name=fullname)
 
 
 class ImplicitNSInfo:
     """Stores information returned from an implicit namespace spec"""
+
     def __init__(self, name, paths):
         self.name = name
         self.paths = paths

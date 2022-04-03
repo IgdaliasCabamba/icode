@@ -9,7 +9,7 @@ from typing import Any, Callable, Iterator, TextIO, Union
 from isort._future import dataclass
 from isort.exceptions import UnsupportedEncoding
 
-_ENCODING_PATTERN = re.compile(br"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)")
+_ENCODING_PATTERN = re.compile(rb"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)")
 
 
 @dataclass(frozen=True)
@@ -19,7 +19,9 @@ class File:
     encoding: str
 
     @staticmethod
-    def detect_encoding(filename: Union[str, Path], readline: Callable[[], bytes]) -> str:
+    def detect_encoding(
+        filename: Union[str, Path], readline: Callable[[], bytes]
+    ) -> str:
         try:
             return tokenize.detect_encoding(readline)[0]
         except Exception:
@@ -27,7 +29,9 @@ class File:
 
     @staticmethod
     def from_contents(contents: str, filename: str) -> "File":
-        encoding = File.detect_encoding(filename, BytesIO(contents.encode("utf-8")).readline)
+        encoding = File.detect_encoding(
+            filename, BytesIO(contents.encode("utf-8")).readline
+        )
         return File(  # type: ignore
             stream=StringIO(contents), path=Path(filename).resolve(), encoding=encoding
         )

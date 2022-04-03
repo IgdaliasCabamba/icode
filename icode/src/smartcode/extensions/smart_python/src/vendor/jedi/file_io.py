@@ -20,7 +20,7 @@ class AbstractFolderIO:
         raise NotImplementedError
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.path)
+        return "<%s: %s>" % (self.__class__.__name__, self.path)
 
 
 class FolderIO(AbstractFolderIO):
@@ -50,7 +50,7 @@ class FolderIO(AbstractFolderIO):
             current = next(modified_iterator, None)
             i = len(original_folder_ios)
             for folder_io in reversed(original_folder_ios):
-                i -= 1   # Basically enumerate but reversed
+                i -= 1  # Basically enumerate but reversed
                 if current is folder_io:
                     current = next(modified_iterator, None)
                 else:
@@ -64,6 +64,7 @@ class FileIOFolderMixin:
 
 class ZipFileIO(file_io.KnownContentFileIO, FileIOFolderMixin):
     """For .zip and .egg archives"""
+
     def __init__(self, path, code, zip_path):
         super().__init__(path, code)
         self._zip_path = zip_path

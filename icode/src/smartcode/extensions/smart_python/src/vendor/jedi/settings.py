@@ -68,17 +68,16 @@ Adds an opening bracket after a function for completions.
 # Filesystem Cache
 # ----------------
 
-if platform.system().lower() == 'windows':
+if platform.system().lower() == "windows":
     _cache_directory = os.path.join(
-        os.getenv('LOCALAPPDATA') or os.path.expanduser('~'),
-        'Jedi',
-        'Jedi',
+        os.getenv("LOCALAPPDATA") or os.path.expanduser("~"),
+        "Jedi",
+        "Jedi",
     )
-elif platform.system().lower() == 'darwin':
-    _cache_directory = os.path.join('~', 'Library', 'Caches', 'Jedi')
+elif platform.system().lower() == "darwin":
+    _cache_directory = os.path.join("~", "Library", "Caches", "Jedi")
 else:
-    _cache_directory = os.path.join(os.getenv('XDG_CACHE_HOME') or '~/.cache',
-                                    'jedi')
+    _cache_directory = os.path.join(os.getenv("XDG_CACHE_HOME") or "~/.cache", "jedi")
 cache_directory = os.path.expanduser(_cache_directory)
 """
 The path where the cache is stored.
@@ -135,7 +134,7 @@ Check for `isinstance` and other information to infer a type.
 """
 
 auto_import_modules = [
-    'gi',  # This third-party repository (GTK stuff) doesn't really work with jedi
+    "gi",  # This third-party repository (GTK stuff) doesn't really work with jedi
 ]
 """
 Modules that will not be analyzed but imported, if they contain Python code.

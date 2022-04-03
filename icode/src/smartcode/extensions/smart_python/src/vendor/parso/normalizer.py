@@ -19,8 +19,8 @@ class Normalizer(metaclass=_NormalizerMeta):
         self._config = config
         self.issues = []
 
-        self._rule_type_instances = self._instantiate_rules('rule_type_classes')
-        self._rule_value_instances = self._instantiate_rules('rule_value_classes')
+        self._rule_type_instances = self._instantiate_rules("rule_type_classes")
+        self._rule_value_instances = self._instantiate_rules("rule_value_classes")
 
     def _instantiate_rules(self, attr):
         dct = {}
@@ -44,7 +44,7 @@ class Normalizer(metaclass=_NormalizerMeta):
             return self.visit_leaf(node)
         else:
             with self.visit_node(node):
-                return ''.join(self.visit(child) for child in children)
+                return "".join(self.visit(child) for child in children)
 
     @contextmanager
     def visit_node(self, node):
@@ -142,7 +142,7 @@ class Issue:
         return hash((self.code, self.start_pos))
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.code)
+        return "<%s: %s>" % (self.__class__.__name__, self.code)
 
 
 class Rule:

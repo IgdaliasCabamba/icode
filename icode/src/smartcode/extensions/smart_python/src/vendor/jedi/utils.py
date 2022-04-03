@@ -59,11 +59,7 @@ def setup_readline(namespace_module=__main__, fuzzy=False):
     bash).
     """
     if READLINE_DEBUG:
-        logging.basicConfig(
-            filename='/tmp/jedi.log',
-            filemode='a',
-            level=logging.DEBUG
-        )
+        logging.basicConfig(filename="/tmp/jedi.log", filemode="a", level=logging.DEBUG)
 
     class JediRL:
         def complete(self, text, state):
@@ -87,7 +83,7 @@ def setup_readline(namespace_module=__main__, fuzzy=False):
                     logging.debug("REPL completions: %s", completions)
 
                     self.matches = [
-                        text[:len(text) - c._like_name_length] + c.name_with_symbols
+                        text[: len(text) - c._like_name_length] + c.name_with_symbols
                         for c in completions
                     ]
                 except:
@@ -120,7 +116,7 @@ def setup_readline(namespace_module=__main__, fuzzy=False):
         # don't repeat all the things written in the readline all the time
         readline.parse_and_bind("set completion-prefix-display-length 2")
         # No delimiters, Jedi handles that.
-        readline.set_completer_delims('')
+        readline.set_completer_delims("")
 
 
 def version_info():
@@ -128,7 +124,8 @@ def version_info():
     Returns a namedtuple of Jedi's version, similar to Python's
     ``sys.version_info``.
     """
-    Version = namedtuple('Version', 'major, minor, micro')
+    Version = namedtuple("Version", "major, minor, micro")
     from jedi import __version__
-    tupl = re.findall(r'[a-z]+|\d+', __version__)
+
+    tupl = re.findall(r"[a-z]+|\d+", __version__)
     return Version(*[x if i == 3 else int(x) for i, x in enumerate(tupl)])

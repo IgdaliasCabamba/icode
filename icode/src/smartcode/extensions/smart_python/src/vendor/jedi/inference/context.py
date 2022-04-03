@@ -4,8 +4,7 @@ from contextlib import contextmanager
 from parso.tree import search_ancestor
 from parso.python.tree import Name
 
-from jedi.inference.filters import ParserTreeFilter, MergedFilter, \
-    GlobalNameFilter
+from jedi.inference.filters import ParserTreeFilter, MergedFilter, GlobalNameFilter
 from jedi.inference.names import AnonymousParamName, TreeNameDefinition
 from jedi.inference.base_value import NO_VALUES, ValueSet
 from jedi.parser_utils import get_parent_scope
@@ -26,15 +25,19 @@ class AbstractContext:
 
     def goto(self, name_or_str, position):
         from jedi.inference import finder
+
         filters = _get_global_filters_for_name(
-            self, name_or_str if isinstance(name_or_str, Name) else None, position,
+            self,
+            name_or_str if isinstance(name_or_str, Name) else None,
+            position,
         )
         names = finder.filter_name(filters, name_or_str)
-        debug.dbg('context.goto %s in (%s): %s', name_or_str, self, names)
+        debug.dbg("context.goto %s in (%s): %s", name_or_str, self, names)
         return names
 
-    def py__getattribute__(self, name_or_str, name_context=None, position=None,
-                           analysis_errors=True):
+    def py__getattribute__(
+        self, name_or_str, name_context=None, position=None, analysis_errors=True
+    ):
         """
         :param position: Position of the last statement -> tuple of line, column
         """
@@ -42,7 +45,9 @@ class AbstractContext:
             name_context = self
         names = self.goto(name_or_str, position)
 
-        string_name = name_or_str.value if isinstance(name_or_str, Name) else name_or_str
+        string_name = (
+            name_or_str.value if isinstance(name_or_str, Name) else name_or_str
+        )
 
         # This paragraph is currently needed for proper branch type inference
         # (static analysis).
@@ -51,7 +56,7 @@ class AbstractContext:
             node = name_or_str
             while node is not None and not parser_utils.is_scope(node):
                 node = node.parent
-                if node.type in ("if_stmt", "for_stmt", "comp_for", 'sync_comp_for'):
+                if node.type in ("if_stmt", "for_stmt", "comp_for", "sync_comp_for"):
                     try:
                         name_dict = self.predefined_names[node]
                         types = name_dict[string_name]
@@ -62,6 +67,7 @@ class AbstractContext:
                         break
         if found_predefined_types is not None and names:
             from jedi.inference import flow_analysis
+
             check = flow_analysis.reachability_check(
                 context=self,
                 value_scope=self.tree_node,
@@ -77,10 +83,11 @@ class AbstractContext:
         if not names and not values and analysis_errors:
             if isinstance(name_or_str, Name):
                 from jedi.inference import analysis
-                message = ("NameError: name '%s' is not defined." % string_name)
-                analysis.add(name_context, 'name-error', name_or_str, message)
 
-        debug.dbg('context.names_to_types: %s -> %s', names, values)
+                message = "NameError: name '%s' is not defined." % string_name
+                analysis.add(name_context, "name-error", name_or_str, message)
+
+        debug.dbg("context.names_to_types: %s -> %s", names, values)
         if values:
             return values
         return self._check_for_additional_knowledge(name_or_str, name_context, position)
@@ -92,13 +99,15 @@ class AbstractContext:
             flow_scope = name_or_str
             base_nodes = [name_context.tree_node]
 
-            if any(b.type in ('comp_for', 'sync_comp_for') for b in base_nodes):
+            if any(b.type in ("comp_for", "sync_comp_for") for b in base_nodes):
                 return NO_VALUES
             from jedi.inference.finder import check_flow_information
+
             while True:
                 flow_scope = get_parent_scope(flow_scope, include_flows=True)
-                n = check_flow_information(name_context, flow_scope,
-                                           name_or_str, position)
+                n = check_flow_information(
+                    name_context, flow_scope, name_or_str, position
+                )
                 if n is not None:
                     return n
                 if flow_scope in base_nodes:
@@ -147,7 +156,7 @@ class AbstractContext:
         return ()
 
     def py__doc__(self):
-        return ''
+        return ""
 
     @contextmanager
     def predefine_names(self, flow_scope, dct):
@@ -163,6 +172,7 @@ class ValueContext(AbstractContext):
     """
     Should be defined, otherwise the API returns empty types.
     """
+
     def __init__(self, value):
         super().__init__(value.inference_state)
         self._value = value
@@ -213,12 +223,13 @@ class ValueContext(AbstractContext):
         return self._value
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self._value)
+        return "%s(%s)" % (self.__class__.__name__, self._value)
 
 
 class TreeContextMixin:
     def infer_node(self, node):
         from jedi.inference.syntax_tree import infer_node
+
         return infer_node(self, node)
 
     def create_value(self, node):
@@ -230,19 +241,22 @@ class TreeContextMixin:
 
         parent_context = self.create_context(node)
 
-        if node.type in ('funcdef', 'lambdef'):
+        if node.type in ("funcdef", "lambdef"):
             func = value.FunctionValue.from_context(parent_context, node)
             if parent_context.is_class():
-                class_value = parent_context.parent_context.create_value(parent_context.tree_node)
+                class_value = parent_context.parent_context.create_value(
+                    parent_context.tree_node
+                )
                 instance = value.AnonymousInstance(
-                    self.inference_state, parent_context.parent_context, class_value)
+                    self.inference_state, parent_context.parent_context, class_value
+                )
                 func = value.BoundMethod(
                     instance=instance,
                     class_context=class_value.as_context(),
-                    function=func
+                    function=func,
                 )
             return func
-        elif node.type == 'classdef':
+        elif node.type == "classdef":
             return value.ClassValue(self.inference_state, parent_context, node)
         else:
             raise NotImplementedError("Probably shouldn't happen: %s" % node)
@@ -252,9 +266,9 @@ class TreeContextMixin:
             if scope_node == self.tree_node:
                 return self
 
-            if scope_node.type in ('funcdef', 'lambdef', 'classdef'):
+            if scope_node.type in ("funcdef", "lambdef", "classdef"):
                 return self.create_value(scope_node).as_context()
-            elif scope_node.type in ('comp_for', 'sync_comp_for'):
+            elif scope_node.type in ("comp_for", "sync_comp_for"):
                 parent_scope = parser_utils.get_parent_scope(scope_node)
                 parent_context = from_scope_node(parent_scope)
                 if node.start_pos >= scope_node.children[-1].start_pos:
@@ -268,28 +282,28 @@ class TreeContextMixin:
 
                 if parser_utils.is_scope(node):
                     return node
-                elif node.type in ('argument', 'testlist_comp'):
-                    if node.children[1].type in ('comp_for', 'sync_comp_for'):
+                elif node.type in ("argument", "testlist_comp"):
+                    if node.children[1].type in ("comp_for", "sync_comp_for"):
                         return node.children[1]
-                elif node.type == 'dictorsetmaker':
+                elif node.type == "dictorsetmaker":
                     for n in node.children[1:4]:
                         # In dictionaries it can be pretty much anything.
-                        if n.type in ('comp_for', 'sync_comp_for'):
+                        if n.type in ("comp_for", "sync_comp_for"):
                             return n
 
         scope_node = parent_scope(node)
-        if scope_node.type in ('funcdef', 'classdef'):
-            colon = scope_node.children[scope_node.children.index(':')]
+        if scope_node.type in ("funcdef", "classdef"):
+            colon = scope_node.children[scope_node.children.index(":")]
             if node.start_pos < colon.start_pos:
                 parent = node.parent
-                if not (parent.type == 'param' and parent.name == node):
+                if not (parent.type == "param" and parent.name == node):
                     scope_node = parent_scope(scope_node)
         return from_scope_node(scope_node, is_nested=True)
 
     def create_name(self, tree_name):
         definition = tree_name.get_definition()
-        if definition and definition.type == 'param' and definition.name == tree_name:
-            funcdef = search_ancestor(definition, 'funcdef', 'lambdef')
+        if definition and definition.type == "param" and definition.name == tree_name:
+            funcdef = search_ancestor(definition, "funcdef", "lambdef")
             func = self.create_value(funcdef)
             return AnonymousParamName(func, tree_name)
         else:
@@ -303,7 +317,7 @@ class FunctionContext(TreeContextMixin, ValueContext):
             self.inference_state,
             parent_context=self,
             until_position=until_position,
-            origin_scope=origin_scope
+            origin_scope=origin_scope,
         )
 
 
@@ -319,7 +333,7 @@ class ModuleContext(TreeContextMixin, ValueContext):
             ParserTreeFilter(
                 parent_context=self,
                 until_position=until_position,
-                origin_scope=origin_scope
+                origin_scope=origin_scope,
             ),
             self.get_global_filter(),
         )
@@ -368,7 +382,7 @@ class ClassContext(TreeContextMixin, ValueContext):
         return ParserTreeFilter(
             parent_context=self,
             until_position=until_position,
-            origin_scope=origin_scope
+            origin_scope=origin_scope,
         )
 
 
@@ -385,10 +399,10 @@ class CompForContext(TreeContextMixin, AbstractContext):
         return None
 
     def py__name__(self):
-        return '<comprehension context>'
+        return "<comprehension context>"
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, self.tree_node)
+        return "%s(%s)" % (self.__class__.__name__, self.tree_node)
 
 
 class CompiledContext(ValueContext):
@@ -415,13 +429,13 @@ def _get_global_filters_for_name(context, name_or_none, position):
     # function and get inferred in the value before the function. So
     # make sure to exclude the function/class name.
     if name_or_none is not None:
-        ancestor = search_ancestor(name_or_none, 'funcdef', 'classdef', 'lambdef')
+        ancestor = search_ancestor(name_or_none, "funcdef", "classdef", "lambdef")
         lambdef = None
-        if ancestor == 'lambdef':
+        if ancestor == "lambdef":
             # For lambdas it's even more complicated since parts will
             # be inferred later.
             lambdef = ancestor
-            ancestor = search_ancestor(name_or_none, 'funcdef', 'classdef')
+            ancestor = search_ancestor(name_or_none, "funcdef", "classdef")
         if ancestor is not None:
             colon = ancestor.children[-2]
             if position is not None and position < colon.start_pos:
@@ -480,11 +494,11 @@ def get_global_filters(context, until_position, origin_scope):
     """
     base_context = context
     from jedi.inference.value.function import BaseFunctionExecutionContext
+
     while context is not None:
         # Names in methods cannot be resolved within the class.
         yield from context.get_filters(
-            until_position=until_position,
-            origin_scope=origin_scope
+            until_position=until_position, origin_scope=origin_scope
         )
         if isinstance(context, (BaseFunctionExecutionContext, ModuleContext)):
             # The position should be reset if the current scope is a function.

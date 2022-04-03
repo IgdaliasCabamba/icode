@@ -80,7 +80,9 @@ def grid(**interface: Any) -> str:
             interface["comments"] = []
         else:
             interface["statement"] += ", " + next_import
-    return f"{interface['statement']}{',' if interface['include_trailing_comma'] else ''})"
+    return (
+        f"{interface['statement']}{',' if interface['include_trailing_comma'] else ''})"
+    )
 
 
 @_wrap_mode
@@ -134,7 +136,10 @@ def hanging_indent(**interface: Any) -> str:
     while interface["imports"]:
         next_import = interface["imports"].pop(0)
         next_statement = interface["statement"] + ", " + next_import
-        if len(next_statement.split(interface["line_separator"])[-1]) > line_length_limit:
+        if (
+            len(next_statement.split(interface["line_separator"])[-1])
+            > line_length_limit
+        ):
             next_statement = (
                 _hanging_indent_end_line(interface["statement"] + ",")
                 + f"{interface['line_separator']}{interface['indent']}{next_import}"
@@ -176,7 +181,9 @@ def vertical_hanging_indent(**interface: Any) -> str:
         removed=interface["remove_comments"],
         comment_prefix=interface["comment_prefix"],
     )
-    _imports = ("," + interface["line_separator"] + interface["indent"]).join(interface["imports"])
+    _imports = ("," + interface["line_separator"] + interface["indent"]).join(
+        interface["imports"]
+    )
     _comma_maybe = "," if interface["include_trailing_comma"] else ""
     return (
         f"{interface['statement']}({_line_with_comments}{interface['line_separator']}"
@@ -362,7 +369,9 @@ def hanging_indent_with_parentheses(**interface: Any) -> str:
             )
             interface["comments"] = []
         interface["statement"] = next_statement
-    return f"{interface['statement']}{',' if interface['include_trailing_comma'] else ''})"
+    return (
+        f"{interface['statement']}{',' if interface['include_trailing_comma'] else ''})"
+    )
 
 
 @_wrap_mode
@@ -372,5 +381,6 @@ def backslash_grid(**interface: Any) -> str:
 
 
 WrapModes = enum.Enum(  # type: ignore
-    "WrapModes", {wrap_mode: index for index, wrap_mode in enumerate(_wrap_modes.keys())}
+    "WrapModes",
+    {wrap_mode: index for index, wrap_mode in enumerate(_wrap_modes.keys())},
 )

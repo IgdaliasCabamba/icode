@@ -11,6 +11,7 @@ class ImplicitNSName(ValueNameMixin, AbstractNameDefinition):
     Accessing names for implicit namespace packages should infer to nothing.
     This object will prevent Jedi from raising exceptions
     """
+
     def __init__(self, implicit_ns_value, string_name):
         self._value = implicit_ns_value
         self.string_name = string_name
@@ -20,10 +21,11 @@ class ImplicitNamespaceValue(Value, SubModuleDictMixin):
     """
     Provides support for implicit namespace packages
     """
+
     # Is a module like every other module, because if you import an empty
     # folder foobar it will be available as an object:
     # <module 'foobar' (namespace)>.
-    api_type = 'module'
+    api_type = "module"
     parent_context = None
 
     def __init__(self, inference_state, string_names, paths):
@@ -48,15 +50,14 @@ class ImplicitNamespaceValue(Value, SubModuleDictMixin):
         return None
 
     def py__package__(self):
-        """Return the fullname
-        """
+        """Return the fullname"""
         return self.string_names
 
     def py__path__(self):
         return self._paths
 
     def py__name__(self):
-        return '.'.join(self.string_names)
+        return ".".join(self.string_names)
 
     def is_namespace(self):
         return True
@@ -71,4 +72,4 @@ class ImplicitNamespaceValue(Value, SubModuleDictMixin):
         return NamespaceContext(self)
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.py__name__())
+        return "<%s: %s>" % (self.__class__.__name__, self.py__name__())

@@ -43,7 +43,7 @@ from parso.grammar import Grammar, load_grammar
 from parso.utils import split_lines, python_bytes_to_unicode
 
 
-__version__ = '0.8.3'
+__version__ = "0.8.3"
 
 
 def parse(code=None, **kwargs):
@@ -53,6 +53,6 @@ def parse(code=None, **kwargs):
 
     :param str version: The version used by :py:func:`parso.load_grammar`.
     """
-    version = kwargs.pop('version', None)
+    version = kwargs.pop("version", None)
     grammar = load_grammar(version=version)
     return grammar.parse(code, **kwargs)

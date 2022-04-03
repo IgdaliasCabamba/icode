@@ -24,23 +24,22 @@ from parso import parse, ParserSyntaxError
 from jedi import debug
 from jedi.common import indent_block
 from jedi.inference.cache import inference_state_method_cache
-from jedi.inference.base_value import iterator_to_value_set, ValueSet, \
-    NO_VALUES
+from jedi.inference.base_value import iterator_to_value_set, ValueSet, NO_VALUES
 from jedi.inference.lazy_value import LazyKnownValues
 
 
 DOCSTRING_PARAM_PATTERNS = [
-    r'\s*:type\s+%s:\s*([^\n]+)',  # Sphinx
-    r'\s*:param\s+(\w+)\s+%s:[^\n]*',  # Sphinx param with type
-    r'\s*@type\s+%s:\s*([^\n]+)',  # Epydoc
+    r"\s*:type\s+%s:\s*([^\n]+)",  # Sphinx
+    r"\s*:param\s+(\w+)\s+%s:[^\n]*",  # Sphinx param with type
+    r"\s*@type\s+%s:\s*([^\n]+)",  # Epydoc
 ]
 
 DOCSTRING_RETURN_PATTERNS = [
-    re.compile(r'\s*:rtype:\s*([^\n]+)', re.M),  # Sphinx
-    re.compile(r'\s*@rtype:\s*([^\n]+)', re.M),  # Epydoc
+    re.compile(r"\s*:rtype:\s*([^\n]+)", re.M),  # Sphinx
+    re.compile(r"\s*@rtype:\s*([^\n]+)", re.M),  # Epydoc
 ]
 
-REST_ROLE_PATTERN = re.compile(r':[^`]+:`([^`]+)`')
+REST_ROLE_PATTERN = re.compile(r":[^`]+:`([^`]+)`")
 
 
 _numpy_doc_string_cache = None
@@ -51,6 +50,7 @@ def _get_numpy_doc_string_cls():
     if isinstance(_numpy_doc_string_cache, (ImportError, SyntaxError)):
         raise _numpy_doc_string_cache
     from numpydoc.docscrape import NumpyDocString  # type: ignore[import]
+
     _numpy_doc_string_cache = NumpyDocString
     return _numpy_doc_string_cache
 
@@ -62,12 +62,12 @@ def _search_param_in_numpydocstr(docstr, param_str):
         try:
             # This is a non-public API. If it ever changes we should be
             # prepared and return gracefully.
-            params = _get_numpy_doc_string_cls()(docstr)._parsed_data['Parameters']
+            params = _get_numpy_doc_string_cls()(docstr)._parsed_data["Parameters"]
         except Exception:
             return []
     for p_name, p_type, p_descr in params:
         if p_name == param_str:
-            m = re.match(r'([^,]+(,[^,]+)*?)(,[ ]*optional)?$', p_type)
+            m = re.match(r"([^,]+(,[^,]+)*?)(,[ ]*optional)?$", p_type)
             if m:
                 p_type = m.group(1)
             return list(_expand_typestr(p_type))
@@ -87,8 +87,8 @@ def _search_return_in_numpydocstr(docstr):
     try:
         # This is a non-public API. If it ever changes we should be
         # prepared and return gracefully.
-        returns = doc._parsed_data['Returns']
-        returns += doc._parsed_data['Yields']
+        returns = doc._parsed_data["Returns"]
+        returns += doc._parsed_data["Yields"]
     except Exception:
         return
     for r_name, r_type, r_descr in returns:
@@ -103,27 +103,27 @@ def _expand_typestr(type_str):
     Attempts to interpret the possible types in `type_str`
     """
     # Check if alternative types are specified with 'or'
-    if re.search(r'\bor\b', type_str):
-        for t in type_str.split('or'):
-            yield t.split('of')[0].strip()
+    if re.search(r"\bor\b", type_str):
+        for t in type_str.split("or"):
+            yield t.split("of")[0].strip()
     # Check if like "list of `type`" and set type to list
-    elif re.search(r'\bof\b', type_str):
-        yield type_str.split('of')[0]
+    elif re.search(r"\bof\b", type_str):
+        yield type_str.split("of")[0]
     # Check if type has is a set of valid literal values eg: {'C', 'F', 'A'}
-    elif type_str.startswith('{'):
-        node = parse(type_str, version='3.7').children[0]
-        if node.type == 'atom':
+    elif type_str.startswith("{"):
+        node = parse(type_str, version="3.7").children[0]
+        if node.type == "atom":
             for leaf in getattr(node.children[1], "children", []):
-                if leaf.type == 'number':
-                    if '.' in leaf.value:
-                        yield 'float'
+                if leaf.type == "number":
+                    if "." in leaf.value:
+                        yield "float"
                     else:
-                        yield 'int'
-                elif leaf.type == 'string':
-                    if 'b' in leaf.string_prefix.lower():
-                        yield 'bytes'
+                        yield "int"
+                elif leaf.type == "string":
+                    if "b" in leaf.string_prefix.lower():
+                        yield "bytes"
                     else:
-                        yield 'str'
+                        yield "str"
                 # Ignore everything else.
 
     # Otherwise just work with what we have.
@@ -149,8 +149,7 @@ def _search_param_in_docstr(docstr, param_str):
 
     """
     # look at #40 to see definitions of those params
-    patterns = [re.compile(p % re.escape(param_str))
-                for p in DOCSTRING_PARAM_PATTERNS]
+    patterns = [re.compile(p % re.escape(param_str)) for p in DOCSTRING_PARAM_PATTERNS]
     for pattern in patterns:
         match = pattern.search(docstr)
         if match:
@@ -182,7 +181,8 @@ def _strip_rst_role(type_str):
 
 
 def _infer_for_statement_string(module_context, string):
-    code = dedent("""
+    code = dedent(
+        """
     def pseudo_docstring_stuff():
         '''
         Create a pseudo function for docstring statements.
@@ -190,16 +190,17 @@ def _infer_for_statement_string(module_context, string):
         is still a function.
         '''
     {}
-    """)
+    """
+    )
     if string is None:
         return []
 
-    for element in re.findall(r'((?:\w+\.)*\w+)\.', string):
+    for element in re.findall(r"((?:\w+\.)*\w+)\.", string):
         # Try to import module part in dotted name.
         # (e.g., 'threading' in 'threading.Thread').
-        string = 'import %s\n' % element + string
+        string = "import %s\n" % element + string
 
-    debug.dbg('Parse docstring code %s', string, color='BLUE')
+    debug.dbg("Parse docstring code %s", string, color="BLUE")
     grammar = module_context.inference_state.grammar
     try:
         module = grammar.parse(code.format(indent_block(string)), error_recovery=False)
@@ -213,14 +214,13 @@ def _infer_for_statement_string(module_context, string):
     except (AttributeError, IndexError):
         return []
 
-    if stmt.type not in ('name', 'atom', 'atom_expr'):
+    if stmt.type not in ("name", "atom", "atom_expr"):
         return []
 
     from jedi.inference.value import FunctionValue
+
     function_value = FunctionValue(
-        module_context.inference_state,
-        module_context,
-        funcdef
+        module_context.inference_state, module_context, funcdef
     )
     func_execution_context = function_value.as_context()
     # Use the module of the param.
@@ -238,8 +238,7 @@ def _execute_types_in_stmt(module_context, stmt):
     """
     definitions = module_context.infer_node(stmt)
     return ValueSet.from_sets(
-        _execute_array_values(module_context.inference_state, d)
-        for d in definitions
+        _execute_array_values(module_context.inference_state, d) for d in definitions
     )
 
 
@@ -249,7 +248,11 @@ def _execute_array_values(inference_state, array):
     ones.  `(str, int)` means that it returns a tuple with both types.
     """
     from jedi.inference.value.iterable import SequenceLiteralValue, FakeTuple, FakeList
-    if isinstance(array, SequenceLiteralValue) and array.array_type in ('tuple', 'list'):
+
+    if isinstance(array, SequenceLiteralValue) and array.array_type in (
+        "tuple",
+        "list",
+    ):
         values = []
         for lazy_value in array.py__iter__():
             objects = ValueSet.from_sets(
@@ -257,7 +260,7 @@ def _execute_array_values(inference_state, array):
                 for typ in lazy_value.infer()
             )
             values.append(LazyKnownValues(objects))
-        cls = FakeTuple if array.array_type == 'tuple' else FakeList
+        cls = FakeTuple if array.array_type == "tuple" else FakeList
         return {cls(inference_state, values)}
     else:
         return array.execute_annotation()
@@ -271,17 +274,17 @@ def infer_param(function_value, param):
             for param_str in _search_param_in_docstr(docstring, param.name.value)
             for p in _infer_for_statement_string(module_context, param_str)
         )
+
     module_context = function_value.get_root_context()
     func = param.get_parent_function()
-    if func.type == 'lambdef':
+    if func.type == "lambdef":
         return NO_VALUES
 
     types = infer_docstring(function_value.py__doc__())
-    if function_value.is_bound_method() \
-            and function_value.py__name__() == '__init__':
+    if function_value.is_bound_method() and function_value.py__name__() == "__init__":
         types |= infer_docstring(function_value.class_context.py__doc__())
 
-    debug.dbg('Found param types for docstring: %s', types, color='BLUE')
+    debug.dbg("Found param types for docstring: %s", types, color="BLUE")
     return types
 
 
@@ -297,4 +300,6 @@ def infer_return_types(function_value):
         yield from _search_return_in_numpydocstr(code)
 
     for type_str in search_return_in_docstr(function_value.py__doc__()):
-        yield from _infer_for_statement_string(function_value.get_root_context(), type_str)
+        yield from _infer_for_statement_string(
+            function_value.get_root_context(), type_str
+        )

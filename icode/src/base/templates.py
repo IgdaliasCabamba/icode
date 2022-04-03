@@ -2,22 +2,23 @@ from functions import getfn
 import pathlib
 from .char_utils import get_unicon
 
+
 class IndexRender:
     def __init__(self):
-        self.icons=getfn.get_smartcode_icons("index")
-        self.logo=f'image: url("{self.icons["logo"]}")'
+        self.icons = getfn.get_smartcode_icons("index")
+        self.logo = f'image: url("{self.icons["logo"]}")'
         self.__paths = []
-    
-    def set_paths(self, paths:list=[]):
+
+    def set_paths(self, paths: list = []):
         if not isinstance(paths, list):
             paths = []
-        
+
         self.__paths = paths
-    
+
     @property
     def paths(self):
         return self.__paths
-    
+
     @property
     def hello_code(self) -> str:
         return f"""
@@ -48,20 +49,20 @@ class IndexRender:
             </p>
         </div>
         
-    """  
-    
+    """
+
     @property
     def recent_paths(self) -> str:
-        
+
         paths = getfn.get_list_without_duplicates(self.paths)
         recent_paths_names = []
         recent_paths = []
-        
+
         for i in range(6):
             paths.insert(0, "#")
-        
+
         for i in range(1, 6):
-            path = paths[i*-1]
+            path = paths[i * -1]
             path_obj = pathlib.Path(path)
             parent = f"~{path_obj.parent}"
             name = path_obj.name
@@ -69,10 +70,12 @@ class IndexRender:
                 path = ""
                 parent = ""
                 name = ""
-                
+
             recent_paths.append(path)
-            recent_paths_names.append(f"<small>{name}<span style='color:gray'>&nbsp;&nbsp;&nbsp;{parent}</span></small>")
-            
+            recent_paths_names.append(
+                f"<small>{name}<span style='color:gray'>&nbsp;&nbsp;&nbsp;{parent}</span></small>"
+            )
+
         return f"""
         <p>
             <span>
@@ -123,10 +126,10 @@ class IndexRender:
         <br>
         <br>
         """
-    
+
     @property
     def dev_utils(self) -> str:
-       return f"""
+        return f"""
         <h3><nobr>Useful links</nobr></h3>
         <p>
             <nobr><a href='#show-commands' style='text-decoration:none;'><span style="font-size:15pt">{ get_unicon("fa", "external_link")}</span> Read The Docs</a></nobr>
@@ -143,10 +146,11 @@ class IndexRender:
         <br>
         """
 
+
 class AprilRender:
     def __init__(self):
         pass
-    
+
     @property
     def error_log(self):
         return """
@@ -159,6 +163,7 @@ class AprilRender:
             </p>
             
         """
+
     @property
     def readme(self):
         return f"""
@@ -176,11 +181,11 @@ class AprilRender:
                 <p>&nbsp;&nbsp;Answer questions <span style="font-size:15pt">\uf477</span></p>
             </nobr>
         """
-    
+
     @property
     def asks(self) -> list:
-        return ["hello","hi"," "]
-    
+        return ["hello", "hi", " "]
+
     @property
     def answers(self) -> list:
-        return ["Hello!","Hi!","???"]
+        return ["Hello!", "Hi!", "???"]

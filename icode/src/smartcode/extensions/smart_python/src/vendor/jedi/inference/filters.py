@@ -10,12 +10,16 @@ from parso.tree import search_ancestor
 from parso.python.tree import Name, UsedNamesMapping
 
 from jedi.inference import flow_analysis
-from jedi.inference.base_value import ValueSet, ValueWrapper, \
-    LazyValueWrapper
+from jedi.inference.base_value import ValueSet, ValueWrapper, LazyValueWrapper
 from jedi.parser_utils import get_cached_parent_scope
 from jedi.inference.utils import to_list
-from jedi.inference.names import TreeNameDefinition, ParamName, \
-    AnonymousParamName, AbstractNameDefinition, NameWrapper
+from jedi.inference.names import (
+    TreeNameDefinition,
+    ParamName,
+    AnonymousParamName,
+    AbstractNameDefinition,
+    NameWrapper,
+)
 
 _definition_name_cache: MutableMapping[UsedNamesMapping, List[Name]]
 _definition_name_cache = weakref.WeakKeyDictionary()
@@ -80,9 +84,11 @@ class AbstractUsedNamesFilter(AbstractFilter):
         self.parent_context = parent_context
 
     def get(self, name):
-        return self._convert_names(self._filter(
-            _get_definition_names(self._used_names, name),
-        ))
+        return self._convert_names(
+            self._filter(
+                _get_definition_names(self._used_names, name),
+            )
+        )
 
     def _convert_names(self, names):
         return [self.name_class(self.parent_context, name) for name in names]
@@ -97,12 +103,13 @@ class AbstractUsedNamesFilter(AbstractFilter):
         )
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.parent_context)
+        return "<%s: %s>" % (self.__class__.__name__, self.parent_context)
 
 
 class ParserTreeFilter(AbstractUsedNamesFilter):
-    def __init__(self, parent_context, node_context=None, until_position=None,
-                 origin_scope=None):
+    def __init__(
+        self, parent_context, node_context=None, until_position=None, origin_scope=None
+    ):
         """
         node_context is an option to specify a second value for use cases
         like the class mro where the parent class of a new name would be the
@@ -123,10 +130,12 @@ class ParserTreeFilter(AbstractUsedNamesFilter):
 
     def _is_name_reachable(self, name):
         parent = name.parent
-        if parent.type == 'trailer':
+        if parent.type == "trailer":
             return False
-        base_node = parent if parent.type in ('classdef', 'funcdef') else name
-        return get_cached_parent_scope(self._used_names, base_node) == self._parser_scope
+        base_node = parent if parent.type in ("classdef", "funcdef") else name
+        return (
+            get_cached_parent_scope(self._used_names, base_node) == self._parser_scope
+        )
 
     def _check_flows(self, names):
         for name in sorted(names, key=lambda name: name.start_pos, reverse=True):
@@ -134,7 +143,7 @@ class ParserTreeFilter(AbstractUsedNamesFilter):
                 context=self._node_context,
                 value_scope=self._parser_scope,
                 node=name,
-                origin_scope=self._origin_scope
+                origin_scope=self._origin_scope,
             )
             if check is not flow_analysis.UNREACHABLE:
                 yield name
@@ -158,7 +167,7 @@ class _FunctionExecutionFilter(ParserTreeFilter):
     @to_list
     def _convert_names(self, names):
         for name in names:
-            param = search_ancestor(name, 'param')
+            param = search_ancestor(name, "param")
             # Here we don't need to check if the param is a default/annotation,
             # because those are not definitions and never make it to this
             # point.
@@ -193,12 +202,13 @@ class GlobalNameFilter(AbstractUsedNamesFilter):
     @to_list
     def _filter(self, names):
         for name in names:
-            if name.parent.type == 'global_stmt':
+            if name.parent.type == "global_stmt":
                 yield name
 
     def values(self):
         return self._convert_names(
-            name for name_list in self._used_names.values()
+            name
+            for name_list in self._used_names.values()
             for name in self._filter(name_list)
         )
 
@@ -222,14 +232,15 @@ class DictFilter(AbstractFilter):
                     yield self._convert(*item)
                 except KeyError:
                     pass
+
         return self._filter(yielder())
 
     def _convert(self, name, value):
         return value
 
     def __repr__(self):
-        keys = ', '.join(self._dct.keys())
-        return '<%s: for {%s}>' % (self.__class__.__name__, keys)
+        keys = ", ".join(self._dct.keys())
+        return "<%s: for {%s}>" % (self.__class__.__name__, keys)
 
 
 class MergedFilter:
@@ -243,12 +254,16 @@ class MergedFilter:
         return [n for filter in self._filters for n in filter.values()]
 
     def __repr__(self):
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(str(f) for f in self._filters))
+        return "%s(%s)" % (
+            self.__class__.__name__,
+            ", ".join(str(f) for f in self._filters),
+        )
 
 
 class _BuiltinMappedMethod(ValueWrapper):
     """``Generator.__next__`` ``dict.values`` methods and so on."""
-    api_type = 'function'
+
+    api_type = "function"
 
     def __init__(self, value, method, builtin_func):
         super().__init__(builtin_func)
@@ -265,8 +280,9 @@ class SpecialMethodFilter(DictFilter):
     A filter for methods that are defined in this module on the corresponding
     classes like Generator (for __next__, etc).
     """
+
     class SpecialMethodName(AbstractNameDefinition):
-        api_type = 'function'
+        api_type = "function"
 
         def __init__(self, parent_context, string_name, callable_, builtin_value):
             self.parent_context = parent_context
@@ -285,9 +301,13 @@ class SpecialMethodFilter(DictFilter):
                 else:
                     continue
                 break
-            return ValueSet([
-                _BuiltinMappedMethod(self.parent_context, self._callable, builtin_func)
-            ])
+            return ValueSet(
+                [
+                    _BuiltinMappedMethod(
+                        self.parent_context, self._callable, builtin_func
+                    )
+                ]
+            )
 
     def __init__(self, value, dct, builtin_value):
         super().__init__(dct)
@@ -329,20 +349,23 @@ class _AttributeOverwriteMixin:
         yield from self._wrapped_value.get_filters(*args, **kwargs)
 
 
-class LazyAttributeOverwrite(_AttributeOverwriteMixin, LazyValueWrapper,
-                             metaclass=_OverwriteMeta):
+class LazyAttributeOverwrite(
+    _AttributeOverwriteMixin, LazyValueWrapper, metaclass=_OverwriteMeta
+):
     def __init__(self, inference_state):
         self.inference_state = inference_state
 
 
-class AttributeOverwrite(_AttributeOverwriteMixin, ValueWrapper,
-                         metaclass=_OverwriteMeta):
+class AttributeOverwrite(
+    _AttributeOverwriteMixin, ValueWrapper, metaclass=_OverwriteMeta
+):
     pass
 
 
 def publish_method(method_name):
     def decorator(func):
-        dct = func.__dict__.setdefault('registered_overwritten_methods', {})
+        dct = func.__dict__.setdefault("registered_overwritten_methods", {})
         dct[method_name] = func
         return func
+
     return decorator

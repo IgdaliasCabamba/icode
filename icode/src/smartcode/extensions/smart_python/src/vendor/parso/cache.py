@@ -49,11 +49,11 @@ are regarded as incompatible.
 - A __slot__ of a class is changed.
 """
 
-_VERSION_TAG = '%s-%s%s-%s' % (
+_VERSION_TAG = "%s-%s%s-%s" % (
     platform.python_implementation(),
     sys.version_info[0],
     sys.version_info[1],
-    _PICKLE_VERSION
+    _PICKLE_VERSION,
 )
 """
 Short name for distinguish Python implementations and versions.
@@ -64,12 +64,12 @@ See: http://docs.python.org/3/library/sys.html#sys.implementation
 
 
 def _get_default_cache_path():
-    if platform.system().lower() == 'windows':
-        dir_ = Path(os.getenv('LOCALAPPDATA') or '~', 'Parso', 'Parso')
-    elif platform.system().lower() == 'darwin':
-        dir_ = Path('~', 'Library', 'Caches', 'Parso')
+    if platform.system().lower() == "windows":
+        dir_ = Path(os.getenv("LOCALAPPDATA") or "~", "Parso", "Parso")
+    elif platform.system().lower() == "darwin":
+        dir_ = Path("~", "Library", "Caches", "Parso")
     else:
-        dir_ = Path(os.getenv('XDG_CACHE_HOME') or '~/.cache', 'parso')
+        dir_ = Path(os.getenv("XDG_CACHE_HOME") or "~/.cache", "parso")
     return dir_.expanduser()
 
 
@@ -125,10 +125,7 @@ def load_module(hashed_grammar, file_io, cache_path=None):
             return module_cache_item.node
     except KeyError:
         return _load_from_file_system(
-            hashed_grammar,
-            file_io.path,
-            p_time,
-            cache_path=cache_path
+            hashed_grammar, file_io.path, p_time, cache_path=cache_path
         )
 
 
@@ -139,7 +136,7 @@ def _load_from_file_system(hashed_grammar, path, p_time, cache_path=None):
             # Cache is outdated
             return None
 
-        with open(cache_path, 'rb') as f:
+        with open(cache_path, "rb") as f:
             gc.disable()
             try:
                 module_cache_item = pickle.load(f)
@@ -149,7 +146,7 @@ def _load_from_file_system(hashed_grammar, path, p_time, cache_path=None):
         return None
     else:
         _set_cache_item(hashed_grammar, path, module_cache_item)
-        LOG.debug('pickle loaded: %s', path)
+        LOG.debug("pickle loaded: %s", path)
         return module_cache_item.node
 
 
@@ -169,7 +166,9 @@ def _set_cache_item(hashed_grammar, path, module_cache_item):
     parser_cache.setdefault(hashed_grammar, {})[path] = module_cache_item
 
 
-def try_to_save_module(hashed_grammar, file_io, module, lines, pickling=True, cache_path=None):
+def try_to_save_module(
+    hashed_grammar, file_io, module, lines, pickling=True, cache_path=None
+):
     path = file_io.path
     try:
         p_time = None if path is None else file_io.get_last_modified()
@@ -187,15 +186,14 @@ def try_to_save_module(hashed_grammar, file_io, module, lines, pickling=True, ca
             # file system. It's still in RAM in that case. However we should
             # still warn the user that this is happening.
             warnings.warn(
-                'Tried to save a file to %s, but got permission denied.' % path,
-                Warning
+                "Tried to save a file to %s, but got permission denied." % path, Warning
             )
         else:
             _remove_cache_and_update_lock(cache_path=cache_path)
 
 
 def _save_to_file_system(hashed_grammar, path, item, cache_path=None):
-    with open(_get_hashed_path(hashed_grammar, path, cache_path=cache_path), 'wb') as f:
+    with open(_get_hashed_path(hashed_grammar, path, cache_path=cache_path), "wb") as f:
         pickle.dump(item, f, pickle.HIGHEST_PROTOCOL)
 
 
@@ -233,7 +231,7 @@ def _touch(path):
         os.utime(path, None)
     except FileNotFoundError:
         try:
-            file = open(path, 'a')
+            file = open(path, "a")
             file.close()
         except (OSError, IOError):  # TODO Maybe log this?
             return False
@@ -263,7 +261,7 @@ def _get_hashed_path(hashed_grammar, path, cache_path=None):
     directory = _get_cache_directory_path(cache_path=cache_path)
 
     file_hash = hashlib.sha256(str(path).encode("utf-8")).hexdigest()
-    return os.path.join(directory, '%s-%s.pkl' % (hashed_grammar, file_hash))
+    return os.path.join(directory, "%s-%s.pkl" % (hashed_grammar, file_hash))
 
 
 def _get_cache_directory_path(cache_path=None):

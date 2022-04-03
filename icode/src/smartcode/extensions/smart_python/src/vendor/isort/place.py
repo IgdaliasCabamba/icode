@@ -37,7 +37,10 @@ def _forced_separate(name: str, config: Config) -> Optional[Tuple[str, str]]:
             path_glob = "%s*" % forced_separate
 
         if fnmatch(name, path_glob) or fnmatch(name, "." + path_glob):
-            return (forced_separate, f"Matched forced_separate ({forced_separate}) config value.")
+            return (
+                forced_separate,
+                f"Matched forced_separate ({forced_separate}) config value.",
+            )
 
     return None
 
@@ -51,7 +54,9 @@ def _local(name: str, config: Config) -> Optional[Tuple[str, str]]:
 
 def _known_pattern(name: str, config: Config) -> Optional[Tuple[str, str]]:
     parts = name.split(".")
-    module_names_to_check = (".".join(parts[:first_k]) for first_k in range(len(parts), 0, -1))
+    module_names_to_check = (
+        ".".join(parts[:first_k]) for first_k in range(len(parts), 0, -1)
+    )
     for module_name_to_check in module_names_to_check:
         for pattern, placement in config.known_patterns:
             if placement in config.sections and pattern.match(module_name_to_check):
@@ -75,7 +80,11 @@ def _src_path(
 
     for src_path in src_paths:
         module_path = (src_path / root_module_name).resolve()
-        if not prefix and not module_path.is_dir() and src_path.name == root_module_name:
+        if (
+            not prefix
+            and not module_path.is_dir()
+            and src_path.name == root_module_name
+        ):
             module_path = src_path.resolve()
         if nested_module and (
             namespace in config.namespace_packages
@@ -90,7 +99,10 @@ def _src_path(
             or _is_package(module_path)
             or _src_path_is_module(src_path, root_module_name)
         ):
-            return (sections.FIRSTPARTY, f"Found in one of the configured src_paths: {src_path}.")
+            return (
+                sections.FIRSTPARTY,
+                f"Found in one of the configured src_paths: {src_path}.",
+            )
 
     return None
 
@@ -128,8 +140,10 @@ def _is_namespace_package(path: Path, src_extensions: FrozenSet[str]) -> bool:
         with init_file.open("rb") as open_init_file:
             file_start = open_init_file.read(4096)
             if (
-                b"__import__('pkg_resources').declare_namespace(__name__)" not in file_start
-                and b'__import__("pkg_resources").declare_namespace(__name__)' not in file_start
+                b"__import__('pkg_resources').declare_namespace(__name__)"
+                not in file_start
+                and b'__import__("pkg_resources").declare_namespace(__name__)'
+                not in file_start
                 and b"__path__ = __import__('pkgutil').extend_path(__path__, __name__)"
                 not in file_start
                 and b'__path__ = __import__("pkgutil").extend_path(__path__, __name__)'
@@ -141,5 +155,7 @@ def _is_namespace_package(path: Path, src_extensions: FrozenSet[str]) -> bool:
 
 def _src_path_is_module(src_path: Path, module_name: str) -> bool:
     return (
-        module_name == src_path.name and src_path.is_dir() and exists_case_sensitive(str(src_path))
+        module_name == src_path.name
+        and src_path.is_dir()
+        and exists_case_sensitive(str(src_path))
     )

@@ -12,12 +12,12 @@ from parso.python.token import PythonTokenTypes
 
 
 class NFAArc:
-    def __init__(self, next_: 'NFAState', nonterminal_or_string: Optional[str]):
+    def __init__(self, next_: "NFAState", nonterminal_or_string: Optional[str]):
         self.next: NFAState = next_
         self.nonterminal_or_string: Optional[str] = nonterminal_or_string
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.nonterminal_or_string)
+        return "<%s: %s>" % (self.__class__.__name__, self.nonterminal_or_string)
 
 
 class NFAState:
@@ -31,19 +31,17 @@ class NFAState:
         self.arcs.append(NFAArc(next_, nonterminal_or_string))
 
     def __repr__(self):
-        return '<%s: from %s>' % (self.__class__.__name__, self.from_rule)
+        return "<%s: from %s>" % (self.__class__.__name__, self.from_rule)
 
 
 class GrammarParser:
     """
     The parser for Python grammar files.
     """
+
     def __init__(self, bnf_grammar: str):
         self._bnf_grammar = bnf_grammar
-        self.generator = tokenize(
-            bnf_grammar,
-            version_info=parse_version_string('3.9')
-        )
+        self.generator = tokenize(bnf_grammar, version_info=parse_version_string("3.9"))
         self._gettoken()  # Initialize lookahead
 
     def parse(self) -> Iterator[Tuple[NFAState, NFAState]]:
@@ -54,7 +52,7 @@ class GrammarParser:
 
             # rule: NAME ':' rhs NEWLINE
             self._current_rule_name = self._expect(PythonTokenTypes.NAME)
-            self._expect(PythonTokenTypes.OP, ':')
+            self._expect(PythonTokenTypes.OP, ":")
 
             a, z = self._parse_rhs()
             self._expect(PythonTokenTypes.NEWLINE)
@@ -84,8 +82,10 @@ class GrammarParser:
     def _parse_items(self):
         # items: item+
         a, b = self._parse_item()
-        while self.type in (PythonTokenTypes.NAME, PythonTokenTypes.STRING) \
-                or self.value in ('(', '['):
+        while self.type in (
+            PythonTokenTypes.NAME,
+            PythonTokenTypes.STRING,
+        ) or self.value in ("(", "["):
             c, d = self._parse_item()
             # Need to end on the next item.
             b.add_arc(c)
@@ -97,7 +97,7 @@ class GrammarParser:
         if self.value == "[":
             self._gettoken()
             a, z = self._parse_rhs()
-            self._expect(PythonTokenTypes.OP, ']')
+            self._expect(PythonTokenTypes.OP, "]")
             # Make it also possible that there is no token and change the
             # state.
             a.add_arc(z)
@@ -122,7 +122,7 @@ class GrammarParser:
         if self.value == "(":
             self._gettoken()
             a, z = self._parse_rhs()
-            self._expect(PythonTokenTypes.OP, ')')
+            self._expect(PythonTokenTypes.OP, ")")
             return a, z
         elif self.type in (PythonTokenTypes.NAME, PythonTokenTypes.STRING):
             a = NFAState(self._current_rule_name)
@@ -132,13 +132,13 @@ class GrammarParser:
             self._gettoken()
             return a, z
         else:
-            self._raise_error("expected (...) or NAME or STRING, got %s/%s",
-                              self.type, self.value)
+            self._raise_error(
+                "expected (...) or NAME or STRING, got %s/%s", self.type, self.value
+            )
 
     def _expect(self, type_, value=None):
         if self.type != type_:
-            self._raise_error("expected %s, got %s [%s]",
-                              type_, self.type, self.value)
+            self._raise_error("expected %s, got %s [%s]", type_, self.type, self.value)
         if value is not None and self.value != value:
             self._raise_error("expected %s, got %s", value, self.value)
         value = self.value
@@ -156,5 +156,4 @@ class GrammarParser:
             except:
                 msg = " ".join([msg] + list(map(str, args)))
         line = self._bnf_grammar.splitlines()[self.begin[0] - 1]
-        raise SyntaxError(msg, ('<grammar>', self.begin[0],
-                                self.begin[1], line))
+        raise SyntaxError(msg, ("<grammar>", self.begin[0], self.begin[1], line))

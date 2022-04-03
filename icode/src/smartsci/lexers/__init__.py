@@ -1,6 +1,7 @@
 from PyQt5.Qsci import *
 from PyQt5.QtGui import *
 
+
 class ILexer:
     Todo = 200
     Warning = 201
@@ -22,6 +23,7 @@ class ILexer:
     AnnotationButtonPrimary = 217
     AnnotationButtonSecondary = 218
     AnnotationButtonDisabled = 219
+
 
 from .lexerc import *
 from .lexercpp import *

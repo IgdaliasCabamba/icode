@@ -9,11 +9,11 @@ def _start_linter():
     """
     import jedi
 
-    if '--debug' in sys.argv:
+    if "--debug" in sys.argv:
         jedi.set_debug_function()
 
     for path in sys.argv[2:]:
-        if path.startswith('--'):
+        if path.startswith("--"):
             continue
         if isdir(path):
             import fnmatch
@@ -21,7 +21,7 @@ def _start_linter():
 
             paths = []
             for root, dirnames, filenames in os.walk(path):
-                for filename in fnmatch.filter(filenames, '*.py'):
+                for filename in fnmatch.filter(filenames, "*.py"):
                     paths.append(os.path.join(root, filename))
         else:
             paths = [path]
@@ -31,10 +31,12 @@ def _start_linter():
                 for error in jedi.Script(path=p)._analysis():
                     print(error)
         except Exception:
-            if '--pdb' in sys.argv:
+            if "--pdb" in sys.argv:
                 import traceback
+
                 traceback.print_exc()
                 import pdb
+
                 pdb.post_mortem()
             else:
                 raise
@@ -44,8 +46,8 @@ def _complete():
     import jedi
     import pdb
 
-    if '-d' in sys.argv:
-        sys.argv.remove('-d')
+    if "-d" in sys.argv:
+        sys.argv.remove("-d")
         jedi.set_debug_function()
 
     try:
@@ -60,13 +62,13 @@ def _complete():
         print(completions)
 
 
-if len(sys.argv) == 2 and sys.argv[1] == 'repl':
+if len(sys.argv) == 2 and sys.argv[1] == "repl":
     # don't want to use __main__ only for repl yet, maybe we want to use it for
     # something else. So just use the keyword ``repl`` for now.
-    print(join(dirname(abspath(__file__)), 'api', 'replstartup.py'))
-elif len(sys.argv) > 1 and sys.argv[1] == '_linter':
+    print(join(dirname(abspath(__file__)), "api", "replstartup.py"))
+elif len(sys.argv) > 1 and sys.argv[1] == "_linter":
     _start_linter()
-elif len(sys.argv) > 1 and sys.argv[1] == '_complete':
+elif len(sys.argv) > 1 and sys.argv[1] == "_complete":
     _complete()
 else:
-    print('Command not implemented: %s' % sys.argv[1])
+    print("Command not implemented: %s" % sys.argv[1])

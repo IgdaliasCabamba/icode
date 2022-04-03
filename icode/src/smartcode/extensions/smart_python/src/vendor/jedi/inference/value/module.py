@@ -4,7 +4,12 @@ from typing import Optional
 
 from jedi.inference.cache import inference_state_method_cache
 from jedi.inference.names import AbstractNameDefinition, ModuleName
-from jedi.inference.filters import GlobalNameFilter, ParserTreeFilter, DictFilter, MergedFilter
+from jedi.inference.filters import (
+    GlobalNameFilter,
+    ParserTreeFilter,
+    DictFilter,
+    MergedFilter,
+)
 from jedi.inference import compiled
 from jedi.inference.base_value import TreeValue
 from jedi.inference.names import SubModuleName
@@ -18,7 +23,8 @@ class _ModuleAttributeName(AbstractNameDefinition):
     """
     For module attributes like __file__, __str__ and so on.
     """
-    api_type = 'instance'
+
+    api_type = "instance"
 
     def __init__(self, parent_module, string_name, string_value=None):
         self.parent_context = parent_module
@@ -28,9 +34,9 @@ class _ModuleAttributeName(AbstractNameDefinition):
     def infer(self):
         if self._string_value is not None:
             s = self._string_value
-            return ValueSet([
-                create_simple_object(self.parent_context.inference_state, s)
-            ])
+            return ValueSet(
+                [create_simple_object(self.parent_context.inference_state, s)]
+            )
         return compiled.get_string_value_set(self.parent_context.inference_state)
 
 
@@ -61,8 +67,7 @@ class ModuleMixin(SubModuleDictMixin):
     def get_filters(self, origin_scope=None):
         yield MergedFilter(
             ParserTreeFilter(
-                parent_context=self.as_context(),
-                origin_scope=origin_scope
+                parent_context=self.as_context(), origin_scope=origin_scope
             ),
             GlobalNameFilter(self.as_context(), self.tree_node),
         )
@@ -71,7 +76,7 @@ class ModuleMixin(SubModuleDictMixin):
         yield from self.iter_star_filters()
 
     def py__class__(self):
-        c, = values_from_qualified_names(self.inference_state, 'types', 'ModuleType')
+        (c,) = values_from_qualified_names(self.inference_state, "types", "ModuleType")
         return c
 
     def is_module(self):
@@ -87,12 +92,12 @@ class ModuleMixin(SubModuleDictMixin):
 
     @inference_state_method_cache()
     def _module_attributes_dict(self):
-        names = ['__package__', '__doc__', '__name__']
+        names = ["__package__", "__doc__", "__name__"]
         # All the additional module attributes are strings.
         dct = dict((n, _ModuleAttributeName(self, n)) for n in names)
         path = self.py__file__()
         if path is not None:
-            dct['__file__'] = _ModuleAttributeName(self, '__file__', str(path))
+            dct["__file__"] = _ModuleAttributeName(self, "__file__", str(path))
         return dct
 
     def iter_star_filters(self):
@@ -116,7 +121,7 @@ class ModuleMixin(SubModuleDictMixin):
                     self.inference_state,
                     import_path=i.get_paths()[-1],
                     module_context=module_context,
-                    level=i.level
+                    level=i.level,
                 ).follow()
 
                 for module in new:
@@ -135,15 +140,18 @@ class ModuleMixin(SubModuleDictMixin):
 
 
 class ModuleValue(ModuleMixin, TreeValue):
-    api_type = 'module'
+    api_type = "module"
 
-    def __init__(self, inference_state, module_node, code_lines, file_io=None,
-                 string_names=None, is_package=False):
-        super().__init__(
-            inference_state,
-            parent_context=None,
-            tree_node=module_node
-        )
+    def __init__(
+        self,
+        inference_state,
+        module_node,
+        code_lines,
+        file_io=None,
+        string_names=None,
+        is_package=False,
+    ):
+        super().__init__(inference_state, parent_context=None, tree_node=module_node)
         self.file_io = file_io
         if file_io is None:
             self._path: Optional[Path] = None
@@ -154,7 +162,7 @@ class ModuleValue(ModuleMixin, TreeValue):
         self._is_package = is_package
 
     def is_stub(self):
-        if self._path is not None and self._path.suffix == '.pyi':
+        if self._path is not None and self._path.suffix == ".pyi":
             # Currently this is the way how we identify stubs when e.g. goto is
             # used in them. This could be changed if stubs would be identified
             # sooner and used as StubModuleValue.
@@ -164,7 +172,7 @@ class ModuleValue(ModuleMixin, TreeValue):
     def py__name__(self):
         if self.string_names is None:
             return None
-        return '.'.join(self.string_names)
+        return ".".join(self.string_names)
 
     def py__file__(self) -> Optional[Path]:
         """
@@ -196,10 +204,10 @@ class ModuleValue(ModuleMixin, TreeValue):
             return None
 
         # A namespace package is typically auto generated and ~10 lines long.
-        first_few_lines = ''.join(self.code_lines[:50])
+        first_few_lines = "".join(self.code_lines[:50])
         # these are strings that need to be used for namespace packages,
         # the first one is ``pkgutil``, the second ``pkg_resources``.
-        options = ('declare_namespace(__name__)', 'extend_path(__path__')
+        options = ("declare_namespace(__name__)", "extend_path(__path__")
         if options[0] in first_few_lines or options[1] in first_few_lines:
             # It is a namespace, now try to find the rest of the
             # modules on sys_path or whatever the search_path is.
@@ -224,7 +232,9 @@ class ModuleValue(ModuleMixin, TreeValue):
 
     def __repr__(self):
         return "<%s: %s@%s-%s is_stub=%s>" % (
-            self.__class__.__name__, self.py__name__(),
-            self.tree_node.start_pos[0], self.tree_node.end_pos[0],
-            self.is_stub()
+            self.__class__.__name__,
+            self.py__name__(),
+            self.tree_node.start_pos[0],
+            self.tree_node.end_pos[0],
+            self.is_stub(),
         )

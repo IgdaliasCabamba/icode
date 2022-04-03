@@ -11,16 +11,20 @@ class TypeVarClass(BaseTypingValue):
         var_name = self._find_string_name(lazy_value)
         # The name must be given, otherwise it's useless.
         if var_name is None or key is not None:
-            debug.warning('Found a variable without a name %s', arguments)
+            debug.warning("Found a variable without a name %s", arguments)
             return NO_VALUES
 
-        return ValueSet([TypeVar.create_cached(
-            self.inference_state,
-            self.parent_context,
-            self._tree_name,
-            var_name,
-            unpacked
-        )])
+        return ValueSet(
+            [
+                TypeVar.create_cached(
+                    self.inference_state,
+                    self.parent_context,
+                    self._tree_name,
+                    var_name,
+                    unpacked,
+                )
+            ]
+        )
 
     def _find_string_name(self, lazy_value):
         if lazy_value is None:
@@ -30,7 +34,7 @@ class TypeVarClass(BaseTypingValue):
         if not value_set:
             return None
         if len(value_set) > 1:
-            debug.warning('Found multiple values for a type variable: %s', value_set)
+            debug.warning("Found multiple values for a type variable: %s", value_set)
 
         name_value = next(iter(value_set))
         try:
@@ -57,14 +61,14 @@ class TypeVar(BaseTypingValue):
             if key is None:
                 self._constraints_lazy_values.append(lazy_value)
             else:
-                if key == 'bound':
+                if key == "bound":
                     self._bound_lazy_value = lazy_value
-                elif key == 'covariant':
+                elif key == "covariant":
                     self._covariant_lazy_value = lazy_value
-                elif key == 'contravariant':
+                elif key == "contravariant":
                     self._contra_variant_lazy_value = lazy_value
                 else:
-                    debug.warning('Invalid TypeVar param name %s', key)
+                    debug.warning("Invalid TypeVar param name %s", key)
 
     def py__name__(self):
         return self._var_name
@@ -77,7 +81,9 @@ class TypeVar(BaseTypingValue):
             return self._bound_lazy_value.infer()
         if self._constraints_lazy_values:
             return self.constraints
-        debug.warning('Tried to infer the TypeVar %s without a given type', self._var_name)
+        debug.warning(
+            "Tried to infer the TypeVar %s without a given type", self._var_name
+        )
         return NO_VALUES
 
     def is_same_class(self, other):
@@ -115,7 +121,7 @@ class TypeVar(BaseTypingValue):
         return {annotation_name: ValueSet(iterate())}
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.py__name__())
+        return "<%s: %s>" % (self.__class__.__name__, self.py__name__())
 
 
 class TypeWrapper(ValueWrapper):

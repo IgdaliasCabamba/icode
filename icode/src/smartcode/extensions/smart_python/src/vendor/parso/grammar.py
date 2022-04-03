@@ -5,8 +5,12 @@ from pathlib import Path
 
 from parso._compatibility import is_pypy
 from parso.pgen2 import generate_grammar
-from parso.utils import split_lines, python_bytes_to_unicode, \
-    PythonVersionInfo, parse_version_string
+from parso.utils import (
+    split_lines,
+    python_bytes_to_unicode,
+    PythonVersionInfo,
+    parse_version_string,
+)
 from parso.python.diff import DiffParser
 from parso.python.tokenize import tokenize_lines, tokenize
 from parso.python.token import PythonTokenTypes
@@ -18,7 +22,7 @@ from parso.python import pep8
 from parso.file_io import FileIO, KnownContentFileIO
 from parso.normalizer import RefactoringNormalizer, NormalizerConfig
 
-_loaded_grammars: Dict[str, 'Grammar'] = {}
+_loaded_grammars: Dict[str, "Grammar"] = {}
 
 _NodeT = TypeVar("_NodeT")
 
@@ -31,6 +35,7 @@ class Grammar(Generic[_NodeT]):
 
     :param text: A BNF representation of your grammar.
     """
+
     _start_nonterminal: str
     _error_normalizer_config: Optional[ErrorFinderConfig] = None
     _token_namespace: Any = None
@@ -38,24 +43,25 @@ class Grammar(Generic[_NodeT]):
 
     def __init__(self, text: str, *, tokenizer, parser=BaseParser, diff_parser=None):
         self._pgen_grammar = generate_grammar(
-            text,
-            token_namespace=self._get_token_namespace()
+            text, token_namespace=self._get_token_namespace()
         )
         self._parser = parser
         self._tokenizer = tokenizer
         self._diff_parser = diff_parser
         self._hashed = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
-    def parse(self,
-              code: Union[str, bytes] = None,
-              *,
-              error_recovery=True,
-              path: Union[os.PathLike, str] = None,
-              start_symbol: str = None,
-              cache=False,
-              diff_cache=False,
-              cache_path: Union[os.PathLike, str] = None,
-              file_io: FileIO = None) -> _NodeT:
+    def parse(
+        self,
+        code: Union[str, bytes] = None,
+        *,
+        error_recovery=True,
+        path: Union[os.PathLike, str] = None,
+        start_symbol: str = None,
+        cache=False,
+        diff_cache=False,
+        cache_path: Union[os.PathLike, str] = None,
+        file_io: FileIO = None
+    ) -> _NodeT:
         """
         If you want to parse a Python file you want to start here, most likely.
 
@@ -101,7 +107,7 @@ class Grammar(Generic[_NodeT]):
         if start_symbol is None:
             start_symbol = self._start_nonterminal
 
-        if error_recovery and start_symbol != 'file_input':
+        if error_recovery and start_symbol != "file_input":
             raise NotImplementedError("This is currently not implemented.")
 
         if file_io is None:
@@ -122,8 +128,9 @@ class Grammar(Generic[_NodeT]):
         lines = split_lines(code, keepends=True)
         if diff_cache:
             if self._diff_parser is None:
-                raise TypeError("You have to define a diff parser to be able "
-                                "to use this option.")
+                raise TypeError(
+                    "You have to define a diff parser to be able " "to use this option."
+                )
             try:
                 module_cache_item = parser_cache[self._hashed][file_io.path]
             except KeyError:
@@ -136,14 +143,16 @@ class Grammar(Generic[_NodeT]):
 
                 new_node = self._diff_parser(
                     self._pgen_grammar, self._tokenizer, module_node
-                ).update(
-                    old_lines=old_lines,
-                    new_lines=lines
+                ).update(old_lines=old_lines, new_lines=lines)
+                try_to_save_module(
+                    self._hashed,
+                    file_io,
+                    new_node,
+                    lines,
+                    # Never pickle in pypy, it's slow as hell.
+                    pickling=cache and not is_pypy,
+                    cache_path=cache_path,
                 )
-                try_to_save_module(self._hashed, file_io, new_node, lines,
-                                   # Never pickle in pypy, it's slow as hell.
-                                   pickling=cache and not is_pypy,
-                                   cache_path=cache_path)
                 return new_node  # type: ignore
 
         tokens = self._tokenizer(lines)
@@ -151,15 +160,20 @@ class Grammar(Generic[_NodeT]):
         p = self._parser(
             self._pgen_grammar,
             error_recovery=error_recovery,
-            start_nonterminal=start_symbol
+            start_nonterminal=start_symbol,
         )
         root_node = p.parse(tokens=tokens)
 
         if cache or diff_cache:
-            try_to_save_module(self._hashed, file_io, root_node, lines,
-                               # Never pickle in pypy, it's slow as hell.
-                               pickling=cache and not is_pypy,
-                               cache_path=cache_path)
+            try_to_save_module(
+                self._hashed,
+                file_io,
+                root_node,
+                lines,
+                # Never pickle in pypy, it's slow as hell.
+                pickling=cache and not is_pypy,
+                cache_path=cache_path,
+            )
         return root_node  # type: ignore
 
     def _get_token_namespace(self):
@@ -186,8 +200,10 @@ class Grammar(Generic[_NodeT]):
         if normalizer_config is None:
             normalizer_config = self._default_normalizer_config
             if normalizer_config is None:
-                raise ValueError("You need to specify a normalizer, because "
-                                 "there's no default normalizer for this tree.")
+                raise ValueError(
+                    "You need to specify a normalizer, because "
+                    "there's no default normalizer for this tree."
+                )
         return normalizer_config.create_normalizer(self)
 
     def _normalize(self, node, normalizer_config=None):
@@ -205,21 +221,21 @@ class Grammar(Generic[_NodeT]):
 
     def __repr__(self):
         nonterminals = self._pgen_grammar.nonterminal_to_dfas.keys()
-        txt = ' '.join(list(nonterminals)[:3]) + ' ...'
-        return '<%s:%s>' % (self.__class__.__name__, txt)
+        txt = " ".join(list(nonterminals)[:3]) + " ..."
+        return "<%s:%s>" % (self.__class__.__name__, txt)
 
 
 class PythonGrammar(Grammar):
     _error_normalizer_config = ErrorFinderConfig()
     _token_namespace = PythonTokenTypes
-    _start_nonterminal = 'file_input'
+    _start_nonterminal = "file_input"
 
     def __init__(self, version_info: PythonVersionInfo, bnf_text: str):
         super().__init__(
             bnf_text,
             tokenizer=self._tokenize_lines,
             parser=PythonParser,
-            diff_parser=DiffParser
+            diff_parser=DiffParser,
         )
         self.version_info = version_info
 
@@ -242,8 +258,7 @@ def load_grammar(*, version: str = None, path: str = None):
     version_info = parse_version_string(version)
 
     file = path or os.path.join(
-        'python',
-        'grammar%s%s.txt' % (version_info.major, version_info.minor)
+        "python", "grammar%s%s.txt" % (version_info.major, version_info.minor)
     )
 
     global _loaded_grammars
@@ -259,6 +274,7 @@ def load_grammar(*, version: str = None, path: str = None):
             return _loaded_grammars.setdefault(path, grammar)
         except FileNotFoundError:
             message = "Python version %s.%s is currently not supported." % (
-                version_info.major, version_info.minor
+                version_info.major,
+                version_info.minor,
             )
             raise NotImplementedError(message)

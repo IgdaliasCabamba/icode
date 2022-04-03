@@ -35,6 +35,7 @@ class ParserSyntaxError(Exception):
 
     May be raised as an exception.
     """
+
     def __init__(self, message, error_leaf):
         self.message = message
         self.error_leaf = error_leaf
@@ -48,8 +49,10 @@ class InternalParseError(Exception):
     """
 
     def __init__(self, msg, type_, value, start_pos):
-        Exception.__init__(self, "%s: type=%r, value=%r, start_pos=%r" %
-                           (msg, type_.name, value, start_pos))
+        Exception.__init__(
+            self,
+            "%s: type=%r, value=%r, start_pos=%r" % (msg, type_.name, value, start_pos),
+        )
         self.msg = msg
         self.type = type
         self.value = value
@@ -83,7 +86,7 @@ class StackNode:
         return self.dfa.from_rule
 
     def __repr__(self):
-        return '%s(%s, %s)' % (self.__class__.__name__, self.dfa, self.nodes)
+        return "%s(%s, %s)" % (self.__class__.__name__, self.dfa, self.nodes)
 
 
 def _token_to_transition(grammar, type_, value):
@@ -116,7 +119,9 @@ class BaseParser:
     leaf_map: Dict[str, Type[tree.Leaf]] = {}
     default_leaf = tree.Leaf
 
-    def __init__(self, pgen_grammar, start_nonterminal='file_input', error_recovery=False):
+    def __init__(
+        self, pgen_grammar, start_nonterminal="file_input", error_recovery=False
+    ):
         self._pgen_grammar = pgen_grammar
         self._start_nonterminal = start_nonterminal
         self._error_recovery = error_recovery
@@ -149,7 +154,7 @@ class BaseParser:
         else:
             type_, value, start_pos, prefix = token
             error_leaf = tree.ErrorLeaf(type_, value, start_pos, prefix)
-            raise ParserSyntaxError('SyntaxError: invalid syntax', error_leaf)
+            raise ParserSyntaxError("SyntaxError: invalid syntax", error_leaf)
 
     def convert_node(self, nonterminal, children):
         try:

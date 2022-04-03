@@ -10,7 +10,14 @@ from isort.parse import _normalize_line, _strip_syntax, skip_line
 from .comments import parse as parse_comments
 from .settings import DEFAULT_CONFIG, Config
 
-STATEMENT_DECLARATIONS: Tuple[str, ...] = ("def ", "cdef ", "cpdef ", "class ", "@", "async def")
+STATEMENT_DECLARATIONS: Tuple[str, ...] = (
+    "def ",
+    "cdef ",
+    "cpdef ",
+    "class ",
+    "@",
+    "async def",
+)
 
 
 class Import(NamedTuple):
@@ -51,7 +58,10 @@ def imports(
     indexed_input = enumerate(input_stream)
     for index, raw_line in indexed_input:
         (skipping_line, in_quote) = skip_line(
-            raw_line, in_quote=in_quote, index=index, section_comments=config.section_comments
+            raw_line,
+            in_quote=in_quote,
+            index=index,
+            section_comments=config.section_comments,
         )
 
         if top_only and not in_quote and raw_line.startswith(STATEMENT_DECLARATIONS):
@@ -94,7 +104,9 @@ def imports(
 
             import_string, _ = parse_comments(line)
             normalized_import_string = (
-                import_string.replace("import(", "import (").replace("\\", " ").replace("\n", " ")
+                import_string.replace("import(", "import (")
+                .replace("\\", " ")
+                .replace("\n", " ")
             )
             cimports: bool = (
                 " cimport " in normalized_import_string
@@ -144,7 +156,9 @@ def imports(
                             import_string += "\n" + line
                         else:
                             import_string = (
-                                import_string.rstrip().rstrip("\\") + " " + line.lstrip()
+                                import_string.rstrip().rstrip("\\")
+                                + " "
+                                + line.lstrip()
                             )
 
             if type_of_import == "from":
@@ -167,7 +181,9 @@ def imports(
 
             direct_imports = just_imports[1:]
             top_level_module = ""
-            if "as" in just_imports and (just_imports.index("as") + 1) < len(just_imports):
+            if "as" in just_imports and (just_imports.index("as") + 1) < len(
+                just_imports
+            ):
                 while "as" in just_imports:
                     attribute = None
                     as_index = just_imports.index("as")
@@ -183,7 +199,9 @@ def imports(
                         if attribute == alias and config.remove_redundant_aliases:
                             yield identified_import(top_level_module, attribute)
                         else:
-                            yield identified_import(top_level_module, attribute, alias=alias)
+                            yield identified_import(
+                                top_level_module, attribute, alias=alias
+                            )
 
                     else:
                         module = just_imports[as_index - 1]

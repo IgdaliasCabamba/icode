@@ -55,15 +55,13 @@ class Reporter(object):
         if offset is not None:
             if sys.version_info < (3, 8):
                 offset = offset - (len(text) - len(line)) + 1
-            self._stderr.write('%s:%d:%d: %s\n' %
-                               (filename, lineno, offset, msg))
+            self._stderr.write("%s:%d:%d: %s\n" % (filename, lineno, offset, msg))
         else:
-            self._stderr.write('%s:%d: %s\n' % (filename, lineno, msg))
+            self._stderr.write("%s:%d: %s\n" % (filename, lineno, msg))
         self._stderr.write(line)
-        self._stderr.write('\n')
+        self._stderr.write("\n")
         if offset is not None:
-            self._stderr.write(re.sub(r'\S', ' ', line[:offset - 1]) +
-                               "^\n")
+            self._stderr.write(re.sub(r"\S", " ", line[: offset - 1]) + "^\n")
 
     def flake(self, message):
         """
@@ -72,7 +70,7 @@ class Reporter(object):
         @param: A L{pyflakes.messages.Message}.
         """
         self._stdout.write(str(message))
-        self._stdout.write('\n')
+        self._stdout.write("\n")
 
 
 def _makeDefaultReporter():

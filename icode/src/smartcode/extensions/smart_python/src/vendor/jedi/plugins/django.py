@@ -17,35 +17,44 @@ from jedi.inference.signature import AbstractSignature
 
 
 mapping = {
-    'IntegerField': (None, 'int'),
-    'BigIntegerField': (None, 'int'),
-    'PositiveIntegerField': (None, 'int'),
-    'SmallIntegerField': (None, 'int'),
-    'CharField': (None, 'str'),
-    'TextField': (None, 'str'),
-    'EmailField': (None, 'str'),
-    'GenericIPAddressField': (None, 'str'),
-    'URLField': (None, 'str'),
-    'FloatField': (None, 'float'),
-    'BinaryField': (None, 'bytes'),
-    'BooleanField': (None, 'bool'),
-    'DecimalField': ('decimal', 'Decimal'),
-    'TimeField': ('datetime', 'time'),
-    'DurationField': ('datetime', 'timedelta'),
-    'DateField': ('datetime', 'date'),
-    'DateTimeField': ('datetime', 'datetime'),
-    'UUIDField': ('uuid', 'UUID'),
+    "IntegerField": (None, "int"),
+    "BigIntegerField": (None, "int"),
+    "PositiveIntegerField": (None, "int"),
+    "SmallIntegerField": (None, "int"),
+    "CharField": (None, "str"),
+    "TextField": (None, "str"),
+    "EmailField": (None, "str"),
+    "GenericIPAddressField": (None, "str"),
+    "URLField": (None, "str"),
+    "FloatField": (None, "float"),
+    "BinaryField": (None, "bytes"),
+    "BooleanField": (None, "bool"),
+    "DecimalField": ("decimal", "Decimal"),
+    "TimeField": ("datetime", "time"),
+    "DurationField": ("datetime", "timedelta"),
+    "DateField": ("datetime", "date"),
+    "DateTimeField": ("datetime", "datetime"),
+    "UUIDField": ("uuid", "UUID"),
 }
 
-_FILTER_LIKE_METHODS = ('create', 'filter', 'exclude', 'update', 'get',
-                        'get_or_create', 'update_or_create')
+_FILTER_LIKE_METHODS = (
+    "create",
+    "filter",
+    "exclude",
+    "update",
+    "get",
+    "get_or_create",
+    "update_or_create",
+)
 
 
 @inference_state_function_cache()
 def _get_deferred_attributes(inference_state):
-    return inference_state.import_module(
-        ('django', 'db', 'models', 'query_utils')
-    ).py__getattribute__('DeferredAttribute').execute_annotation()
+    return (
+        inference_state.import_module(("django", "db", "models", "query_utils"))
+        .py__getattribute__("DeferredAttribute")
+        .execute_annotation()
+    )
 
 
 def _infer_scalar_field(inference_state, field_name, field_tree_instance, is_instance):
@@ -74,7 +83,7 @@ def _get_foreign_key_values(cls, field_tree_instance):
         key, lazy_values = next(argument_iterator, (None, None))
         if key is None and lazy_values is not None:
             for value in lazy_values.infer():
-                if value.py__name__() == 'str':
+                if value.py__name__() == "str":
                     foreign_key_class_name = value.get_safe_value()
                     module = cls.get_root_context()
                     for v in module.py__getattribute__(foreign_key_class_name):
@@ -89,26 +98,32 @@ def _infer_field(cls, field_name, is_instance):
     result = field_name.infer()
     for field_tree_instance in result:
         scalar_field = _infer_scalar_field(
-            inference_state, field_name, field_tree_instance, is_instance)
+            inference_state, field_name, field_tree_instance, is_instance
+        )
         if scalar_field is not None:
             return scalar_field
 
         name = field_tree_instance.py__name__()
-        is_many_to_many = name == 'ManyToManyField'
-        if name in ('ForeignKey', 'OneToOneField') or is_many_to_many:
+        is_many_to_many = name == "ManyToManyField"
+        if name in ("ForeignKey", "OneToOneField") or is_many_to_many:
             if not is_instance:
                 return _get_deferred_attributes(inference_state)
 
             values = _get_foreign_key_values(cls, field_tree_instance)
             if is_many_to_many:
-                return ValueSet(filter(None, [
-                    _create_manager_for(v, 'RelatedManager') for v in values
-                ]))
+                return ValueSet(
+                    filter(
+                        None, [_create_manager_for(v, "RelatedManager") for v in values]
+                    )
+                )
             else:
                 return values.execute_with_values()
 
-    debug.dbg('django plugin: fail to infer `%s` from class `%s`',
-              field_name.string_name, cls.py__name__())
+    debug.dbg(
+        "django plugin: fail to infer `%s` from class `%s`",
+        field_name.string_name,
+        cls.py__name__(),
+    )
     return result
 
 
@@ -122,9 +137,9 @@ class DjangoModelName(NameWrapper):
         return _infer_field(self._cls, self._wrapped_name, self._is_instance)
 
 
-def _create_manager_for(cls, manager_cls='BaseManager'):
+def _create_manager_for(cls, manager_cls="BaseManager"):
     managers = cls.inference_state.import_module(
-        ('django', 'db', 'models', 'manager')
+        ("django", "db", "models", "manager")
     ).py__getattribute__(manager_cls)
     for m in managers:
         if m.is_class_mixin():
@@ -135,10 +150,12 @@ def _create_manager_for(cls, manager_cls='BaseManager'):
 
 
 def _new_dict_filter(cls, is_instance):
-    filters = list(cls.get_filters(
-        is_instance=is_instance,
-        include_metaclasses=False,
-        include_type_when_class=False)
+    filters = list(
+        cls.get_filters(
+            is_instance=is_instance,
+            include_metaclasses=False,
+            include_type_when_class=False,
+        )
     )
     dct = {
         name.string_name: DjangoModelName(cls, name, is_instance)
@@ -152,14 +169,16 @@ def _new_dict_filter(cls, is_instance):
         # It would be nicer to do that in a better way, so that it also doesn't
         # show up in completions, but it's probably just not worth doing that
         # for the extra amount of work.
-        dct['objects'] = EmptyCompiledName(cls.inference_state, 'objects')
+        dct["objects"] = EmptyCompiledName(cls.inference_state, "objects")
 
     return DictFilter(dct)
 
 
 def is_django_model_base(value):
-    return value.py__name__() == 'ModelBase' \
-        and value.get_root_context().py__name__() == 'django.db.models.base'
+    return (
+        value.py__name__() == "ModelBase"
+        and value.get_root_context().py__name__() == "django.db.models.base"
+    )
 
 
 def get_metaclass_filters(func):
@@ -169,6 +188,7 @@ def get_metaclass_filters(func):
                 return [_new_dict_filter(cls, is_instance)]
 
         return func(cls, metaclasses, is_instance)
+
     return wrapper
 
 
@@ -180,31 +200,46 @@ def tree_name_to_values(func):
             # this to make sure that keyword param completion works on these
             # kind of methods.
             for v in result:
-                if v.get_qualified_names() == ('_BaseQuerySet', tree_name.value) \
-                        and v.parent_context.is_module() \
-                        and v.parent_context.py__name__() == 'django.db.models.query':
+                if (
+                    v.get_qualified_names() == ("_BaseQuerySet", tree_name.value)
+                    and v.parent_context.is_module()
+                    and v.parent_context.py__name__() == "django.db.models.query"
+                ):
                     qs = context.get_value()
                     generics = qs.get_generics()
                     if len(generics) >= 1:
-                        return ValueSet(QuerySetMethodWrapper(v, model)
-                                        for model in generics[0])
+                        return ValueSet(
+                            QuerySetMethodWrapper(v, model) for model in generics[0]
+                        )
 
-        elif tree_name.value == 'BaseManager' and context.is_module() \
-                and context.py__name__() == 'django.db.models.manager':
+        elif (
+            tree_name.value == "BaseManager"
+            and context.is_module()
+            and context.py__name__() == "django.db.models.manager"
+        ):
             return ValueSet(ManagerWrapper(r) for r in result)
 
-        elif tree_name.value == 'Field' and context.is_module() \
-                and context.py__name__() == 'django.db.models.fields':
+        elif (
+            tree_name.value == "Field"
+            and context.is_module()
+            and context.py__name__() == "django.db.models.fields"
+        ):
             return ValueSet(FieldWrapper(r) for r in result)
         return result
+
     return wrapper
 
 
 def _find_fields(cls):
     for name in _new_dict_filter(cls, is_instance=False).values():
         for value in name.infer():
-            if value.name.get_qualified_names(include_module_names=True) \
-                    == ('django', 'db', 'models', 'query_utils', 'DeferredAttribute'):
+            if value.name.get_qualified_names(include_module_names=True) == (
+                "django",
+                "db",
+                "models",
+                "query_utils",
+                "DeferredAttribute",
+            ):
                 yield name
 
 
@@ -218,6 +253,7 @@ def get_metaclass_signatures(func):
             if is_django_model_base(metaclass):
                 return _get_signatures(cls)
         return func(cls, metaclass)
+
     return wrapper
 
 
@@ -226,7 +262,8 @@ class ManagerWrapper(ValueWrapper):
         return ValueSet(
             GenericManagerWrapper(generic)
             for generic in self._wrapped_value.py__getitem__(
-                index_value_set, contextualized_node)
+                index_value_set, contextualized_node
+            )
         )
 
 
@@ -245,7 +282,8 @@ class FieldWrapper(ValueWrapper):
         return ValueSet(
             GenericFieldWrapper(generic)
             for generic in self._wrapped_value.py__getitem__(
-                index_value_set, contextualized_node)
+                index_value_set, contextualized_node
+            )
         )
 
 
@@ -283,8 +321,12 @@ class QuerySetMethodWrapper(ValueWrapper):
         self._model_cls = model_cls
 
     def py__get__(self, instance, class_value):
-        return ValueSet({QuerySetBoundMethodWrapper(v, self._model_cls)
-                         for v in self._wrapped_value.py__get__(instance, class_value)})
+        return ValueSet(
+            {
+                QuerySetBoundMethodWrapper(v, self._model_cls)
+                for v in self._wrapped_value.py__get__(instance, class_value)
+            }
+        )
 
 
 class QuerySetBoundMethodWrapper(ValueWrapper):

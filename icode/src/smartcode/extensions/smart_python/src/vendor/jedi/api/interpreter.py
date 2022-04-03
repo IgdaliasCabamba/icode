@@ -49,23 +49,19 @@ class MixedModuleContext(ModuleContext):
     def __init__(self, tree_module_value, namespaces):
         super().__init__(tree_module_value)
         self.mixed_values = [
-            self._get_mixed_object(
-                _create(self.inference_state, NamespaceObject(n))
-            ) for n in namespaces
+            self._get_mixed_object(_create(self.inference_state, NamespaceObject(n)))
+            for n in namespaces
         ]
 
     def _get_mixed_object(self, compiled_value):
-        return mixed.MixedObject(
-            compiled_value=compiled_value,
-            tree_value=self._value
-        )
+        return mixed.MixedObject(compiled_value=compiled_value, tree_value=self._value)
 
     def get_filters(self, until_position=None, origin_scope=None):
         yield MergedFilter(
             MixedParserTreeFilter(
                 parent_context=self,
                 until_position=until_position,
-                origin_scope=origin_scope
+                origin_scope=origin_scope,
             ),
             self.get_global_filter(),
         )

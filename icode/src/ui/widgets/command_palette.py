@@ -1,10 +1,14 @@
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QSize
 from PyQt5.QtWidgets import (
-    QFrame, QGridLayout,
-    QHBoxLayout, QListWidget,
-    QPushButton, QSizePolicy,
-    QVBoxLayout, QGraphicsDropShadowEffect,
-    QLabel
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QListWidget,
+    QPushButton,
+    QSizePolicy,
+    QVBoxLayout,
+    QGraphicsDropShadowEffect,
+    QLabel,
 )
 
 from ..igui import IListWidgetItem, InputHistory
@@ -12,10 +16,11 @@ from PyQt5.QtGui import QColor
 
 from functions import getfn
 
+
 class ApplicationCommandPalette(QFrame):
-    
+
     focus_out = pyqtSignal(object, object)
-    
+
     def __init__(self, api, parent):
         super().__init__(parent)
         self.api = api
@@ -23,7 +28,7 @@ class ApplicationCommandPalette(QFrame):
         self.setParent(parent)
         self.setObjectName("editor-widget")
         self.init_ui()
-    
+
     def init_ui(self):
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(5, 5, 5, 5)
@@ -44,21 +49,21 @@ class ApplicationCommandPalette(QFrame):
 
         self.layout.addWidget(self.input_edit)
         self.layout.addWidget(self.command_list)
-    
+
     def search_command(self, text):
         if text.startswith(">"):
             if len(text) > 1:
                 command = text.split(">")[1]
-            
+
                 commands = self.command_list.findItems(command, Qt.MatchContains)
-        
+
                 for i in range(self.command_list.count()):
                     self.command_list.setRowHidden(i, True)
 
-                for row_item in commands:    
+                for row_item in commands:
                     i = self.command_list.row(row_item)
                     self.command_list.setRowHidden(i, False)
-                
+
                 if len(commands) > 0:
                     i = self.command_list.row(commands[0])
                     self.command_list.setCurrentRow(i)
@@ -66,21 +71,23 @@ class ApplicationCommandPalette(QFrame):
             else:
                 for i in range(self.command_list.count()):
                     self.command_list.setRowHidden(i, False)
-            
+
             self.update_size()
-        
-        elif text.startswith((":","@","!")):
+
+        elif text.startswith((":", "@", "!")):
             self.api.run_by_id(self, text)
-    
+
     def update_size(self):
         height = 0
         for i in range(self.command_list.count()):
             if not self.command_list.isRowHidden(i):
                 height += self.command_list.sizeHintForRow(i)
 
-        self.command_list.setFixedHeight(height+10 if height < 300 else 300)
-        self.setFixedHeight(self.input_edit.size().height()+self.command_list.size().height()+20)
-        
+        self.command_list.setFixedHeight(height + 10 if height < 300 else 300)
+        self.setFixedHeight(
+            self.input_edit.size().height() + self.command_list.size().height() + 20
+        )
+
     def focusOutEvent(self, event):
         super().focusOutEvent(event)
         if self.focusWidget() not in self.findChildren(object, "child"):
@@ -97,20 +104,17 @@ class ApplicationCommandPalette(QFrame):
         except Exception as e:
             print(e)
         self.hide()
-    
+
     def run(self):
         self.input_edit.setFocus()
         self.input_edit.setText(">")
-    
+
     def set_commands(self, data=False):
         if data:
             self.command_list.clear()
             for item in data:
                 row = IListWidgetItem(
-                    item["icon"],
-                    item["name"],
-                    None,
-                    {"command":item["command"]}
+                    item["icon"], item["name"], None, {"command": item["command"]}
                 )
                 self.command_list.addItem(row)
             self.command_list.setCurrentRow(0)

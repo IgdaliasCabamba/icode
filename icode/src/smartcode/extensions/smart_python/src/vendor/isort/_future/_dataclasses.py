@@ -406,7 +406,11 @@ def _field_init(f, frozen, globals, self_name):
             # This field has a default factory.  If a parameter is
             # given, use it.  If not, call the factory.
             globals[default_name] = f.default_factory
-            value = f"{default_name}() " f"if {f.name} is _HAS_DEFAULT_FACTORY " f"else {f.name}"
+            value = (
+                f"{default_name}() "
+                f"if {f.name} is _HAS_DEFAULT_FACTORY "
+                f"else {f.name}"
+            )
         else:
             # This is a field that's not in the __init__ params, but
             # has a default factory function.  It needs to be
@@ -482,7 +486,9 @@ def _init_fn(fields, frozen, has_post_init, self_name):
             if not (f.default is MISSING and f.default_factory is MISSING):
                 seen_default = True
             elif seen_default:
-                raise TypeError(f"non-default argument {f.name!r} " "follows default argument")
+                raise TypeError(
+                    f"non-default argument {f.name!r} " "follows default argument"
+                )
 
     globals = {"MISSING": MISSING, "_HAS_DEFAULT_FACTORY": _HAS_DEFAULT_FACTORY}
 
@@ -694,7 +700,8 @@ def _get_field(cls, a_name, a_type):
     typing = sys.modules.get("typing")
     if typing:
         if _is_classvar(a_type, typing) or (
-            isinstance(f.type, str) and _is_type(f.type, cls, typing, typing.ClassVar, _is_classvar)
+            isinstance(f.type, str)
+            and _is_type(f.type, cls, typing, typing.ClassVar, _is_classvar)
         ):
             f._field_type = _FIELD_CLASSVAR
 
@@ -925,15 +932,24 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
         flds = [f for f in field_list if f.compare]
         self_tuple = _tuple_str("self", flds)
         other_tuple = _tuple_str("other", flds)
-        _set_new_attribute(cls, "__eq__", _cmp_fn("__eq__", "==", self_tuple, other_tuple))
+        _set_new_attribute(
+            cls, "__eq__", _cmp_fn("__eq__", "==", self_tuple, other_tuple)
+        )
 
     if order:
         # Create and set the ordering methods.
         flds = [f for f in field_list if f.compare]
         self_tuple = _tuple_str("self", flds)
         other_tuple = _tuple_str("other", flds)
-        for name, op in [("__lt__", "<"), ("__le__", "<="), ("__gt__", ">"), ("__ge__", ">=")]:
-            if _set_new_attribute(cls, name, _cmp_fn(name, op, self_tuple, other_tuple)):
+        for name, op in [
+            ("__lt__", "<"),
+            ("__le__", "<="),
+            ("__gt__", ">"),
+            ("__ge__", ">="),
+        ]:
+            if _set_new_attribute(
+                cls, name, _cmp_fn(name, op, self_tuple, other_tuple)
+            ):
                 raise TypeError(
                     f"Cannot overwrite attribute {name} "
                     f"in class {cls.__name__}. Consider using "
@@ -944,11 +960,14 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
         for fn in _frozen_get_del_attr(cls, field_list):
             if _set_new_attribute(cls, fn.__name__, fn):
                 raise TypeError(
-                    f"Cannot overwrite attribute {fn.__name__} " f"in class {cls.__name__}"
+                    f"Cannot overwrite attribute {fn.__name__} "
+                    f"in class {cls.__name__}"
                 )
 
     # Decide if/how we're going to create a hash function.
-    hash_action = _hash_action[bool(unsafe_hash), bool(eq), bool(frozen), has_explicit_hash]
+    hash_action = _hash_action[
+        bool(unsafe_hash), bool(eq), bool(frozen), has_explicit_hash
+    ]
     if hash_action:
         # No need to call _set_new_attribute here, since by the time
         # we're here the overwriting is unconditional.
@@ -965,7 +984,14 @@ def _process_class(cls, init, repr, eq, order, unsafe_hash, frozen):
 # underscore.  The presence of _cls is used to detect if this
 # decorator is being called with parameters or not.
 def dataclass(
-    _cls=None, *, init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=False
+    _cls=None,
+    *,
+    init=True,
+    repr=True,
+    eq=True,
+    order=False,
+    unsafe_hash=False,
+    frozen=False,
 ):
     """Returns the same class as was passed in, with dunder methods
     added based on the fields defined in the class.
@@ -1048,7 +1074,8 @@ def _asdict_inner(obj, dict_factory):
         return type(obj)(_asdict_inner(v, dict_factory) for v in obj)
     elif isinstance(obj, dict):
         return type(obj)(
-            (_asdict_inner(k, dict_factory), _asdict_inner(v, dict_factory)) for k, v in obj.items()
+            (_asdict_inner(k, dict_factory), _asdict_inner(v, dict_factory))
+            for k, v in obj.items()
         )
     else:
         return copy.deepcopy(obj)
@@ -1162,7 +1189,13 @@ def make_dataclass(
     # of generic dataclassses.
     cls = types.new_class(cls_name, bases, {}, lambda ns: ns.update(namespace))
     return dataclass(
-        cls, init=init, repr=repr, eq=eq, order=order, unsafe_hash=unsafe_hash, frozen=frozen
+        cls,
+        init=init,
+        repr=repr,
+        eq=eq,
+        order=order,
+        unsafe_hash=unsafe_hash,
+        frozen=frozen,
     )
 
 

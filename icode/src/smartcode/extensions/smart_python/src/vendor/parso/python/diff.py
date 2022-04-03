@@ -39,7 +39,7 @@ from parso.python.token import PythonTokenTypes
 LOG = logging.getLogger(__name__)
 DEBUG_DIFF_PARSER = False
 
-_INDENTATION_TOKENS = 'INDENT', 'ERROR_DEDENT', 'DEDENT'
+_INDENTATION_TOKENS = "INDENT", "ERROR_DEDENT", "DEDENT"
 
 NEWLINE = PythonTokenTypes.NEWLINE
 DEDENT = PythonTokenTypes.DEDENT
@@ -49,7 +49,7 @@ ENDMARKER = PythonTokenTypes.ENDMARKER
 
 
 def _is_indentation_error_leaf(node):
-    return node.type == 'error_leaf' and node.token_type in _INDENTATION_TOKENS
+    return node.type == "error_leaf" and node.token_type in _INDENTATION_TOKENS
 
 
 def _get_previous_leaf_if_indentation(leaf):
@@ -83,7 +83,7 @@ def _assert_valid_graph(node):
     except AttributeError:
         # Ignore INDENT is necessary, because indent/dedent tokens don't
         # contain value/prefix and are just around, because of the tokenizer.
-        if node.type == 'error_leaf' and node.token_type in _INDENTATION_TOKENS:
+        if node.type == "error_leaf" and node.token_type in _INDENTATION_TOKENS:
             assert not node.value
             assert not node.prefix
             return
@@ -94,20 +94,20 @@ def _assert_valid_graph(node):
             content = node.prefix
             previous_start_pos = 1, 0
         else:
-            assert previous_leaf.end_pos <= node.start_pos, \
-                (previous_leaf, node)
+            assert previous_leaf.end_pos <= node.start_pos, (previous_leaf, node)
 
             content = previous_leaf.value + node.prefix
             previous_start_pos = previous_leaf.start_pos
 
-        if '\n' in content or '\r' in content:
+        if "\n" in content or "\r" in content:
             splitted = split_lines(content)
             line = previous_start_pos[0] + len(splitted) - 1
             actual = line, len(splitted[-1])
         else:
             actual = previous_start_pos[0], previous_start_pos[1] + len(content)
-            if content.startswith(BOM_UTF8_STRING) \
-                    and node.get_start_pos_of_prefix() == (1, 0):
+            if content.startswith(
+                BOM_UTF8_STRING
+            ) and node.get_start_pos_of_prefix() == (1, 0):
                 # Remove the byte order mark
                 actual = actual[0], actual[1] - 1
 
@@ -122,7 +122,7 @@ def _assert_nodes_are_equal(node1, node2):
     try:
         children1 = node1.children
     except AttributeError:
-        assert not hasattr(node2, 'children'), (node1, node2)
+        assert not hasattr(node2, "children"), (node1, node2)
         assert node1.value == node2.value, (node1, node2)
         assert node1.type == node2.type, (node1, node2)
         assert node1.prefix == node2.prefix, (node1, node2)
@@ -135,7 +135,9 @@ def _assert_nodes_are_equal(node1, node2):
             assert False, (node1, node2)
     for n1, n2 in zip(children1, children2):
         _assert_nodes_are_equal(n1, n2)
-    assert len(children1) == len(children2), '\n' + repr(children1) + '\n' + repr(children2)
+    assert len(children1) == len(children2), (
+        "\n" + repr(children1) + "\n" + repr(children2)
+    )
 
 
 def _get_debug_error_message(module, old_lines, new_lines):
@@ -143,10 +145,11 @@ def _get_debug_error_message(module, old_lines, new_lines):
     current_diff = difflib.unified_diff(new_lines, current_lines)
     old_new_diff = difflib.unified_diff(old_lines, new_lines)
     import parso
+
     return (
         "There's an issue with the diff parser. Please "
         "report (parso v%s) - Old/New:\n%s\nActual Diff (May be empty):\n%s"
-        % (parso.__version__, ''.join(old_new_diff), ''.join(current_diff))
+        % (parso.__version__, "".join(old_new_diff), "".join(current_diff))
     )
 
 
@@ -156,7 +159,7 @@ def _get_last_line(node_or_leaf):
         return last_leaf.start_pos[0]
     else:
         n = last_leaf.get_next_leaf()
-        if n.type == 'endmarker' and '\n' in n.prefix:
+        if n.type == "endmarker" and "\n" in n.prefix:
             # This is a very special case and has to do with error recovery in
             # Parso. The problem is basically that there's no newline leaf at
             # the end sometimes (it's required in the grammar, but not needed
@@ -168,20 +171,22 @@ def _get_last_line(node_or_leaf):
 
 
 def _skip_dedent_error_leaves(leaf):
-    while leaf is not None and leaf.type == 'error_leaf' and leaf.token_type == 'DEDENT':
+    while (
+        leaf is not None and leaf.type == "error_leaf" and leaf.token_type == "DEDENT"
+    ):
         leaf = leaf.get_previous_leaf()
     return leaf
 
 
-def _ends_with_newline(leaf, suffix=''):
+def _ends_with_newline(leaf, suffix=""):
     leaf = _skip_dedent_error_leaves(leaf)
 
-    if leaf.type == 'error_leaf':
+    if leaf.type == "error_leaf":
         typ = leaf.token_type.lower()
     else:
         typ = leaf.type
 
-    return typ == 'newline' or suffix.endswith('\n') or suffix.endswith('\r')
+    return typ == "newline" or suffix.endswith("\n") or suffix.endswith("\r")
 
 
 def _flows_finished(pgen_grammar, stack):
@@ -190,17 +195,17 @@ def _flows_finished(pgen_grammar, stack):
     still be parsed.
     """
     for stack_node in stack:
-        if stack_node.nonterminal in ('if_stmt', 'while_stmt', 'for_stmt', 'try_stmt'):
+        if stack_node.nonterminal in ("if_stmt", "while_stmt", "for_stmt", "try_stmt"):
             return False
     return True
 
 
 def _func_or_class_has_suite(node):
-    if node.type == 'decorated':
+    if node.type == "decorated":
         node = node.children[-1]
-    if node.type in ('async_funcdef', 'async_stmt'):
+    if node.type in ("async_funcdef", "async_stmt"):
         node = node.children[-1]
-    return node.type in ('classdef', 'funcdef') and node.children[-1].type == 'suite'
+    return node.type in ("classdef", "funcdef") and node.children[-1].type == "suite"
 
 
 def _suite_or_file_input_is_valid(pgen_grammar, stack):
@@ -208,11 +213,11 @@ def _suite_or_file_input_is_valid(pgen_grammar, stack):
         return False
 
     for stack_node in reversed(stack):
-        if stack_node.nonterminal == 'decorator':
+        if stack_node.nonterminal == "decorator":
             # A decorator is only valid with the upcoming function.
             return False
 
-        if stack_node.nonterminal == 'suite':
+        if stack_node.nonterminal == "suite":
             # If only newline is in the suite, the suite is not valid, yet.
             return len(stack_node.nodes) > 1
     # Not reaching a suite means that we're dealing with file_input levels
@@ -221,13 +226,13 @@ def _suite_or_file_input_is_valid(pgen_grammar, stack):
 
 
 def _is_flow_node(node):
-    if node.type == 'async_stmt':
+    if node.type == "async_stmt":
         node = node.children[1]
     try:
         value = node.children[0].value
     except AttributeError:
         return False
-    return value in ('if', 'for', 'while', 'try', 'with')
+    return value in ("if", "for", "while", "try", "with")
 
 
 class _PositionUpdatingFinished(Exception):
@@ -252,6 +257,7 @@ class DiffParser:
     An advanced form of parsing a file faster. Unfortunately comes with huge
     side effects. It changes the given module.
     """
+
     def __init__(self, pgen_grammar, tokenizer, module):
         self._pgen_grammar = pgen_grammar
         self._tokenizer = tokenizer
@@ -264,7 +270,7 @@ class DiffParser:
         self._nodes_tree = _NodesTree(self._module)
 
     def update(self, old_lines, new_lines):
-        '''
+        """
         The algorithm works as follows:
 
         Equal:
@@ -278,8 +284,8 @@ class DiffParser:
               much more.
 
         Returns the new module node.
-        '''
-        LOG.debug('diff parser start')
+        """
+        LOG.debug("diff parser start")
         # Reset the used names cache so they get regenerated.
         self._module._used_names = None
 
@@ -290,25 +296,26 @@ class DiffParser:
         line_length = len(new_lines)
         sm = difflib.SequenceMatcher(None, old_lines, self._parser_lines_new)
         opcodes = sm.get_opcodes()
-        LOG.debug('line_lengths old: %s; new: %s' % (len(old_lines), line_length))
+        LOG.debug("line_lengths old: %s; new: %s" % (len(old_lines), line_length))
 
         for operation, i1, i2, j1, j2 in opcodes:
-            LOG.debug('-> code[%s] old[%s:%s] new[%s:%s]',
-                      operation, i1 + 1, i2, j1 + 1, j2)
+            LOG.debug(
+                "-> code[%s] old[%s:%s] new[%s:%s]", operation, i1 + 1, i2, j1 + 1, j2
+            )
 
-            if j2 == line_length and new_lines[-1] == '':
+            if j2 == line_length and new_lines[-1] == "":
                 # The empty part after the last newline is not relevant.
                 j2 -= 1
 
-            if operation == 'equal':
+            if operation == "equal":
                 line_offset = j1 - i1
                 self._copy_from_old_parser(line_offset, i1 + 1, i2, j2)
-            elif operation == 'replace':
+            elif operation == "replace":
                 self._parse(until_line=j2)
-            elif operation == 'insert':
+            elif operation == "insert":
                 self._parse(until_line=j2)
             else:
-                assert operation == 'delete'
+                assert operation == "delete"
 
         # With this action all change will finally be applied and we have a
         # changed module.
@@ -318,12 +325,11 @@ class DiffParser:
             # If there is reasonable suspicion that the diff parser is not
             # behaving well, this should be enabled.
             try:
-                code = ''.join(new_lines)
+                code = "".join(new_lines)
                 assert self._module.get_code() == code
                 _assert_valid_graph(self._module)
                 without_diff_parser_module = Parser(
-                    self._pgen_grammar,
-                    error_recovery=True
+                    self._pgen_grammar, error_recovery=True
                 ).parse(self._tokenizer(new_lines))
                 _assert_nodes_are_equal(self._module, without_diff_parser_module)
             except AssertionError:
@@ -333,17 +339,19 @@ class DiffParser:
         last_pos = self._module.end_pos[0]
         if last_pos != line_length:
             raise Exception(
-                ('(%s != %s) ' % (last_pos, line_length))
+                ("(%s != %s) " % (last_pos, line_length))
                 + _get_debug_error_message(self._module, old_lines, new_lines)
             )
-        LOG.debug('diff parser end')
+        LOG.debug("diff parser end")
         return self._module
 
     def _enabled_debugging(self, old_lines, lines_new):
-        if self._module.get_code() != ''.join(lines_new):
-            LOG.warning('parser issue:\n%s\n%s', ''.join(old_lines), ''.join(lines_new))
+        if self._module.get_code() != "".join(lines_new):
+            LOG.warning("parser issue:\n%s\n%s", "".join(old_lines), "".join(lines_new))
 
-    def _copy_from_old_parser(self, line_offset, start_line_old, until_line_old, until_line_new):
+    def _copy_from_old_parser(
+        self, line_offset, start_line_old, until_line_old, until_line_new
+    ):
         last_until_line = -1
         while until_line_new > self._nodes_tree.parsed_until_line:
             parsed_until_line_old = self._nodes_tree.parsed_until_line - line_offset
@@ -357,17 +365,16 @@ class DiffParser:
                 p_children = line_stmt.parent.children
                 index = p_children.index(line_stmt)
 
-                if start_line_old == 1 \
-                        and p_children[0].get_first_leaf().prefix.startswith(BOM_UTF8_STRING):
+                if start_line_old == 1 and p_children[
+                    0
+                ].get_first_leaf().prefix.startswith(BOM_UTF8_STRING):
                     # If there's a BOM in the beginning, just reparse. It's too
                     # complicated to account for it otherwise.
                     copied_nodes = []
                 else:
                     from_ = self._nodes_tree.parsed_until_line + 1
                     copied_nodes = self._nodes_tree.copy_nodes(
-                        p_children[index:],
-                        until_line_old,
-                        line_offset
+                        p_children[index:], until_line_old, line_offset
                     )
                 # Match all the nodes that are in the wanted range.
                 if copied_nodes:
@@ -375,16 +382,22 @@ class DiffParser:
 
                     to = self._nodes_tree.parsed_until_line
 
-                    LOG.debug('copy old[%s:%s] new[%s:%s]',
-                              copied_nodes[0].start_pos[0],
-                              copied_nodes[-1].end_pos[0] - 1, from_, to)
+                    LOG.debug(
+                        "copy old[%s:%s] new[%s:%s]",
+                        copied_nodes[0].start_pos[0],
+                        copied_nodes[-1].end_pos[0] - 1,
+                        from_,
+                        to,
+                    )
                 else:
                     # We have copied as much as possible (but definitely not too
                     # much). Therefore we just parse a bit more.
                     self._parse(self._nodes_tree.parsed_until_line + 1)
             # Since there are potential bugs that might loop here endlessly, we
             # just stop here.
-            assert last_until_line != self._nodes_tree.parsed_until_line, last_until_line
+            assert (
+                last_until_line != self._nodes_tree.parsed_until_line
+            ), last_until_line
             last_until_line = self._nodes_tree.parsed_until_line
 
     def _get_old_line_stmt(self, old_line):
@@ -394,7 +407,7 @@ class DiffParser:
             leaf = leaf.get_next_leaf()
         if leaf.get_start_pos_of_prefix()[0] == old_line:
             node = leaf
-            while node.parent.type not in ('file_input', 'suite'):
+            while node.parent.type not in ("file_input", "suite"):
                 node = node.parent
 
             # Make sure that if only the `else:` line of an if statement is
@@ -419,15 +432,17 @@ class DiffParser:
                 self._nodes_tree.indents[-1] = self._replace_tos_indent
 
             LOG.debug(
-                'parse_part from %s to %s (to %s in part parser)',
+                "parse_part from %s to %s (to %s in part parser)",
                 nodes[0].get_start_pos_of_prefix()[0],
                 self._nodes_tree.parsed_until_line,
-                node.end_pos[0] - 1
+                node.end_pos[0] - 1,
             )
             # Since the tokenizer sometimes has bugs, we cannot be sure that
             # this loop terminates. Therefore assert that there's always a
             # change.
-            assert last_until_line != self._nodes_tree.parsed_until_line, last_until_line
+            assert (
+                last_until_line != self._nodes_tree.parsed_until_line
+            ), last_until_line
             last_until_line = self._nodes_tree.parsed_until_line
 
     def _try_parse_part(self, until_line):
@@ -442,14 +457,9 @@ class DiffParser:
         parsed_until_line = self._nodes_tree.parsed_until_line
         lines_after = self._parser_lines_new[parsed_until_line:]
         tokens = self._diff_tokenize(
-            lines_after,
-            until_line,
-            line_offset=parsed_until_line
+            lines_after, until_line, line_offset=parsed_until_line
         )
-        self._active_parser = Parser(
-            self._pgen_grammar,
-            error_recovery=True
-        )
+        self._active_parser = Parser(self._pgen_grammar, error_recovery=True)
         return self._active_parser.parse(tokens=tokens)
 
     def _diff_tokenize(self, lines, until_line, line_offset=0):
@@ -486,17 +496,13 @@ class DiffParser:
                         else:
                             break
 
-                    if '\n' in prefix or '\r' in prefix:
-                        prefix = re.sub(r'[^\n\r]+\Z', '', prefix)
+                    if "\n" in prefix or "\r" in prefix:
+                        prefix = re.sub(r"[^\n\r]+\Z", "", prefix)
                     else:
                         assert start_pos[1] >= len(prefix), repr(prefix)
                         if start_pos[1] - len(prefix) == 0:
-                            prefix = ''
-                    yield PythonToken(
-                        ENDMARKER, '',
-                        start_pos,
-                        prefix
-                    )
+                            prefix = ""
+                    yield PythonToken(ENDMARKER, "", start_pos, prefix)
                     break
             elif typ == NEWLINE and token.start_pos[0] >= until_line:
                 was_newline = True
@@ -505,10 +511,10 @@ class DiffParser:
                 if len(indents) == initial_indentation_count:
                     # Check if the parser is actually in a valid suite state.
                     if _suite_or_file_input_is_valid(self._pgen_grammar, stack):
-                        yield PythonToken(ENDMARKER, '', token.start_pos, '')
+                        yield PythonToken(ENDMARKER, "", token.start_pos, "")
                         break
 
-            if typ == NAME and token.string in ('class', 'def'):
+            if typ == NAME and token.string in ("class", "def"):
                 self._keyword_token_indents[token.start_pos] = list(indents)
 
             yield token
@@ -516,8 +522,8 @@ class DiffParser:
 
 class _NodesTreeNode:
     _ChildrenGroup = namedtuple(
-        '_ChildrenGroup',
-        'prefix children line_offset last_line_offset_leaf')
+        "_ChildrenGroup", "prefix children line_offset last_line_offset_leaf"
+    )
 
     def __init__(self, tree_node, parent=None, indentation=0):
         self.tree_node = tree_node
@@ -528,7 +534,12 @@ class _NodesTreeNode:
 
     def finish(self):
         children = []
-        for prefix, children_part, line_offset, last_line_offset_leaf in self._children_groups:
+        for (
+            prefix,
+            children_part,
+            line_offset,
+            last_line_offset_leaf,
+        ) in self._children_groups:
             first_leaf = _get_next_leaf_if_indentation(
                 children_part[0].get_first_leaf()
             )
@@ -536,8 +547,7 @@ class _NodesTreeNode:
             first_leaf.prefix = prefix + first_leaf.prefix
             if line_offset != 0:
                 try:
-                    _update_positions(
-                        children_part, line_offset, last_line_offset_leaf)
+                    _update_positions(children_part, line_offset, last_line_offset_leaf)
                 except _PositionUpdatingFinished:
                     pass
             children += children_part
@@ -552,8 +562,9 @@ class _NodesTreeNode:
     def add_child_node(self, child_node):
         self._node_children.append(child_node)
 
-    def add_tree_nodes(self, prefix, children, line_offset=0,
-                       last_line_offset_leaf=None):
+    def add_tree_nodes(
+        self, prefix, children, line_offset=0, last_line_offset_leaf=None
+    ):
         if last_line_offset_leaf is None:
             last_line_offset_leaf = children[-1].get_last_leaf()
         group = self._ChildrenGroup(
@@ -577,7 +588,7 @@ class _NodesTreeNode:
                 line -= 1
         line += len(split_lines(suffix)) - 1
 
-        if suffix and not suffix.endswith('\n') and not suffix.endswith('\r'):
+        if suffix and not suffix.endswith("\n") and not suffix.endswith("\r"):
             # This is the end of a file (that doesn't end with a newline).
             line += 1
 
@@ -586,7 +597,7 @@ class _NodesTreeNode:
         return line
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.tree_node)
+        return "<%s: %s>" % (self.__class__.__name__, self.tree_node)
 
 
 class _NodesTree:
@@ -594,8 +605,8 @@ class _NodesTree:
         self._base_node = _NodesTreeNode(module)
         self._working_stack = [self._base_node]
         self._module = module
-        self._prefix_remainder = ''
-        self.prefix = ''
+        self._prefix_remainder = ""
+        self.prefix = ""
         self.indents = [0]
 
     @property
@@ -615,22 +626,22 @@ class _NodesTree:
             self.prefix = old_prefix + self.prefix
             return
 
-        assert tree_nodes[0].type != 'newline'
+        assert tree_nodes[0].type != "newline"
 
         node = self._update_insertion_node(tree_nodes[0].start_pos[1])
-        assert node.tree_node.type in ('suite', 'file_input')
+        assert node.tree_node.type in ("suite", "file_input")
         node.add_tree_nodes(old_prefix, tree_nodes)
         # tos = Top of stack
         self._update_parsed_node_tos(tree_nodes[-1], keyword_token_indents)
 
     def _update_parsed_node_tos(self, tree_node, keyword_token_indents):
-        if tree_node.type == 'suite':
+        if tree_node.type == "suite":
             def_leaf = tree_node.parent.children[0]
             new_tos = _NodesTreeNode(
                 tree_node,
                 indentation=keyword_token_indents[def_leaf.start_pos][-1],
             )
-            new_tos.add_tree_nodes('', list(tree_node.children))
+            new_tos.add_tree_nodes("", list(tree_node.children))
 
             self._working_stack[-1].add_child_node(new_tos)
             self._working_stack.append(new_tos)
@@ -644,19 +655,21 @@ class _NodesTree:
         Helps cleaning up the tree nodes that get inserted.
         """
         last_leaf = tree_nodes[-1].get_last_leaf()
-        is_endmarker = last_leaf.type == 'endmarker'
-        self._prefix_remainder = ''
+        is_endmarker = last_leaf.type == "endmarker"
+        self._prefix_remainder = ""
         if is_endmarker:
             prefix = last_leaf.prefix
-            separation = max(prefix.rfind('\n'), prefix.rfind('\r'))
+            separation = max(prefix.rfind("\n"), prefix.rfind("\r"))
             if separation > -1:
                 # Remove the whitespace part of the prefix after a newline.
                 # That is not relevant if parentheses were opened. Always parse
                 # until the end of a line.
-                last_leaf.prefix, self._prefix_remainder = \
-                    last_leaf.prefix[:separation + 1], last_leaf.prefix[separation + 1:]
+                last_leaf.prefix, self._prefix_remainder = (
+                    last_leaf.prefix[: separation + 1],
+                    last_leaf.prefix[separation + 1 :],
+                )
 
-        self.prefix = ''
+        self.prefix = ""
 
         if is_endmarker:
             self.prefix = last_leaf.prefix
@@ -690,7 +703,7 @@ class _NodesTree:
 
         Returns the number of tree nodes that were copied.
         """
-        if tree_nodes[0].type in ('error_leaf', 'error_node'):
+        if tree_nodes[0].type in ("error_leaf", "error_node"):
             # Avoid copying errors in the beginning. Can lead to a lot of
             # issues.
             return []
@@ -718,25 +731,31 @@ class _NodesTree:
             self.indents = old_indents
         return new_nodes
 
-    def _copy_nodes(self, working_stack, nodes, until_line, line_offset,
-                    prefix='', is_nested=False):
+    def _copy_nodes(
+        self, working_stack, nodes, until_line, line_offset, prefix="", is_nested=False
+    ):
         new_nodes = []
         added_indents = []
 
-        nodes = list(self._get_matching_indent_nodes(
-            nodes,
-            is_new_suite=is_nested,
-        ))
+        nodes = list(
+            self._get_matching_indent_nodes(
+                nodes,
+                is_new_suite=is_nested,
+            )
+        )
 
-        new_prefix = ''
+        new_prefix = ""
         for node in nodes:
             if node.start_pos[0] > until_line:
                 break
 
-            if node.type == 'endmarker':
+            if node.type == "endmarker":
                 break
 
-            if node.type == 'error_leaf' and node.token_type in ('DEDENT', 'ERROR_DEDENT'):
+            if node.type == "error_leaf" and node.token_type in (
+                "DEDENT",
+                "ERROR_DEDENT",
+            ):
                 break
             # TODO this check might take a bit of time for large files. We
             # might want to change this to do more intelligent guessing or
@@ -756,16 +775,16 @@ class _NodesTree:
                 # include a newline in the statement and we need to take care
                 # of that.
                 n = node
-                if n.type == 'decorated':
+                if n.type == "decorated":
                     n = n.children[-1]
-                if n.type in ('async_funcdef', 'async_stmt'):
+                if n.type in ("async_funcdef", "async_stmt"):
                     n = n.children[-1]
-                if n.type in ('classdef', 'funcdef'):
+                if n.type in ("classdef", "funcdef"):
                     suite_node = n.children[-1]
                 else:
                     suite_node = c[-1]
 
-                if suite_node.type in ('error_leaf', 'error_node'):
+                if suite_node.type in ("error_leaf", "error_node"):
                     break
 
             new_nodes.append(node)
@@ -774,8 +793,9 @@ class _NodesTree:
         if new_nodes:
             while new_nodes:
                 last_node = new_nodes[-1]
-                if (last_node.type in ('error_leaf', 'error_node')
-                        or _is_flow_node(new_nodes[-1])):
+                if last_node.type in ("error_leaf", "error_node") or _is_flow_node(
+                    new_nodes[-1]
+                ):
                     # Error leafs/nodes don't have a defined start/end. Error
                     # nodes might not end with a newline (e.g. if there's an
                     # open `(`). Therefore ignore all of them unless they are
@@ -783,15 +803,15 @@ class _NodesTree:
                     # If we copy flows at the end, they might be continued
                     # after the copy limit (in the new parser).
                     # In this while loop we try to remove until we find a newline.
-                    new_prefix = ''
+                    new_prefix = ""
                     new_nodes.pop()
                     while new_nodes:
                         last_node = new_nodes[-1]
-                        if last_node.get_last_leaf().type == 'newline':
+                        if last_node.get_last_leaf().type == "newline":
                             break
                         new_nodes.pop()
                     continue
-                if len(new_nodes) > 1 and new_nodes[-2].type == 'error_node':
+                if len(new_nodes) > 1 and new_nodes[-2].type == "error_node":
                     # The problem here is that Parso error recovery sometimes
                     # influences nodes before this node.
                     # Since the new last node is an error node this will get
@@ -809,7 +829,7 @@ class _NodesTree:
         # Pop incomplete suites from the list
         if _func_or_class_has_suite(last_node):
             suite = last_node
-            while suite.type != 'suite':
+            while suite.type != "suite":
                 suite = suite.children[-1]
 
             indent = _get_suite_indentation(suite)
@@ -819,14 +839,17 @@ class _NodesTree:
             # Don't need to pass line_offset here, it's already done by the
             # parent.
             suite_nodes, new_working_stack, new_prefix, ai = self._copy_nodes(
-                working_stack + [suite_tos], suite.children, until_line, line_offset,
+                working_stack + [suite_tos],
+                suite.children,
+                until_line,
+                line_offset,
                 is_nested=True,
             )
             added_indents += ai
             if len(suite_nodes) < 2:
                 # A suite only with newline is not valid.
                 new_nodes.pop()
-                new_prefix = ''
+                new_prefix = ""
             else:
                 assert new_nodes
                 tos.add_child_node(suite_tos)
@@ -834,7 +857,10 @@ class _NodesTree:
                 had_valid_suite_last = True
 
         if new_nodes:
-            if not _ends_with_newline(new_nodes[-1].get_last_leaf()) and not had_valid_suite_last:
+            if (
+                not _ends_with_newline(new_nodes[-1].get_last_leaf())
+                and not had_valid_suite_last
+            ):
                 p = new_nodes[-1].get_next_leaf().prefix
                 # We are not allowed to remove the newline at the end of the
                 # line, otherwise it's going to be missing. This happens e.g.
@@ -844,19 +870,22 @@ class _NodesTree:
 
             if had_valid_suite_last:
                 last = new_nodes[-1]
-                if last.type == 'decorated':
+                if last.type == "decorated":
                     last = last.children[-1]
-                if last.type in ('async_funcdef', 'async_stmt'):
+                if last.type in ("async_funcdef", "async_stmt"):
                     last = last.children[-1]
                 last_line_offset_leaf = last.children[-2].get_last_leaf()
-                assert last_line_offset_leaf == ':'
+                assert last_line_offset_leaf == ":"
             else:
                 last_line_offset_leaf = new_nodes[-1].get_last_leaf()
             tos.add_tree_nodes(
-                prefix, new_nodes, line_offset, last_line_offset_leaf,
+                prefix,
+                new_nodes,
+                line_offset,
+                last_line_offset_leaf,
             )
             prefix = new_prefix
-            self._prefix_remainder = ''
+            self._prefix_remainder = ""
 
         return new_nodes, working_stack, prefix, added_indents
 
@@ -881,6 +910,6 @@ class _NodesTree:
             end_pos[0] += len(lines) - 1
             end_pos[1] = len(lines[-1])
 
-        endmarker = EndMarker('', tuple(end_pos), self.prefix + self._prefix_remainder)
+        endmarker = EndMarker("", tuple(end_pos), self.prefix + self._prefix_remainder)
         endmarker.parent = self._module
         self._module.children.append(endmarker)

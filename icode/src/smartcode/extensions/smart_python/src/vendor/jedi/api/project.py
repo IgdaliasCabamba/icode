@@ -16,16 +16,28 @@ from jedi.api.environment import get_cached_default_environment, create_environm
 from jedi.api.exceptions import WrongVersion
 from jedi.api.completion import search_in_module
 from jedi.api.helpers import split_search_string, get_module_names
-from jedi.inference.imports import load_module_from_path, \
-    load_namespace_from_path, iter_module_names
+from jedi.inference.imports import (
+    load_module_from_path,
+    load_namespace_from_path,
+    iter_module_names,
+)
 from jedi.inference.sys_path import discover_buildout_paths
 from jedi.inference.cache import inference_state_as_method_param_cache
-from jedi.inference.references import recurse_find_python_folders_and_files, search_in_file_ios
+from jedi.inference.references import (
+    recurse_find_python_folders_and_files,
+    search_in_file_ios,
+)
 from jedi.file_io import FolderIO
 
-_CONFIG_FOLDER = '.jedi'
-_CONTAINS_POTENTIAL_PROJECT = \
-    'setup.py', '.git', '.hg', 'requirements.txt', 'MANIFEST.in', 'pyproject.toml'
+_CONFIG_FOLDER = ".jedi"
+_CONTAINS_POTENTIAL_PROJECT = (
+    "setup.py",
+    ".git",
+    ".hg",
+    "requirements.txt",
+    "MANIFEST.in",
+    "pyproject.toml",
+)
 
 _SERIALIZER_VERSION = 1
 
@@ -38,12 +50,13 @@ def _try_to_skip_duplicates(func):
             tree_node = definition._name.tree_name
             if tree_node is not None and tree_node in found_tree_nodes:
                 continue
-            if definition.type == 'module' and definition.module_path is not None:
+            if definition.type == "module" and definition.module_path is not None:
                 if definition.module_path in found_modules:
                     continue
                 found_modules.append(definition.module_path)
             yield definition
             found_tree_nodes.append(tree_node)
+
     return wrapper
 
 
@@ -62,6 +75,7 @@ class Project:
     import resolution. It is mostly used as a parameter to :class:`.Script`.
     Additionally there are functions to search a whole project.
     """
+
     _environment = None
 
     @staticmethod
@@ -70,7 +84,7 @@ class Project:
 
     @staticmethod
     def _get_json_path(base_path):
-        return Project._get_config_folder_path(base_path).joinpath('project.json')
+        return Project._get_config_folder_path(base_path).joinpath("project.json")
 
     @classmethod
     def load(cls, path):
@@ -97,13 +111,13 @@ class Project:
         Saves the project configuration in the project in ``.jedi/project.json``.
         """
         data = dict(self.__dict__)
-        data.pop('_environment', None)
-        data.pop('_django', None)  # TODO make django setting public?
-        data = {k.lstrip('_'): v for k, v in data.items()}
-        data['path'] = str(data['path'])
+        data.pop("_environment", None)
+        data.pop("_django", None)  # TODO make django setting public?
+        data = {k.lstrip("_"): v for k, v in data.items()}
+        data["path"] = str(data["path"])
 
         self._get_config_folder_path(self._path).mkdir(parents=True, exist_ok=True)
-        with open(self._get_json_path(self._path), 'w') as f:
+        with open(self._get_json_path(self._path), "w") as f:
             return json.dump((_SERIALIZER_VERSION, data), f)
 
     def __init__(self, path, **kwargs):
@@ -125,8 +139,15 @@ class Project:
             local directories. Otherwise you will have to rely on your packages
             being properly configured on the ``sys.path``.
         """
-        def py2_comp(path, environment_path=None, load_unsafe_extensions=False,
-                     sys_path=None, added_sys_path=(), smart_sys_path=True):
+
+        def py2_comp(
+            path,
+            environment_path=None,
+            load_unsafe_extensions=False,
+            sys_path=None,
+            added_sys_path=(),
+            smart_sys_path=True,
+        ):
             if isinstance(path, str):
                 path = Path(path).absolute()
             self._path = path
@@ -180,13 +201,15 @@ class Project:
         # The sys path has not been set explicitly.
         sys_path = list(inference_state.environment.get_sys_path())
         try:
-            sys_path.remove('')
+            sys_path.remove("")
         except ValueError:
             pass
         return sys_path
 
     @inference_state_as_method_param_cache()
-    def _get_sys_path(self, inference_state, add_parent_paths=True, add_init_paths=False):
+    def _get_sys_path(
+        self, inference_state, add_parent_paths=True, add_init_paths=False
+    ):
         """
         Keep this method private for all users of jedi. However internally this
         one is used like a public method.
@@ -203,10 +226,12 @@ class Project:
             prefixed.append(str(self._path))
 
             if inference_state.script_path is not None:
-                suffixed += map(str, discover_buildout_paths(
-                    inference_state,
-                    inference_state.script_path
-                ))
+                suffixed += map(
+                    str,
+                    discover_buildout_paths(
+                        inference_state, inference_state.script_path
+                    ),
+                )
 
                 if add_parent_paths:
                     # Collect directories in upward search by:
@@ -214,11 +239,15 @@ class Project:
                     #   2. Stopping immediately when above self._path
                     traversed = []
                     for parent_path in inference_state.script_path.parents:
-                        if parent_path == self._path \
-                                or self._path not in parent_path.parents:
+                        if (
+                            parent_path == self._path
+                            or self._path not in parent_path.parents
+                        ):
                             break
-                        if not add_init_paths \
-                                and parent_path.joinpath("__init__.py").is_file():
+                        if (
+                            not add_init_paths
+                            and parent_path.joinpath("__init__.py").is_file()
+                        ):
                             continue
                         traversed.append(str(parent_path))
 
@@ -236,7 +265,9 @@ class Project:
     def get_environment(self):
         if self._environment is None:
             if self._environment_path is not None:
-                self._environment = create_environment(self._environment_path, safe=False)
+                self._environment = create_environment(
+                    self._environment_path, safe=False
+                )
             else:
                 self._environment = get_cached_default_environment()
         return self._environment
@@ -280,14 +311,15 @@ class Project:
     def _search_func(self, string, complete=False, all_scopes=False):
         # Using a Script is they easiest way to get an empty module context.
         from jedi import Script
-        s = Script('', project=self)
+
+        s = Script("", project=self)
         inference_state = s._inference_state
         empty_module_context = s._get_module_context()
 
-        debug.dbg('Search for string %s, complete=%s', string, complete)
+        debug.dbg("Search for string %s, complete=%s", string, complete)
         wanted_type, wanted_names = split_search_string(string)
         name = wanted_names[0]
-        stub_folder_name = name + '-stubs'
+        stub_folder_name = name + "-stubs"
 
         ios = recurse_find_python_folders_and_files(FolderIO(str(self._path)))
         file_ios = []
@@ -297,25 +329,27 @@ class Project:
             if file_io is None:
                 file_name = folder_io.get_base_name()
                 if file_name == name or file_name == stub_folder_name:
-                    f = folder_io.get_file_io('__init__.py')
+                    f = folder_io.get_file_io("__init__.py")
                     try:
                         m = load_module_from_path(inference_state, f).as_context()
                     except FileNotFoundError:
-                        f = folder_io.get_file_io('__init__.pyi')
+                        f = folder_io.get_file_io("__init__.pyi")
                         try:
                             m = load_module_from_path(inference_state, f).as_context()
                         except FileNotFoundError:
-                            m = load_namespace_from_path(inference_state, folder_io).as_context()
+                            m = load_namespace_from_path(
+                                inference_state, folder_io
+                            ).as_context()
                 else:
                     continue
             else:
                 file_ios.append(file_io)
-                if Path(file_io.path).name in (name + '.py', name + '.pyi'):
+                if Path(file_io.path).name in (name + ".py", name + ".pyi"):
                     m = load_module_from_path(inference_state, file_io).as_context()
                 else:
                     continue
 
-            debug.dbg('Search of a specific module %s', m)
+            debug.dbg("Search of a specific module %s", m)
             yield from search_in_module(
                 inference_state,
                 m,
@@ -344,7 +378,8 @@ class Project:
 
         # 3. Search for modules on sys.path
         sys_path = [
-            p for p in self._get_sys_path(inference_state)
+            p
+            for p in self._get_sys_path(inference_state)
             # Exclude folders that are handled by recursing of the Python
             # folders.
             if not p.startswith(str(self._path))
@@ -361,7 +396,7 @@ class Project:
         )
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self._path)
+        return "<%s: %s>" % (self.__class__.__name__, self._path)
 
 
 def _is_potential_project(path):
@@ -375,9 +410,9 @@ def _is_potential_project(path):
 
 
 def _is_django_path(directory):
-    """ Detects the path of the very well known Django library (if used) """
+    """Detects the path of the very well known Django library (if used)"""
     try:
-        with open(directory.joinpath('manage.py'), 'rb') as f:
+        with open(directory.joinpath("manage.py"), "rb") as f:
             return b"DJANGO_SETTINGS_MODULE" in f.read()
     except (FileNotFoundError, IsADirectoryError, PermissionError):
         return False
@@ -410,7 +445,7 @@ def get_default_project(path=None):
             continue
 
         if first_no_init_file is None:
-            if dir.joinpath('__init__.py').exists():
+            if dir.joinpath("__init__.py").exists():
                 # In the case that a __init__.py exists, it's in 99% just a
                 # Python package and the project sits at least one level above.
                 continue
@@ -437,7 +472,4 @@ def get_default_project(path=None):
 
 
 def _remove_imports(names):
-    return [
-        n for n in names
-        if n.tree_name is None or n.api_type != 'module'
-    ]
+    return [n for n in names if n.tree_name is None or n.api_type != "module"]

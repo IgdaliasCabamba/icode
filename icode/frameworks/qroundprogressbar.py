@@ -28,9 +28,19 @@ import operator
 from enum import Enum
 
 from qtpy.QtCore import Slot, QPointF, Qt, QRectF
-from qtpy.QtGui import (QPalette, QConicalGradient, QGradient, QRadialGradient,
-                        QFontMetricsF, QFont, QPainter, QPen, QPainterPath, QImage,
-                        QPaintEvent)
+from qtpy.QtGui import (
+    QPalette,
+    QConicalGradient,
+    QGradient,
+    QRadialGradient,
+    QFontMetricsF,
+    QFont,
+    QPainter,
+    QPen,
+    QPainterPath,
+    QImage,
+    QPaintEvent,
+)
 from qtpy.QtWidgets import QWidget
 
 
@@ -54,7 +64,7 @@ class QRoundProgressBar(QWidget):
         self.m_outlinePenWidth = 1
         self.m_dataPenWidth = 1
         self.m_rebuildBrush = False
-        self.m_format = '%p%'
+        self.m_format = "%p%"
         self.m_decimals = 1
         self.m_updateFlags = self.UpdateFlags.PERCENT
         self.m_gradientData = None
@@ -62,14 +72,14 @@ class QRoundProgressBar(QWidget):
     # ENUMS ---------------------------------------------------------
 
     class BarStyle(Enum):
-        DONUT = 0,
-        PIE = 1,
-        LINE = 2,
+        DONUT = (0,)
+        PIE = (1,)
+        LINE = (2,)
         EXPAND = 3
 
     class UpdateFlags(Enum):
-        VALUE = 0,
-        PERCENT = 1,
+        VALUE = (0,)
+        PERCENT = (1,)
         MAX = 2
 
     # GETTERS -------------------------------------------------------
@@ -194,8 +204,14 @@ class QRoundProgressBar(QWidget):
         elif self.m_barStyle == self.BarStyle.LINE:
             p.setPen(QPen(self.palette().base().color(), self.m_outlinePenWidth))
             p.setBrush(Qt.NoBrush)
-            p.drawEllipse(baseRect.adjusted(self.m_outlinePenWidth / 2, self.m_outlinePenWidth / 2,
-                                            -self.m_outlinePenWidth / 2, -self.m_outlinePenWidth / 2))
+            p.drawEllipse(
+                baseRect.adjusted(
+                    self.m_outlinePenWidth / 2,
+                    self.m_outlinePenWidth / 2,
+                    -self.m_outlinePenWidth / 2,
+                    -self.m_outlinePenWidth / 2,
+                )
+            )
         elif self.m_barStyle in (self.BarStyle.PIE, self.BarStyle.EXPAND):
             p.setPen(QPen(self.palette().base().color(), self.m_outlinePenWidth))
             p.setBrush(self.palette().base())
@@ -214,14 +230,26 @@ class QRoundProgressBar(QWidget):
             p.setPen(QPen(self.palette().highlight().color(), self.m_dataPenWidth))
             p.setBrush(Qt.NoBrush)
             if value == self.m_max:
-                p.drawEllipse(baseRect.adjusted(self.m_outlinePenWidth / 2, self.m_outlinePenWidth / 2,
-                                                -self.m_outlinePenWidth / 2, -self.m_outlinePenWidth / 2))
+                p.drawEllipse(
+                    baseRect.adjusted(
+                        self.m_outlinePenWidth / 2,
+                        self.m_outlinePenWidth / 2,
+                        -self.m_outlinePenWidth / 2,
+                        -self.m_outlinePenWidth / 2,
+                    )
+                )
             else:
                 arcLength = 360 / delta
-                p.drawArc(baseRect.adjusted(self.m_outlinePenWidth / 2, self.m_outlinePenWidth / 2,
-                                            -self.m_outlinePenWidth / 2, -self.m_outlinePenWidth / 2),
-                          int(self.m_nullPosition * 16),
-                          int(-arcLength * 16))
+                p.drawArc(
+                    baseRect.adjusted(
+                        self.m_outlinePenWidth / 2,
+                        self.m_outlinePenWidth / 2,
+                        -self.m_outlinePenWidth / 2,
+                        -self.m_outlinePenWidth / 2,
+                    ),
+                    int(self.m_nullPosition * 16),
+                    int(-arcLength * 16),
+                )
             return
         dataPath = QPainterPath()
         dataPath.setFillRule(Qt.WindingFill)
@@ -250,7 +278,9 @@ class QRoundProgressBar(QWidget):
             p.setBrush(self.palette().base())
             p.drawEllipse(innerRect)
 
-    def drawText(self, p: QPainter, innerRect: QRectF, innerRadius: float, value: float):
+    def drawText(
+        self, p: QPainter, innerRect: QRectF, innerRadius: float, value: float
+    ):
         if not self.m_format:
             return
         f = QFont(self.font())
@@ -268,25 +298,31 @@ class QRoundProgressBar(QWidget):
     def valueToText(self, value: float):
         textToDraw = self.m_format
         if self.m_updateFlags == self.UpdateFlags.VALUE:
-            textToDraw = textToDraw.replace('%v', str(round(value, self.m_decimals)))
+            textToDraw = textToDraw.replace("%v", str(round(value, self.m_decimals)))
         if self.m_updateFlags == self.UpdateFlags.PERCENT:
             procent = (value - self.m_min) / (self.m_max - self.m_min) * 100
-            textToDraw = textToDraw.replace('%p', str(round(procent, self.m_decimals)))
+            textToDraw = textToDraw.replace("%p", str(round(procent, self.m_decimals)))
         if self.m_updateFlags == self.UpdateFlags.MAX:
-            textToDraw = textToDraw.replace('%m', str(round(self.m_max - self.m_min + 1, self.m_decimals)))
+            textToDraw = textToDraw.replace(
+                "%m", str(round(self.m_max - self.m_min + 1, self.m_decimals))
+            )
         return textToDraw
 
     def valueFormatChanged(self):
-        if operator.contains(self.m_format, '%v'):
+        if operator.contains(self.m_format, "%v"):
             self.m_updateFlags = self.UpdateFlags.VALUE
-        if operator.contains(self.m_format, '%p'):
+        if operator.contains(self.m_format, "%p"):
             self.m_updateFlags = self.UpdateFlags.PERCENT
-        if operator.contains(self.m_format, '%m'):
+        if operator.contains(self.m_format, "%m"):
             self.m_updateFlags = self.UpdateFlags.MAX
         self.update()
 
     def rebuildDataBrushIfNeeded(self):
-        if not self.m_rebuildBrush or not self.m_gradientData or self.m_barStyle == self.BarStyle.LINE:
+        if (
+            not self.m_rebuildBrush
+            or not self.m_gradientData
+            or self.m_barStyle == self.BarStyle.LINE
+        ):
             return
         self.m_rebuildBrush = False
         p = self.palette()
@@ -294,12 +330,16 @@ class QRoundProgressBar(QWidget):
             dataBrush = QRadialGradient(0.5, 0.5, 0.5, 0.5, 0.5)
             dataBrush.setCoordinateMode(QGradient.StretchToDeviceMode)
             for i in range(0, len(self.m_gradientData)):
-                dataBrush.setColorAt(self.m_gradientData[i][0], self.m_gradientData[i][1])
+                dataBrush.setColorAt(
+                    self.m_gradientData[i][0], self.m_gradientData[i][1]
+                )
             p.setBrush(QPalette.Highlight, dataBrush)
         else:
             dataBrush = QConicalGradient(QPointF(0.5, 0.5), self.m_nullPosition)
             dataBrush.setCoordinateMode(QGradient.StretchToDeviceMode)
             for i in range(0, len(self.m_gradientData)):
-                dataBrush.setColorAt(1 - self.m_gradientData[i][0], self.m_gradientData[i][1])
+                dataBrush.setColorAt(
+                    1 - self.m_gradientData[i][0], self.m_gradientData[i][1]
+                )
             p.setBrush(QPalette.Highlight, dataBrush)
         self.setPalette(p)

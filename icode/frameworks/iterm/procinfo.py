@@ -5,7 +5,6 @@ import re
 
 
 class ProcessInfo(object):
-
     def __init__(self):
         self.update()
 

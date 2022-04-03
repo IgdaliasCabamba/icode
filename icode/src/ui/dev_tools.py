@@ -1,6 +1,17 @@
-from PyQt5.QtWidgets import (QFrame, QListWidget, QVBoxLayout, QPushButton,
-                             QLabel, QTextEdit, QHBoxLayout, QListWidget,
-                             QStackedLayout, QFormLayout, QLineEdit, QComboBox)
+from PyQt5.QtWidgets import (
+    QFrame,
+    QListWidget,
+    QVBoxLayout,
+    QPushButton,
+    QLabel,
+    QTextEdit,
+    QHBoxLayout,
+    QListWidget,
+    QStackedLayout,
+    QFormLayout,
+    QLineEdit,
+    QComboBox,
+)
 
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QColor
@@ -10,6 +21,7 @@ from base import memory, system
 from data import note_file_path, labels_cache
 from base.char_utils import get_unicon
 from base.code_api import icode_api
+
 
 class NotesCore(QObject):
     def __init__(self, editor):
@@ -22,6 +34,7 @@ class NotesCore(QObject):
 
     def save_data(self):
         self.parent.file.write_text(self.editor.toPlainText())
+
 
 class Notes(QFrame):
     def __init__(self, parent):
@@ -45,7 +58,8 @@ class Notes(QFrame):
 
         self.text_editor.setAcceptRichText(True)
         self.text_editor.setPlaceholderText(
-            "Make your notes here, they are automatically saved")
+            "Make your notes here, they are automatically saved"
+        )
 
         self.layout.addWidget(self.text_editor)
 
@@ -98,7 +112,7 @@ class Todos(QFrame):
         self.display.currentRowChanged.connect(self.goto_annotation_line)
         self.layout.addWidget(self.display)
         self.layout.addWidget(self.screen_new)
-        
+
         self.btn_save.clicked.connect(self.new_todo)
         self.update_data()
 
@@ -108,24 +122,28 @@ class Todos(QFrame):
             labels = labels_cache.get_all_from_list(self.file_name)
             if isinstance(labels, list):
                 for label in labels:
-                    self.add_todo(label["line"], label["title"], label["desc"], label["label"])
+                    self.add_todo(
+                        label["line"], label["title"], label["desc"], label["label"]
+                    )
 
     def add_todo(self, line, text, tooltip, type):
         self.layout.setCurrentWidget(self.display)
-        
+
         title = text
         color_text = QColor(icode_api.get_lexers_frontend()["Label"]["fg"])
         if type == "bug":
             color_text = QColor(icode_api.get_lexers_frontend()["Bug"]["fg"])
             title = f"{get_unicon('nf', 'fa-bug')} {text}"
-            
+
         elif type == "todo":
             color_text = QColor(icode_api.get_lexers_frontend()["Todo"]["fg"])
             title = f"{get_unicon('nf', 'fa-tasks')} {text}"
-        
-        item = IListWidgetItem(None, title, tooltip, {"line": line, "note":tooltip, "label":type})
+
+        item = IListWidgetItem(
+            None, title, tooltip, {"line": line, "note": tooltip, "label": type}
+        )
         item.setForeground(color_text)
-            
+
         self.display.addItem(item)
 
     def go_screen_new(self):
@@ -137,13 +155,10 @@ class Todos(QFrame):
         title = self.input_title.text()
         label = self.label_picker.currentText().lower()
 
-        labels_cache.save_to_list({
-            "line":line,
-            "desc": desc,
-            "title": title,
-            "label": label
-        }, self.file_name)
-        
+        labels_cache.save_to_list(
+            {"line": line, "desc": desc, "title": title, "label": label}, self.file_name
+        )
+
         self.update_data()
 
     def set_data(self, editor: object, file_name: str):
@@ -151,7 +166,7 @@ class Todos(QFrame):
             self.file_name = str(file_name).replace(system.SYS_SEP, "_")
         else:
             self.file_name = file_name
-        
+
         self.editor = editor
         self.update_data()
 
@@ -173,20 +188,22 @@ class Todos(QFrame):
                     style = 206
                 if hasattr(self.editor, "editor"):
                     self.editor.editor.go_to_line(line)
-                    self.editor.editor.display_annotation(line, text+note, style, "on_text_changed", 0)
-                        
+                    self.editor.editor.display_annotation(
+                        line, text + note, style, "on_text_changed", 0
+                    )
+
         except Exception as e:
             print(e)
-            
+
     def show_hide_all(self):
         try:
             if self.is_showing:
                 self.is_showing = False
             else:
                 if hasattr(self.editor, "editor"):
-                    labels = labels_cache.get_all_from_list(self.file_name)        
+                    labels = labels_cache.get_all_from_list(self.file_name)
                     if isinstance(labels, list):
-                        for label in labels:    
+                        for label in labels:
                             if label["label"].lower() == "todo":
                                 text = f"{get_unicon('nf', 'fa-tasks')} TODO: "
                                 style = 210
@@ -196,9 +213,15 @@ class Todos(QFrame):
                             else:
                                 text = f"{get_unicon('nf', 'fa-sticky_note')} NOTE: "
                                 style = 206
-                                
-                            self.editor.editor.display_annotation(int(label["line"]), text+label["desc"], style, "on_text_changed", 0)
-                                
+
+                            self.editor.editor.display_annotation(
+                                int(label["line"]),
+                                text + label["desc"],
+                                style,
+                                "on_text_changed",
+                                0,
+                            )
+
                 self.is_showing = True
         except Exception as e:
             print(e)

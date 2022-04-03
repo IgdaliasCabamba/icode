@@ -48,6 +48,7 @@ def _avoid_recursions(func):
                 finally:
                     inf.dynamic_params_depth -= 1
             return NO_VALUES
+
     return wrapper
 
 
@@ -79,23 +80,21 @@ def dynamic_param_lookup(function_value, param_index):
         # you will see the slowdown, especially in 3.6.
         return NO_VALUES
 
-    if funcdef.type == 'lambdef':
+    if funcdef.type == "lambdef":
         string_name = _get_lambda_name(funcdef)
         if string_name is None:
             return NO_VALUES
     else:
         string_name = funcdef.name.value
-    debug.dbg('Dynamic param search in %s.', string_name, color='MAGENTA')
+    debug.dbg("Dynamic param search in %s.", string_name, color="MAGENTA")
 
     module_context = function_value.get_root_context()
     arguments_list = _search_function_arguments(module_context, funcdef, string_name)
     values = ValueSet.from_sets(
-        get_executed_param_names(
-            function_value, arguments
-        )[param_index].infer()
+        get_executed_param_names(function_value, arguments)[param_index].infer()
         for arguments in arguments_list
     )
-    debug.dbg('Dynamic param result finished', color='MAGENTA')
+    debug.dbg("Dynamic param result finished", color="MAGENTA")
     return values
 
 
@@ -106,9 +105,9 @@ def _search_function_arguments(module_context, funcdef, string_name):
     Returns a list of param names.
     """
     compare_node = funcdef
-    if string_name == '__init__':
+    if string_name == "__init__":
         cls = get_parent_scope(funcdef)
-        if cls.type == 'classdef':
+        if cls.type == "classdef":
             string_name = cls.name.value
             compare_node = cls
 
@@ -118,7 +117,9 @@ def _search_function_arguments(module_context, funcdef, string_name):
 
     if settings.dynamic_params_for_other_modules:
         module_contexts = get_module_contexts_containing_name(
-            inference_state, [module_context], string_name,
+            inference_state,
+            [module_context],
+            string_name,
             # Limit the amounts of files to be opened massively.
             limit_reduction=5,
         )
@@ -137,7 +138,8 @@ def _search_function_arguments(module_context, funcdef, string_name):
 
             random_context = for_mod_context.create_context(name)
             for arguments in _check_name_for_execution(
-                    inference_state, random_context, compare_node, name, trailer):
+                inference_state, random_context, compare_node, name, trailer
+            ):
                 found_arguments = True
                 yield arguments
 
@@ -149,11 +151,11 @@ def _search_function_arguments(module_context, funcdef, string_name):
 
 def _get_lambda_name(node):
     stmt = node.parent
-    if stmt.type == 'expr_stmt':
+    if stmt.type == "expr_stmt":
         first_operator = next(stmt.yield_operators(), None)
-        if first_operator == '=':
+        if first_operator == "=":
             first = stmt.children[0]
-            if first.type == 'name':
+            if first.type == "name":
                 return first.value
 
     return None
@@ -168,7 +170,7 @@ def _get_potential_nodes(module_value, func_string_name):
     for name in names:
         bracket = name.get_next_leaf()
         trailer = bracket.parent
-        if trailer.type == 'trailer' and bracket == '(':
+        if trailer.type == "trailer" and bracket == "(":
             yield name, trailer
 
 
@@ -177,16 +179,14 @@ def _check_name_for_execution(inference_state, context, compare_node, name, trai
 
     def create_args(value):
         arglist = trailer.children[1]
-        if arglist == ')':
+        if arglist == ")":
             arglist = None
         args = TreeArguments(inference_state, context, arglist, trailer)
         from jedi.inference.value.instance import InstanceArguments
-        if value.tree_node.type == 'classdef':
+
+        if value.tree_node.type == "classdef":
             created_instance = instance.TreeInstance(
-                inference_state,
-                value.parent_context,
-                value,
-                args
+                inference_state, value.parent_context, value, args
             )
             return InstanceArguments(created_instance, args)
         else:
@@ -198,8 +198,10 @@ def _check_name_for_execution(inference_state, context, compare_node, name, trai
         value_node = value.tree_node
         if compare_node == value_node:
             yield create_args(value)
-        elif isinstance(value.parent_context, BaseFunctionExecutionContext) \
-                and compare_node.type == 'funcdef':
+        elif (
+            isinstance(value.parent_context, BaseFunctionExecutionContext)
+            and compare_node.type == "funcdef"
+        ):
             # Here we're trying to find decorators by checking the first
             # parameter. It's not very generic though. Should find a better
             # solution that also applies to nested decorators.
@@ -211,14 +213,12 @@ def _check_name_for_execution(inference_state, context, compare_node, name, trai
                 # Found a decorator.
                 module_context = context.get_root_context()
                 execution_context = value.as_context(create_args(value))
-                potential_nodes = _get_potential_nodes(module_context, param_names[0].string_name)
+                potential_nodes = _get_potential_nodes(
+                    module_context, param_names[0].string_name
+                )
                 for name, trailer in potential_nodes:
                     if value_node.start_pos < name.start_pos < value_node.end_pos:
                         random_context = execution_context.create_context(name)
                         yield from _check_name_for_execution(
-                            inference_state,
-                            random_context,
-                            compare_node,
-                            name,
-                            trailer
+                            inference_state, random_context, compare_node, name, trailer
                         )

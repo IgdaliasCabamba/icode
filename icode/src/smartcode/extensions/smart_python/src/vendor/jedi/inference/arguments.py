@@ -6,8 +6,12 @@ from parso.python import tree
 from jedi import debug
 from jedi.inference.utils import PushBackIterator
 from jedi.inference import analysis
-from jedi.inference.lazy_value import LazyKnownValue, LazyKnownValues, \
-    LazyTreeValue, get_merged_lazy_value
+from jedi.inference.lazy_value import (
+    LazyKnownValue,
+    LazyKnownValues,
+    LazyTreeValue,
+    get_merged_lazy_value,
+)
 from jedi.inference.names import ParamName, TreeNameDefinition, AnonymousParamName
 from jedi.inference.base_value import NO_VALUES, ValueSet, ContextualizedNode
 from jedi.inference.value import iterable
@@ -46,20 +50,24 @@ def repack_with_argument_clinic(clinic_string):
         str.split.__text_signature__
         # Results in: '($self, /, sep=None, maxsplit=-1)'
     """
+
     def decorator(func):
         def wrapper(value, arguments):
             try:
-                args = tuple(iterate_argument_clinic(
-                    value.inference_state,
-                    arguments,
-                    clinic_string,
-                ))
+                args = tuple(
+                    iterate_argument_clinic(
+                        value.inference_state,
+                        arguments,
+                        clinic_string,
+                    )
+                )
             except ParamIssue:
                 return NO_VALUES
             else:
                 return func(value, *args)
 
         return wrapper
+
     return decorator
 
 
@@ -84,11 +92,17 @@ def iterate_argument_clinic(inference_state, arguments, clinic_string):
             raise NotImplementedError()
         key, argument = next(iterator, (None, None))
         if key is not None:
-            debug.warning('Keyword arguments in argument clinic are currently not supported.')
+            debug.warning(
+                "Keyword arguments in argument clinic are currently not supported."
+            )
             raise ParamIssue
         if argument is None and not optional:
-            debug.warning('TypeError: %s expected at least %s arguments, got %s',
-                          name, len(clinic_args), i)
+            debug.warning(
+                "TypeError: %s expected at least %s arguments, got %s",
+                name,
+                len(clinic_args),
+                i,
+            )
             raise ParamIssue
 
         value_set = NO_VALUES if argument is None else argument.infer()
@@ -110,14 +124,14 @@ def _parse_argument_clinic(string):
         # at the end of the arguments. This is therefore not a proper argument
         # clinic implementation. `range()` for exmple allows an optional start
         # value at the beginning.
-        match = re.match(r'(?:(?:(\[),? ?|, ?|)(\**\w+)|, ?/)\]*', string)
-        string = string[len(match.group(0)):]
+        match = re.match(r"(?:(?:(\[),? ?|, ?|)(\**\w+)|, ?/)\]*", string)
+        string = string[len(match.group(0)) :]
         if not match.group(2):  # A slash -> allow named arguments
             allow_kwargs = True
             continue
         optional = optional or bool(match.group(1))
         word = match.group(2)
-        stars = word.count('*')
+        stars = word.count("*")
         word = word[stars:]
         yield (word, optional, allow_kwargs, stars)
         if stars:
@@ -142,21 +156,21 @@ def unpack_arglist(arglist):
     if arglist is None:
         return
 
-    if arglist.type != 'arglist' and not (
-            arglist.type == 'argument' and arglist.children[0] in ('*', '**')):
+    if arglist.type != "arglist" and not (
+        arglist.type == "argument" and arglist.children[0] in ("*", "**")
+    ):
         yield 0, arglist
         return
 
     iterator = iter(arglist.children)
     for child in iterator:
-        if child == ',':
+        if child == ",":
             continue
-        elif child in ('*', '**'):
+        elif child in ("*", "**"):
             c = next(iterator, None)
             assert c is not None
             yield len(child.value), c
-        elif child.type == 'argument' and \
-                child.children[0] in ('*', '**'):
+        elif child.type == "argument" and child.children[0] in ("*", "**"):
             assert len(child.children) == 2
             yield len(child.children[0].value), child.children[1]
         else:
@@ -183,8 +197,9 @@ class TreeArguments(AbstractArguments):
         for star_count, el in unpack_arglist(self.argument_node):
             if star_count == 1:
                 arrays = self.context.infer_node(el)
-                iterators = [_iterate_star_args(self.context, a, el, funcdef)
-                             for a in arrays]
+                iterators = [
+                    _iterate_star_args(self.context, a, el, funcdef) for a in arrays
+                ]
                 for values in list(zip_longest(*iterators)):
                     yield None, get_merged_lazy_value(
                         [v for v in values if v is not None]
@@ -194,14 +209,19 @@ class TreeArguments(AbstractArguments):
                 for dct in arrays:
                     yield from _star_star_dict(self.context, dct, el, funcdef)
             else:
-                if el.type == 'argument':
+                if el.type == "argument":
                     c = el.children
                     if len(c) == 3:  # Keyword argument.
-                        named_args.append((c[0].value, LazyTreeValue(self.context, c[2]),))
+                        named_args.append(
+                            (
+                                c[0].value,
+                                LazyTreeValue(self.context, c[2]),
+                            )
+                        )
                     else:  # Generator comprehension.
                         # Include the brackets with the parent.
                         sync_comp_for = el.children[1]
-                        if sync_comp_for.type == 'comp_for':
+                        if sync_comp_for.type == "comp_for":
                             sync_comp_for = sync_comp_for.children[1]
                         comp = iterable.GeneratorComprehension(
                             self._inference_state,
@@ -220,7 +240,7 @@ class TreeArguments(AbstractArguments):
     def _as_tree_tuple_objects(self):
         for star_count, argument in unpack_arglist(self.argument_node):
             default = None
-            if argument.type == 'argument':
+            if argument.type == "argument":
                 if len(argument.children) == 3:  # Keyword argument.
                     argument, default = argument.children[::2]
             yield argument, default, star_count
@@ -234,7 +254,7 @@ class TreeArguments(AbstractArguments):
             yield TreeNameDefinition(self.context, name)
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.argument_node)
+        return "<%s: %s>" % (self.__class__.__name__, self.argument_node)
 
     def get_calling_nodes(self):
         old_arguments_list = []
@@ -245,7 +265,9 @@ class TreeArguments(AbstractArguments):
                 break
 
             old_arguments_list.append(arguments)
-            for calling_name in reversed(list(arguments.iter_calling_names_with_star())):
+            for calling_name in reversed(
+                list(arguments.iter_calling_names_with_star())
+            ):
                 names = calling_name.goto()
                 if len(names) != 1:
                     break
@@ -275,7 +297,7 @@ class ValuesArguments(AbstractArguments):
             yield None, LazyKnownValues(values)
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self._values_list)
+        return "<%s: %s>" % (self.__class__.__name__, self._values_list)
 
 
 class TreeArgumentsWrapper(_AbstractArgumentsMixin):
@@ -301,16 +323,18 @@ class TreeArgumentsWrapper(_AbstractArgumentsMixin):
         return self._wrapped_arguments.get_calling_nodes()
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self._wrapped_arguments)
+        return "<%s: %s>" % (self.__class__.__name__, self._wrapped_arguments)
 
 
 def _iterate_star_args(context, array, input_node, funcdef=None):
-    if not array.py__getattribute__('__iter__'):
+    if not array.py__getattribute__("__iter__"):
         if funcdef is not None:
             # TODO this funcdef should not be needed.
-            m = "TypeError: %s() argument after * must be a sequence, not %s" \
-                % (funcdef.name.value, array)
-            analysis.add(context, 'type-error-star', input_node, message=m)
+            m = "TypeError: %s() argument after * must be a sequence, not %s" % (
+                funcdef.name.value,
+                array,
+            )
+            analysis.add(context, "type-error-star", input_node, message=m)
     try:
         iter_ = array.py__iter__
     except AttributeError:
@@ -321,15 +345,18 @@ def _iterate_star_args(context, array, input_node, funcdef=None):
 
 def _star_star_dict(context, array, input_node, funcdef):
     from jedi.inference.value.instance import CompiledInstance
-    if isinstance(array, CompiledInstance) and array.name.string_name == 'dict':
+
+    if isinstance(array, CompiledInstance) and array.name.string_name == "dict":
         # For now ignore this case. In the future add proper iterators and just
         # make one call without crazy isinstance checks.
         return {}
-    elif isinstance(array, iterable.Sequence) and array.array_type == 'dict':
+    elif isinstance(array, iterable.Sequence) and array.array_type == "dict":
         return array.exact_key_items()
     else:
         if funcdef is not None:
-            m = "TypeError: %s argument after ** must be a mapping, not %s" \
-                % (funcdef.name.value, array)
-            analysis.add(context, 'type-error-star-star', input_node, message=m)
+            m = "TypeError: %s argument after ** must be a mapping, not %s" % (
+                funcdef.name.value,
+                array,
+            )
+            analysis.add(context, "type-error-star-star", input_node, message=m)
         return {}

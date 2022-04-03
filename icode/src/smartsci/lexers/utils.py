@@ -2,14 +2,15 @@ from PyQt5.QtGui import QFont
 import base.consts as iconsts
 from base.system import *
 
+
 def get_font():
-    font = QFont('Courier New', iconsts.APP_BASE_FONT_SIZE)
+    font = QFont("Courier New", iconsts.APP_BASE_FONT_SIZE)
     if SYS_NAME.startswith("linux"):
         font = QFont("DejaVu Sans Mono", iconsts.APP_BASE_FONT_SIZE)
     elif SYS_NAME.startswith("darwin"):
         font = QFont("Menlo", iconsts.APP_BASE_FONT_SIZE)
     elif SYS_NAME.startswith("win"):
-        font = QFont('Consolas', iconsts.APP_BASE_FONT_SIZE)
+        font = QFont("Consolas", iconsts.APP_BASE_FONT_SIZE)
     return font
 
 
@@ -17,9 +18,20 @@ def made_font(data: dict):
     font = get_font()
 
     keys = [
-        "name", "pixel-size", "fixed-pitch", "point-size", "bold", "stretch",
-        "underline", "weight", "word-spacing", "strike-out", "kerning",
-        "italic", "capitalization", "hinting-preference"
+        "name",
+        "pixel-size",
+        "fixed-pitch",
+        "point-size",
+        "bold",
+        "stretch",
+        "underline",
+        "weight",
+        "word-spacing",
+        "strike-out",
+        "kerning",
+        "italic",
+        "capitalization",
+        "hinting-preference",
     ]
 
     for key in keys:

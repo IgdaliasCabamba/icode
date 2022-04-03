@@ -11,8 +11,11 @@ from jedi.inference.utils import to_list
 from jedi._compatibility import cast_path
 from jedi.cache import memoize_method
 from jedi.inference.filters import AbstractFilter
-from jedi.inference.names import AbstractNameDefinition, ValueNameMixin, \
-    ParamNameInterface
+from jedi.inference.names import (
+    AbstractNameDefinition,
+    ValueNameMixin,
+    ParamNameInterface,
+)
 from jedi.inference.base_value import Value, ValueSet, NO_VALUES
 from jedi.inference.lazy_value import LazyKnownValue
 from jedi.inference.compiled.access import _sentinel
@@ -24,6 +27,7 @@ from jedi.inference.context import CompiledContext, CompiledModuleContext
 
 class CheckAttribute:
     """Raises :exc:`AttributeError` if the attribute X is not available."""
+
     def __init__(self, check_name=None):
         # Remove the py in front of e.g. py__call__.
         self.check_name = check_name
@@ -53,26 +57,32 @@ class CompiledValue(Value):
         if return_annotation is not None:
             # TODO the return annotation may also be a string.
             return create_from_access_path(
-                self.inference_state,
-                return_annotation
+                self.inference_state, return_annotation
             ).execute_annotation()
 
         try:
-            self.access_handle.getattr_paths('__call__')
+            self.access_handle.getattr_paths("__call__")
         except AttributeError:
             return super().py__call__(arguments)
         else:
             if self.access_handle.is_class():
                 from jedi.inference.value import CompiledInstance
-                return ValueSet([
-                    CompiledInstance(self.inference_state, self.parent_context, self, arguments)
-                ])
+
+                return ValueSet(
+                    [
+                        CompiledInstance(
+                            self.inference_state, self.parent_context, self, arguments
+                        )
+                    ]
+                )
             else:
                 return ValueSet(self._execute_function(arguments))
 
     @CheckAttribute()
     def py__class__(self):
-        return create_from_access_path(self.inference_state, self.access_handle.py__class__())
+        return create_from_access_path(
+            self.inference_state, self.access_handle.py__class__()
+        )
 
     @CheckAttribute()
     def py__mro__(self):
@@ -124,11 +134,11 @@ class CompiledValue(Value):
             if not params_str:
                 tokens = []
             else:
-                tokens = params_str.split(',')
+                tokens = params_str.split(",")
             if self.access_handle.ismethoddescriptor():
-                tokens.insert(0, 'self')
+                tokens.insert(0, "self")
             for p in tokens:
-                name, _, default = p.strip().partition('=')
+                name, _, default = p.strip().partition("=")
                 yield UnresolvableParamName(self, name, default)
         else:
             for signature_param in signature_params:
@@ -139,13 +149,13 @@ class CompiledValue(Value):
         return [BuiltinSignature(self, return_string)]
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self.access_handle.get_repr())
+        return "<%s: %s>" % (self.__class__.__name__, self.access_handle.get_repr())
 
     @memoize_method
     def _parse_function_doc(self):
         doc = self.py__doc__()
         if doc is None:
-            return '', ''
+            return "", ""
 
         return _parse_function_doc(doc)
 
@@ -207,7 +217,8 @@ class CompiledValue(Value):
     def _execute_function(self, params):
         from jedi.inference import docstrings
         from jedi.inference.compiled import builtin_from_name
-        if self.api_type != 'function':
+
+        if self.api_type != "function":
             return
 
         for name in self._parse_function_doc()[1].split():
@@ -232,15 +243,21 @@ class CompiledValue(Value):
 
     def execute_operation(self, other, operator):
         try:
-            return ValueSet([create_from_access_path(
-                self.inference_state,
-                self.access_handle.execute_operation(other.access_handle, operator)
-            )])
+            return ValueSet(
+                [
+                    create_from_access_path(
+                        self.inference_state,
+                        self.access_handle.execute_operation(
+                            other.access_handle, operator
+                        ),
+                    )
+                ]
+            )
         except TypeError:
             return NO_VALUES
 
     def execute_annotation(self):
-        if self.access_handle.get_repr() == 'None':
+        if self.access_handle.get_repr() == "None":
             # None as an annotation doesn't need to be executed.
             return ValueSet([self])
 
@@ -249,20 +266,24 @@ class CompiledValue(Value):
             ValueSet([create_from_access_path(self.inference_state, path)])
             for path in args
         ]
-        if name == 'Union':
+        if name == "Union":
             return ValueSet.from_sets(arg.execute_annotation() for arg in arguments)
         elif name:
             # While with_generics only exists on very specific objects, we
             # should probably be fine, because we control all the typing
             # objects.
-            return ValueSet([
-                v.with_generics(arguments)
-                for v in self.inference_state.typing_module.py__getattribute__(name)
-            ]).execute_annotation()
+            return ValueSet(
+                [
+                    v.with_generics(arguments)
+                    for v in self.inference_state.typing_module.py__getattribute__(name)
+                ]
+            ).execute_annotation()
         return super().execute_annotation()
 
     def negate(self):
-        return create_from_access_path(self.inference_state, self.access_handle.negate())
+        return create_from_access_path(
+            self.inference_state, self.access_handle.negate()
+        )
 
     def get_metaclasses(self):
         return NO_VALUES
@@ -281,8 +302,8 @@ class CompiledValue(Value):
         ]
 
     def get_type_hint(self, add_class_info=True):
-        if self.access_handle.get_repr() in ('None', "<class 'NoneType'>"):
-            return 'None'
+        if self.access_handle.get_repr() in ("None", "<class 'NoneType'>"):
+            return "None"
         return None
 
 
@@ -307,7 +328,7 @@ class CompiledModule(CompiledValue):
         name = self.py__name__()
         if name is None:
             return ()
-        return tuple(name.split('.'))
+        return tuple(name.split("."))
 
     def py__file__(self):
         path = cast_path(self.access_handle.py__file__())
@@ -344,7 +365,7 @@ class CompiledName(AbstractNameDefinition):
             name = self.parent_context.name  # __name__ is not defined all the time
         except AttributeError:
             name = None
-        return '<%s: (%s).%s>' % (self.__class__.__name__, name, self.string_name)
+        return "<%s: (%s).%s>" % (self.__class__.__name__, name, self.string_name)
 
     @property
     def api_type(self):
@@ -355,7 +376,9 @@ class CompiledName(AbstractNameDefinition):
 
     @memoize_method
     def infer_compiled_value(self):
-        return create_from_name(self._inference_state, self._parent_value, self.string_name)
+        return create_from_name(
+            self._inference_state, self._parent_value, self.string_name
+        )
 
 
 class SignatureParamName(ParamNameInterface, AbstractNameDefinition):
@@ -370,9 +393,9 @@ class SignatureParamName(ParamNameInterface, AbstractNameDefinition):
     def to_string(self):
         s = self._kind_string() + self.string_name
         if self._signature_param.has_annotation:
-            s += ': ' + self._signature_param.annotation_string
+            s += ": " + self._signature_param.annotation_string
         if self._signature_param.has_default:
-            s += '=' + self._signature_param.default_string
+            s += "=" + self._signature_param.default_string
         return s
 
     def get_kind(self):
@@ -402,7 +425,7 @@ class UnresolvableParamName(ParamNameInterface, AbstractNameDefinition):
     def to_string(self):
         string = self.string_name
         if self._default:
-            string += '=' + self._default
+            string += "=" + self._default
         return string
 
     def infer(self):
@@ -422,6 +445,7 @@ class EmptyCompiledName(AbstractNameDefinition):
     completions, just give Jedi the option to return this object. It infers to
     nothing.
     """
+
     def __init__(self, inference_state, name):
         self.parent_context = inference_state.builtins_module
         self.string_name = name
@@ -442,10 +466,12 @@ class CompiledValueFilter(AbstractFilter):
             name,
             lambda name, unsafe: access_handle.is_allowed_getattr(name, unsafe),
             lambda name: name in access_handle.dir(),
-            check_has_attribute=True
+            check_has_attribute=True,
         )
 
-    def _get(self, name, allowed_getattr_callback, in_dir_callback, check_has_attribute=False):
+    def _get(
+        self, name, allowed_getattr_callback, in_dir_callback, check_has_attribute=False
+    ):
         """
         To remove quite a few access calls we introduced the callback here.
         """
@@ -453,14 +479,14 @@ class CompiledValueFilter(AbstractFilter):
             pass
 
         has_attribute, is_descriptor = allowed_getattr_callback(
-            name,
-            unsafe=self._inference_state.allow_descriptor_getattr
+            name, unsafe=self._inference_state.allow_descriptor_getattr
         )
         if check_has_attribute and not has_attribute:
             return []
 
-        if (is_descriptor or not has_attribute) \
-                and not self._inference_state.allow_descriptor_getattr:
+        if (
+            is_descriptor or not has_attribute
+        ) and not self._inference_state.allow_descriptor_getattr:
             return [self._get_cached_name(name, is_empty=True)]
 
         if self.is_instance and not in_dir_callback(name):
@@ -476,8 +502,12 @@ class CompiledValueFilter(AbstractFilter):
 
     def values(self):
         from jedi.inference.compiled import builtin_from_name
+
         names = []
-        needs_type_completions, dir_infos = self.compiled_value.access_handle.get_dir_infos()
+        (
+            needs_type_completions,
+            dir_infos,
+        ) = self.compiled_value.access_handle.get_dir_infos()
         # We could use `unsafe` here as well, especially as a parameter to
         # get_dir_infos. But this would lead to a lot of property executions
         # that are probably not wanted. The drawback for this is that we
@@ -492,27 +522,25 @@ class CompiledValueFilter(AbstractFilter):
 
         # ``dir`` doesn't include the type names.
         if not self.is_instance and needs_type_completions:
-            for filter in builtin_from_name(self._inference_state, 'type').get_filters():
+            for filter in builtin_from_name(
+                self._inference_state, "type"
+            ).get_filters():
                 names += filter.values()
         return names
 
     def _create_name(self, name):
-        return CompiledName(
-            self._inference_state,
-            self.compiled_value,
-            name
-        )
+        return CompiledName(self._inference_state, self.compiled_value, name)
 
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.compiled_value)
 
 
 docstr_defaults = {
-    'floating point number': 'float',
-    'character': 'str',
-    'integer': 'int',
-    'dictionary': 'dict',
-    'string': 'str',
+    "floating point number": "float",
+    "character": "str",
+    "integer": "int",
+    "dictionary": "dict",
+    "string": "str",
 }
 
 
@@ -527,49 +555,48 @@ def _parse_function_doc(doc):
     # parse round parentheses: def func(a, (b,c))
     try:
         count = 0
-        start = doc.index('(')
+        start = doc.index("(")
         for i, s in enumerate(doc[start:]):
-            if s == '(':
+            if s == "(":
                 count += 1
-            elif s == ')':
+            elif s == ")":
                 count -= 1
             if count == 0:
                 end = start + i
                 break
-        param_str = doc[start + 1:end]
+        param_str = doc[start + 1 : end]
     except (ValueError, UnboundLocalError):
         # ValueError for doc.index
         # UnboundLocalError for undefined end in last line
-        debug.dbg('no brackets found - no param')
+        debug.dbg("no brackets found - no param")
         end = 0
-        param_str = ''
+        param_str = ""
     else:
         # remove square brackets, that show an optional param ( = None)
         def change_options(m):
-            args = m.group(1).split(',')
+            args = m.group(1).split(",")
             for i, a in enumerate(args):
-                if a and '=' not in a:
-                    args[i] += '=None'
-            return ','.join(args)
+                if a and "=" not in a:
+                    args[i] += "=None"
+            return ",".join(args)
 
         while True:
-            param_str, changes = re.subn(r' ?\[([^\[\]]+)\]',
-                                         change_options, param_str)
+            param_str, changes = re.subn(r" ?\[([^\[\]]+)\]", change_options, param_str)
             if changes == 0:
                 break
-    param_str = param_str.replace('-', '_')  # see: isinstance.__doc__
+    param_str = param_str.replace("-", "_")  # see: isinstance.__doc__
 
     # parse return value
-    r = re.search('-[>-]* ', doc[end:end + 7])
+    r = re.search("-[>-]* ", doc[end : end + 7])
     if r is None:
-        ret = ''
+        ret = ""
     else:
         index = end + r.end()
         # get result type, which can contain newlines
-        pattern = re.compile(r'(,\n|[^\n-])+')
+        pattern = re.compile(r"(,\n|[^\n-])+")
         ret_str = pattern.match(doc, index).group(0).strip()
         # New object -> object()
-        ret_str = re.sub(r'[nN]ew (.*)', r'\1()', ret_str)
+        ret_str = re.sub(r"[nN]ew (.*)", r"\1()", ret_str)
 
         ret = docstr_defaults.get(ret_str, ret_str)
 
@@ -591,8 +618,10 @@ def create_from_name(inference_state, compiled_value, name):
 
 def _normalize_create_args(func):
     """The cache doesn't care about keyword vs. normal args."""
+
     def wrapper(inference_state, obj, parent_context=None):
         return func(inference_state, obj, parent_context)
+
     return wrapper
 
 
@@ -602,7 +631,7 @@ def create_from_access_path(inference_state, access_path):
         value = create_cached_compiled_value(
             inference_state,
             access,
-            parent_context=None if value is None else value.as_context()
+            parent_context=None if value is None else value.as_context(),
         )
     return value
 

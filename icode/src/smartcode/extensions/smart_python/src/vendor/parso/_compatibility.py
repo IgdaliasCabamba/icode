@@ -1,3 +1,3 @@
 import platform
 
-is_pypy = platform.python_implementation() == 'PyPy'
+is_pypy = platform.python_implementation() == "PyPy"

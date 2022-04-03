@@ -5,13 +5,15 @@ from PyQt5.QtCore import Qt
 import settings
 from functions import getfn
 
-windows_style=settings.get_window_style()
+windows_style = settings.get_window_style()
+
 
 def apply_base_theme(settings, qapp):
     qapp.setStyle(settings.get_qt_theme())
 
+
 def dark(app):
-    
+
     darkPalette = QPalette()
 
     # base
@@ -35,18 +37,16 @@ def dark(app):
     darkPalette.setColor(QPalette.LinkVisited, QColor(80, 80, 80))
 
     # disabled
-    darkPalette.setColor(QPalette.Disabled, QPalette.WindowText,
-                         QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.Disabled, QPalette.Text,
-                         QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.Disabled, QPalette.ButtonText,
-                         QColor(127, 127, 127))
-    darkPalette.setColor(QPalette.Disabled, QPalette.Highlight,
-                         QColor(80, 80, 80))
-    darkPalette.setColor(QPalette.Disabled, QPalette.HighlightedText,
-                         QColor(127, 127, 127))
+    darkPalette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(127, 127, 127))
+    darkPalette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
+    darkPalette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(127, 127, 127))
+    darkPalette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(80, 80, 80))
+    darkPalette.setColor(
+        QPalette.Disabled, QPalette.HighlightedText, QColor(127, 127, 127)
+    )
 
     app.setPalette(darkPalette)
+
 
 def light(app):
 
@@ -73,16 +73,13 @@ def light(app):
     lightPalette.setColor(QPalette.LinkVisited, QColor(222, 222, 222))
 
     # disabled
-    lightPalette.setColor(QPalette.Disabled, QPalette.WindowText,
-                         QColor(115, 115, 115))
-    lightPalette.setColor(QPalette.Disabled, QPalette.Text,
-                         QColor(115, 115, 115))
-    lightPalette.setColor(QPalette.Disabled, QPalette.ButtonText,
-                         QColor(115, 115, 115))
-    lightPalette.setColor(QPalette.Disabled, QPalette.Highlight,
-                         QColor(190, 190, 190))
-    lightPalette.setColor(QPalette.Disabled, QPalette.HighlightedText,
-                         QColor(115, 115, 115))
+    lightPalette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(115, 115, 115))
+    lightPalette.setColor(QPalette.Disabled, QPalette.Text, QColor(115, 115, 115))
+    lightPalette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(115, 115, 115))
+    lightPalette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(190, 190, 190))
+    lightPalette.setColor(
+        QPalette.Disabled, QPalette.HighlightedText, QColor(115, 115, 115)
+    )
 
     app.setPalette(lightPalette)
 
@@ -95,18 +92,18 @@ def beautify(qapp, app=None):
     qapp.setEffectEnabled(Qt.UI_AnimateTooltip, True)
     qapp.setEffectEnabled(Qt.UI_FadeTooltip, True)
     qapp.setEffectEnabled(Qt.UI_AnimateToolBox, True)
-    
-    if settings.get_palette() in {"dark","black",0,"night"}:
+
+    if settings.get_palette() in {"dark", "black", 0, "night"}:
         dark(qapp)
-    
-    elif settings.get_palette() in {"light","white",1,"day"}:
+
+    elif settings.get_palette() in {"light", "white", 1, "day"}:
         light(qapp)
-    
+
     else:
         pass
-    
+
     apply_base_theme(settings, qapp)
-    
+
     fonts = get_fonts_from_resources()
     for font in fonts:
         add_application_font(font)

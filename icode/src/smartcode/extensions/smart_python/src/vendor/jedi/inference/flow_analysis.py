@@ -6,7 +6,7 @@ from jedi.inference.helpers import is_big_annoying_library
 
 
 class Status:
-    lookup_table: Dict[Optional[bool], 'Status'] = {}
+    lookup_table: Dict[Optional[bool], "Status"] = {}
 
     def __init__(self, value: Optional[bool], name: str) -> None:
         self._value = value
@@ -28,12 +28,12 @@ class Status:
             return REACHABLE if self._value and other._value else UNREACHABLE
 
     def __repr__(self):
-        return '<%s: %s>' % (type(self).__name__, self._name)
+        return "<%s: %s>" % (type(self).__name__, self._name)
 
 
-REACHABLE = Status(True, 'reachable')
-UNREACHABLE = Status(False, 'unreachable')
-UNSURE = Status(None, 'unsure')
+REACHABLE = Status(True, "reachable")
+UNREACHABLE = Status(False, "unreachable")
+UNSURE = Status(None, "unsure")
 
 
 def _get_flow_scopes(node):
@@ -45,8 +45,10 @@ def _get_flow_scopes(node):
 
 
 def reachability_check(context, value_scope, node, origin_scope=None):
-    if is_big_annoying_library(context) \
-            or not context.inference_state.flow_analysis_enabled:
+    if (
+        is_big_annoying_library(context)
+        or not context.inference_state.flow_analysis_enabled
+    ):
         return UNSURE
 
     first_flow_scope = get_parent_scope(node, include_flows=True)
@@ -60,12 +62,15 @@ def reachability_check(context, value_scope, node, origin_scope=None):
                 node_keyword = get_flow_branch_keyword(flow_scope, node)
                 origin_keyword = get_flow_branch_keyword(flow_scope, origin_scope)
                 branch_matches = node_keyword == origin_keyword
-                if flow_scope.type == 'if_stmt':
+                if flow_scope.type == "if_stmt":
                     if not branch_matches:
                         return UNREACHABLE
-                elif flow_scope.type == 'try_stmt':
-                    if not branch_matches and origin_keyword == 'else' \
-                            and node_keyword == 'except':
+                elif flow_scope.type == "try_stmt":
+                    if (
+                        not branch_matches
+                        and origin_keyword == "else"
+                        and node_keyword == "except"
+                    ):
                         return UNREACHABLE
                 if branch_matches:
                     break
@@ -87,7 +92,7 @@ def reachability_check(context, value_scope, node, origin_scope=None):
 
 def _break_check(context, value_scope, flow_scope, node):
     reachable = REACHABLE
-    if flow_scope.type == 'if_stmt':
+    if flow_scope.type == "if_stmt":
         if flow_scope.is_node_after_else(node):
             for check_node in flow_scope.get_test_nodes():
                 reachable = _check_if(context, check_node)
@@ -98,7 +103,7 @@ def _break_check(context, value_scope, flow_scope, node):
             flow_node = flow_scope.get_corresponding_test_node(node)
             if flow_node is not None:
                 reachable = _check_if(context, flow_node)
-    elif flow_scope.type in ('try_stmt', 'while_stmt'):
+    elif flow_scope.type in ("try_stmt", "while_stmt"):
         return UNSURE
 
     # Only reachable branches need to be examined further.

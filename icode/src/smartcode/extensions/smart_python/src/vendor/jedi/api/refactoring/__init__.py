@@ -7,14 +7,15 @@ from parso import split_lines
 from jedi.api.exceptions import RefactoringError
 
 EXPRESSION_PARTS = (
-    'or_test and_test not_test comparison '
-    'expr xor_expr and_expr shift_expr arith_expr term factor power atom_expr'
+    "or_test and_test not_test comparison "
+    "expr xor_expr and_expr shift_expr arith_expr term factor power atom_expr"
 ).split()
 
 
 class ChangedFile:
-    def __init__(self, inference_state, from_path, to_path,
-                 module_node, node_to_str_map):
+    def __init__(
+        self, inference_state, from_path, to_path, module_node, node_to_str_map
+    ):
         self._inference_state = inference_state
         self._from_path = from_path
         self._to_path = to_path
@@ -33,43 +34,46 @@ class ChangedFile:
         # This is not necessary IMO, because Jedi does not really play with
         # newlines and the ending newline does not really matter in Python
         # files. ~dave
-        if old_lines[-1] != '':
-            old_lines[-1] += '\n'
-        if new_lines[-1] != '':
-            new_lines[-1] += '\n'
+        if old_lines[-1] != "":
+            old_lines[-1] += "\n"
+        if new_lines[-1] != "":
+            new_lines[-1] += "\n"
 
         project_path = self._inference_state.project.path
         if self._from_path is None:
-            from_p = ''
+            from_p = ""
         else:
             from_p = self._from_path.relative_to(project_path)
         if self._to_path is None:
-            to_p = ''
+            to_p = ""
         else:
             to_p = self._to_path.relative_to(project_path)
         diff = difflib.unified_diff(
-            old_lines, new_lines,
+            old_lines,
+            new_lines,
             fromfile=str(from_p),
             tofile=str(to_p),
         )
         # Apparently there's a space at the end of the diff - for whatever
         # reason.
-        return ''.join(diff).rstrip(' ')
+        return "".join(diff).rstrip(" ")
 
     def get_new_code(self):
-        return self._inference_state.grammar.refactor(self._module_node, self._node_to_str_map)
+        return self._inference_state.grammar.refactor(
+            self._module_node, self._node_to_str_map
+        )
 
     def apply(self):
         if self._from_path is None:
             raise RefactoringError(
-                'Cannot apply a refactoring on a Script with path=None'
+                "Cannot apply a refactoring on a Script with path=None"
             )
 
-        with open(self._from_path, 'w', newline='') as f:
+        with open(self._from_path, "w", newline="") as f:
             f.write(self.get_new_code())
 
     def __repr__(self):
-        return '<%s: %s>' % (self.__class__.__name__, self._from_path)
+        return "<%s: %s>" % (self.__class__.__name__, self._from_path)
 
 
 class Refactoring:
@@ -85,7 +89,7 @@ class Refactoring:
             p = str(p)
             for from_, to in renames:
                 if p.startswith(str(from_)):
-                    p = str(to) + p[len(str(from_)):]
+                    p = str(to) + p[len(str(from_)) :]
             return Path(p)
 
         renames = self.get_renames()
@@ -95,8 +99,9 @@ class Refactoring:
                 from_path=path,
                 to_path=calculate_to_path(path),
                 module_node=next(iter(map_)).get_root_node(),
-                node_to_str_map=map_
-            ) for path, map_ in sorted(self._file_to_node_changes.items())
+                node_to_str_map=map_,
+            )
+            for path, map_ in sorted(self._file_to_node_changes.items())
         }
 
     def get_renames(self) -> Iterable[Tuple[Path, Path]]:
@@ -106,13 +111,15 @@ class Refactoring:
         return sorted(self._renames)
 
     def get_diff(self):
-        text = ''
+        text = ""
         project_path = self._inference_state.project.path
         for from_, to in self.get_renames():
-            text += 'rename from %s\nrename to %s\n' \
-                % (from_.relative_to(project_path), to.relative_to(project_path))
+            text += "rename from %s\nrename to %s\n" % (
+                from_.relative_to(project_path),
+                to.relative_to(project_path),
+            )
 
-        return text + ''.join(f.get_diff() for f in self.get_changed_files().values())
+        return text + "".join(f.get_diff() for f in self.get_changed_files().values())
 
     def apply(self):
         """
@@ -127,7 +134,7 @@ class Refactoring:
 
 def _calculate_rename(path, new_name):
     dir_ = path.parent
-    if path.name in ('__init__.py', '__init__.pyi'):
+    if path.name in ("__init__.py", "__init__.pyi"):
         return dir_, dir_.parent.joinpath(new_name)
     return path, dir_.joinpath(new_name + path.suffix)
 
@@ -141,7 +148,7 @@ def rename(inference_state, definitions, new_name):
 
     for d in definitions:
         tree_name = d._name.tree_name
-        if d.type == 'module' and tree_name is None:
+        if d.type == "module" and tree_name is None:
             p = None if d.module_path is None else Path(d.module_path)
             file_renames.add(_calculate_rename(p, new_name))
         else:
@@ -156,7 +163,7 @@ def rename(inference_state, definitions, new_name):
 def inline(inference_state, names):
     if not names:
         raise RefactoringError("There is no name under the cursor")
-    if any(n.api_type == 'module' for n in names):
+    if any(n.api_type == "module" for n in names):
         raise RefactoringError("Cannot inline imports or modules")
     if any(n.tree_name is None for n in names):
         raise RefactoringError("Cannot inline builtins/extensions")
@@ -172,22 +179,22 @@ def inline(inference_state, names):
     tree_name = definitions[0].tree_name
 
     expr_stmt = tree_name.get_definition()
-    if expr_stmt.type != 'expr_stmt':
+    if expr_stmt.type != "expr_stmt":
         type_ = dict(
-            funcdef='function',
-            classdef='class',
+            funcdef="function",
+            classdef="class",
         ).get(expr_stmt.type, expr_stmt.type)
         raise RefactoringError("Cannot inline a %s" % type_)
 
     if len(expr_stmt.get_defined_names(include_setitem=True)) > 1:
         raise RefactoringError("Cannot inline a statement with multiple definitions")
     first_child = expr_stmt.children[1]
-    if first_child.type == 'annassign' and len(first_child.children) == 4:
+    if first_child.type == "annassign" and len(first_child.children) == 4:
         first_child = first_child.children[2]
-    if first_child != '=':
-        if first_child.type == 'annassign':
+    if first_child != "=":
+        if first_child.type == "annassign":
             raise RefactoringError(
-                'Cannot inline a statement that is defined by an annotation'
+                "Cannot inline a statement that is defined by an annotation"
             )
         else:
             raise RefactoringError(
@@ -204,22 +211,24 @@ def inline(inference_state, names):
         tree_name = name.tree_name
         path = name.get_root_context().py__file__()
         s = replace_code
-        if rhs.type == 'testlist_star_expr' \
-                or tree_name.parent.type in EXPRESSION_PARTS \
-                or tree_name.parent.type == 'trailer' \
-                and tree_name.parent.get_next_sibling() is not None:
-            s = '(' + replace_code + ')'
+        if (
+            rhs.type == "testlist_star_expr"
+            or tree_name.parent.type in EXPRESSION_PARTS
+            or tree_name.parent.type == "trailer"
+            and tree_name.parent.get_next_sibling() is not None
+        ):
+            s = "(" + replace_code + ")"
 
         of_path = file_to_node_changes.setdefault(path, {})
 
         n = tree_name
         prefix = n.prefix
         par = n.parent
-        if par.type == 'trailer' and par.children[0] == '.':
+        if par.type == "trailer" and par.children[0] == ".":
             prefix = par.parent.children[0].prefix
             n = par
-            for some_node in par.parent.children[:par.parent.children.index(par)]:
-                of_path[some_node] = ''
+            for some_node in par.parent.children[: par.parent.children.index(par)]:
+                of_path[some_node] = ""
         of_path[n] = prefix + s
 
     path = definitions[0].get_root_context().py__file__()
@@ -229,9 +238,10 @@ def inline(inference_state, names):
 
     # Most of the time we have to remove the newline at the end of the
     # statement, but if there's a comment we might not need to.
-    if next_leaf.prefix.strip(' \t') == '' \
-            and (next_leaf.type == 'newline' or next_leaf == ';'):
-        changes[next_leaf] = ''
+    if next_leaf.prefix.strip(" \t") == "" and (
+        next_leaf.type == "newline" or next_leaf == ";"
+    ):
+        changes[next_leaf] = ""
     return Refactoring(inference_state, file_to_node_changes)
 
 
@@ -239,4 +249,4 @@ def _remove_indent_of_prefix(prefix):
     r"""
     Removes the last indentation of a prefix, e.g. " \n \n " becomes " \n \n".
     """
-    return ''.join(split_lines(prefix, keepends=True)[:-1])
+    return "".join(split_lines(prefix, keepends=True)[:-1])

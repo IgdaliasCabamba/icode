@@ -14,12 +14,17 @@ from jedi.file_io import FileIO
 from jedi.inference.names import NameWrapper
 from jedi.inference.base_value import ValueSet, ValueWrapper, NO_VALUES
 from jedi.inference.value import ModuleValue
-from jedi.inference.cache import inference_state_function_cache, \
-    inference_state_method_cache
+from jedi.inference.cache import (
+    inference_state_function_cache,
+    inference_state_method_cache,
+)
 from jedi.inference.compiled.access import ALLOWED_GETITEM_TYPES, get_api_type
 from jedi.inference.gradual.conversion import to_stub
-from jedi.inference.context import CompiledContext, CompiledModuleContext, \
-    TreeContextMixin
+from jedi.inference.context import (
+    CompiledContext,
+    CompiledModuleContext,
+    TreeContextMixin,
+)
 
 _sentinel = object()
 
@@ -41,6 +46,7 @@ class MixedObject(ValueWrapper):
     fewer special cases, because we in Python you don't have the same freedoms
     to modify the runtime.
     """
+
     def __init__(self, compiled_value, tree_value):
         super().__init__(tree_value)
         self.compiled_value = compiled_value
@@ -48,7 +54,8 @@ class MixedObject(ValueWrapper):
 
     def get_filters(self, *args, **kwargs):
         yield MixedObjectFilter(
-            self.inference_state, self.compiled_value, self._wrapped_value)
+            self.inference_state, self.compiled_value, self._wrapped_value
+        )
 
     def get_signatures(self):
         # Prefer `inspect.signature` over somehow analyzing Python code. It
@@ -91,7 +98,7 @@ class MixedObject(ValueWrapper):
         return MixedContext(self)
 
     def __repr__(self):
-        return '<%s: %s; %s>' % (
+        return "<%s: %s; %s>" % (
             type(self).__name__,
             self.access_handle.get_repr(),
             self._wrapped_value,
@@ -112,6 +119,7 @@ class MixedName(NameWrapper):
     """
     The ``CompiledName._compiled_value`` is our MixedObject.
     """
+
     def __init__(self, wrapped_name, parent_tree_value):
         super().__init__(wrapped_name)
         self._parent_tree_value = parent_tree_value
@@ -155,7 +163,7 @@ def _load_module(inference_state, path):
         path=path,
         cache=True,
         diff_cache=settings.fast_parser,
-        cache_path=settings.cache_directory
+        cache_path=settings.cache_directory,
     ).get_root_node()
 
 
@@ -167,13 +175,15 @@ def _get_object_to_check(python_object):
         # Can return a ValueError when it wraps around
         pass
 
-    if (inspect.ismodule(python_object)
-            or inspect.isclass(python_object)
-            or inspect.ismethod(python_object)
-            or inspect.isfunction(python_object)
-            or inspect.istraceback(python_object)
-            or inspect.isframe(python_object)
-            or inspect.iscode(python_object)):
+    if (
+        inspect.ismodule(python_object)
+        or inspect.isclass(python_object)
+        or inspect.ismethod(python_object)
+        or inspect.isfunction(python_object)
+        or inspect.istraceback(python_object)
+        or inspect.isframe(python_object)
+        or inspect.iscode(python_object)
+    ):
         return python_object
 
     try:
@@ -218,7 +228,7 @@ def _find_syntax_node_name(inference_state, python_object):
         # Stuff like python_function.__code__.
         return None
 
-    if name_str == '<lambda>':
+    if name_str == "<lambda>":
         return None  # It's too hard to find lambdas.
 
     # Doesn't always work (e.g. os.stat_result)
@@ -227,8 +237,9 @@ def _find_syntax_node_name(inference_state, python_object):
     # import, it's probably a builtin (like collections.deque) and needs to be
     # ignored.
     names = [
-        n for n in names
-        if n.parent.type in ('funcdef', 'classdef') and n.parent.name == n
+        n
+        for n in names
+        if n.parent.type in ("funcdef", "classdef") and n.parent.name == n
     ]
     if not names:
         return None
@@ -256,7 +267,7 @@ def _find_syntax_node_name(inference_state, python_object):
     # inference, because people tend to define a public name in a module only
     # once.
     tree_node = names[-1].parent
-    if tree_node.type == 'funcdef' and get_api_type(original_object) == 'instance':
+    if tree_node.type == "funcdef" and get_api_type(original_object) == "instance":
         # If an instance is given and we're landing on a function (e.g.
         # partial in 3.5), something is completely wrong and we should not
         # return that.
@@ -285,9 +296,10 @@ def _create(inference_state, compiled_value, module_context):
             root_compiled_value = compiled_value.get_root_context().get_value()
             # TODO this __name__ might be wrong.
             name = root_compiled_value.py__name__()
-            string_names = tuple(name.split('.'))
+            string_names = tuple(name.split("."))
             module_value = ModuleValue(
-                inference_state, module_node,
+                inference_state,
+                module_node,
                 file_io=file_io,
                 string_names=string_names,
                 code_lines=code_lines,
@@ -298,12 +310,11 @@ def _create(inference_state, compiled_value, module_context):
             module_context = module_value.as_context()
 
         tree_values = ValueSet({module_context.create_value(tree_node)})
-        if tree_node.type == 'classdef':
+        if tree_node.type == "classdef":
             if not compiled_value.is_class():
                 # Is an instance, not a class.
                 tree_values = tree_values.execute_with_values()
 
     return ValueSet(
-        MixedObject(compiled_value, tree_value=tree_value)
-        for tree_value in tree_values
+        MixedObject(compiled_value, tree_value=tree_value) for tree_value in tree_values
     )
