@@ -1,9 +1,3 @@
-import faulthandler
-import sys
-
-sys.dont_write_bytecode = True
-faulthandler.enable()
-
 from base import *
 
 

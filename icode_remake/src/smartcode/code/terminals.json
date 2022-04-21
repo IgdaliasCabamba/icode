@@ -1,0 +1,26 @@
+{	
+	"current":0,
+
+	"emulators":[
+		{
+			"name":"Bash",
+			"bin":"/bin/bash",
+			"icon":null,
+			"run_on_startup":true,
+			"id":0
+		},
+		{
+			"name":"Python",
+			"bin":"/bin/python3",
+			"icon":null,
+			"run_on_startup":false,
+			"id":1
+		}
+		{
+			"name":"NodeJs",
+			"bin":"/bin/node",
+			"icon":null,
+			"id":2
+		}
+	]
+}

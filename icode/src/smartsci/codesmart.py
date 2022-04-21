@@ -201,10 +201,13 @@ class Editor(EditorBase):
         self.all_cursors_pos.clear()
 
     def remove_annotations(self, type, annotations):
-        for annotation in annotations:  # BUG: ValueError: list.remove(x): x not in list
-            if annotation["note"] in self.annotations_data[type]:
-                self.annotations_data[type].remove()
-                self.clearAnnotations(annotation["line"])
+        try:
+            for annotation in annotations:  # BUG: ValueError: list.remove(x): x not in list
+                if annotation["note"] in self.annotations_data[type]:
+                    self.annotations_data[type].remove(annotation["note"])
+                    self.clearAnnotations(annotation["line"])        
+        except Exception as e:
+            print(e)
 
     def clear_annotations_by_type(self, type: str) -> None:
         if type in self.annotations_data.keys():
@@ -213,11 +216,14 @@ class Editor(EditorBase):
             )
 
     def clear_annotations_by_line(self, type: str, line: object) -> None:
-        if type in self.annotations_data.keys():
-            for note in self.annotations_data[type]:
-                if line == note.row:
-                    self.annotations_data[type].remove(note)
-                    self.clearAnnotations(note.row)
+        try:
+            if type in self.annotations_data.keys():
+                for note in self.annotations_data[type]:
+                    if line == note.row:
+                        self.annotations_data[type].remove(note)
+                        self.clearAnnotations(note.row)
+        except Exception as e:
+            print(e)
 
     def selection_event(self) -> None:
         row_from, col_from, row_to, col_to = self.getSelection()

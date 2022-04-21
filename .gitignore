@@ -5,7 +5,11 @@ get-icode/
 smartenv/
 tools_env/
 icode/src/.cache/
+icode/src/.mypy_cache
 icode/src/data/
+icode_remake/src/.cache/
+icode_remake/src/.mypy_cache
+icode_remake/src/data/
 tests/local/
 **/__pycache__
 *.pyi
