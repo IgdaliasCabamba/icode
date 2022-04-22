@@ -14,8 +14,8 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api, visitors
-from ui.igui import ScrollLabel, IListWidgetItem, IStandardItem
-from frameworks.qroundprogressbar import QRoundProgressBar
+from gui.view.igui import IListWidgetItem, IStandardItem
+from smartlibs.qtmd.qroundprogressbar import QRoundProgressBar
 from smartpy_utils import format_analyze_rank, deep_analyze_doc
 
 

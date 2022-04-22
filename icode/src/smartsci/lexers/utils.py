@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QFont
-import base.consts as iconsts
-from base.system import *
+import core.consts as iconsts
+from core.system import *
 
 
 def get_font():

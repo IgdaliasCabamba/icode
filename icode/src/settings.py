@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from PyQt5.QtCore import Qt
 from urllib3 import Retry
-import frameworks.jedit2 as ijson
-from base.system import BASE_PATH, SYS_SEP
+import smartlibs.mjson as ijson
+from core.system import BASE_PATH, SYS_SEP
 from data import qt_cache, DATA_FILE, TERMINALS_FILE, EDITOR_FILE
-import base.consts as iconsts
-from base.memory import *
+import core.consts as iconsts
+from core.memory import *
 
 
 @dataclass
@@ -137,10 +137,10 @@ def restore_window(window, app, getfn):
 
     if window_geometry is not None:
         window_object.setGeometry(window_geometry)
-        window_object.center()
+        window_object.centralize()
     else:
         window_object.setGeometry(iconsts.MAINWINDOW_BASE_GEOMETRY)
-        window_object.center()
+        window_object.centralize()
 
     if window_state is not None:
         state = int(window_state)

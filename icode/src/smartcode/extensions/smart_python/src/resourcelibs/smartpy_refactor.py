@@ -14,7 +14,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
-from ui.igui import ScrollLabel, IListWidgetItem, InputHistory
+from smartlibs.qtmd import InputHistory
 
 
 class Refactor(QFrame):

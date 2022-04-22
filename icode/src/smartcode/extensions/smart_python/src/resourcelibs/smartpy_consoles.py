@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
 from functions import getfn
 from pyqtconsole.console import PythonConsole
 import pyqtconsole.highlighter as hl
-from base.code_api import icode_api
+from core.code_api import icode_api
 
 
 class SmartPythonConsole(QFrame):

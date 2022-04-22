@@ -13,13 +13,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-import base.consts as iconsts
+import core.consts as iconsts
 import settings
-from base.code_api import *
-from base.font_loader import *
-from base.icache import *
-from base.isetting import *
-from base.system import *
+from core.code_api import *
+from core.font_loader import *
+from core.storer import *
+from core.storer import *
+from core.system import *
 from data import ijson
 from functions import *
 from settings import *

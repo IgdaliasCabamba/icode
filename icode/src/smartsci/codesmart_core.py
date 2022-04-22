@@ -17,7 +17,7 @@ from PyQt5.QtCore import (
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QFrame, QMenu, QShortcut, QToolTip
 
-from base.system import SYS_NAME
+from core.system import SYS_NAME
 from functions import filefn, getfn
 
 from . import iconsts

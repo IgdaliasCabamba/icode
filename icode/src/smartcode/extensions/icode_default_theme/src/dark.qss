@@ -265,14 +265,14 @@ QRoundProgressBar {
 /*Styling by IDs*/
 /* Main Areas*/
 
-#windowFrame {background-color: $base2;}
-#titleBar #lblTitle{font-size: 10.5pt;}
-#titleBar {background-color: $contrast;}
-#titleBar #btnMenu{
+#window-frame {background-color: $base2;}
+#title-bar #lbl-title{font-size: 10.5pt;}
+#title-bar {background-color: $contrast;}
+#title-bar #btn-menu{
     border: none;
     padding: 0 4px 0 4px;
 }
-#titleBar #btnMenu:hover{background-color: rgba(180, 180, 180, 70);}
+#title-bar #btn-menu:hover{background-color: rgba(180, 180, 180, 70);}
 
 /* Application Bars*/
 #status-bar[folder_open=false] {background: #68217a;}

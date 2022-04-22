@@ -15,7 +15,7 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 from pathlib import Path
 from functions import getfn
 from smartpy_api import python_api
-from ui.igui import ScrollLabel, IListWidgetItem, IStandardItem
+from gui.view.igui import IListWidgetItem, IStandardItem
 
 
 class CodeTreeCore(QObject):

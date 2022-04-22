@@ -25,7 +25,7 @@ from smartpy_utils import (
 )
 
 from functions import getfn
-from ui.igui import IListWidgetItem, IStandardItem
+from gui.view.igui import IListWidgetItem, IStandardItem
 
 
 class OutputErrors(QFrame):

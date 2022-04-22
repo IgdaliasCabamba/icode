@@ -12,7 +12,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import QColor
 
-from ui.igui import IListWidgetItem, InputHistory
+from gui.view.igui import IListWidgetItem
+from smartlibs.qtmd import InputHistory
 from functions import getfn
 
 

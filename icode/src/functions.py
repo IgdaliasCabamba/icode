@@ -9,14 +9,14 @@ import sys
 
 from PyQt5.QtGui import QColor, QFont, QIcon, QImage, QPixmap
 from shamanld import Shaman
-from base.system import BASE_PATH, SYS_NAME, SYS_SEP
+from core.system import BASE_PATH, SYS_NAME, SYS_SEP
 from typing_extensions import ParamSpec
 
-import base.consts as iconsts
+import core.consts as iconsts
 import settings
 import data
-import frameworks.jedit2 as ijson
-from base.extender import Extender
+import smartlibs.mjson as ijson
+from core.extender import Extender
 from smartsci.lexers import *
 
 

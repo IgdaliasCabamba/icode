@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import (
     QFileDialog,
 )
 
-from ui.igui import IListWidgetItem, InputHistory
+from gui.view.igui import IListWidgetItem
+from smartlibs.qtmd import InputHistory
 from smartpy_api import python_api
 from functions import getfn
 from extension_api import settings

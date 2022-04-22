@@ -1,4 +1,4 @@
-from base import *
+from core import *
 
 
 class App(Base):
@@ -7,20 +7,14 @@ class App(Base):
         self.qt_app = qt_app
         self.ui = ui
         self.ui.set_controller(self)
-        self.last_files = editor_cache.get_all_from_list("files")
-        self.last_folders = editor_cache.get_all_from_list("folders")
-        self.last_folder = editor_cache.restore_from_list("folders", -1)
-        self.last_repository = editor_cache.restore_from_list("repositorys", -1)
-        self.files_opened = []
-        self.tabs_count = iconsts.INIT_TAB_COUNT
         self.menu = self.ui.menu_bar
         self.tool_bar = self.ui.tool_bar
         self.status_bar = self.ui.status_bar
-        self.side_bottom = self.ui.side_bottom
         self.side_left = self.ui.side_left
         self.side_right = self.ui.side_right
         self.editor_widgets = self.ui.editor_widgets
         self.april = self.ui.april
+        self.init_controllers()
         self.run()  # running the server
         self.run_api()  # setting the api for external services as widgets
         self.run_ui()
@@ -82,7 +76,7 @@ class App(Base):
 
     def open_dir(self, dir=None) -> None:
         if dir is not None:
-            folder = self.ui.side_left.explorer.open_folder(dir)
+            folder = self.file_explorer.open_folder(dir)
             if not self.ui.side_left.explorer.isVisible():
                 self.tool_bar.explorer.trigger()
             self.status_bar.open_folder_mode()
@@ -92,7 +86,7 @@ class App(Base):
         editor_cache.save_to_list(str(folder_with_path), "folders")
 
     def open_folder(self):
-        folder = self.ui.side_left.explorer.open_folder()
+        folder = self.file_explorer.open_folder()
         if folder is not None:
             if not self.ui.side_left.explorer.isVisible():
                 self.tool_bar.explorer.trigger()
@@ -102,23 +96,23 @@ class App(Base):
 
     def open_repository(self, repository=None):
         if not isinstance(repository, str) or repository is None:
-            repository = self.ui.side_left.git.open_repository()
+            repository = self.git.open_repository()
         self.enter_repository(repository)
         self.on_commit_app.emit(0)
 
     def close_folder(self):
-        self.ui.side_left.explorer.close_folder()
+        self.file_explorer.close_folder()
         self.status_bar.open_folder_mode(False)
 
     def restore_folder(self, path):
         if pathlib.Path(path).exists() and pathlib.Path(path).is_dir():
-            folder = self.ui.side_left.explorer.goto_folder(path)
+            folder = self.file_explorer.goto_folder(path)
             if folder is not None:
                 self.status_bar.open_folder_mode()
 
     def restore_repository(self, path):
         if pathlib.Path(path).exists() and pathlib.Path(path).is_dir():
-            repository = self.ui.side_left.git.open_repository(path)
+            repository = self.git.open_repository(path)
             self.enter_repository(repository)
 
     def reopen_editors(self):
@@ -196,11 +190,11 @@ class App(Base):
 
     def call_april(self):
         """Show/Hide April"""
-        self.ui.april.appear()
+        self.ui.april.show_hide()
 
     def show_notifications(self):
         """Show/Hide Notifications Panel"""
-        self.ui.notificator.appear()
+        self.ui.notificator.show_hide()
 
     def show_goto_tab(self):
         self.editor_widgets.do_goto_tab()
@@ -268,7 +262,7 @@ class App(Base):
         """Set the current editor and change icode current working dir in memory"""
         file = widget.file
         self.editor_widgets.set_current_editor(widget)
-        self.side_right.todos.set_data(widget, file)
+        self.todos.set_data(widget, file)
         if file is not None:
             settings.icwd(pathlib.Path(file).parent)
         self.on_current_editor_changed.emit(widget)
@@ -388,7 +382,7 @@ class App(Base):
                 self.status_bar.source_control.setText(
                     f"{pathlib.Path(repo_path).name}{repo_branch}"
                 )
-                self.ui.side_left.explorer.goto_folder(repo_path)
+                self.file_explorer.goto_folder(repo_path)
                 if opened:
                     if not self.ui.side_left.git.isVisible():
                         self.tool_bar.igit.trigger()
@@ -416,6 +410,123 @@ class App(Base):
         elif command == 2:
             self.update_components()
             self.save_status()
+
+# .......................................................................................................................
+
+    def new_editor(self, notebook, file=None, content_type=None):
+        editor = EditorView(self, self.ui, notebook, file, content_type)
+        self.configure_editor(editor)
+        return editor
+
+    def new_editor_notebook(self, orientation: int) -> None:
+        self.tabs_count += 1
+        notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
+        self.new_file(notebook)
+
+    def new_file(self, notebook=False) -> EditorView:
+        if isinstance(notebook, bool):
+            notebook = self.ui.notebook
+
+        self.tabs_count += 1
+
+        editor = EditorView(self, self.ui, notebook)
+        editor.on_tab_content_changed.connect(self.update_tab)
+        index = notebook.add_tab_and_get_index(editor, f"# Untituled-{self.tabs_count}")
+        self.configure_tab(index, f"# Untituled-{self.tabs_count}", None)
+        self.configure_editor(editor)
+        self.on_commit_app.emit(1)
+        return editor
+
+    def configure_editor(self, editor):
+        editor.on_tab_content_changed.connect(self.update_tab)
+        self.on_new_editor.emit(editor)
+
+    def copy_editor(self, notebook, tab_data) -> EditorView:
+        editor = self.new_editor(
+            notebook, tab_data.widget.file, tab_data.widget.content_type
+        )
+        editor.make_deep_copy(tab_data.widget)
+        index = notebook.add_tab_and_get_index(editor, tab_data.title)
+        notebook.setTabToolTip(index, tab_data.tooltip)
+        notebook.setTabIcon(index, tab_data.icon)
+        return editor
+
+    def create_editor_from_file(self, code_file: str) -> EditorView:
+        editor = EditorView(self, self.ui, self.ui.notebook, code_file)
+        index = self.ui.notebook.add_tab_and_get_index(editor, code_file.name)
+        self.configure_tab(index, code_file)
+        self.configure_editor(editor)
+        self.files_opened.append(code_file)
+        self.on_commit_app.emit(1)
+        return editor
+
+    def create_new_notebook(
+        self, orientation: int, widget=None, copy: bool = True
+    ) -> NoteBookEditor:
+        """Create a new notebook and split in mainwindow"""
+        if widget is None:
+            widget = self.ui.notebook
+        parent_notebook = parent_tab_widget(widget)
+
+        tab_data = parent_notebook.get_tab_data()
+
+        notebook = NoteBookEditor(self.ui.isplitter, self)
+        notebook.last_tab_closed.connect(self.tabbar_last_closed)
+        notebook.on_user_event.connect(self.ui.set_notebook)
+
+        self.on_new_notebook.emit(notebook)
+        self.ui.set_notebook(notebook)
+
+        if copy:
+            self.copy_editor(notebook, tab_data)
+
+        DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
+
+        self.ui.isplitter.add_notebook(notebook)
+        self.ui.isplitter.splitAt(parent_notebook, DIRS[orientation], notebook)
+        self.on_commit_app.emit(1)
+        return notebook
+
+    def current_notebook_editor(
+        self, notebook: object = None, attr: str = None, value: object = None
+    ) -> Union[object, bool]:
+        if not self.are_notebooks_empty():
+            if notebook is None:
+                widget = self.ui.notebook.currentWidget()
+            else:
+                widget = notebook.currentWidget()
+            if widget is not None:
+                if isfn.is_widget_code_editor(widget, attr, value):
+                    return widget.editor
+        return False
+
+    def are_notebooks_empty(self) -> bool:
+        return self.ui.isplitter.is_empty
+
+    def has_notebook_editor(self, notebook=None) -> Union[object, bool]:
+        if notebook is None:
+            notebook = self.ui.notebook
+        widget = notebook.currentWidget()
+        if widget is not None:
+            if widget.objectName() == "editor-frame":
+                return widget
+        return False
+
+    def have_notebooks_editor(self) -> bool:
+        for notebook in self.ui.notebooks:
+            widget = self.notebook_have_editor(notebook)
+            if widget:
+                return True
+        return False
+
+    def is_file_duplicated(self, file: str, notebook: object) -> bool:
+        for i in range(notebook.count()):
+            widget = notebook.widget(i)
+            if isfn.is_widget_code_editor(widget):
+                if str(widget.file) == file:
+                    return {"index": i, "widget": widget, "notebook": notebook}
+        return False
+
 
 
 def run(args=None, call_out=None) -> None:

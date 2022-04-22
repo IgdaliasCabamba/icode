@@ -12,7 +12,7 @@ def __rope_start_everything():
     import types
     import threading
     import rope.base.utils.pycompat as pycompat
-    import base64
+    import core64
     import hashlib
     import hmac
 

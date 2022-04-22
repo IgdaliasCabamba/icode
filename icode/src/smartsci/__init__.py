@@ -1,3 +1,3 @@
-import base.consts as iconsts
-from base.system import SYS_NAME
-from base.char_utils import get_unicon
+import core.consts as iconsts
+from core.system import SYS_NAME
+from core.char_utils import get_unicon
