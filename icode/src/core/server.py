@@ -7,21 +7,18 @@ import settings
 from settings import DATA_FILE
 from gui.view import *
 from data import editor_cache
-from .extender import Plugin
+from .extender import Plugger
 from typing import Union
 from gui.controller import *
 
-plugin = Plugin()
-
 class Core(object):
-
+    on_style_changed = pyqtSignal(object)
     on_new_notebook = pyqtSignal(object)
     on_new_tab = pyqtSignal(object)
     on_new_editor = pyqtSignal(object)
     on_window_title_changed = pyqtSignal(str)
-    on_env_changed = pyqtSignal(object)
     on_commit_app = pyqtSignal(int)
-    on_change_ide_mode = pyqtSignal(int)
+    on_ide_mode = pyqtSignal(int)
     on_current_editor_changed = pyqtSignal(object)
 
     def __init__(self) -> None:
@@ -155,13 +152,15 @@ class Core(object):
         )
 
 
-class Base(QObject, Core):
+class Server(QObject, Core):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self._parent = parent
+        self.plugger = Plugger(self)
         self.logo_icons = getfn.get_smartcode_icons("logo")
         self.command_icons = getfn.get_smartcode_icons("action")
         self.indentation_icons = getfn.get_smartcode_icons("indentation")
+        #self.style = 
         self.__lexers = [
             {
                 "name": "python",
@@ -297,8 +296,8 @@ class Base(QObject, Core):
 
     def load_plugins(self):
         data = {"app": self, "qt_app": self.qt_app}
-        plugin.run_ui_plugin(DATA_FILE, data)
-        plugin.run_app_plugin(DATA_FILE, data)
+        self.plugger.run_ui_plugin(DATA_FILE, data)
+        self.plugger.run_app_plugin(DATA_FILE, data)
 
     def add_lexer(self, lexer_object: dict) -> None:
         if isinstance(lexer_object, dict):

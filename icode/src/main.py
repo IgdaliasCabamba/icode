@@ -1,7 +1,7 @@
 from core import *
 
 
-class App(Base):
+class App(Server):
     def __init__(self, ui: object, qt_app: object) -> None:
         super().__init__(None)
         self.qt_app = qt_app
@@ -14,6 +14,8 @@ class App(Base):
         self.side_right = self.ui.side_right
         self.editor_widgets = self.ui.editor_widgets
         self.april = self.ui.april
+        self.styler = Styler(self, self.ui, self.qt_app)
+        self.styler.beautify()
         self.init_controllers()
         self.run()  # running the server
         self.run_api()  # setting the api for external services as widgets
@@ -186,7 +188,7 @@ class App(Base):
 
     def change_ide_mode(self, mode: int) -> None:
         """Emit a signal to change the performance of icode"""
-        self.on_change_ide_mode.emit(mode)
+        self.on_ide_mode.emit(mode)
 
     def call_april(self):
         """Show/Hide April"""
@@ -537,8 +539,7 @@ def run(args=None, call_out=None) -> None:
     qapp.setApplicationVersion("0.0.1")
     qapp.setApplicationName("Intelligent Code")
     qapp.setDesktopSettingsAware(False)
-
-    styler.beautify(qapp)
+    
     exe = MainWindow(None, styler.windows_style, qapp)
     app = App(exe, qapp)
     settings.restore_window(exe, app, getfn)

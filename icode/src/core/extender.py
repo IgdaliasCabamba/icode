@@ -43,9 +43,10 @@ class Extender:
             extension.finish()
 
 
-class Plugin(Extender):
-    def __init__(self) -> None:
+class Plugger(Extender):
+    def __init__(self, application_core) -> None:
         super().__init__()
+        self.application_core = application_core
 
     def run_ui_plugin(self, config, data) -> None:
         config = ijson.load(config)

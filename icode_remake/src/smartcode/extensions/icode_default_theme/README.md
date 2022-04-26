@@ -1,1 +1,0 @@
-# ICode Default Dark Theme

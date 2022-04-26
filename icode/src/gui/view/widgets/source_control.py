@@ -195,10 +195,10 @@ class InitRepo(QFrame):
         btn_open_folder = QPushButton("Open Folder")
         btn_open_repo = QPushButton("Open Repository")
         btn_open_folder.clicked.connect(
-            lambda: self.api.api.side_left.explorer.open_folder(repo_path)
+            lambda: self.api.api.explorer.open_folder(repo_path)
         )
         btn_open_repo.clicked.connect(
-            lambda: self.api.api.side_left.git.load_repository(repo)
+            lambda: self.api.api.git.load_repository(repo)
         )
         self.api.api.notify(
             "Repo Initialized",
