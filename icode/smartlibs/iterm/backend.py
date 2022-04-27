@@ -4,14 +4,20 @@
 # I made some small fixes, improved some small parts and added a Session class
 # which can be used by the widget.
 # License: GPL2
+import platform
+kernel_name = platform.system().lower()
+
 import sys
 import os
-import fcntl
+
+if kernel_name == "linux":
+    import fcntl
+    import pty
+    import termios
+    
 import array
 import threading
 import time
-import termios
-import pty
 import signal
 import struct
 import select
@@ -1163,14 +1169,15 @@ class Multiplexer(object):
     def proc_resize(self, sid, w, h):
         fd = self.session[sid]["fd"]
         # Set terminal size
-        try:
-            fcntl.ioctl(
-                fd,
-                struct.unpack("i", struct.pack("I", termios.TIOCSWINSZ))[0],
-                struct.pack("HHHH", h, w, 0, 0),
-            )
-        except (IOError, OSError):
-            pass
+        if kernel_name == "linux":
+            try:
+                fcntl.ioctl(
+                    fd,
+                    struct.unpack("i", struct.pack("I", termios.TIOCSWINSZ))[0],
+                    struct.pack("HHHH", h, w, 0, 0),
+                )
+            except (IOError, OSError):
+                pass
         self.session[sid]["term"].set_size(w, h)
         self.session[sid]["w"] = w
         self.session[sid]["h"] = h
@@ -1201,44 +1208,47 @@ class Multiplexer(object):
         self.session[sid]["state"] = "alive"
         w, h = self.session[sid]["w"], self.session[sid]["h"]
         # Fork new process
-        try:
-            pid, fd = pty.fork()
-        except (IOError, OSError):
-            self.session[sid]["state"] = "dead"
-            return False
-        if pid == 0:
-            cmd = cmd or self.cmd
-            # Safe way to make it work under BSD and Linux
+        if kernel_name == "linux":
             try:
-                ls = os.environ["LANG"].split(".")
-            except KeyError:
-                ls = []
-            if len(ls) < 2:
-                ls = ["en_US", "UTF-8"]
-            try:
-                os.putenv("COLUMNS", str(w))
-                os.putenv("LINES", str(h))
-                os.putenv("TERM", self.env_term)
-                os.putenv("PATH", os.environ["PATH"])
-                os.putenv("LANG", ls[0] + ".UTF-8")
-                # os.system(cmd)
-                p = subprocess.Popen(cmd, shell=False)
-                # print "called with subprocess", p.pid
-                child_pid, sts = os.waitpid(p.pid, 0)
-                # print "child_pid", child_pid, sts
+                pid, fd = pty.fork()
             except (IOError, OSError):
-                pass
-            # self.proc_finish(sid)
-            os._exit(0)
-        else:
-            # Store session vars
-            self.session[sid]["pid"] = pid
-            self.session[sid]["fd"] = fd
-            # Set file control
-            fcntl.fcntl(fd, fcntl.F_SETFL, os.O_NONBLOCK)
-            # Set terminal size
-            self.proc_resize(sid, w, h)
-            return True
+                self.session[sid]["state"] = "dead"
+                return False
+            if pid == 0:
+                cmd = cmd or self.cmd
+                # Safe way to make it work under BSD and Linux
+                try:
+                    ls = os.environ["LANG"].split(".")
+                except KeyError:
+                    ls = []
+                if len(ls) < 2:
+                    ls = ["en_US", "UTF-8"]
+                try:
+                    os.putenv("COLUMNS", str(w))
+                    os.putenv("LINES", str(h))
+                    os.putenv("TERM", self.env_term)
+                    os.putenv("PATH", os.environ["PATH"])
+                    os.putenv("LANG", ls[0] + ".UTF-8")
+                    # os.system(cmd)
+                    p = subprocess.Popen(cmd, shell=False)
+                    # print "called with subprocess", p.pid
+                    child_pid, sts = os.waitpid(p.pid, 0)
+                    # print "child_pid", child_pid, sts
+                except (IOError, OSError):
+                    pass
+                # self.proc_finish(sid)
+                os._exit(0)
+            else:
+                # Store session vars
+                self.session[sid]["pid"] = pid
+                self.session[sid]["fd"] = fd
+                # Set file control
+                if kernel_name == "linux":
+                    fcntl.fcntl(fd, fcntl.F_SETFL, os.O_NONBLOCK)
+                # Set terminal size
+                self.proc_resize(sid, w, h)
+                return True
+        return True
 
     def proc_waitfordeath(self, sid):
         try:

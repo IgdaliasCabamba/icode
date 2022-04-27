@@ -144,6 +144,8 @@ class StyleMaker:
 
         if isinstance(to_replace, str) and isinstance(to_place, str):
             self._text = self._text.replace(to_replace, to_place)
+        
+        self._text = self._text.replace("\\", "/")
 
     def compile_qsass(self):
         for key, value in self.vars.items():

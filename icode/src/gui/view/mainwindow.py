@@ -1,6 +1,7 @@
 from weakref import ref
 
 from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QScrollArea, QSplitter, qApp
 
 import core.consts as iconsts
@@ -149,10 +150,9 @@ class MainWindow(QMainWindow):
         self.move(app_geo.topLeft())
 
     def _make_window(self, style: str) -> None:
-        from PyQt5.QtGui import QIcon
         btn_layout = HeaderPushButton(self)
         btn_layout.setStyleSheet("background:transparent")
-        btn_layout.setIcon(QIcon("/home/igdalias/Downloads/b.png"))
+        # TODO: finish this button
         self.frame = iwindow.ModernWindow(self, extra_buttons_right=[btn_layout] )
         self.frame.set_window_menu(self.menu_bar)
         self.frame.set_menu_icon(self.icons.get_icon("menubar-menu"))
