@@ -29,7 +29,6 @@ icode_packages=[
 "lxml",
 "nacl",
 "packaging",
-"patchelf",
 "pycparser",
 "pygit2",
 "pygments",
@@ -93,7 +92,6 @@ from klein import *
 from lxml import *
 from nacl import *
 from packaging import *
-from patchelf import *
 from pycparser import *
 from pygit2 import *
 from pygments import *

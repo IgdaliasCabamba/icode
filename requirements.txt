@@ -29,7 +29,6 @@ klein==21.8.0
 lxml==4.7.1
 MarkupSafe==2.0.1
 packaging==21.3
-patchelf==0.14.3.0
 pycparser==2.21
 pygit2==1.7.2
 PyGithub==1.55
@@ -42,7 +41,7 @@ pyparsing==3.0.7
 pyperclip==1.8.2
 PyQt5==5.15.6
 PyQt5-Qt5==5.15.2
-PyQt5-sip==12.9.0
+PyQt5-sip==12.10.1
 pyquery==1.4.3
 QScintilla==2.13.1
 QtPy==2.0.0
