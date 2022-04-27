@@ -162,7 +162,7 @@
 		},
 		
 		// ALL
-		"DefaultColor":"#000000",
+		"DefaultColor":"#ffffff",
 		"DefaultPaper":"#ffffff",
 		"DefaultFont":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false},
 
@@ -294,8 +294,8 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Error":{
-			"fg":"yellow",
-			"bg":"red",
+			"fg":"#dddddd",
+			"bg":"#de506a",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"String":{
@@ -309,7 +309,7 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"UUID":{
-			"fg":"#222222",
+			"fg":"#dddddd",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -431,7 +431,7 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"OtherInTag":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -441,52 +441,52 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Entity":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"XMLTagEnd":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"XMLStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"XMLEnd":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Script":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPAtStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"CDATA":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"HTMLValue":{
-			"fg":"",
+			"fg":"#67e0b6",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -496,17 +496,17 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLCommand":{
-			"fg":"",
+			"fg":"#e067b0",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLParameter":{
-			"fg":"",
+			"fg":"#e0da67",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -521,17 +521,17 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLError":{
-			"fg":"",
+			"fg":"#de506a",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLSpecial":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLEntity":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -546,17 +546,17 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SGMLBlockDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -576,52 +576,52 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptWord":{
-			"fg":"",
+			"fg":"#eeeeee",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptDoubleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptSingleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptSymbol":{
-			"fg":"",
+			"fg":"#f283a8",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptUnclosedString":{
-			"fg":"",
+			"fg":"red",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"JavaScriptRegex":{
-			"fg":"",
+			"fg":"#e0da67",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -641,52 +641,52 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptWord":{
-			"fg":"",
+			"fg":"#eeeeee",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptDoubleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptSingleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptSymbol":{
-			"fg":"",
+			"fg":"#f283a8",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptUnclosedString":{
-			"fg":"",
+			"fg":"red",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPJavaScriptRegex":{
-			"fg":"",
+			"fg":"#e0da67",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -696,37 +696,37 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptIdentifier":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"VBScriptUnclosedString":{
-			"fg":"",
+			"fg":"red",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -736,37 +736,37 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptIdentifier":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPVBScriptUnclosedString":{
-			"fg":"",
+			"fg":"red",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -776,12 +776,12 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonDoubleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -791,7 +791,7 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -806,12 +806,12 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonClassName":{
-			"fg":"",
+			"fg":"#499c44",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonFunctionMethodName":{
-			"fg":"",
+			"fg":"#f7ffad",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -821,17 +821,17 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PythonIdentifier":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonStart":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -841,22 +841,22 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonDoubleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonSingleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -871,12 +871,12 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonClassName":{
-			"fg":"",
+			"fg":"#499c44",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonFunctionMethodName":{
-			"fg":"",
+			"fg":"#f7ffad",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -886,37 +886,37 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ASPPythonIdentifier":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPDefault":{
-			"fg":"",
+			"fg":"#ffffff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPDoubleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPSingleQuotedString":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPKeyword":{
-			"fg":"",
+			"fg":"#c683f2",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPNumber":{
-			"fg":"",
+			"fg":"#afe37b",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPVariable":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -931,7 +931,7 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PHPDoubleQuotedVariable":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -941,87 +941,87 @@
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ClassSelector":{
-			"fg":"",
+			"fg":"#499c44",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PseudoClass":{
-			"fg":"",
+			"fg":"#499c44",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"UnknownPseudoClass":{
-			"fg":"",
+			"fg":"#499c44",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"CSS1Property":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"UnknownProperty":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Value":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"IDSelector":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Important":{
-			"fg":"",
+			"fg":"#e06767",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"AtRule":{
-			"fg":"",
+			"fg":"#e06795",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"CSS2Property":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"CSS3Property":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"PseudoElement":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ExtendedCSSProperty":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ExtendedPseudoClass":{
-			"fg":"",
+			"fg":"#499c44",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ExtendedPseudoElement":{
-			"fg":"",
+			"fg":"#98d9ff",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"MediaRule":{
-			"fg":"",
+			"fg":"#e06795",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Variable":{
-			"fg":"",
+			"fg":"#e06795",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -1029,69 +1029,69 @@
 		//Bash; Batch
 		
 		"Scalar":{
-			"fg":"",
+			"fg":"#e06795",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ParameterExpansion":{
-			"fg":"",
+			"fg":"#e0a467",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Backticks":{
-			"fg":"",
+			"fg":"#f283a8",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"HereDocumentDelimiter":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SingleQuotedHereDocument":{
-			"fg":"",
+			"fg":"#d9715d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"Label":{
-			"fg":"",
+			"fg":"#8be067",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"HideCommandChar":{
-			"fg":"",
+			"fg":"#67e0cc",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"ExternalCommand":{
-			"fg":"",
+			"fg":"#67e0cc",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		
 		// MarkDown
 		"Special":{
-			"fg":"",
+			"fg":"#67e0cc",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"StrongEmphasisAsterisks":{
-			"fg":"#222222",
+			"fg":"#dddddd",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"StrongEmphasisUnderscores":{
-			"fg":"#222222",
+			"fg":"#dddddd",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"EmphasisAsterisks":{
-			"fg":"#222222",
+			"fg":"#dddddd",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"EmphasisUnderscores":{
-			"fg":"#222222",
+			"fg":"#dddddd",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
@@ -1162,38 +1162,38 @@
 		},
 		"CodeBackticks":{
 			"fg":"#e394c2",
-			"bg":"#2e2e2e",
+			"bg":"#eeeeee",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"CodeDoubleBackticks":{
 			"fg":"#e394c2",
-			"bg":"#2e2e2e",
+			"bg":"#eeeeee",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"CodeBlock":{
 			"fg":"#e394c2",
-			"bg":"#2e2e2e",
+			"bg":"#eeeeee",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		
 		// YAML
 		"Reference":{
-			"fg":"",
+			"fg":"#469afa",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"DocumentDelimiter":{
-			"fg":"",
+			"fg":"#67e08d",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"TextBlockMarker":{
-			"fg":"",
+			"fg":"#67e0cc",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
 		"SyntaxErrorMarker":{
-			"fg":"",
+			"fg":"#de506a",
 			"bg":"#ffffff",
 			"font":{"name":null, "pixel-size":1, "fixed-pitch":true, "point-size":10.5, "bold":false}
 		},
