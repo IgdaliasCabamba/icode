@@ -2,8 +2,7 @@ build/builder/
 build/olds/
 dist/
 get-icode/
-smartenv/
-tools_env/
+envs/
 icode/src/.cache/
 icode/src/.mypy_cache
 icode/src/data/
