@@ -1,4 +1,4 @@
 #!/usr/bin/bash
-source ~/SmartCode/smartenv/bin/activate
+source ~/SmartCode/envs/icode/bin/activate
 cd ~/SmartCode/Icode
-python app.py
+python init.py

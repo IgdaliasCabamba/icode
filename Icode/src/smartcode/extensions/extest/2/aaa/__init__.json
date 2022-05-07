@@ -1,0 +1,11 @@
+{
+    "name":"hello3",
+    "category":"themes",
+    "require":{
+        "engines":{
+            "icode":"0.0.1"
+        }
+    },
+    "main":"test.py"
+
+}
