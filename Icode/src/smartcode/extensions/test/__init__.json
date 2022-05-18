@@ -1,6 +1,7 @@
 {
-    "name":"hello3",
-    "category":"themes",
+    "name":"hello5",
+    "display_name":"Test Icode Extension",
+    "category":"functions",
     "require":{
         "engines":{
             "icode":"0.0.1"

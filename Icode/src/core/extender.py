@@ -8,6 +8,7 @@ import shutil
 from tinydb import TinyDB, Query
 from .routes import DATA_ROUTES
 from .iconsts import *
+import importlib
 
 class ExtManager:
     def __init__(self, parent) -> None:
@@ -50,6 +51,7 @@ class Plugger:
             "lexer_styles":[],
             "functions":[]
         }
+        self.running_extensions = []
     
     def remove(self, ext):
         if ext in self.extensions["themes"]:
@@ -62,6 +64,7 @@ class Plugger:
             self.extensions["functions"].remove(ext)
 
     def get_files(self) -> list:
+        """Return all extensions init files"""
         return glob.glob(
                 os.path.join(
                     "/",
@@ -72,6 +75,7 @@ class Plugger:
         )
 
     def build_ext(self, file, content:dict) -> None:
+        """Prepare the extension based on init file"""
         try:
             ext = {
                 "name":None,
@@ -95,7 +99,7 @@ class Plugger:
 
                 ext["name"]=content["name"]
                 ext["path"] = str(pathlib.Path(file).parent)
-                ext["remove"] = lambda: self.ext_manager.uninstall(ext)
+                ext["uninstall"] = lambda: self.ext_manager.uninstall(ext)
                 ext["enable"] = lambda: self.ext_manager.enable(ext)
                 ext["disable"] = lambda: self.ext_manager.disable(ext)
                 
@@ -118,6 +122,7 @@ class Plugger:
             logging.error(f"Failed to build extension because:", exc_info=True)
 
     def find_extensions(self) -> None:
+        """Find extensions from init files"""
         for ext in self.get_files():
             try:
                 with open(ext, "r") as fext:
@@ -127,15 +132,32 @@ class Plugger:
                 logging.error(f"Failed to load extension: {ext} because:", exc_info=True)
                 pass
         
-        print(self.extensions["themes"][0]["enabled"])
-        self.extensions["themes"][0]["enable"]()
-        print(self.extensions["themes"][0]["enabled"])
-        self.extensions["themes"][0]["disable"]()
-        print(self.extensions["themes"][0]["enabled"])
+        return self
+        
+        #print(self.extensions["themes"][0]["enabled"])
+        #self.extensions["themes"][0]["enable"]()
+        #print(self.extensions["themes"][0]["enabled"])
+        #self.extensions["themes"][0]["disable"]()
+        #print(self.extensions["themes"][0]["path"])
+        #self.extensions["themes"][0]["uninstall"]()
+        #print(self.extensions["themes"][0]["path"])
+        #print(self.extensions["themes"][0]["enabled"])
     
     def load_extensions(self) -> None:
-        pass
+        """Load the extenions and append the Init class to list of running extensions(running_extensions)"""
+        for ext in self.extensions["functions"]:
+            if ext["enabled"] and ext["name"] != None: # check if extension is enabled
+                
+                package = pathlib.Path(ext["path"]).name
+                module = ext['main'].split(".")[0]
+
+                extension = importlib.import_module(name=f"extensions.{package}.src.{module}")
+                self.running_extensions.append(extension.Init)
+
+                logging.info(f"loaded: {extension}\n from: .src.{module} {package}")
+
 (
     Plugger()
     .find_extensions()
+    .load_extensions()
 )
