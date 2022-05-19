@@ -1,3 +1,8 @@
+class Main():
+    pass
 
-class Init():
-    print("Hello ICODE-2")
+def run(data):
+    print("Hello ICODE-1", data)
+
+def stop():
+    print("aa")

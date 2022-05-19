@@ -1,5 +1,6 @@
 import glob
 import os
+from typing import Union
 import hjson
 import logging
 from .version import ICODE_VERSION
@@ -42,29 +43,44 @@ class ExtManager:
         self.db.remove(self.ext_query.name == ext["name"])
         self.parent.remove(ext)
 
-
 class Plugger:
     def __init__(self) -> None:
         self.ext_manager = ExtManager(self)
         self.extensions = {
             "themes":[],
             "lexer_styles":[],
-            "functions":[]
+            "functions":[],
+            "icons":[]
         }
+        self.loaded_extensions = []
         self.running_extensions = []
     
-    def remove(self, ext):
-        if ext in self.extensions["themes"]:
-            self.extensions["themes"].remove(ext)
+    def remove(self, ext:dict) -> None:
+        """
+        Remove the extension from his list
         
-        elif ext in self.extensions["lexer_styles"]:
-            self.extensions["lexer_styles"].remove(ext)
+        Parameters
+        ----------
+        ext: dict 
+            The extension
         
-        elif ext in self.extensions["functions"]:
-            self.extensions["functions"].remove(ext)
+        Returns
+        -------
+        None
+        """
+        for key in self.extensions.keys(): #Remove the extension by category
+            if ext in self.extensions[key]:
+                self.extensions[key].remove(ext)
 
     def get_files(self) -> list:
-        """Return all extensions init files"""
+        """
+        Return all extensions init files
+        
+        Returns
+        -------
+        list
+            A list of all __init__.json files under extensions path
+        """
         return glob.glob(
                 os.path.join(
                     "/",
@@ -74,18 +90,26 @@ class Plugger:
                 recursive=True
         )
 
-    def build_ext(self, file, content:dict) -> None:
-        """Prepare the extension based on init file"""
+    def build_ext(self, file:str, content:dict) -> object:
+        """
+        Prepare the extension based on init file
+        
+        Parameters
+        ----------
+        file: str
+            The path of the __init__.json file
+
+        content: dict
+            A dict containing the content of the __init__.json file
+            This file contains the instructions to build the extension
+        
+        Returns
+        -------
+        self
+        """
         try:
-            ext = {
-                "name":None,
-                "path":None,
-                "enable":None,
-                "disable":None,
-                "remove":None,
-                "enabled":True,
-                "main":None
-            }
+            ext = dict()
+
             requirements = content["require"]["engines"]["icode"].replace("^", "")
             min_ver = requirements.split(".")
             if (
@@ -95,69 +119,172 @@ class Plugger:
                 ):
                 
                 category = content["category"].lower()
+
+                # Assigning the values to the extension
+
                 ext["main"] = content["main"]
+                ext["category"] = category
 
-                ext["name"]=content["name"]
+                ext["name"]=content["name"] 
                 ext["path"] = str(pathlib.Path(file).parent)
-                ext["uninstall"] = lambda: self.ext_manager.uninstall(ext)
-                ext["enable"] = lambda: self.ext_manager.enable(ext)
-                ext["disable"] = lambda: self.ext_manager.disable(ext)
+                ext["uninstall"] = lambda: self.ext_manager.uninstall(ext) #Uninstall method, call this to remove the extension
+                """
+                Usage:
+                    print(self.extensions[category][idx]["path"])
+                    self.extensions[category][idx]["uninstall"]()
+                    print(self.extensions[category][idx]["path"])
+                """
+                ext["enable"] = lambda: self.ext_manager.enable(ext) #Enable method, call this to enable the extension
+                """        
+                Usage:
+                    print(self.extensions[category][idx]["enabled"])
+                    self.extensions[category][idx]["enable"]()
+                    print(self.extensions[category][idx]["enabled"])
+                """
+                ext["disable"] = lambda: self.ext_manager.disable(ext) #Disable method, call this to disable the extension
+                """        
+                Usage:
+                    print(self.extensions[category][idx]["enabled"])
+                    self.extensions[category][idx]["disable"]()
+                    print(self.extensions[category][idx]["enabled"])
+                """
+                ext["publisher"] = content["publisher"]
                 
-                ext_data = self.ext_manager.extension_exists(ext["name"])
+                ext_data = self.ext_manager.extension_exists(ext["name"]) #checks if the extension is saved in the database and its state
                 if isinstance(ext_data, dict):
-                    ext["enabled"] = ext_data["enabled"]
+                    ext["enabled"] = ext_data["enabled"] # restore extension state
                 else:
-                    self.ext_manager.add(ext)
-                
-                if category.lower() in {"themes"}:
-                    self.extensions["themes"].append(ext)
-                
-                elif category.lower() in {"lexer_styles"}:
-                    self.extensions["lexer_styles"].append(ext)
-
-                elif category.lower() in {"functions"}:
-                    self.extensions["functions"].append(ext)
+                    ext["enabled"] = True #by default extensions are enabled
+                    self.ext_manager.add(ext) #if not, add it to the database
+                 
+                for key in self.extensions.keys(): #Add the extension by category
+                    if category in {key}:
+                        self.extensions[key].append(ext)
 
         except Exception as e:
             logging.error(f"Failed to build extension because:", exc_info=True)
+        
+        return self
 
-    def find_extensions(self) -> None:
-        """Find extensions from init files"""
+    def find_extensions(self) -> object:
+        """
+        Find extensions from init files
+    
+        Returns
+        -------
+        self
+        """
         for ext in self.get_files():
             try:
                 with open(ext, "r") as fext:
                     content = hjson.load(fext)
                     self.build_ext(ext, content)
             except Exception as e:
-                logging.error(f"Failed to load extension: {ext} because:", exc_info=True)
+                logging.error(f"Failed to find extension: {ext} because:", exc_info=True)
                 pass
         
         return self
-        
-        #print(self.extensions["themes"][0]["enabled"])
-        #self.extensions["themes"][0]["enable"]()
-        #print(self.extensions["themes"][0]["enabled"])
-        #self.extensions["themes"][0]["disable"]()
-        #print(self.extensions["themes"][0]["path"])
-        #self.extensions["themes"][0]["uninstall"]()
-        #print(self.extensions["themes"][0]["path"])
-        #print(self.extensions["themes"][0]["enabled"])
     
-    def load_extensions(self) -> None:
-        """Load the extenions and append the Init class to list of running extensions(running_extensions)"""
-        for ext in self.extensions["functions"]:
+    def load_extensions(self) -> object:
+        """
+        Load the extenions and append the Init class to list of running extensions(running_extensions)
+        
+        Returns
+        -------
+        self
+        """
+        
+        all_extensions = []
+        for key in self.extensions.keys():
+            all_extensions.extend(self.extensions[key])
+
+        for ext in all_extensions:
             if ext["enabled"] and ext["name"] != None: # check if extension is enabled
                 
                 package = pathlib.Path(ext["path"]).name
                 module = ext['main'].split(".")[0]
 
                 extension = importlib.import_module(name=f"extensions.{package}.src.{module}")
-                self.running_extensions.append(extension.Init)
+                if hasattr(extension, "run") and hasattr(extension, "stop"):
+                    self.loaded_extensions.append(
+                        (
+                            ext,
+                            extension,
+                            {
+                                "run":extension.run,
+                                "stop":extension.stop,
+                                "reload": lambda: importlib.reload(extension)
+                            }
+                        )
+                    )
 
                 logging.info(f"loaded: {extension}\n from: .src.{module} {package}")
+        
+        return self
+    
+    def init_extensions(self, data:dict) -> object:
+        """
+        Start the extents from a list of tuples containing the extents in index 1,
+        passing the main class and the Qt6 instance
 
+        Parameters
+        ----------
+        data: dict
+            A dict containing the classes
+        
+        Returns
+        -------
+        self
+        """
+        for ext in self.loaded_extensions:
+            self.running_extensions.append(ext[1].run(data))
+        
+        return self
+    
+    def get_plugin_list(self, only_running: bool = False) -> Union[list, dict]:
+        """
+        Parameters
+        ----------
+        only_running: bool
+            If True return only the extensions that is ruuning
+            else return all extensions
+        
+        Returns
+        -------
+        Union[list, dict]
+        """
+        if only_running:
+            return self.running_extensions
+        return self.extensions
+
+    def finish_all(self) -> None:
+        """
+        Stop all running extensions
+        Returns
+        -------
+        None
+        """
+        for ext in self.running_extensions:
+            self.finish_one(ext)
+
+    def finish_one(self, extension: object) -> None:
+        """
+        Stop the given extension
+        
+        Parameters
+        ----------
+        extension: object
+            The extension to be stoped
+
+        Returns
+        -------
+        None
+        """
+        if hasattr(extension, "stop"):
+            extension.stop()
 (
     Plugger()
     .find_extensions()
     .load_extensions()
+    .init_extensions({"app":1, "qapp":2})
 )

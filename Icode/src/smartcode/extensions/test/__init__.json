@@ -7,6 +7,12 @@
             "icode":"0.0.1"
         }
     },
-    "main":"test.py"
+    "main":"test.py",
+    "publisher":{
+        "name":"Igdálias Cabamba",
+        "email":"example@server.com",
+        "repository":"https://github.com/IgdaliasCabamba/icode",
+        "docs":"https://github.com/IgdaliasCabamba/icode/blob/main/docs/main.rst"
+    }
 
 }
