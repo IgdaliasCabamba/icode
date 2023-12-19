@@ -1,4 +1,6 @@
-from extension_api import *
+from extension_api import *  #pyright: ignore
+
+from PyQt5.QtGui import QFontMetrics
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QFrame,
@@ -11,17 +13,17 @@ from PyQt5.QtWidgets import (
 )
 
 from functions import getfn
-from pyqtconsole.console import PythonConsole  #pyright: ignore
-import pyqtconsole.highlighter as hl  #pyright: ignore
+from qtconsole.rich_jupyter_widget import RichJupyterWidget
+from qtconsole.inprocess import QtInProcessKernelManager
 from core.code_api import icode_api
 
 
-class SmartPythonConsole(QFrame):
+class SmartJupyterConsole(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
         self.setObjectName("Frame")
-        self.color_map = icode_api.get_generic_lexer_styles()
+        self.color_map = icode_api.get_editor_styles()
         self.icons = getfn.get_smartcode_icons("console")
         self.init_ui()
 
@@ -30,30 +32,17 @@ class SmartPythonConsole(QFrame):
         self.setLayout(self.layout)
         self.setMinimumHeight(180)
 
-        self.console = PythonConsole(
-            formats={
-                "keyword": hl.format(self.color_map["keyword"][0]),
-                "operator": hl.format(self.color_map["operator"][0]),
-                "brace": hl.format(self.color_map["brace"][0]),
-                "defclass": hl.format(self.color_map["class-function"][0]),
-                "string": hl.format(self.color_map["string"][0]),
-                "string2": hl.format(self.color_map["string2"][0]),
-                "comment": hl.format(self.color_map["comment"][0]),
-                "self": hl.format(self.color_map["self"][0]),
-                "numbers": hl.format(self.color_map["numbers"][0]),
-                "inprompt": hl.format(self.color_map["inprompt"][0]),
-                "outprompt": hl.format(self.color_map["outprompt"][0]),
-            }
-        )
-        self.console.eval_in_thread()
-        self.console.setObjectName("Frame")
-        self.console.setProperty("style-border-radius", "mid")
-        self.console.setProperty("style-bg", "mid")
-        self.console.setProperty("style-pad", "small")
+        self.console = RichJupyterWidget()
 
-        self.console.edit.setObjectName("TextArea")
-        self.console.edit.setProperty("style-bg", "mid")
-        self.console.edit.setProperty("style-pad", "small")
+        self.console.kernel_manager = QtInProcessKernelManager()
+        self.console.kernel_manager.start_kernel(show_banner=False)
+        self.console.kernel_manager.kernel.gui = 'qt'
+        self.console.kernel_client = self.console._kernel_manager.client()
+        self.console.kernel_client.start_channels()
+
+        
+        # TODO: put this styles on qss file
+        self.console.setStyleSheet(f"background:{self.color_map['paper']}")
 
         self.gde = QGraphicsDropShadowEffect(self)
         self.gde.setBlurRadius(15)
@@ -108,7 +97,7 @@ class SmartPythonConsole(QFrame):
                 self.console.insert_input_text(widget.editor.text())
 
 
-class PyConsole(QFrame):
+class JupyterConsole(QFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -142,5 +131,5 @@ class PyConsole(QFrame):
         self.add_cell()
 
     def add_cell(self):
-        console = SmartPythonConsole(self)
+        console = SmartJupyterConsole(self)
         self.vbox.addWidget(console)

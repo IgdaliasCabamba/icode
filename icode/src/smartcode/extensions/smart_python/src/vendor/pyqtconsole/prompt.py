@@ -25,12 +25,11 @@ class PromptArea(QWidget):
         first = True
         while block.isValid():
             count += 1
-            block_top = (
-                edit.blockBoundingGeometry(block).translated(edit.contentOffset()).top()
-            )
+            block_top = edit.blockBoundingGeometry(block).translated(
+                edit.contentOffset()).top()
             if not block.isVisible() or block_top > event.rect().bottom():
                 break
-            rect = QRect(0, block_top, self.width(), height)
+            rect = QRect(0, int(block_top), self.width(), height)
             self.draw_block(painter, rect, block, first)
             first = False
             block = block.next()
@@ -59,20 +58,18 @@ class PromptArea(QWidget):
         painter.setFont(self.edit.font())
 
         for index, length, format in self.highlighter.highlight(text):
-            formats[index : index + length] = [format] * length
+            formats[index:index+length] = [format] * length
 
         for idx, (char, format) in enumerate(zip(text, formats)):
             rpos = len(text) - idx - 1
             pen.setColor(format.foreground().color())
             painter.setPen(pen)
-            painter.drawText(rect, Qt.AlignRight, text[idx] + " " * rpos)
+            painter.drawText(rect, Qt.AlignRight, text[idx] + ' ' * rpos)
 
 
 def calc_text_width(widget, text):
     """Estimate the width that the given text would take within the widget."""
-    return (
-        widget.fontMetrics().width(text)
-        + widget.fontMetrics().width("M")
-        + widget.contentsMargins().left()
-        + widget.contentsMargins().right()
-    )
+    return (widget.fontMetrics().width(text) +
+            widget.fontMetrics().width('M') +
+            widget.contentsMargins().left() +
+            widget.contentsMargins().right())

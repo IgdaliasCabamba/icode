@@ -6,10 +6,12 @@ faulthandler.enable()
 
 import os
 import importlib
+import distro
 from bin import utils
 
 IS_RUNNING = True
 IS_FINISHED = False
+WAYLAND_DISTROS = ["fedora_linux"]
 
 src_path = "src"
 root_path = os.getcwd()
@@ -20,6 +22,12 @@ if getattr(sys, "frozen", False):
 else:
     root_path = os.path.dirname(os.path.realpath(__file__))
     os.chdir(root_path + os.sep + src_path)
+
+distro_name = distro.name().lower().replace(" ", "_")
+
+if distro_name in WAYLAND_DISTROS:
+    ...
+    #os.environ["QT_QPA_PLATFORM"]="wayland"
 
 
 def finish():

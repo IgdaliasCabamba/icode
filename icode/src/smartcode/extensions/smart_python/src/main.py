@@ -7,19 +7,22 @@ export(path="smart_python.src.vendor")
 export(path="smart_python.src.resourcelibs")
 export(path="smart_python.src.resourcelibs.jedi")
 
-from smartpy_analyze import *
-from smartpy_api import *
-from smartpy_consoles import *
-from smartpy_core import *
-from smartpy_debug import *
-from smartpy_doctor import *
-from smartpy_envs import *
-from smartpy_navigator import *
-from smartpy_refactor import *
-from smartpy_server import *
-from smartpy_tree import *
-from smartpy_utils import *
-from smartpy_warning import *
+# extension loc
+
+from .resourcelibs.smartpy_analyze import *
+from .resourcelibs.smartpy_api import *
+from .resourcelibs.smartpy_consoles import *
+from .resourcelibs.smartpy_core import *
+from .resourcelibs.smartpy_debug import *
+from .resourcelibs.smartpy_doctor import *
+from .resourcelibs.smartpy_envs import *
+from .resourcelibs.smartpy_navigator import *
+from .resourcelibs.smartpy_refactor import *
+from .resourcelibs.smartpy_server import *
+from .resourcelibs.smartpy_tree import *
+from .resourcelibs.smartpy_utils import *
+from .resourcelibs.smartpy_warning import *
+from .resourcelibs.smartpy_jupyter import *
 
 pylang_server_data = get_pylang_server()
 
@@ -90,6 +93,15 @@ class Init(ModelApp):
 
         self.ui.side_bottom.insert_widget(
             1, self.py_console, "PYCONSOLE", [self.btn_add_pycell]
+        )
+
+        self.jupyter_console = JupyterConsole(self.ui.side_bottom)
+        self.btn_add_jupyter_cell = QPushButton()
+        self.btn_add_jupyter_cell.setIcon(corner_icons.get_icon("add"))
+        self.btn_add_jupyter_cell.clicked.connect(lambda: self.jupyter_console.add_cell())
+
+        self.ui.side_bottom.insert_widget(
+            2, self.jupyter_console, "JUPYTER", [self.btn_add_jupyter_cell]
         )
 
         # Editor Widgets

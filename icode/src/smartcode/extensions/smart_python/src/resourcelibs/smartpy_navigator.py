@@ -1,14 +1,8 @@
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QSize
 from PyQt5.QtWidgets import (
     QFrame,
-    QGridLayout,
-    QHBoxLayout,
     QListWidget,
-    QPushButton,
-    QSizePolicy,
     QVBoxLayout,
-    QGraphicsDropShadowEffect,
-    QLabel,
 )
 from PyQt5.QtGui import QColor
 
