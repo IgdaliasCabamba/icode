@@ -18,7 +18,6 @@ class Core(object):
     on_new_editor = pyqtSignal(object)
     on_window_title_changed = pyqtSignal(str)
     on_commit_app = pyqtSignal(int)
-    on_ide_mode = pyqtSignal(int)
     on_current_editor_changed = pyqtSignal(object)
 
     def __init__(self) -> None:
@@ -68,7 +67,6 @@ class Core(object):
         self.status_bar.line_col.clicked.connect(self.show_goto_line)
         self.status_bar.indentation.clicked.connect(self.show_space_mode)
         self.status_bar.end_line_seq.clicked.connect(self.show_eol_mode)
-        self.status_bar.april.clicked.connect(self.call_april)
         self.status_bar.notify.clicked.connect(self.show_notifications)
         self.status_bar.eol_visiblity.clicked.connect(self.toggle_eol_visiblity)
 
@@ -109,8 +107,6 @@ class Core(object):
         self.on_commit_app.connect(self.commit_app)
 
         self.file_explorer.on_path_changed.connect(self.explorer_path_changed)
-
-        self.april.on_mode_changed.connect(self.change_ide_mode)
 
         self.configure_notebook(self.ui.notebook)
 
@@ -280,7 +276,6 @@ class Server(QObject, Core):
     
     def init_controllers(self):
         self.ui.set_controller(self)
-        self.april = AprilController(self, self.ui.april)
         self.assistant = AssistantController(self, self.ui.side_left.april)
         self.notes = NotesController(self, self.ui.side_right.notes)
         self.file_explorer = FileExplorerController(self, self.ui.side_left.explorer)

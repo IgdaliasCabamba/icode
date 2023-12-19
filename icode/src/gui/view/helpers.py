@@ -124,14 +124,9 @@ class StatusBar(QStatusBar):
         self.source_control = QPushButton(self)
         self.source_control.setIcon(self.icons.get_icon("source_control"))
 
-        self.april = QPushButton(self)
-        self.april.setIcon(self.icons.get_icon("april"))
-
         self.add_status_widget(self.source_control)
         self.add_status_widget(self.errors)
         self.add_status_widget(self.warnings)
-
-        self.add_widget(self.april)
 
         self.add_editor_widget(self.line_col)
         self.add_editor_widget(self.indentation_box)

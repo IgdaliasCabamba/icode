@@ -186,13 +186,6 @@ class App(Server):
                     for editor in widget.get_editors():
                         editor.set_minimap_visiblity(visiblity)
 
-    def change_ide_mode(self, mode: int) -> None:
-        """Emit a signal to change the performance of icode"""
-        self.on_ide_mode.emit(mode)
-
-    def call_april(self):
-        """Show/Hide April"""
-        self.ui.april.show_hide()
 
     def show_notifications(self):
         """Show/Hide Notifications Panel"""

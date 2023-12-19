@@ -15,7 +15,6 @@ from .code_notebook import NoteBookEditor
 from .splitter import ISplitter
 from .index import Index, Welcome
 from .assistant_ui import AssistantUi
-from .april_ui import AprilUi
 from .notificator import Notificator
 from .settings_ui import ConfigUi
 from smartlibs.icodeframe import iwindow
@@ -140,7 +139,6 @@ class MainWindow(QMainWindow):
 
     def _add_extra_widgets(self) -> None:
         self.editor_widgets = EditorWidgets(self)
-        self.april = AprilUi(self)
         self.notificator = Notificator(self)
 
     def center(self) -> None:

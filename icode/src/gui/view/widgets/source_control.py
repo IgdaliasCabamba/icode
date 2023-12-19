@@ -38,7 +38,7 @@ def get_folder_name_from_clone_url(url: str) -> Union[str, tuple, None]:
 
     if len(string) >= 0:
 
-        name = re.split("\.", string)
+        name = re.split(r"\.", string)
         if name:
             return name[0]
 
