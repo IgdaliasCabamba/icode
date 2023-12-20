@@ -118,7 +118,8 @@ def ParseCodeToTree(code):
         # Now try to parse using a Python 2 grammar; If this fails, then
         # there's something else wrong with the code.
         try:
-            parser_driver = driver.Driver(_GRAMMAR_FOR_PY2, convert=pytree.convert)
+            parser_driver = driver.Driver(_GRAMMAR_FOR_PY2,
+                                          convert=pytree.convert)
             tree = parser_driver.parse_string(code, debug=False)
         except parse.ParseError:
             # Raise a syntax error if the code is invalid python syntax.
@@ -195,14 +196,13 @@ def _InsertNodeAt(new_node, target, after=False):
 
     # Protect against attempts to insert nodes which already belong to some tree.
     if new_node.parent is not None:
-        raise RuntimeError(
-            "inserting node which already has a parent", (new_node, new_node.parent)
-        )
+        raise RuntimeError("inserting node which already has a parent",
+                           (new_node, new_node.parent))
 
     # The code here is based on pytree.Base.next_sibling
     parent_of_target = target.parent
     if parent_of_target is None:
-        raise RuntimeError("expected target node to have a parent", (target,))
+        raise RuntimeError("expected target node to have a parent", (target, ))
 
     for i, child in enumerate(parent_of_target.children):
         if child is target:
@@ -210,7 +210,8 @@ def _InsertNodeAt(new_node, target, after=False):
             parent_of_target.insert_child(insertion_index, new_node)
             return
 
-    raise RuntimeError("unable to find insertion point for target node", (target,))
+    raise RuntimeError("unable to find insertion point for target node",
+                       (target, ))
 
 
 # The following constant and functions implement a simple custom annotation
@@ -316,10 +317,8 @@ def DumpNodeToString(node):
       The string representation.
     """
     if isinstance(node, pytree.Leaf):
-        fmt = (
-            "{name}({value}) [lineno={lineno}, column={column}, "
-            "prefix={prefix}, penalty={penalty}]"
-        )
+        fmt = ("{name}({value}) [lineno={lineno}, column={column}, "
+               "prefix={prefix}, penalty={penalty}]")
         return fmt.format(
             name=NodeName(node),
             value=_PytreeNodeRepr(node),
@@ -346,8 +345,10 @@ def _PytreeNodeRepr(node):
             [_PytreeNodeRepr(c) for c in node.children],
         )
     if isinstance(node, pytree.Leaf):
-        return "%s(%s, %r)" % (node.__class__.__name__, NodeName(node), node.value)
+        return "%s(%s, %r)" % (node.__class__.__name__, NodeName(node),
+                               node.value)
 
 
 def IsCommentStatement(node):
-    return NodeName(node) == "simple_stmt" and node.children[0].type == token.COMMENT
+    return NodeName(
+        node) == "simple_stmt" and node.children[0].type == token.COMMENT

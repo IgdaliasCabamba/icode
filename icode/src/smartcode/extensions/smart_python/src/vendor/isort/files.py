@@ -5,17 +5,15 @@ from typing import Iterable, Iterator, List, Set
 from isort.settings import Config
 
 
-def find(
-    paths: Iterable[str], config: Config, skipped: List[str], broken: List[str]
-) -> Iterator[str]:
+def find(paths: Iterable[str], config: Config, skipped: List[str],
+         broken: List[str]) -> Iterator[str]:
     """Fines and provides an iterator for all Python source files defined in paths."""
     visited_dirs: Set[Path] = set()
 
     for path in paths:
         if os.path.isdir(path):
             for dirpath, dirnames, filenames in os.walk(
-                path, topdown=True, followlinks=config.follow_links
-            ):
+                    path, topdown=True, followlinks=config.follow_links):
                 base_path = Path(dirpath)
                 for dirname in list(dirnames):
                     full_path = base_path / dirname

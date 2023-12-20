@@ -28,31 +28,25 @@ class _DoctestMixin(object):
         for line in textwrap.dedent(input).splitlines():
             if line.strip() == "":
                 pass
-            elif (
-                line.startswith(" ")
-                or line.startswith("except:")
-                or line.startswith("except ")
-                or line.startswith("finally:")
-                or line.startswith("else:")
-                or line.startswith("elif ")
-                or (lines and lines[-1].startswith((">>> @", "... @")))
-            ):
+            elif (line.startswith(" ") or line.startswith("except:")
+                  or line.startswith("except ") or line.startswith("finally:")
+                  or line.startswith("else:") or line.startswith("elif ")
+                  or (lines and lines[-1].startswith((">>> @", "... @")))):
                 line = "... %s" % line
             else:
                 line = ">>> %s" % line
             lines.append(line)
-        doctestificator = textwrap.dedent(
-            '''\
+        doctestificator = textwrap.dedent('''\
             def doctest_something():
                 """
                    %s
                 """
-            '''
-        )
+            ''')
         return doctestificator % "\n       ".join(lines)
 
     def flakes(self, input, *args, **kw):
-        return super(_DoctestMixin, self).flakes(self.doctestify(input), *args, **kw)
+        return super(_DoctestMixin, self).flakes(self.doctestify(input), *args,
+                                                 **kw)
 
 
 class Test(TestCase):
@@ -61,8 +55,7 @@ class Test(TestCase):
 
     def test_scope_class(self):
         """Check that a doctest is given a DoctestScope."""
-        checker = self.flakes(
-            """
+        checker = self.flakes("""
         m = None
 
         def doctest_stuff():
@@ -71,12 +64,15 @@ class Test(TestCase):
             '''
             f = m
             return f
-        """
-        )
+        """)
 
         scopes = checker.deadScopes
-        module_scopes = [scope for scope in scopes if scope.__class__ is ModuleScope]
-        doctest_scopes = [scope for scope in scopes if scope.__class__ is DoctestScope]
+        module_scopes = [
+            scope for scope in scopes if scope.__class__ is ModuleScope
+        ]
+        doctest_scopes = [
+            scope for scope in scopes if scope.__class__ is DoctestScope
+        ]
         function_scopes = [
             scope for scope in scopes if scope.__class__ is FunctionScope
         ]
@@ -102,8 +98,7 @@ class Test(TestCase):
 
     def test_nested_doctest_ignored(self):
         """Check that nested doctests are ignored."""
-        checker = self.flakes(
-            """
+        checker = self.flakes("""
         m = None
 
         def doctest_stuff():
@@ -119,12 +114,15 @@ class Test(TestCase):
             '''
             f = m
             return f
-        """
-        )
+        """)
 
         scopes = checker.deadScopes
-        module_scopes = [scope for scope in scopes if scope.__class__ is ModuleScope]
-        doctest_scopes = [scope for scope in scopes if scope.__class__ is DoctestScope]
+        module_scopes = [
+            scope for scope in scopes if scope.__class__ is ModuleScope
+        ]
+        doctest_scopes = [
+            scope for scope in scopes if scope.__class__ is DoctestScope
+        ]
         function_scopes = [
             scope for scope in scopes if scope.__class__ is FunctionScope
         ]
@@ -146,8 +144,7 @@ class Test(TestCase):
 
     def test_global_module_scope_pollution(self):
         """Check that global in doctest does not pollute module scope."""
-        checker = self.flakes(
-            """
+        checker = self.flakes("""
         def doctest_stuff():
             '''
                 >>> def function_in_doctest():
@@ -161,12 +158,15 @@ class Test(TestCase):
             f = 10
             return f
 
-        """
-        )
+        """)
 
         scopes = checker.deadScopes
-        module_scopes = [scope for scope in scopes if scope.__class__ is ModuleScope]
-        doctest_scopes = [scope for scope in scopes if scope.__class__ is DoctestScope]
+        module_scopes = [
+            scope for scope in scopes if scope.__class__ is ModuleScope
+        ]
+        doctest_scopes = [
+            scope for scope in scopes if scope.__class__ is DoctestScope
+        ]
         function_scopes = [
             scope for scope in scopes if scope.__class__ is FunctionScope
         ]
@@ -227,8 +227,7 @@ class Test(TestCase):
         # (https://bugs.python.org/issue1650090). If nested functions were
         # processed, this use of m should cause UndefinedName, and the
         # name inner_function should probably exist in the doctest scope.
-        self.flakes(
-            """
+        self.flakes("""
         def doctest_stuff():
             def inner_function():
                 '''
@@ -240,8 +239,7 @@ class Test(TestCase):
                 return 1
             m = inner_function()
             return m
-        """
-        )
+        """)
 
     def test_inaccessible_scope_class(self):
         """Doctest may not access class scope."""
@@ -259,16 +257,14 @@ class Test(TestCase):
         )
 
     def test_importBeforeDoctest(self):
-        self.flakes(
-            """
+        self.flakes("""
         import foo
 
         def doctest_stuff():
             '''
                 >>> foo
             '''
-        """
-        )
+        """)
 
     @skip("todo")
     def test_importBeforeAndInDoctest(self):
@@ -288,8 +284,7 @@ class Test(TestCase):
         )
 
     def test_importInDoctestAndAfter(self):
-        self.flakes(
-            '''
+        self.flakes('''
         def doctest_stuff():
             """
                 >>> import foo
@@ -298,8 +293,7 @@ class Test(TestCase):
 
         import foo
         foo()
-        '''
-        )
+        ''')
 
     def test_offsetInDoctests(self):
         exc = self.flakes(
@@ -431,18 +425,15 @@ class Test(TestCase):
         self.assertEqual(exc2.col, 12)
 
     def test_doctestCanReferToFunction(self):
-        self.flakes(
-            """
+        self.flakes("""
         def foo():
             '''
                 >>> foo
             '''
-        """
-        )
+        """)
 
     def test_doctestCanReferToClass(self):
-        self.flakes(
-            """
+        self.flakes("""
         class Foo():
             '''
                 >>> Foo
@@ -451,8 +442,7 @@ class Test(TestCase):
                 '''
                     >>> Foo
                 '''
-        """
-        )
+        """)
 
     def test_noOffsetSyntaxErrorInDoctest(self):
         exceptions = self.flakes(
@@ -475,8 +465,7 @@ class Test(TestCase):
         self.assertEqual(exc.lineno, 6)
 
     def test_singleUnderscoreInDoctest(self):
-        self.flakes(
-            '''
+        self.flakes('''
         def func():
             """A docstring
 
@@ -486,8 +475,7 @@ class Test(TestCase):
             1
             """
             return 1
-        '''
-        )
+        ''')
 
     def test_globalUnderscoreInDoctest(self):
         self.flakes(

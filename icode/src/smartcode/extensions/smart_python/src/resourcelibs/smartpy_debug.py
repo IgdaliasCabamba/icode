@@ -29,6 +29,7 @@ from gui.view.igui import IListWidgetItem, IStandardItem
 
 
 class OutputErrors(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -74,6 +75,7 @@ class OutputErrors(QFrame):
 
 
 class OutputTree(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -126,6 +128,7 @@ class OutputTree(QFrame):
 
 
 class ConsoleOutput(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -153,6 +156,7 @@ class ConsoleOutput(QFrame):
 
 
 class Debug(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.env = None
@@ -161,7 +165,8 @@ class Debug(QFrame):
         self.parent = parent
         self.setObjectName("debug")
         self.process_debuger = QProcess(self)
-        self.process_debuger.readyReadStandardOutput.connect(self.handle_stdout)
+        self.process_debuger.readyReadStandardOutput.connect(
+            self.handle_stdout)
         self.process_debuger.readyReadStandardError.connect(self.handle_stderr)
         self.process_debuger.stateChanged.connect(self.handle_state)
         self.process_debuger.finished.connect(self.process_finished)
@@ -271,7 +276,8 @@ class Debug(QFrame):
         if state == QProcess.NotRunning:
             self.process_debuger.start(bin, args)
         else:
-            self.label_status.setText("<h5 style='color:yellow'>ALREADY RUNNING</h5>")
+            self.label_status.setText(
+                "<h5 style='color:yellow'>ALREADY RUNNING</h5>")
 
     def handle_stderr(self):
         data = self.process_debuger.readAllStandardError()
@@ -296,7 +302,8 @@ class Debug(QFrame):
         self.label_status.setText(state_name)
 
     def process_finished(self):
-        self.label_status.setText("<h5 style='color:green'>Process finished</h5>")
+        self.label_status.setText(
+            "<h5 style='color:green'>Process finished</h5>")
 
     def next_frame(self):
         command = "n" + "\n"

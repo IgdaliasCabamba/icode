@@ -17,6 +17,7 @@ from core.code_api import icode_api
 
 
 class SmartPythonConsole(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -43,8 +44,7 @@ class SmartPythonConsole(QFrame):
                 "numbers": hl.format(self.color_map["numbers"][0]),
                 "inprompt": hl.format(self.color_map["inprompt"][0]),
                 "outprompt": hl.format(self.color_map["outprompt"][0]),
-            }
-        )
+            })
         self.console.eval_in_thread()
         self.console.setObjectName("Frame")
         self.console.setProperty("style-border-radius", "mid")
@@ -109,6 +109,7 @@ class SmartPythonConsole(QFrame):
 
 
 class PyConsole(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent

@@ -24,14 +24,16 @@ class CoEditor(QObject):
 
     def run(self):
         if self.editor.parent.is_text:
-            self.editor.on_highlight_sel_request.connect(self.highlight_selection)
-            self.editor.on_highlight_match_request.connect(self.highlight_match)
+            self.editor.on_highlight_sel_request.connect(
+                self.highlight_selection)
+            self.editor.on_highlight_match_request.connect(
+                self.highlight_match)
             self.editor.on_word_added.connect(
-                lambda: self.timer.singleShot(500, self.set_lexer_from_code)
-            )
+                lambda: self.timer.singleShot(500, self.set_lexer_from_code))
             self.editor.on_close_char.connect(self.close_char)
             self.editor.on_intellisense.connect(self.intellisense_editor)
-            self.editor.on_clear_annotation.connect(self.prepare_annotations_garbage)
+            self.editor.on_clear_annotation.connect(
+                self.prepare_annotations_garbage)
 
     def close_char(self, char):
         row, col = self.editor.getCursorPosition()
@@ -73,8 +75,7 @@ class CoEditor(QObject):
                         from_col, to_col = span
                         if row_from != line or col_from != from_col:
                             self.on_highlight_selection.emit(
-                                line, from_col, line, to_col, 2, True
-                            )
+                                line, from_col, line, to_col, 2, True)
 
             except Exception as e:
                 print("highlight_selection Exception: ", e)
@@ -106,25 +107,22 @@ class CoEditor(QObject):
                         for span in match:
                             from_col, to_col = span
                             self.on_highlight_text.emit(
-                                line, from_col, line, to_col, 3, False
-                            )
+                                line, from_col, line, to_col, 3, False)
 
                 except Exception as e:
                     print("highlight_match Exception: ", e)
 
     def intellisense_editor(self, editor, string):
         line, index = editor.getCursorPosition()
-        editor.on_complete.emit(
-            {
-                "code": editor.text(),
-                "file": editor.file_path,
-                "cursor-pos": editor.getCursorPosition(),
-                "lexer-api": editor.lexer_api,
-                "lexer-name": editor.lexer_name,
-                "event-text": string,
-                "word": editor.wordAtLineIndex(line, index),
-            }
-        )
+        editor.on_complete.emit({
+            "code": editor.text(),
+            "file": editor.file_path,
+            "cursor-pos": editor.getCursorPosition(),
+            "lexer-api": editor.lexer_api,
+            "lexer-name": editor.lexer_name,
+            "event-text": string,
+            "word": editor.wordAtLineIndex(line, index),
+        })
 
     def prepare_annotations_garbage(self, annotations_data, lines, type):
         notes_map = []
@@ -138,5 +136,8 @@ class CoEditor(QObject):
         for note in annotations_data:
             for item in notes_map:
                 if item["note"] == note.content:
-                    notes_to_remove.append({"note": note, "line": item["line"]})
+                    notes_to_remove.append({
+                        "note": note,
+                        "line": item["line"]
+                    })
         self.on_remove_annotations.emit(type, notes_to_remove)

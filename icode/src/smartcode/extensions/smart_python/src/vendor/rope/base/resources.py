@@ -51,7 +51,8 @@ class Resource(object):
 
     def remove(self):
         """Remove resource from the project"""
-        self._perform_change(change.RemoveResource(self), "Removing <%s>" % self.path)
+        self._perform_change(change.RemoveResource(self),
+                             "Removing <%s>" % self.path)
 
     def is_folder(self):
         """Return true if the resource is a folder"""
@@ -133,9 +134,8 @@ class File(Resource):
                 return
         except IOError:
             pass
-        self._perform_change(
-            change.ChangeContents(self, contents), "Writing file <%s>" % self.path
-        )
+        self._perform_change(change.ChangeContents(self, contents),
+                             "Writing file <%s>" % self.path)
 
     def is_folder(self):
         return False
@@ -201,11 +201,15 @@ class Folder(Resource):
 
     def get_files(self):
         return [
-            resource for resource in self.get_children() if not resource.is_folder()
+            resource for resource in self.get_children()
+            if not resource.is_folder()
         ]
 
     def get_folders(self):
-        return [resource for resource in self.get_children() if resource.is_folder()]
+        return [
+            resource for resource in self.get_children()
+            if resource.is_folder()
+        ]
 
     def contains(self, resource):
         if self == resource:
@@ -217,6 +221,7 @@ class Folder(Resource):
 
 
 class _ResourceMatcher(object):
+
     def __init__(self):
         self.patterns = []
         self._compiled_patterns = []
@@ -232,12 +237,8 @@ class _ResourceMatcher(object):
         self.patterns = patterns
 
     def _add_pattern(self, pattern):
-        re_pattern = (
-            pattern.replace(".", "\\.")
-            .replace("*", "[^/]*")
-            .replace("?", "[^/]")
-            .replace("//", "/(.*/)?")
-        )
+        re_pattern = (pattern.replace(".", "\\.").replace(
+            "*", "[^/]*").replace("?", "[^/]").replace("//", "/(.*/)?"))
         re_pattern = "^(.*/)?" + re_pattern + "(/.*)?$"
         self.compiled_patterns.append(re.compile(re_pattern))
 
@@ -245,7 +246,8 @@ class _ResourceMatcher(object):
         for pattern in self.compiled_patterns:
             if pattern.match(resource.path):
                 return True
-        path = os.path.join(resource.project.address, *resource.path.split("/"))
+        path = os.path.join(resource.project.address,
+                            *resource.path.split("/"))
         if os.path.islink(path):
             return True
         return False

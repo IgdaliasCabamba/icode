@@ -21,23 +21,21 @@ try:
 except ImportError:
     jedi = None
 
-
-try:                        # PyQt >= 5.11
+try:  # PyQt >= 5.11
     QueuedConnection = Qt.ConnectionType.QueuedConnection
-except AttributeError:      # PyQt < 5.11
+except AttributeError:  # PyQt < 5.11
     QueuedConnection = Qt.QueuedConnection
 
 
 class BaseConsole(QFrame):
-
     """Base class for implementing a GUI console."""
 
     def __init__(self, parent=None, formats=None):
         super(BaseConsole, self).__init__(parent)
 
         self.edit = edit = InputArea()
-        self.pbar = pbar = PromptArea(
-            edit, self._get_prompt_text, PromptHighlighter(formats=formats))
+        self.pbar = pbar = PromptArea(edit, self._get_prompt_text,
+                                      PromptHighlighter(formats=formats))
 
         layout = QHBoxLayout()
         layout.addWidget(pbar)
@@ -76,15 +74,14 @@ class BaseConsole(QFrame):
         self.setFont(font)
 
         geometry = edit.geometry()
-        geometry.setWidth(font_width*80+20)
-        geometry.setHeight(font_width*40)
+        geometry.setWidth(font_width * 80 + 20)
+        geometry.setHeight(font_width * 40)
         edit.setGeometry(geometry)
-        edit.resize(font_width*80+20, font_width*40)
+        edit.resize(font_width * 80 + 20, font_width * 40)
 
         edit.setReadOnly(True)
-        edit.setTextInteractionFlags(
-            Qt.TextSelectableByMouse |
-            Qt.TextSelectableByKeyboard)
+        edit.setTextInteractionFlags(Qt.TextSelectableByMouse
+                                     | Qt.TextSelectableByKeyboard)
         self.setFocusPolicy(Qt.NoFocus)
         pbar.setFocusPolicy(Qt.NoFocus)
         edit.setFocusPolicy(Qt.StrongFocus)
@@ -134,9 +131,8 @@ class BaseConsole(QFrame):
     @Slot(bool, object)
     def _finish_command(self, executed, result):
         if result is not None:
-            self._insert_output_text(
-                repr(result),
-                prompt=self._ps_out % self._current_line)
+            self._insert_output_text(repr(result),
+                                     prompt=self._ps_out % self._current_line)
             self._insert_output_text('\n')
 
         if executed and self._last_input:
@@ -153,21 +149,21 @@ class BaseConsole(QFrame):
 
     def _get_key_event_handlers(self):
         return {
-            Qt.Key_Escape:      self._handle_escape_key,
-            Qt.Key_Return:      self._handle_enter_key,
-            Qt.Key_Enter:       self._handle_enter_key,
-            Qt.Key_Backspace:   self._handle_backspace_key,
-            Qt.Key_Delete:      self._handle_delete_key,
-            Qt.Key_Home:        self._handle_home_key,
-            Qt.Key_Tab:         self._handle_tab_key,
-            Qt.Key_Backtab:     self._handle_backtab_key,
-            Qt.Key_Up:          self._handle_up_key,
-            Qt.Key_Down:        self._handle_down_key,
-            Qt.Key_Left:        self._handle_left_key,
-            Qt.Key_D:           self._handle_d_key,
-            Qt.Key_C:           self._handle_c_key,
-            Qt.Key_V:           self._handle_v_key,
-            Qt.Key_U:           self._handle_u_key,
+            Qt.Key_Escape: self._handle_escape_key,
+            Qt.Key_Return: self._handle_enter_key,
+            Qt.Key_Enter: self._handle_enter_key,
+            Qt.Key_Backspace: self._handle_backspace_key,
+            Qt.Key_Delete: self._handle_delete_key,
+            Qt.Key_Home: self._handle_home_key,
+            Qt.Key_Tab: self._handle_tab_key,
+            Qt.Key_Backtab: self._handle_backtab_key,
+            Qt.Key_Up: self._handle_up_key,
+            Qt.Key_Down: self._handle_down_key,
+            Qt.Key_Left: self._handle_left_key,
+            Qt.Key_D: self._handle_d_key,
+            Qt.Key_C: self._handle_c_key,
+            Qt.Key_V: self._handle_v_key,
+            Qt.Key_U: self._handle_u_key,
         }
 
     def insertFromMimeData(self, mime_data):
@@ -232,17 +228,15 @@ class BaseConsole(QFrame):
             tab = self._tab_chars
             buf = self._get_line_until_cursor()
             if event.modifiers() == Qt.ControlModifier:
-                cursor.movePosition(
-                    QTextCursor.PreviousWord,
-                    QTextCursor.KeepAnchor, 1)
+                cursor.movePosition(QTextCursor.PreviousWord,
+                                    QTextCursor.KeepAnchor, 1)
                 self._keep_cursor_in_buffer()
             else:
                 # delete spaces to previous tabstop boundary:
                 tabstop = len(buf) % len(tab) == 0
                 num = len(tab) if tabstop and buf.endswith(tab) else 1
-                cursor.movePosition(
-                    QTextCursor.PreviousCharacter,
-                    QTextCursor.KeepAnchor, num)
+                cursor.movePosition(QTextCursor.PreviousCharacter,
+                                    QTextCursor.KeepAnchor, num)
         self._remove_selected_input(cursor)
         return True
 
@@ -255,17 +249,15 @@ class BaseConsole(QFrame):
             left = self._get_line_until_cursor()
             right = self._get_line_after_cursor()
             if event.modifiers() == Qt.ControlModifier:
-                cursor.movePosition(
-                    QTextCursor.NextWord,
-                    QTextCursor.KeepAnchor, 1)
+                cursor.movePosition(QTextCursor.NextWord,
+                                    QTextCursor.KeepAnchor, 1)
                 self._keep_cursor_in_buffer()
             else:
                 # delete spaces to next tabstop boundary:
                 tabstop = len(left) % len(tab) == 0
                 num = len(tab) if tabstop and right.startswith(tab) else 1
-                cursor.movePosition(
-                    QTextCursor.NextCharacter,
-                    QTextCursor.KeepAnchor, num)
+                cursor.movePosition(QTextCursor.NextCharacter,
+                                    QTextCursor.KeepAnchor, num)
         self._remove_selected_input(cursor)
         return True
 
@@ -294,7 +286,7 @@ class BaseConsole(QFrame):
         line0 = buf[:pos0].count('\n')
         line1 = buf[:pos1].count('\n')
         lines = buf.split('\n')
-        for i in range(line0, line1+1):
+        for i in range(line0, line1 + 1):
             # Although it at first seemed appealing to me to indent to the
             # next tab boundary, this leads to losing relative sub-tab
             # indentations and is therefore not desirable. We should therefore
@@ -400,8 +392,11 @@ class BaseConsole(QFrame):
         self._setTextCursor(cursor)
         self.ensureCursorVisible()
 
-    def _insert_output_text(self, text,
-                            lf=False, keep_buffer=False, prompt=''):
+    def _insert_output_text(self,
+                            text,
+                            lf=False,
+                            keep_buffer=False,
+                            prompt=''):
         if keep_buffer:
             self._copy_buffer = self.input_buffer()
 
@@ -522,7 +517,7 @@ class BaseConsole(QFrame):
 
         if num_lines > 0:
             block = cursor.blockNumber() + 1
-            del self._prompt_doc[block:block+num_lines]
+            del self._prompt_doc[block:block + num_lines]
 
     def closeEvent(self, event):
         """Exit interpreter when we're closing."""
@@ -563,15 +558,15 @@ class BaseConsole(QFrame):
 
 
 class PythonConsole(BaseConsole):
-
     """Interactive python GUI console."""
 
     def __init__(self, parent=None, locals=None, formats=None):
         super(PythonConsole, self).__init__(parent, formats=formats)
-        self.highlighter = PythonHighlighter(
-            self.edit.document(), formats=formats)
-        self.interpreter = PythonInterpreter(
-            self.stdin, self.stdout, locals=locals)
+        self.highlighter = PythonHighlighter(self.edit.document(),
+                                             formats=formats)
+        self.interpreter = PythonInterpreter(self.stdin,
+                                             self.stdout,
+                                             locals=locals)
         self.interpreter.done_signal.connect(self._finish_command)
         self.interpreter.exit_signal.connect(self.exit)
         self.set_auto_complete_mode(COMPLETE_MODE.DROPDOWN)
@@ -617,15 +612,15 @@ class PythonConsole(BaseConsole):
         """Start a thread in which code snippets will be executed."""
         self._thread = Thread()
         self.interpreter.moveToThread(self._thread)
-        self.interpreter.exec_signal.connect(
-            self.interpreter.exec_, QueuedConnection)
+        self.interpreter.exec_signal.connect(self.interpreter.exec_,
+                                             QueuedConnection)
         return self._thread
 
     def eval_queued(self):
         """Setup connections to execute code snippets in later mainloop
         iterations in the main thread."""
-        return self.interpreter.exec_signal.connect(
-            self.interpreter.exec_, QueuedConnection)
+        return self.interpreter.exec_signal.connect(self.interpreter.exec_,
+                                                    QueuedConnection)
 
     def eval_executor(self, spawn):
         """Exec snippets using the given executor function (e.g.
@@ -635,7 +630,6 @@ class PythonConsole(BaseConsole):
 
 
 class Thread(QThread):
-
     """Thread that runs an event loop and exposes thread ID as ``.ident``."""
 
     def __init__(self, parent=None):
@@ -656,12 +650,10 @@ class Thread(QThread):
         bytecode)."""
         if self.ident != threading.current_thread().ident:
             ctypes.pythonapi.PyThreadState_SetAsyncExc(
-                ctypes.c_long(self.ident),
-                ctypes.py_object(value))
+                ctypes.c_long(self.ident), ctypes.py_object(value))
 
 
 class InputArea(QPlainTextEdit):
-
     """Widget that is used for the input/output edit area of the console."""
 
     def insertFromMimeData(self, mime_data):

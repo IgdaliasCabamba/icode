@@ -3,12 +3,14 @@ from rope.base.change import ChangeSet, ChangeContents, MoveResource, CreateFold
 
 
 class ModuleToPackage(object):
+
     def __init__(self, project, resource):
         self.project = project
         self.resource = resource
 
     def get_changes(self):
-        changes = ChangeSet("Transform <%s> module to package" % self.resource.path)
+        changes = ChangeSet("Transform <%s> module to package" %
+                            self.resource.path)
         new_content = self._transform_relatives_to_absolute(self.resource)
         if new_content is not None:
             changes.add_change(ChangeContents(self.resource, new_content))

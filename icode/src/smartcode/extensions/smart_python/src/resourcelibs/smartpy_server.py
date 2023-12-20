@@ -62,16 +62,23 @@ class SmartPyLanguageServer(object):
             if isinstance(data["env"], str):
                 env = jedi.create_environment(data["env"])
 
-            script = jedi.Script(code=source_code, path=file_code, environment=env)
+            script = jedi.Script(code=source_code,
+                                 path=file_code,
+                                 environment=env)
             completers = script.complete(row + 1, col)
 
             for completion in completers:
                 completion_object = {
-                    "name_with_symbols": str(completion.name_with_symbols),
-                    "name": str(completion.name),
-                    "type": str(completion.type),
-                    "docstring": str(completion.docstring()),
-                    "prefix_length": str(completion.get_completion_prefix_length()),
+                    "name_with_symbols":
+                    str(completion.name_with_symbols),
+                    "name":
+                    str(completion.name),
+                    "type":
+                    str(completion.type),
+                    "docstring":
+                    str(completion.docstring()),
+                    "prefix_length":
+                    str(completion.get_completion_prefix_length()),
                 }
                 completions.append(completion_object)
 
@@ -101,18 +108,25 @@ class SmartPyLanguageServer(object):
             if isinstance(data["env"], str):
                 env = jedi.create_environment(data["env"])
 
-            script = jedi.Script(code=source_code, path=file_code, environment=env)
-            complete_helpers = script.complete_search(
-                string=word, all_scopes=all_scopes, fuzzy=fuzzy
-            )
+            script = jedi.Script(code=source_code,
+                                 path=file_code,
+                                 environment=env)
+            complete_helpers = script.complete_search(string=word,
+                                                      all_scopes=all_scopes,
+                                                      fuzzy=fuzzy)
 
             for x, completion in enumerate(complete_helpers):
                 completion_object = {
-                    "name_with_symbols": str(completion.name_with_symbols),
-                    "name": str(completion.name),
-                    "type": str(completion.type),
-                    "docstring": str(completion.docstring()),
-                    "prefix_length": str(completion.get_completion_prefix_length()),
+                    "name_with_symbols":
+                    str(completion.name_with_symbols),
+                    "name":
+                    str(completion.name),
+                    "type":
+                    str(completion.type),
+                    "docstring":
+                    str(completion.docstring()),
+                    "prefix_length":
+                    str(completion.get_completion_prefix_length()),
                 }
 
                 completions.append(completion_object)

@@ -72,7 +72,13 @@ class Restructure(object):
 
     """
 
-    def __init__(self, project, pattern, goal, args=None, imports=None, wildcards=None):
+    def __init__(self,
+                 project,
+                 pattern,
+                 goal,
+                 args=None,
+                 imports=None,
+                 wildcards=None):
         """Construct a restructuring
 
         See class pydoc for more info about the arguments.
@@ -91,11 +97,11 @@ class Restructure(object):
         self.template = similarfinder.CodeTemplate(self.goal)
 
     def get_changes(
-        self,
-        checks=None,
-        imports=None,
-        resources=None,
-        task_handle=taskhandle.NullTaskHandle(),
+            self,
+            checks=None,
+            imports=None,
+            resources=None,
+            task_handle=taskhandle.NullTaskHandle(),
     ):
         """Get the changes needed by this restructuring
 
@@ -136,13 +142,11 @@ class Restructure(object):
                 stacklevel=2,
             )
             self.imports = imports
-        changes = change.ChangeSet(
-            "Restructuring <%s> to <%s>" % (self.pattern, self.goal)
-        )
+        changes = change.ChangeSet("Restructuring <%s> to <%s>" %
+                                   (self.pattern, self.goal))
         if resources is not None:
             files = [
-                resource
-                for resource in resources
+                resource for resource in resources
                 if libutils.is_python_file(self.project, resource)
             ]
         else:
@@ -151,13 +155,16 @@ class Restructure(object):
         for resource in files:
             job_set.started_job(resource.path)
             pymodule = self.project.get_pymodule(resource)
-            finder = similarfinder.SimilarFinder(pymodule, wildcards=self.wildcards)
+            finder = similarfinder.SimilarFinder(pymodule,
+                                                 wildcards=self.wildcards)
             matches = list(finder.get_matches(self.pattern, self.args))
             computer = self._compute_changes(matches, pymodule)
             result = computer.get_changed()
             if result is not None:
-                imported_source = self._add_imports(resource, result, self.imports)
-                changes.add_change(change.ChangeContents(resource, imported_source))
+                imported_source = self._add_imports(resource, result,
+                                                    self.imports)
+                changes.add_change(
+                    change.ChangeContents(resource, imported_source))
             job_set.finished_job()
         return changes
 
@@ -181,9 +188,8 @@ class Restructure(object):
         return imports.get_changed_source()
 
     def _get_import_infos(self, resource, imports):
-        pymodule = libutils.get_string_module(
-            self.project, "\n".join(imports), resource
-        )
+        pymodule = libutils.get_string_module(self.project, "\n".join(imports),
+                                              resource)
         imports = module_imports.ModuleImports(self.project, pymodule)
         return [imports.import_info for imports in imports.imports]
 
@@ -195,7 +201,8 @@ class Restructure(object):
         """
         checks = {}
         for key, value in string_checks.items():
-            is_pyname = not key.endswith(".object") and not key.endswith(".type")
+            is_pyname = not key.endswith(".object") and not key.endswith(
+                ".type")
             evaluated = self._evaluate(value, is_pyname=is_pyname)
             if evaluated is not None:
                 checks[key] = evaluated
@@ -207,6 +214,7 @@ class Restructure(object):
         if attributes[0] in ("__builtin__", "__builtins__"):
 
             class _BuiltinsStub(object):
+
                 def get_attribute(self, name):
                     return builtins.builtins[name]
 
@@ -236,6 +244,7 @@ def replace(code, pattern, goal):
 
 
 class _ChangeComputer(object):
+
     def __init__(self, code, ast, lines, goal, matches):
         self.source = code
         self.goal = goal
@@ -268,16 +277,16 @@ class _ChangeComputer(object):
             return collector.get_changed()
 
     def _is_expression(self):
-        return self.matches and isinstance(
-            self.matches[0], similarfinder.ExpressionMatch
-        )
+        return self.matches and isinstance(self.matches[0],
+                                           similarfinder.ExpressionMatch)
 
     def _get_matched_text(self, match):
         mapping = {}
         for name in self.goal.get_names():
             node = match.get_ast(name)
             if node is None:
-                raise similarfinder.BadNameInCheckError("Unknown name <%s>" % name)
+                raise similarfinder.BadNameInCheckError("Unknown name <%s>" %
+                                                        name)
             force = self._is_expression() and match.ast == node
             mapping[name] = self._get_node_text(node, force)
         unindented = self.goal.substitute(mapping)
@@ -291,9 +300,8 @@ class _ChangeComputer(object):
         collector = codeanalyze.ChangeCollector(main_text)
         for node in self._get_nearest_roots(node):
             sub_start, sub_end = patchedast.node_region(node)
-            collector.add_change(
-                sub_start - start, sub_end - start, self._get_node_text(node)
-            )
+            collector.add_change(sub_start - start, sub_end - start,
+                                 self._get_node_text(node))
         result = collector.get_changed()
         if result is None:
             return main_text

@@ -20,8 +20,7 @@ class InvalidSettingsPath(ISortError):
         super().__init__(
             f"isort was told to use the settings_path: {settings_path} as the base directory or "
             "file that represents the starting point of config file discovery, but it does not "
-            "exist."
-        )
+            "exist.")
         self.settings_path = settings_path
 
 
@@ -31,8 +30,7 @@ class ExistingSyntaxErrors(ISortError):
     def __init__(self, file_path: str):
         super().__init__(
             f"isort was told to sort imports within code that contains syntax errors: "
-            f"{file_path}."
-        )
+            f"{file_path}.")
         self.file_path = file_path
 
 
@@ -42,8 +40,7 @@ class IntroducedSyntaxErrors(ISortError):
     def __init__(self, file_path: str):
         super().__init__(
             f"isort introduced syntax errors when attempting to sort the imports contained within "
-            f"{file_path}."
-        )
+            f"{file_path}.")
         self.file_path = file_path
 
 
@@ -81,10 +78,8 @@ class ProfileDoesNotExist(ISortError):
     """Raised when a profile is set by the user that doesn't exist"""
 
     def __init__(self, profile: str):
-        super().__init__(
-            f"Specified profile of {profile} does not exist. "
-            f"Available profiles: {','.join(profiles)}."
-        )
+        super().__init__(f"Specified profile of {profile} does not exist. "
+                         f"Available profiles: {','.join(profiles)}.")
         self.profile = profile
 
 
@@ -94,8 +89,7 @@ class SortingFunctionDoesNotExist(ISortError):
     def __init__(self, sort_order: str, available_sort_orders: List[str]):
         super().__init__(
             f"Specified sort_order of {sort_order} does not exist. "
-            f"Available sort_orders: {','.join(available_sort_orders)}."
-        )
+            f"Available sort_orders: {','.join(available_sort_orders)}.")
         self.sort_order = sort_order
         self.available_sort_orders = available_sort_orders
 
@@ -104,7 +98,8 @@ class FormattingPluginDoesNotExist(ISortError):
     """Raised when a formatting plugin is set by the user that doesn't exist"""
 
     def __init__(self, formatter: str):
-        super().__init__(f"Specified formatting plugin of {formatter} does not exist. ")
+        super().__init__(
+            f"Specified formatting plugin of {formatter} does not exist. ")
         self.formatter = formatter
 
 
@@ -113,12 +108,12 @@ class LiteralParsingFailure(ISortError):
     the given data structure.
     """
 
-    def __init__(self, code: str, original_error: Union[Exception, Type[Exception]]):
+    def __init__(self, code: str, original_error: Union[Exception,
+                                                        Type[Exception]]):
         super().__init__(
             f"isort failed to parse the given literal {code}. It's important to note "
             "that isort literal sorting only supports simple literals parsable by "
-            f"ast.literal_eval which gave the exception of {original_error}."
-        )
+            f"ast.literal_eval which gave the exception of {original_error}.")
         self.code = code
         self.original_error = original_error
 
@@ -131,8 +126,7 @@ class LiteralSortTypeMismatch(ISortError):
     def __init__(self, kind: type, expected_kind: type):
         super().__init__(
             f"isort was told to sort a literal of type {expected_kind} but was given "
-            f"a literal of type {kind}."
-        )
+            f"a literal of type {kind}.")
         self.kind = kind
         self.expected_kind = expected_kind
 
@@ -150,8 +144,7 @@ class AssignmentsFormatMismatch(ISortError):
             "sorting:\n\n"
             "{variable_name} = {value}\n"
             "{variable_name2} = {value2}\n"
-            "...\n\n"
-        )
+            "...\n\n")
         self.code = code
 
 
@@ -167,15 +160,13 @@ class UnsupportedSettings(ISortError):
     def __init__(self, unsupported_settings: Dict[str, Dict[str, str]]):
         errors = "\n".join(
             self._format_option(name, **option)
-            for name, option in unsupported_settings.items()
-        )
+            for name, option in unsupported_settings.items())
 
         super().__init__(
             "isort was provided settings that it doesn't support:\n\n"
             f"{errors}\n\n"
             "For a complete and up-to-date listing of supported settings see: "
-            "https://pycqa.github.io/isort/docs/configuration/options.\n"
-        )
+            "https://pycqa.github.io/isort/docs/configuration/options.\n")
         self.unsupported_settings = unsupported_settings
 
 
@@ -195,5 +186,4 @@ class MissingSection(ISortError):
             f"Found {import_module} import while parsing, but {section} was not included "
             "in the `sections` setting of your config. Please add it before continuing\n"
             "See https://pycqa.github.io/isort/#custom-sections-and-ordering "
-            "for more info."
-        )
+            "for more info.")

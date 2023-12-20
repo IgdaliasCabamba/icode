@@ -5,6 +5,7 @@ from smartlibs.qtmd import QGithubButton
 
 
 class CodeSettings(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("settings-page")
@@ -17,6 +18,7 @@ class CodeSettings(QFrame):
 
 
 class ConfigUi(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("settings")

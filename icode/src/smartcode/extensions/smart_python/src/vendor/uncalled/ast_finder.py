@@ -2,6 +2,7 @@ import ast
 
 
 class AstFinder:
+
     def __init__(self, filename, txt):
         self.collector = StoreLoadCollector()
         try:
@@ -23,6 +24,7 @@ class AstFinder:
 
 
 class StoreLoadCollector(ast.NodeVisitor):
+
     def __init__(self):
         self.definitions = []  # list[str]
         self.references = []  # list[str]

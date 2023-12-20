@@ -57,14 +57,12 @@ def UnwrapPyTree(tree):
 
 
 # Grammar tokens considered as whitespace for the purpose of unwrapping.
-_WHITESPACE_TOKENS = frozenset(
-    [
-        grammar_token.NEWLINE,
-        grammar_token.DEDENT,
-        grammar_token.INDENT,
-        grammar_token.ENDMARKER,
-    ]
-)
+_WHITESPACE_TOKENS = frozenset([
+    grammar_token.NEWLINE,
+    grammar_token.DEDENT,
+    grammar_token.INDENT,
+    grammar_token.ENDMARKER,
+])
 
 
 class PyTreeUnwrapper(pytree_visitor.PyTreeVisitor):
@@ -116,20 +114,19 @@ class PyTreeUnwrapper(pytree_visitor.PyTreeVisitor):
             _MatchBrackets(self._cur_unwrapped_line)
             _IdentifyParameterLists(self._cur_unwrapped_line)
             _AdjustSplitPenalty(self._cur_unwrapped_line)
-        self._cur_unwrapped_line = unwrapped_line.UnwrappedLine(self._cur_depth)
+        self._cur_unwrapped_line = unwrapped_line.UnwrappedLine(
+            self._cur_depth)
 
-    _STMT_TYPES = frozenset(
-        {
-            "if_stmt",
-            "while_stmt",
-            "for_stmt",
-            "try_stmt",
-            "expect_clause",
-            "with_stmt",
-            "funcdef",
-            "classdef",
-        }
-    )
+    _STMT_TYPES = frozenset({
+        "if_stmt",
+        "while_stmt",
+        "for_stmt",
+        "try_stmt",
+        "expect_clause",
+        "with_stmt",
+        "funcdef",
+        "classdef",
+    })
 
     # pylint: disable=invalid-name,missing-docstring
     def Visit_simple_stmt(self, node):
@@ -143,9 +140,8 @@ class PyTreeUnwrapper(pytree_visitor.PyTreeVisitor):
         # standalone comment and in the case of it coming directly after the
         # funcdef, it is a "top" comment for the whole function.
         # TODO(eliben): add more relevant compound statements here.
-        single_stmt_suite = (
-            node.parent and pytree_utils.NodeName(node.parent) in self._STMT_TYPES
-        )
+        single_stmt_suite = (node.parent and pytree_utils.NodeName(node.parent)
+                             in self._STMT_TYPES)
         is_comment_stmt = pytree_utils.IsCommentStatement(node)
         if single_stmt_suite and not is_comment_stmt:
             self._cur_depth += 1
@@ -230,14 +226,16 @@ class PyTreeUnwrapper(pytree_visitor.PyTreeVisitor):
             if pytree_utils.NodeName(child) == "ASYNC":
                 break
         for child in node.children[index].children:
-            if pytree_utils.NodeName(child) == "NAME" and child.value == "else":
+            if pytree_utils.NodeName(
+                    child) == "NAME" and child.value == "else":
                 self._StartNewLine()
             self.Visit(child)
 
     def Visit_decorator(self, node):  # pylint: disable=invalid-name
         for child in node.children:
             self.Visit(child)
-            if pytree_utils.NodeName(child) == "COMMENT" and child == node.children[0]:
+            if pytree_utils.NodeName(
+                    child) == "COMMENT" and child == node.children[0]:
                 self._StartNewLine()
 
     def Visit_decorators(self, node):  # pylint: disable=invalid-name
@@ -325,7 +323,8 @@ def _MatchBrackets(uwline):
             bracket_stack.pop()
 
         for bracket in bracket_stack:
-            if id(pytree_utils.GetOpeningBracket(token.node)) == id(bracket.node):
+            if id(pytree_utils.GetOpeningBracket(token.node)) == id(
+                    bracket.node):
                 bracket.container_elements.append(token)
                 token.container_opening = bracket
 
@@ -360,7 +359,8 @@ def _IdentifyParameterLists(uwline):
         # Not "elif", a parameter could be a single token.
         if param_stack and format_token.Subtype.PARAMETER_STOP in tok.subtypes:
             start = param_stack.pop()
-            func_stack[-1].parameters.append(object_state.Parameter(start, tok))
+            func_stack[-1].parameters.append(object_state.Parameter(
+                start, tok))
 
 
 def _AdjustSplitPenalty(uwline):
@@ -393,15 +393,11 @@ def _DetermineMustSplitAnnotation(node):
     if not _ContainsComments(node):
         token = next(node.parent.leaves())
         if token.value == "(":
-            if (
-                sum(1 for ch in node.children if pytree_utils.NodeName(ch) == "COMMA")
-                < 2
-            ):
+            if (sum(1 for ch in node.children
+                    if pytree_utils.NodeName(ch) == "COMMA") < 2):
                 return
-        if (
-            not isinstance(node.children[-1], pytree.Leaf)
-            or node.children[-1].value != ","
-        ):
+        if (not isinstance(node.children[-1], pytree.Leaf)
+                or node.children[-1].value != ","):
             return
     num_children = len(node.children)
     index = 0
@@ -430,6 +426,5 @@ def _ContainsComments(node):
 
 def _SetMustSplitOnFirstLeaf(node):
     """Set the "must split" annotation on the first leaf node."""
-    pytree_utils.SetNodeAnnotation(
-        pytree_utils.FirstLeafNode(node), pytree_utils.Annotation.MUST_SPLIT, True
-    )
+    pytree_utils.SetNodeAnnotation(pytree_utils.FirstLeafNode(node),
+                                   pytree_utils.Annotation.MUST_SPLIT, True)

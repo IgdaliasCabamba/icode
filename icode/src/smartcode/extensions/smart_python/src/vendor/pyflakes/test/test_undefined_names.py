@@ -6,15 +6,15 @@ from pyflakes.test.harness import TestCase, skipIf, skip
 
 
 class Test(TestCase):
+
     def test_undefined(self):
         self.flakes("bar", m.UndefinedName)
 
     def test_definedInListComp(self):
         self.flakes("[a for a in range(10) if a]")
 
-    @skipIf(
-        version_info < (3,), "in Python 2 list comprehensions execute in the same scope"
-    )
+    @skipIf(version_info < (3, ),
+            "in Python 2 list comprehensions execute in the same scope")
     def test_undefinedInListComp(self):
         self.flakes(
             """
@@ -25,7 +25,7 @@ class Test(TestCase):
         )
 
     @skipIf(
-        version_info < (3,),
+        version_info < (3, ),
         "in Python 2 exception names stay bound after the except: block",
     )
     def test_undefinedExceptionName(self):
@@ -49,15 +49,13 @@ class Test(TestCase):
 
         This shows the example in test_undefinedExceptionName is
         different."""
-        self.flakes(
-            """
+        self.flakes("""
         try:
             raise ValueError('ve')
         except ValueError as exc:
             e = exc
         e
-        """
-        )
+        """)
 
     @skip("error reporting disabled due to false positives below")
     def test_undefinedExceptionNameObscuringLocalVariable(self):
@@ -79,7 +77,7 @@ class Test(TestCase):
         )
 
     @skipIf(
-        version_info < (3,),
+        version_info < (3, ),
         "in Python 2 exception names stay bound after the except: block",
     )
     def test_undefinedExceptionNameObscuringLocalVariable2(self):
@@ -107,7 +105,7 @@ class Test(TestCase):
         Last line will never raise UnboundLocalError because it's only
         entered if no exception was raised."""
         # The exc variable is unused inside the exception handler.
-        expected = [] if version_info < (3,) else [m.UnusedVariable]
+        expected = [] if version_info < (3, ) else [m.UnusedVariable]
         self.flakes(
             """
         exc = 'Original value'
@@ -117,20 +115,16 @@ class Test(TestCase):
             print('exception logged')
             raise
         exc
-        """,
-            *expected
-        )
+        """, *expected)
 
     def test_delExceptionInExcept(self):
         """The exception name can be deleted in the except: block."""
-        self.flakes(
-            """
+        self.flakes("""
         try:
             pass
         except Exception as exc:
             del exc
-        """
-        )
+        """)
 
     def test_undefinedExceptionNameObscuringLocalVariableFalsePositive2(self):
         """Exception names obscure locals, can't be used after. Unless.
@@ -138,7 +132,7 @@ class Test(TestCase):
         Last line will never raise UnboundLocalError because `error` is
         only falsy if the `except:` block has not been entered."""
         # The exc variable is unused inside the exception handler.
-        expected = [] if version_info < (3,) else [m.UnusedVariable]
+        expected = [] if version_info < (3, ) else [m.UnusedVariable]
         self.flakes(
             """
         exc = 'Original value'
@@ -151,9 +145,7 @@ class Test(TestCase):
             print(error)
         else:
             exc
-        """,
-            *expected
-        )
+        """, *expected)
 
     @skip("error reporting disabled due to false positives below")
     def test_undefinedExceptionNameObscuringGlobalVariable(self):
@@ -204,7 +196,7 @@ class Test(TestCase):
         Last line will never raise NameError because it's only entered
         if no exception was raised."""
         # The exc variable is unused inside the exception handler.
-        expected = [] if version_info < (3,) else [m.UnusedVariable]
+        expected = [] if version_info < (3, ) else [m.UnusedVariable]
         self.flakes(
             """
         exc = 'Original value'
@@ -216,9 +208,7 @@ class Test(TestCase):
                 print('exception logged')
                 raise
             exc
-        """,
-            *expected
-        )
+        """, *expected)
 
     def test_undefinedExceptionNameObscuringGlobalVariableFalsePositive2(self):
         """Exception names obscure globals, can't be used after. Unless.
@@ -226,7 +216,7 @@ class Test(TestCase):
         Last line will never raise NameError because `error` is only
         falsy if the `except:` block has not been entered."""
         # The exc variable is unused inside the exception handler.
-        expected = [] if version_info < (3,) else [m.UnusedVariable]
+        expected = [] if version_info < (3, ) else [m.UnusedVariable]
         self.flakes(
             """
         exc = 'Original value'
@@ -241,19 +231,15 @@ class Test(TestCase):
                 print(error)
             else:
                 exc
-        """,
-            *expected
-        )
+        """, *expected)
 
     def test_functionsNeedGlobalScope(self):
-        self.flakes(
-            """
+        self.flakes("""
         class a:
             def b():
                 fu
         fu = 1
-        """
-        )
+        """)
 
     def test_builtins(self):
         self.flakes("range(10)")
@@ -308,12 +294,10 @@ class Test(TestCase):
         name warning if used in class scope.
         """
         self.flakes("__module__", m.UndefinedName)
-        self.flakes(
-            """
+        self.flakes("""
         class Foo:
             __module__
-        """
-        )
+        """)
         self.flakes(
             """
         class Foo:
@@ -330,12 +314,10 @@ class Test(TestCase):
         name warning if used in class scope.
         """
         self.flakes("__qualname__", m.UndefinedName)
-        self.flakes(
-            """
+        self.flakes("""
         class Foo:
             __qualname__
-        """
-        )
+        """)
         self.flakes(
             """
         class Foo:
@@ -347,9 +329,10 @@ class Test(TestCase):
 
     def test_globalImportStar(self):
         """Can't find undefined names with import *."""
-        self.flakes("from fu import *; bar", m.ImportStarUsed, m.ImportStarUsage)
+        self.flakes("from fu import *; bar", m.ImportStarUsed,
+                    m.ImportStarUsage)
 
-    @skipIf(version_info >= (3,), "obsolete syntax")
+    @skipIf(version_info >= (3, ), "obsolete syntax")
     def test_localImportStar(self):
         """
         A local import * still allows undefined names to be found
@@ -366,44 +349,36 @@ class Test(TestCase):
             m.UnusedImport,
         )
 
-    @skipIf(version_info >= (3,), "obsolete syntax")
+    @skipIf(version_info >= (3, ), "obsolete syntax")
     def test_unpackedParameter(self):
         """Unpacked function parameters create bindings."""
-        self.flakes(
-            """
+        self.flakes("""
         def a((bar, baz)):
             bar; baz
-        """
-        )
+        """)
 
     def test_definedByGlobal(self):
         """
         "global" can make an otherwise undefined name in another function
         defined.
         """
-        self.flakes(
-            """
+        self.flakes("""
         def a(): global fu; fu = 1
         def b(): fu
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         def c(): bar
         def b(): global bar; bar = 1
-        """
-        )
+        """)
 
     def test_definedByGlobalMultipleNames(self):
         """
         "global" can accept multiple names.
         """
-        self.flakes(
-            """
+        self.flakes("""
         def a(): global fu, bar; fu = 1; bar = 2
         def b(): fu; bar
-        """
-        )
+        """)
 
     def test_globalInGlobalScope(self):
         """
@@ -453,15 +428,13 @@ class Test(TestCase):
 
     def test_delGlobal(self):
         """Del a global binding from a function."""
-        self.flakes(
-            """
+        self.flakes("""
         a = 1
         def f():
             global a
             del a
         a
-        """
-        )
+        """)
 
     def test_delUndefined(self):
         """Del an undefined name."""
@@ -471,69 +444,60 @@ class Test(TestCase):
         """
         Ignores conditional bindings deletion.
         """
-        self.flakes(
-            """
+        self.flakes("""
         context = None
         test = True
         if False:
             del(test)
         assert(test)
-        """
-        )
+        """)
 
     def test_delConditionalNested(self):
         """
         Ignored conditional bindings deletion even if they are nested in other
         blocks.
         """
-        self.flakes(
-            """
+        self.flakes("""
         context = None
         test = True
         if False:
             with context():
                 del(test)
         assert(test)
-        """
-        )
+        """)
 
     def test_delWhile(self):
         """
         Ignore bindings deletion if called inside the body of a while
         statement.
         """
-        self.flakes(
-            """
+        self.flakes("""
         def test():
             foo = 'bar'
             while False:
                 del foo
             assert(foo)
-        """
-        )
+        """)
 
     def test_delWhileTestUsage(self):
         """
         Ignore bindings deletion if called inside the body of a while
         statement and name is used inside while's test part.
         """
-        self.flakes(
-            """
+        self.flakes("""
         def _worker():
             o = True
             while o is not True:
                 del o
                 o = False
-        """
-        )
+        """)
 
     def test_delWhileNested(self):
         """
         Ignore bindings deletions if node is part of while's test, even when
         del is in a nested block.
         """
-        self.flakes(
-            """
+        self.flakes("""
         context = None
         def _worker():
             o = True
@@ -542,19 +506,16 @@ class Test(TestCase):
                     with context():
                         del o
                 o = False
-        """
-        )
+        """)
 
     def test_globalFromNestedScope(self):
         """Global names are available from nested scopes."""
-        self.flakes(
-            """
+        self.flakes("""
         a = 1
         def b():
             def c():
                 a
-        """
-        )
+        """)
 
     def test_laterRedefinedGlobalFromNestedScope(self):
         """
@@ -679,8 +640,7 @@ class Test(TestCase):
 
     def test_nestedClass(self):
         """Nested classes can access enclosing scope."""
-        self.flakes(
-            """
+        self.flakes("""
         def f(foo):
             class C:
                 bar = foo
@@ -689,8 +649,7 @@ class Test(TestCase):
             return C()
 
         f(123).f()
-        """
-        )
+        """)
 
     def test_badNestedClass(self):
         """Free variables in nested classes must bind at class creation."""
@@ -708,60 +667,46 @@ class Test(TestCase):
 
     def test_definedAsStarArgs(self):
         """Star and double-star arg names are defined."""
-        self.flakes(
-            """
+        self.flakes("""
         def f(a, *b, **c):
             print(a, b, c)
-        """
-        )
+        """)
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_definedAsStarUnpack(self):
         """Star names in unpack are defined."""
-        self.flakes(
-            """
+        self.flakes("""
         a, *b = range(10)
         print(a, b)
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         *a, b = range(10)
         print(a, b)
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         a, *b, c = range(10)
         print(a, b, c)
-        """
-        )
+        """)
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_usedAsStarUnpack(self):
         """
         Star names in unpack are used if RHS is not a tuple/list literal.
         """
-        self.flakes(
-            """
+        self.flakes("""
         def f():
             a, *b = range(10)
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         def f():
             (*a, b) = range(10)
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         def f():
             [a, *b, c] = range(10)
-        """
-        )
+        """)
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_unusedAsStarUnpack(self):
         """
         Star names in unpack are unused if RHS is a tuple/list literal.
@@ -792,25 +737,21 @@ class Test(TestCase):
             m.UnusedVariable,
         )
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_keywordOnlyArgs(self):
         """Keyword-only arg names are defined."""
-        self.flakes(
-            """
+        self.flakes("""
         def f(*, a, b=None):
             print(a, b)
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         import default_b
         def f(*, a, b=default_b):
             print(a, b)
-        """
-        )
+        """)
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_keywordOnlyArgsUndefined(self):
         """Typo in kwonly name."""
         self.flakes(
@@ -821,33 +762,27 @@ class Test(TestCase):
             m.UndefinedName,
         )
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_annotationUndefined(self):
         """Undefined annotations."""
-        self.flakes(
-            """
+        self.flakes("""
         from abc import note1, note2, note3, note4, note5
         def func(a: note1, *args: note2,
                  b: note3=12, **kw: note4) -> note5: pass
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         def func():
             d = e = 42
             def func(a: {1, d}) -> (lambda c: e): pass
-        """
-        )
+        """)
 
-    @skipIf(version_info < (3,), "new in Python 3")
+    @skipIf(version_info < (3, ), "new in Python 3")
     def test_metaClassUndefined(self):
-        self.flakes(
-            """
+        self.flakes("""
         from abc import ABCMeta
         class A(metaclass=ABCMeta): pass
-        """
-        )
+        """)
 
     def test_definedInGenExp(self):
         """
@@ -863,31 +798,29 @@ class Test(TestCase):
         The loop variables of generator expressions nested together are
         not defined in the other generator.
         """
-        self.flakes("(b for b in (a for a in [1, 2, 3] if b) if b)", m.UndefinedName)
+        self.flakes("(b for b in (a for a in [1, 2, 3] if b) if b)",
+                    m.UndefinedName)
 
-        self.flakes("(b for b in (a for a in [1, 2, 3] if a) if a)", m.UndefinedName)
+        self.flakes("(b for b in (a for a in [1, 2, 3] if a) if a)",
+                    m.UndefinedName)
 
     def test_undefinedWithErrorHandler(self):
         """
         Some compatibility code checks explicitly for NameError.
         It should not trigger warnings.
         """
-        self.flakes(
-            """
+        self.flakes("""
         try:
             socket_map
         except NameError:
             socket_map = {}
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         try:
             _memoryview.contiguous
         except (NameError, AttributeError):
             raise RuntimeError("Python >= 3.3 is required")
-        """
-        )
+        """)
         # If NameError is not explicitly handled, generate a warning
         self.flakes(
             """
@@ -912,37 +845,31 @@ class Test(TestCase):
         """
         Defined name for generator expressions and dict/set comprehension.
         """
-        self.flakes(
-            """
+        self.flakes("""
         class A:
             T = range(10)
 
             Z = (x for x in T)
             L = [x for x in T]
             B = dict((i, str(i)) for i in T)
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         class A:
             T = range(10)
 
             X = {x for x in T}
             Y = {x:x for x in T}
-        """
-        )
+        """)
 
     def test_definedInClassNested(self):
         """Defined name for nested generator expressions in a class."""
-        self.flakes(
-            """
+        self.flakes("""
         class A:
             T = range(10)
 
             Z = (x for x in (a for a in T))
-        """
-        )
+        """)
 
     def test_undefinedInLoop(self):
         """
@@ -973,22 +900,18 @@ class Test(TestCase):
         Defined name referenced from a lambda function within a dict/set
         comprehension.
         """
-        self.flakes(
-            """
+        self.flakes("""
         {lambda: id(x) for x in range(10)}
-        """
-        )
+        """)
 
     def test_definedFromLambdaInGenerator(self):
         """
         Defined name referenced from a lambda function within a generator
         expression.
         """
-        self.flakes(
-            """
+        self.flakes("""
         any(lambda: id(x) for x in range(10))
-        """
-        )
+        """)
 
     def test_undefinedFromLambdaInDictionaryComprehension(self):
         """
@@ -1027,7 +950,7 @@ class Test(TestCase):
 
         t = Test()
         """
-        if version_info < (3,):
+        if version_info < (3, ):
             self.flakes(code, m.UndefinedName)
         else:
             self.flakes(code)
@@ -1047,4 +970,7 @@ class NameTests(TestCase):
         file_tokens = checker.make_tokens("x = 10")
         # Make it into something unrecognizable.
         tree.body[0].targets[0].ctx = object()
-        self.assertRaises(RuntimeError, checker.Checker, tree, file_tokens=file_tokens)
+        self.assertRaises(RuntimeError,
+                          checker.Checker,
+                          tree,
+                          file_tokens=file_tokens)

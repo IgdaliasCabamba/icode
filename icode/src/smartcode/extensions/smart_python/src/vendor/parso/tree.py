@@ -4,7 +4,8 @@ from typing import List, Optional, Tuple, Union
 from parso.utils import split_lines
 
 
-def search_ancestor(node: "NodeOrLeaf", *node_types: str) -> "Optional[BaseNode]":
+def search_ancestor(node: "NodeOrLeaf", *node_types:
+                    str) -> "Optional[BaseNode]":
     """
     Recursively looks at the parents of a node and returns the first found node
     that matches ``node_types``. Returns ``None`` if no matching node is found.
@@ -27,7 +28,7 @@ class NodeOrLeaf:
     The base class for nodes and leaves.
     """
 
-    __slots__ = ("parent",)
+    __slots__ = ("parent", )
     type: str
     """
     The type is a string that typically matches the types of the grammar file.
@@ -245,11 +246,12 @@ class NodeOrLeaf:
             newline = True
             indent_string = indent
         else:
-            raise TypeError(f"expect 'indent' to be int, str or None, got {indent!r}")
+            raise TypeError(
+                f"expect 'indent' to be int, str or None, got {indent!r}")
 
-        def _format_dump(
-            node: NodeOrLeaf, indent: str = "", top_level: bool = True
-        ) -> str:
+        def _format_dump(node: NodeOrLeaf,
+                         indent: str = "",
+                         top_level: bool = True) -> str:
             result = ""
             node_type = type(node).__name__
             if isinstance(node, Leaf):
@@ -270,9 +272,9 @@ class NodeOrLeaf:
                 if newline:
                     result += "\n"
                 for child in node.children:
-                    result += _format_dump(
-                        child, indent=indent + indent_string, top_level=False
-                    )
+                    result += _format_dump(child,
+                                           indent=indent + indent_string,
+                                           top_level=False)
                 result += f"{indent}])"
             else:  # pragma: no cover
                 # We shouldn't ever reach here, unless:
@@ -299,9 +301,10 @@ class Leaf(NodeOrLeaf):
     __slots__ = ("value", "line", "column", "prefix")
     prefix: str
 
-    def __init__(
-        self, value: str, start_pos: Tuple[int, int], prefix: str = ""
-    ) -> None:
+    def __init__(self,
+                 value: str,
+                 start_pos: Tuple[int, int],
+                 prefix: str = "") -> None:
         self.value = value
         """
         :py:func:`str` The value of the current token.
@@ -365,7 +368,7 @@ class Leaf(NodeOrLeaf):
 
 
 class TypedLeaf(Leaf):
-    __slots__ = ("type",)
+    __slots__ = ("type", )
 
     def __init__(self, type, value, start_pos, prefix=""):
         super().__init__(value, start_pos, prefix)
@@ -378,7 +381,7 @@ class BaseNode(NodeOrLeaf):
     A node has children, a type and possibly a parent node.
     """
 
-    __slots__ = ("children",)
+    __slots__ = ("children", )
 
     def __init__(self, children: List[NodeOrLeaf]) -> None:
         self.children = children
@@ -432,7 +435,8 @@ class BaseNode(NodeOrLeaf):
                     return None
                 # In case we have prefixes, a leaf always matches
                 try:
-                    return element.get_leaf_for_position(position, include_prefixes)
+                    return element.get_leaf_for_position(
+                        position, include_prefixes)
                 except AttributeError:
                     return element
 
@@ -444,7 +448,8 @@ class BaseNode(NodeOrLeaf):
                 return binary_search(index + 1, upper)
 
         if not ((1, 0) <= position <= self.children[-1].end_pos):
-            raise ValueError("Please provide a position that exists within this node.")
+            raise ValueError(
+                "Please provide a position that exists within this node.")
         return binary_search(0, len(self.children) - 1)
 
     def get_first_leaf(self):
@@ -466,14 +471,15 @@ class BaseNode(NodeOrLeaf):
 class Node(BaseNode):
     """Concrete implementation for interior nodes."""
 
-    __slots__ = ("type",)
+    __slots__ = ("type", )
 
     def __init__(self, type, children):
         super().__init__(children)
         self.type = type
 
     def __repr__(self):
-        return "%s(%s, %r)" % (self.__class__.__name__, self.type, self.children)
+        return "%s(%s, %r)" % (self.__class__.__name__, self.type,
+                               self.children)
 
 
 class ErrorNode(BaseNode):
@@ -493,7 +499,7 @@ class ErrorLeaf(Leaf):
     or is invalid at that position. Like the star in `1 +* 1`.
     """
 
-    __slots__ = ("token_type",)
+    __slots__ = ("token_type", )
     type = "error_leaf"
 
     def __init__(self, token_type, value, start_pos, prefix=""):

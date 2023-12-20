@@ -50,7 +50,8 @@ class ApplicationCommandPalette(QFrame):
             if len(text) > 1:
                 command = text.split(">")[1]
 
-                commands = self.command_list.findItems(command, Qt.MatchContains)
+                commands = self.command_list.findItems(command,
+                                                       Qt.MatchContains)
 
                 for i in range(self.command_list.count()):
                     self.command_list.setRowHidden(i, True)
@@ -79,9 +80,8 @@ class ApplicationCommandPalette(QFrame):
                 height += self.command_list.sizeHintForRow(i)
 
         self.command_list.setFixedHeight(height + 10 if height < 300 else 300)
-        self.setFixedHeight(
-            self.input_edit.size().height() + self.command_list.size().height() + 20
-        )
+        self.setFixedHeight(self.input_edit.size().height() +
+                            self.command_list.size().height() + 20)
 
     def focusOutEvent(self, event):
         super().focusOutEvent(event)
@@ -108,9 +108,8 @@ class ApplicationCommandPalette(QFrame):
         if data:
             self.command_list.clear()
             for item in data:
-                row = IListWidgetItem(
-                    item["icon"], item["name"], None, {"command": item["command"]}
-                )
+                row = IListWidgetItem(item["icon"], item["name"], None,
+                                      {"command": item["command"]})
                 self.command_list.addItem(row)
             self.command_list.setCurrentRow(0)
         self.update_size()

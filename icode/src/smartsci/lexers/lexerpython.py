@@ -55,6 +55,7 @@ python_extra_key_list = [
 
 
 class PythonLexer(QsciLexerPython, ILexer):
+
     def __init__(self, parent=None):
         super().__init__()
         self.parent = parent
@@ -81,11 +82,8 @@ class PythonLexer(QsciLexerPython, ILexer):
 
     def keywords(self, keyset):
         if keyset == 1:
-            return (
-                " ".join(self.python_key_list)
-                + " "
-                + QsciLexerPython().keywords(keyset)
-            )
+            return (" ".join(self.python_key_list) + " " +
+                    QsciLexerPython().keywords(keyset))
         elif keyset == 2:
             return " ".join(self.python_extra_key_list)
         return QsciLexerPython.keywords(self, keyset)

@@ -19,11 +19,9 @@ class FileExplorerController(QObject):
 
         self.view.tree.clicked.connect(self.on_tree_clicked)
         self.view.btn_open_dir.clicked.connect(
-            lambda: self.on_open_folder_request.emit()
-        )
+            lambda: self.on_open_folder_request.emit())
         self.view.btn_open_folder.clicked.connect(
-            lambda: self.on_open_folder_request.emit()
-        )
+            lambda: self.on_open_folder_request.emit())
         self.view.btn_expand_collapse.clicked.connect(self.expand_collapse)
 
     @property
@@ -38,9 +36,9 @@ class FileExplorerController(QObject):
             if self._folder is None:
                 home_dir = str(pathlib.Path.home())
 
-            path = QFileDialog.getExistingDirectory(
-                None, "Open Folder", home_dir, QFileDialog.ShowDirsOnly
-            )
+            path = QFileDialog.getExistingDirectory(None, "Open Folder",
+                                                    home_dir,
+                                                    QFileDialog.ShowDirsOnly)
             if path == "":
                 return None
 
@@ -78,10 +76,12 @@ class FileExplorerController(QObject):
         subdirs = [f for f in p.iterdir() if f.is_dir()]
         for directory in subdirs:
             item = self.view.model.index(directory.name, 0)
-            if directory.name not in {".git"} and not directory.name.startswith("."):
+            if directory.name not in {".git"
+                                      } and not directory.name.startswith("."):
                 self.view.tree.expand(item)
         self.is_expanded = True
-        self.view.btn_expand_collapse.setIcon(self.view.icons.get_icon("collapse"))
+        self.view.btn_expand_collapse.setIcon(
+            self.view.icons.get_icon("collapse"))
 
     def collapse(self):
         p = pathlib.Path(self.view.model.rootPath())
@@ -91,13 +91,15 @@ class FileExplorerController(QObject):
             item = self.view.model.index(directory.name, 0)
             self.view.tree.collapse(item)
         self.is_expanded = False
-        self.view.btn_expand_collapse.setIcon(self.view.icons.get_icon("expand"))
+        self.view.btn_expand_collapse.setIcon(
+            self.view.icons.get_icon("expand"))
 
     def select_first(self):
         p = pathlib.Path(self.view.model.rootPath())
         ls = [f for f in p.iterdir()]
         if ls:
-            self.view.tree.setCurrentIndex(self.view.model.index(ls[0].name, 0))
+            self.view.tree.setCurrentIndex(self.view.model.index(
+                ls[0].name, 0))
 
     def close_folder(self):
         self.view.close_folder()

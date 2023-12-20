@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QFrame, QSizePolicy, QHBoxLayout
 
 
 class QGithubButton(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("qtmd-github-button")

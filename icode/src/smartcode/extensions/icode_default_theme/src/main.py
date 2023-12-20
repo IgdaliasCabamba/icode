@@ -29,17 +29,25 @@ class Init(ModelUi):
         notebook.widget_added.connect(self.apply_style_in_editor)
 
     def listen_slots(self):
-        self.do_on(self.apply_style_in_editor, "ui", "notebook", "widget_added")
+        self.do_on(self.apply_style_in_editor, "ui", "notebook",
+                   "widget_added")
         self.do_on(self.listen_notebook_slots, "app", "on_new_notebook")
 
     def apply_style(self):
         style_sheet = self.get_styles(
-            dark={"styles": "dark.qss", "vars": self.dark_vars},
-            light={"styles": "light.qss", "vars": self.light_vars},
+            dark={
+                "styles": "dark.qss",
+                "vars": self.dark_vars
+            },
+            light={
+                "styles": "light.qss",
+                "vars": self.light_vars
+            },
         )
         style_sheet.format_style(
             ["<get_resources_path>", "<get_app_icons_path>"],
-            [self.path_to("res"), self.icons_path_to("app")],
+            [self.path_to("res"),
+             self.icons_path_to("app")],
         )
         style_sheet.apply()
 
@@ -112,6 +120,7 @@ class Init(ModelUi):
 
     def lexer_styler(self, lexer):
         if lexer is not None:
-            self.set_lexer_style(
-                lexer=lexer, key="lexer-styles", dark="dark.json", light="light.json"
-            )
+            self.set_lexer_style(lexer=lexer,
+                                 key="lexer-styles",
+                                 dark="dark.json",
+                                 light="light.json")

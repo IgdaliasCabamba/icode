@@ -13,9 +13,9 @@ EXPRESSION_PARTS = (
 
 
 class ChangedFile:
-    def __init__(
-        self, inference_state, from_path, to_path, module_node, node_to_str_map
-    ):
+
+    def __init__(self, inference_state, from_path, to_path, module_node,
+                 node_to_str_map):
         self._inference_state = inference_state
         self._from_path = from_path
         self._to_path = to_path
@@ -59,15 +59,13 @@ class ChangedFile:
         return "".join(diff).rstrip(" ")
 
     def get_new_code(self):
-        return self._inference_state.grammar.refactor(
-            self._module_node, self._node_to_str_map
-        )
+        return self._inference_state.grammar.refactor(self._module_node,
+                                                      self._node_to_str_map)
 
     def apply(self):
         if self._from_path is None:
             raise RefactoringError(
-                "Cannot apply a refactoring on a Script with path=None"
-            )
+                "Cannot apply a refactoring on a Script with path=None")
 
         with open(self._from_path, "w", newline="") as f:
             f.write(self.get_new_code())
@@ -77,24 +75,27 @@ class ChangedFile:
 
 
 class Refactoring:
+
     def __init__(self, inference_state, file_to_node_changes, renames=()):
         self._inference_state = inference_state
         self._renames = renames
         self._file_to_node_changes = file_to_node_changes
 
     def get_changed_files(self) -> Dict[Path, ChangedFile]:
+
         def calculate_to_path(p):
             if p is None:
                 return p
             p = str(p)
             for from_, to in renames:
                 if p.startswith(str(from_)):
-                    p = str(to) + p[len(str(from_)) :]
+                    p = str(to) + p[len(str(from_)):]
             return Path(p)
 
         renames = self.get_renames()
         return {
-            path: ChangedFile(
+            path:
+            ChangedFile(
                 self._inference_state,
                 from_path=path,
                 to_path=calculate_to_path(path),
@@ -119,7 +120,8 @@ class Refactoring:
                 to.relative_to(project_path),
             )
 
-        return text + "".join(f.get_diff() for f in self.get_changed_files().values())
+        return text + "".join(f.get_diff()
+                              for f in self.get_changed_files().values())
 
     def apply(self):
         """
@@ -172,7 +174,8 @@ def inline(inference_state, names):
     if len(definitions) == 0:
         raise RefactoringError("No definition found to inline")
     if len(definitions) > 1:
-        raise RefactoringError("Cannot inline a name with multiple definitions")
+        raise RefactoringError(
+            "Cannot inline a name with multiple definitions")
     if len(names) == 1:
         raise RefactoringError("There are no references to this name")
 
@@ -187,20 +190,18 @@ def inline(inference_state, names):
         raise RefactoringError("Cannot inline a %s" % type_)
 
     if len(expr_stmt.get_defined_names(include_setitem=True)) > 1:
-        raise RefactoringError("Cannot inline a statement with multiple definitions")
+        raise RefactoringError(
+            "Cannot inline a statement with multiple definitions")
     first_child = expr_stmt.children[1]
     if first_child.type == "annassign" and len(first_child.children) == 4:
         first_child = first_child.children[2]
     if first_child != "=":
         if first_child.type == "annassign":
             raise RefactoringError(
-                "Cannot inline a statement that is defined by an annotation"
-            )
+                "Cannot inline a statement that is defined by an annotation")
         else:
-            raise RefactoringError(
-                'Cannot inline a statement with "%s"'
-                % first_child.get_code(include_prefix=False)
-            )
+            raise RefactoringError('Cannot inline a statement with "%s"' %
+                                   first_child.get_code(include_prefix=False))
 
     rhs = expr_stmt.get_rhs()
     replace_code = rhs.get_code(include_prefix=False)
@@ -211,12 +212,10 @@ def inline(inference_state, names):
         tree_name = name.tree_name
         path = name.get_root_context().py__file__()
         s = replace_code
-        if (
-            rhs.type == "testlist_star_expr"
-            or tree_name.parent.type in EXPRESSION_PARTS
-            or tree_name.parent.type == "trailer"
-            and tree_name.parent.get_next_sibling() is not None
-        ):
+        if (rhs.type == "testlist_star_expr"
+                or tree_name.parent.type in EXPRESSION_PARTS
+                or tree_name.parent.type == "trailer"
+                and tree_name.parent.get_next_sibling() is not None):
             s = "(" + replace_code + ")"
 
         of_path = file_to_node_changes.setdefault(path, {})
@@ -227,20 +226,21 @@ def inline(inference_state, names):
         if par.type == "trailer" and par.children[0] == ".":
             prefix = par.parent.children[0].prefix
             n = par
-            for some_node in par.parent.children[: par.parent.children.index(par)]:
+            for some_node in par.parent.children[:par.parent.children.index(par
+                                                                            )]:
                 of_path[some_node] = ""
         of_path[n] = prefix + s
 
     path = definitions[0].get_root_context().py__file__()
     changes = file_to_node_changes.setdefault(path, {})
-    changes[expr_stmt] = _remove_indent_of_prefix(expr_stmt.get_first_leaf().prefix)
+    changes[expr_stmt] = _remove_indent_of_prefix(
+        expr_stmt.get_first_leaf().prefix)
     next_leaf = expr_stmt.get_next_leaf()
 
     # Most of the time we have to remove the newline at the end of the
     # statement, but if there's a comment we might not need to.
-    if next_leaf.prefix.strip(" \t") == "" and (
-        next_leaf.type == "newline" or next_leaf == ";"
-    ):
+    if next_leaf.prefix.strip(" \t") == "" and (next_leaf.type == "newline"
+                                                or next_leaf == ";"):
         changes[next_leaf] = ""
     return Refactoring(inference_state, file_to_node_changes)
 

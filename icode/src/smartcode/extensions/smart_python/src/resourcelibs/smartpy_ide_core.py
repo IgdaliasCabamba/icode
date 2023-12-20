@@ -7,8 +7,7 @@ from pycodestyle import *
 EXCEPTIONS_REGEX = str()
 EXCEPTIONS_REGEX += "BaseException||FileNotFoundError||Exception||ArithmeticError||"
 EXCEPTIONS_REGEX += (
-    "BufferError||LookupError||AssertionError||AttributeError||EOFError||"
-)
+    "BufferError||LookupError||AssertionError||AttributeError||EOFError||")
 EXCEPTIONS_REGEX += "NameError"
 
 BUILTIN_EXCEPTIONS = [
@@ -24,7 +23,8 @@ BUILTIN_EXCEPTIONS = [
     "NameError",
 ]
 
-DEBUG_STATUS_REGEX = re.compile("([_a-z-A-Z-0-9]*.py)\\(([0-9]*)\\)<([_a-z-A-Z-0-9]*)>")
+DEBUG_STATUS_REGEX = re.compile(
+    "([_a-z-A-Z-0-9]*.py)\\(([0-9]*)\\)<([_a-z-A-Z-0-9]*)>")
 DEBUG_RETURN_REGEX = re.compile("(->) (.*)")
 DEBUG_CONTEXT_REGEX = re.compile("(Pdb)")
 DEBUG_EXCEPTION_REGEX = re.compile(f"({EXCEPTIONS_REGEX})(:)(.*)")
@@ -38,7 +38,8 @@ builtin_functions = {
     "breakpoint": "(*args, **kws)",
     "callable": "(object)",
     "chr": "(i)",
-    "compile": "(source, filename, mode, flags=0, dont_inherit=False, optimize=-1)",
+    "compile":
+    "(source, filename, mode, flags=0, dont_inherit=False, optimize=-1)",
     "delattr": "(object, name)",
     "dir": "([object])",
     "divmod": "(a, b)",
@@ -63,7 +64,8 @@ builtin_functions = {
     "min": "(iterable, *[, key, default])||(arg1, arg2, *args[, key])",
     "next": "(iterator[, default])",
     "oct": "(x)",
-    "open": "(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)",
+    "open":
+    "(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None)",
     "ord": "(c)",
     "pow": "(base, exp[, mod])",
     "print": r"(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)",

@@ -69,9 +69,8 @@ def match_to_datetime(match: "re.Match") -> Union[datetime, date]:
     hour, minute, sec = int(hour_str), int(minute_str), int(sec_str)
     micros = int(micros_str.ljust(6, "0")) if micros_str else 0
     if offset_sign_str:
-        tz: Optional[tzinfo] = cached_tz(
-            offset_hour_str, offset_minute_str, offset_sign_str
-        )
+        tz: Optional[tzinfo] = cached_tz(offset_hour_str, offset_minute_str,
+                                         offset_sign_str)
     elif zulu_time:
         tz = timezone.utc
     else:  # local date-time
@@ -86,8 +85,7 @@ def cached_tz(hour_str: str, minute_str: str, sign_str: str) -> timezone:
         timedelta(
             hours=sign * int(hour_str),
             minutes=sign * int(minute_str),
-        )
-    )
+        ))
 
 
 def match_to_localtime(match: "re.Match") -> time:

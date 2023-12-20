@@ -45,28 +45,22 @@ def module_key(
     if not config.case_sensitive:
         module_name = module_name.lower()
 
-    length_sort = (
-        config.length_sort
-        or (config.length_sort_straight and straight_import)
-        or str(section_name).lower() in config.length_sort_sections
-    )
-    _length_sort_maybe = (
-        (str(len(module_name)) + ":" + module_name) if length_sort else module_name
-    )
+    length_sort = (config.length_sort
+                   or (config.length_sort_straight and straight_import)
+                   or str(section_name).lower() in config.length_sort_sections)
+    _length_sort_maybe = ((str(len(module_name)) + ":" +
+                           module_name) if length_sort else module_name)
     return f"{module_name in config.force_to_top and 'A' or 'B'}{prefix}{_length_sort_maybe}"
 
 
 def section_key(line: str, config: Config) -> str:
     section = "B"
 
-    if (
-        not config.sort_relative_in_force_sorted_sections
-        and config.reverse_relative
-        and line.startswith("from .")
-    ):
+    if (not config.sort_relative_in_force_sorted_sections
+            and config.reverse_relative and line.startswith("from .")):
         match = re.match(r"^from (\.+)\s*(.*)", line)
         if (
-            match
+                match
         ):  # pragma: no cover - regex always matches if line starts with "from ."
             line = f"from {' '.join(match.groups())}"
     if config.group_by_package and line.strip().startswith("from"):
@@ -74,8 +68,7 @@ def section_key(line: str, config: Config) -> str:
 
     if config.lexicographical:
         line = _import_line_intro_re.sub(
-            "", _import_line_midline_import_re.sub(".", line)
-        )
+            "", _import_line_midline_import_re.sub(".", line))
     else:
         line = re.sub("^from ", "", line)
         line = re.sub("^import ", "", line)
@@ -88,10 +81,8 @@ def section_key(line: str, config: Config) -> str:
     #   order_by_type are different, only ignore case in part of the line.
     # * Otherwise, let order_by_type decide the sorting of the whole line. This
     #   is only "correct" if case_sensitive and order_by_type have the same value.
-    if (
-        config.honor_case_in_force_sorted_sections
-        and config.case_sensitive != config.order_by_type
-    ):
+    if (config.honor_case_in_force_sorted_sections
+            and config.case_sensitive != config.order_by_type):
         split_module = line.split(" import ", 1)
         if len(split_module) > 1:
             module_name, names = split_module

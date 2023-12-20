@@ -58,9 +58,8 @@ def h_visit_ast(ast_node):
     """
     visitor = HalsteadVisitor.from_ast(ast_node)
     total = halstead_visitor_report(visitor)
-    functions = [
-        (v.context, halstead_visitor_report(v)) for v in visitor.function_visitors
-    ]
+    functions = [(v.context, halstead_visitor_report(v))
+                 for v in visitor.function_visitors]
 
     return Halstead(total, functions)
 
@@ -106,13 +105,8 @@ def mi_compute(halstead_volume, complexity, sloc, comments):
     volume_scale = math.log(halstead_volume)
     comments_scale = math.sqrt(2.46 * math.radians(comments))
     # Non-normalized MI
-    nn_mi = (
-        171
-        - 5.2 * volume_scale
-        - 0.23 * complexity
-        - 16.2 * sloc_scale
-        + 50 * math.sin(comments_scale)
-    )
+    nn_mi = (171 - 5.2 * volume_scale - 0.23 * complexity - 16.2 * sloc_scale +
+             50 * math.sin(comments_scale))
     return min(max(0.0, nn_mi * 100 / 171.0), 100.0)
 
 

@@ -2,6 +2,7 @@ from core import *
 
 
 class App(Server):
+
     def __init__(self, ui: object, qt_app: object) -> None:
         super().__init__(None)
         self.qt_app = qt_app
@@ -27,9 +28,8 @@ class App(Server):
     def run_ui(self) -> None:
         """Organize the main widgets in current notebook"""
         self.welcome_widget = self.ui.welcome
-        index = self.ui.notebook.add_tab_and_get_index(
-            self.welcome_widget, f"# Get Started"
-        )
+        index = self.ui.notebook.add_tab_and_get_index(self.welcome_widget,
+                                                       f"# Get Started")
         self.configure_tab(index=index, tab_type="icode")
         self.on_new_tab.emit(self.welcome_widget)
 
@@ -52,7 +52,8 @@ class App(Server):
         home_dir = str(Path.home())
         if file_with_path:
             code_file = Path(file_with_path)
-            duplicate = self.is_file_duplicated(file_with_path, self.ui.notebook)
+            duplicate = self.is_file_duplicated(file_with_path,
+                                                self.ui.notebook)
             if code_file.is_file():
                 if duplicate:
                     # if file already exist in this notebook just go to file tab
@@ -72,7 +73,8 @@ class App(Server):
                         self.create_editor_from_file(code_file)
                         editor_cache.save_to_list(str(file), "files")
                     else:
-                        duplicate["notebook"].setCurrentWidget(duplicate["widget"])
+                        duplicate["notebook"].setCurrentWidget(
+                            duplicate["widget"])
 
         self.on_commit_app.emit(0)
 
@@ -155,15 +157,17 @@ class App(Server):
             if widget.objectName() == "editor-frame":
                 self.ui.notebook.find_replace.do_replace()
 
-    def configure_tab(self, index: int, tab_text: str = "", tab_type: str = ""):
+    def configure_tab(self,
+                      index: int,
+                      tab_text: str = "",
+                      tab_type: str = ""):
         widget = self.ui.notebook.widget(index)
         if tab_type == "icode":
             self.ui.notebook.setTabIcon(index, getfn.get_app_icon())
 
         else:
             self.ui.notebook.setTabIcon(
-                index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text))
-            )
+                index, getfn.get_qicon(getfn.get_icon_from_ext(tab_text)))
 
         if isfn.is_widget_code_editor(widget):
             widget.set_title(tab_text)
@@ -174,8 +178,7 @@ class App(Server):
             self.ui.notebook.close_widget(self.ui.config_ui)
         else:
             index = self.ui.notebook.add_tab_and_get_index(
-                self.ui.config_ui, "Settings"
-            )
+                self.ui.config_ui, "Settings")
             self.configure_tab(index=index, tab_type="icode")
 
     def change_minimap_visiblity(self, visiblity: bool) -> None:
@@ -185,7 +188,6 @@ class App(Server):
                 if isfn.is_widget_code_editor(widget):
                     for editor in widget.get_editors():
                         editor.set_minimap_visiblity(visiblity)
-
 
     def show_notifications(self):
         """Show/Hide Notifications Panel"""
@@ -233,18 +235,18 @@ class App(Server):
             title = data["data"]["first_line"]
 
             if len(title) > iconsts.MAX_TITLE_LENGTH:
-                title = title[0 : iconsts.MAX_TITLE_LENGTH]
+                title = title[0:iconsts.MAX_TITLE_LENGTH]
                 title += "..."
 
-            self.ui.notebook.setTabText(index, title + " " + str(data["widget"].title))
+            self.ui.notebook.setTabText(
+                index, title + " " + str(data["widget"].title))
         else:
             self.ui.notebook.setTabText(index, data["data"]["name"])
 
         self.ui.notebook.setTabToolTip(index, data["data"]["tooltip"])
         self.ui.notebook.setTabIcon(index, data["data"]["icon"])
         self.ui.set_window_title(
-            f"{self.ui.notebook.tabText(index)} - Intelligent Code"
-        )
+            f"{self.ui.notebook.tabText(index)} - Intelligent Code")
 
     def last_tab_closed(self):
         """Display home screen when no have more tabs to show in any notebook"""
@@ -375,8 +377,7 @@ class App(Server):
             if repo_path is not None:
                 self.status_bar.open_folder_mode()
                 self.status_bar.source_control.setText(
-                    f"{pathlib.Path(repo_path).name}{repo_branch}"
-                )
+                    f"{pathlib.Path(repo_path).name}{repo_branch}")
                 self.file_explorer.goto_folder(repo_path)
                 if opened:
                     if not self.ui.side_left.git.isVisible():
@@ -406,6 +407,7 @@ class App(Server):
             self.update_components()
             self.save_status()
 
+
 # .......................................................................................................................
 
     def new_editor(self, notebook, file=None, content_type=None):
@@ -415,7 +417,8 @@ class App(Server):
 
     def new_editor_notebook(self, orientation: int) -> None:
         self.tabs_count += 1
-        notebook = self.create_new_notebook(orientation, self.ui.notebook, False)
+        notebook = self.create_new_notebook(orientation, self.ui.notebook,
+                                            False)
         self.new_file(notebook)
 
     def new_file(self, notebook=False) -> EditorView:
@@ -426,7 +429,8 @@ class App(Server):
 
         editor = EditorView(self, self.ui, notebook)
         editor.on_tab_content_changed.connect(self.update_tab)
-        index = notebook.add_tab_and_get_index(editor, f"# Untituled-{self.tabs_count}")
+        index = notebook.add_tab_and_get_index(
+            editor, f"# Untituled-{self.tabs_count}")
         self.configure_tab(index, f"# Untituled-{self.tabs_count}", None)
         self.configure_editor(editor)
         self.on_commit_app.emit(1)
@@ -437,9 +441,8 @@ class App(Server):
         self.on_new_editor.emit(editor)
 
     def copy_editor(self, notebook, tab_data) -> EditorView:
-        editor = self.new_editor(
-            notebook, tab_data.widget.file, tab_data.widget.content_type
-        )
+        editor = self.new_editor(notebook, tab_data.widget.file,
+                                 tab_data.widget.content_type)
         editor.make_deep_copy(tab_data.widget)
         index = notebook.add_tab_and_get_index(editor, tab_data.title)
         notebook.setTabToolTip(index, tab_data.tooltip)
@@ -455,9 +458,10 @@ class App(Server):
         self.on_commit_app.emit(1)
         return editor
 
-    def create_new_notebook(
-        self, orientation: int, widget=None, copy: bool = True
-    ) -> NoteBookEditor:
+    def create_new_notebook(self,
+                            orientation: int,
+                            widget=None,
+                            copy: bool = True) -> NoteBookEditor:
         """Create a new notebook and split in mainwindow"""
         if widget is None:
             widget = self.ui.notebook
@@ -482,9 +486,10 @@ class App(Server):
         self.on_commit_app.emit(1)
         return notebook
 
-    def current_notebook_editor(
-        self, notebook: object = None, attr: str = None, value: object = None
-    ) -> Union[object, bool]:
+    def current_notebook_editor(self,
+                                notebook: object = None,
+                                attr: str = None,
+                                value: object = None) -> Union[object, bool]:
         if not self.are_notebooks_empty():
             if notebook is None:
                 widget = self.ui.notebook.currentWidget()
@@ -523,7 +528,6 @@ class App(Server):
         return False
 
 
-
 def run(args=None, call_out=None) -> None:
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
@@ -532,7 +536,7 @@ def run(args=None, call_out=None) -> None:
     qapp.setApplicationVersion("0.0.1")
     qapp.setApplicationName("Intelligent Code")
     qapp.setDesktopSettingsAware(False)
-    
+
     exe = MainWindow(None, styler.windows_style, qapp)
     app = App(exe, qapp)
     settings.restore_window(exe, app, getfn)

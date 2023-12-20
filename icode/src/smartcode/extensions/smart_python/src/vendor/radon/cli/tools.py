@@ -75,9 +75,9 @@ else:
             if enc == "utf-8" or enc.startswith("utf-8-"):
                 return "utf-8"
             if enc in (
-                "latin-1",
-                "iso-8859-1",
-                "iso-latin-1",
+                    "latin-1",
+                    "iso-8859-1",
+                    "iso-latin-1",
             ) or enc.startswith(("latin-1-", "iso-8859-1-", "iso-latin-1-")):
                 return "iso-8859-1"
             return orig_enc
@@ -140,8 +140,7 @@ else:
                         msg = "unknown encoding: " + encoding
                     else:
                         msg = "unknown encoding for {!r}: " "{}".format(
-                            filename, encoding
-                        )
+                            filename, encoding)
                     raise SyntaxError(msg)
 
                 if bom_found:
@@ -150,7 +149,8 @@ else:
                         if filename is None:
                             msg = "encoding problem: utf-8"
                         else:
-                            msg = "encoding problem for " "{!r}: utf-8".format(filename)
+                            msg = "encoding problem for " "{!r}: utf-8".format(
+                                filename)
                         raise SyntaxError(msg)
                     encoding += "-sig"
                 return encoding
@@ -219,11 +219,8 @@ else:
 
 def _is_python_file(filename):
     """Check if a file is a Python source file."""
-    if (
-        filename == "-"
-        or filename.endswith(".py")
-        or (SUPPORTS_IPYNB and filename.endswith(".ipynb"))
-    ):
+    if (filename == "-" or filename.endswith(".py")
+            or (SUPPORTS_IPYNB and filename.endswith(".ipynb"))):
         return True
     try:
         with open(filename) as fobj:
@@ -243,17 +240,15 @@ def iter_filenames(paths, exclude=None, ignore=None):
     patterns. If paths contains only a single hyphen, stdin is implied,
     returned as is.
     """
-    if set(paths) == set(("-",)):
+    if set(paths) == set(("-", )):
         yield "-"
         return
     exclude = exclude.split(",") if exclude else []
     ignore = ".*,{0}".format(ignore).split(",") if ignore else [".*"]
     for path in paths:
-        if (
-            os.path.isfile(path)
-            and _is_python_file(path)
-            and (not exclude or not any(fnmatch.fnmatch(path, p) for p in exclude))
-        ):
+        if (os.path.isfile(path) and _is_python_file(path) and
+            (not exclude or not any(fnmatch.fnmatch(path, p)
+                                    for p in exclude))):
             yield path
             continue
         for filename in explore_directories(path, exclude, ignore):
@@ -268,9 +263,8 @@ def explore_directories(start, exclude, ignore):
         dirs[:] = list(filter_out(dirs, ignore))
         fullpaths = (os.path.normpath(os.path.join(root, p)) for p in files)
         for filename in filter_out(fullpaths, exclude):
-            if not os.path.basename(filename).startswith(".") and _is_python_file(
-                filename
-            ):
+            if not os.path.basename(filename).startswith(
+                    ".") and _is_python_file(filename):
                 yield filename
 
 
@@ -334,7 +328,8 @@ def dict_to_xml(results):
 
             et.SubElement(metric, "classification").text = block["rank"]
             et.SubElement(metric, "file").text = filename
-            et.SubElement(metric, "startLineNumber").text = str(block["lineno"])
+            et.SubElement(metric,
+                          "startLineNumber").text = str(block["lineno"])
             et.SubElement(metric, "endLineNumber").text = str(block["endline"])
     return et.tostring(ccm).decode("utf-8")
 
@@ -349,11 +344,8 @@ def dict_to_md(results):
         for block in blocks:
             raw_classname = block.get("classname")
             raw_name = block.get("name")
-            name = (
-                "{}.{}".format(raw_classname, raw_name)
-                if raw_classname
-                else block["name"]
-            )
+            name = ("{}.{}".format(raw_classname, raw_name)
+                    if raw_classname else block["name"])
             type = type_letter_map[block["type"]]
             md_string += "| {} | {} | {} | {}:{} | {} | {} |\n".format(
                 filename,
@@ -399,22 +391,20 @@ def dict_to_codeclimate_issues(results, threshold="B"):
                     endline,
                     remediation_points,
                     fingerprint,
-                )
-            )
+                ))
         else:
             for offender in info:
                 beginline = offender["lineno"]
                 endline = offender["endline"]
                 complexity = offender["complexity"]
                 category = "Complexity"
-                description = (
-                    "Cyclomatic complexity is too high in {0} {1}. "
-                    "({2})".format(offender["type"], offender["name"], complexity)
-                )
-                remediation_points = get_remediation_points(complexity, threshold)
+                description = ("Cyclomatic complexity is too high in {0} {1}. "
+                               "({2})".format(offender["type"],
+                                              offender["name"], complexity))
+                remediation_points = get_remediation_points(
+                    complexity, threshold)
                 fingerprint = get_fingerprint(
-                    path, [offender["type"], offender["name"]]
-                )
+                    path, [offender["type"], offender["name"]])
 
                 if remediation_points > 0:
                     codeclimate_issues.append(
@@ -427,8 +417,7 @@ def dict_to_codeclimate_issues(results, threshold="B"):
                             endline,
                             remediation_points,
                             fingerprint,
-                        )
-                    )
+                        ))
     return codeclimate_issues
 
 
@@ -559,7 +548,8 @@ def get_content():
         "| while| +1| There is a decision at the *while* statement. |",
         "| except| +1| Each *except* branch adds a new conditional "
         "path of execution. |",
-        "| finally| +0| The finally block is unconditionally " "executed. |",
+        "| finally| +0| The finally block is unconditionally "
+        "executed. |",
         "| with| +1| The *with* statement roughly corresponds to a "
         "try/except block (see PEP 343 for details). |",
         "| assert| +1| The *assert* statement internally roughly "
@@ -583,4 +573,5 @@ def get_fingerprint(path, additional_parts):
 
 
 def strip_ipython(code):
-    return "\n".join([line for line in code.split("\n") if not line.startswith("%")])
+    return "\n".join(
+        [line for line in code.split("\n") if not line.startswith("%")])

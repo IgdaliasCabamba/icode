@@ -3,6 +3,7 @@ from qtpy.QtCore import QObject
 
 
 class CommandHistory(QObject):
+
     def __init__(self, parent):
         super(CommandHistory, self).__init__(parent)
         self._cmd_history = []

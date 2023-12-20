@@ -5,6 +5,7 @@
 # which can be used by the widget.
 # License: GPL2
 import platform
+
 kernel_name = platform.system().lower()
 
 import sys
@@ -14,7 +15,7 @@ if kernel_name == "linux":
     import fcntl
     import pty
     import termios
-    
+
 import array
 import threading
 import time
@@ -27,6 +28,7 @@ __version__ = "0.3"
 
 
 class Terminal(object):
+
     def __init__(self, w, h):
         self.w = w
         self.h = h
@@ -304,11 +306,11 @@ class Terminal(object):
 
     # Low-level terminal functions
     def peek(self, y0, x0, y1, x1):
-        return self.screen[self.w * y0 + x0 : self.w * (y1 - 1) + x1]
+        return self.screen[self.w * y0 + x0:self.w * (y1 - 1) + x1]
 
     def poke(self, y, x, s):
         pos = self.w * y + x
-        self.screen[pos : pos + len(s)] = s
+        self.screen[pos:pos + len(s)] = s
 
     def fill(self, y0, x0, y1, x1, char):
         n = self.w * (y1 - y0 - 1) + (x1 - x0)
@@ -446,8 +448,7 @@ class Terminal(object):
     # VT100 CTRL, ESC, CSI handlers
     def vt100_charset_update(self):
         self.vt100_charset_is_graphical = (
-            self.vt100_charset_g[self.vt100_charset_g_sel] == 2
-        )
+            self.vt100_charset_g[self.vt100_charset_g_sel] == 2)
 
     def vt100_charset_set(self, g):
         # Invoke active character set
@@ -502,8 +503,7 @@ class Terminal(object):
             elif m == "?47":
                 # Alternate screen mode
                 if (state and not self.vt100_mode_alt_screen) or (
-                    not state and self.vt100_mode_alt_screen
-                ):
+                        not state and self.vt100_mode_alt_screen):
                     self.screen, self.screen2 = self.screen2, self.screen
                     self.vt100_saved, self.vt100_saved2 = (
                         self.vt100_saved2,
@@ -739,12 +739,14 @@ class Terminal(object):
     def csi_SU(self, p):
         # Scroll up
         p = self.vt100_parse_params(p, [1])
-        self.scroll_area_up(self.scroll_area_y0, self.scroll_area_y1, max(1, p[0]))
+        self.scroll_area_up(self.scroll_area_y0, self.scroll_area_y1,
+                            max(1, p[0]))
 
     def csi_SD(self, p):
         # Scroll down
         p = self.vt100_parse_params(p, [1])
-        self.scroll_area_down(self.scroll_area_y0, self.scroll_area_y1, max(1, p[0]))
+        self.scroll_area_down(self.scroll_area_y0, self.scroll_area_y1,
+                              max(1, p[0]))
 
     def csi_CTC(self, p):
         # Cursor tabulation control
@@ -1130,6 +1132,7 @@ class Terminal(object):
 
 
 def synchronized(func):
+
     def wrapper(self, *args, **kwargs):
         try:
             self.lock.acquire()
@@ -1146,7 +1149,11 @@ def synchronized(func):
 
 
 class Multiplexer(object):
-    def __init__(self, cmd="/bin/bash", env_term="xterm-color", timeout=60 * 60 * 24):
+
+    def __init__(self,
+                 cmd="/bin/bash",
+                 env_term="xterm-color",
+                 timeout=60 * 60 * 24):
         # Set Linux signal handler
         if sys.platform in ("linux2", "linux3"):
             self.sigchldhandler = signal.signal(signal.SIGCHLD, signal.SIG_IGN)
@@ -1173,7 +1180,8 @@ class Multiplexer(object):
             try:
                 fcntl.ioctl(
                     fd,
-                    struct.unpack("i", struct.pack("I", termios.TIOCSWINSZ))[0],
+                    struct.unpack("i", struct.pack("I",
+                                                   termios.TIOCSWINSZ))[0],
                     struct.pack("HHHH", h, w, 0, 0),
                 )
             except (IOError, OSError):
@@ -1411,9 +1419,9 @@ class Session(object):
             self.keepalive()
 
     def start(self, cmd=None):
-        self._started = Session._mux.proc_keepalive(
-            self._session_id, self._width, self._height, cmd or self.cmd
-        )
+        self._started = Session._mux.proc_keepalive(self._session_id,
+                                                    self._width, self._height,
+                                                    cmd or self.cmd)
         return self._started
 
     def close(self):
@@ -1422,10 +1430,12 @@ class Session(object):
     stop = close
 
     def is_alive(self):
-        return Session._mux.session.get(self._session_id, {}).get("state") == "alive"
+        return Session._mux.session.get(self._session_id,
+                                        {}).get("state") == "alive"
 
     def keepalive(self):
-        return Session._mux.proc_keepalive(self._session_id, self._width, self._height)
+        return Session._mux.proc_keepalive(self._session_id, self._width,
+                                           self._height)
 
     def dump(self):
         if self.keepalive():
@@ -1436,7 +1446,8 @@ class Session(object):
             Session._mux.proc_write(self._session_id, data)
 
     def last_change(self):
-        return Session._mux.session.get(self._session_id, {}).get("changed", None)
+        return Session._mux.session.get(self._session_id,
+                                        {}).get("changed", None)
 
     def pid(self):
         return Session._mux.session.get(self._session_id, {}).get("pid", None)

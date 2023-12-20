@@ -15,6 +15,7 @@ class MovableTabData:
 
 
 class MovableMimeData(QMimeData):
+
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
         self._tab_data = None

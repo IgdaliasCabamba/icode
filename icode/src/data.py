@@ -4,27 +4,23 @@ from pathlib import Path
 import smartlibs.mjson as ijson
 from core.storer import CacheManager, DataManager
 
-user_cache = CacheManager(f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user.idt")
+user_cache = CacheManager(
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user.idt")
 
 editor_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}editors{SYS_SEP}cache.idt"
-)
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}editors{SYS_SEP}cache.idt")
 
 april_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}cache.idt"
-)
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}cache.idt")
 
 assistant_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}bot.idt"
-)
+    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}bot.idt")
 
-qt_cache = CacheManager(
-    BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "user" + SYS_SEP + "cache.idt"
-)
+qt_cache = CacheManager(BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "user" +
+                        SYS_SEP + "cache.idt")
 
-labels_cache = CacheManager(
-    BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "labs" + SYS_SEP + "labels.idt"
-)
+labels_cache = CacheManager(BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "labs" +
+                            SYS_SEP + "labels.idt")
 
 DATA_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}settings.json"
 TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}terminals.json"

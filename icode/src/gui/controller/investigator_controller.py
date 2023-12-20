@@ -3,7 +3,7 @@ from core.searcher import *
 
 
 class SearcherController(QObject):
-    
+
     on_searched = pyqtSignal(str, str, str, int, dict)
 
     def __init__(self, application_core, view):
@@ -24,12 +24,12 @@ class SearcherController(QObject):
         self.thread.started.connect(self.run)
 
         self.view.input_find.returnPressed.connect(lambda: self.do_search(0))
-        self.view.input_replace.returnPressed.connect(lambda: self.do_search(1))
+        self.view.input_replace.returnPressed.connect(
+            lambda: self.do_search(1))
         self.view.btn_replace_all.clicked.connect(lambda: self.do_search(1))
         self.view.btn_change_search_mode.clicked.connect(
-            lambda: self.view.btn_change_search_mode.showMenu()
-        )
-    
+            lambda: self.view.btn_change_search_mode.showMenu())
+
     def display_results(self, results, query):
         self.view.display_results(results, query)
 
@@ -39,7 +39,7 @@ class SearcherController(QObject):
 
     def run(self):
         self.engine.run()
-    
+
     def validate(self, text):
         if len(text.replace(" ", "")) <= 0:
             return False
@@ -62,11 +62,11 @@ class SearcherController(QObject):
                 "bf": self.view.search_options_menu.break_on_find.isChecked(),
             }
 
-            self.on_searched.emit(find_text, replace_text, self.folder, event, args)
+            self.on_searched.emit(find_text, replace_text, self.folder, event,
+                                  args)
             self.query_history.append(find_text)
             self._work_count += 1
             self.view.animation.play(True)
         else:
             self.view.display.show_text(
-                "<p style='color:yellow'>Please Type Some Thing to Search</p>"
-            )
+                "<p style='color:yellow'>Please Type Some Thing to Search</p>")

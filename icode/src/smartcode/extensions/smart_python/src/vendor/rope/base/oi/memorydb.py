@@ -2,6 +2,7 @@ from rope.base.oi import objectdb
 
 
 class MemoryDB(objectdb.FileDict):
+
     def __init__(self, project, persist=None):
         self.project = project
         self._persist = persist
@@ -12,9 +13,9 @@ class MemoryDB(objectdb.FileDict):
     def _load_files(self):
         self._files = {}
         if self.persist:
-            result = self.project.data_files.read_data(
-                "objectdb", compress=self.compress, import_=True
-            )
+            result = self.project.data_files.read_data("objectdb",
+                                                       compress=self.compress,
+                                                       import_=True)
             if result is not None:
                 self._files = result
 
@@ -51,7 +52,8 @@ class MemoryDB(objectdb.FileDict):
 
     def write(self):
         if self.persist:
-            self.project.data_files.write_data("objectdb", self._files, self.compress)
+            self.project.data_files.write_data("objectdb", self._files,
+                                               self.compress)
 
     @property
     def compress(self):
@@ -66,6 +68,7 @@ class MemoryDB(objectdb.FileDict):
 
 
 class FileInfo(objectdb.FileInfo):
+
     def __init__(self, scopes):
         self.scopes = scopes
 
@@ -96,6 +99,7 @@ class FileInfo(objectdb.FileInfo):
 
 
 class ScopeInfo(objectdb.ScopeInfo):
+
     def __init__(self):
         self.call_info = {}
         self.per_name = {}

@@ -4,6 +4,7 @@ from jedi.inference.gradual.base import BaseTypingValue
 
 
 class TypeVarClass(BaseTypingValue):
+
     def py__call__(self, arguments):
         unpacked = arguments.unpack()
 
@@ -14,17 +15,15 @@ class TypeVarClass(BaseTypingValue):
             debug.warning("Found a variable without a name %s", arguments)
             return NO_VALUES
 
-        return ValueSet(
-            [
-                TypeVar.create_cached(
-                    self.inference_state,
-                    self.parent_context,
-                    self._tree_name,
-                    var_name,
-                    unpacked,
-                )
-            ]
-        )
+        return ValueSet([
+            TypeVar.create_cached(
+                self.inference_state,
+                self.parent_context,
+                self._tree_name,
+                var_name,
+                unpacked,
+            )
+        ])
 
     def _find_string_name(self, lazy_value):
         if lazy_value is None:
@@ -34,7 +33,8 @@ class TypeVarClass(BaseTypingValue):
         if not value_set:
             return None
         if len(value_set) > 1:
-            debug.warning("Found multiple values for a type variable: %s", value_set)
+            debug.warning("Found multiple values for a type variable: %s",
+                          value_set)
 
         name_value = next(iter(value_set))
         try:
@@ -49,6 +49,7 @@ class TypeVarClass(BaseTypingValue):
 
 
 class TypeVar(BaseTypingValue):
+
     def __init__(self, parent_context, tree_name, var_name, unpacked_args):
         super().__init__(parent_context, tree_name)
         self._var_name = var_name
@@ -81,9 +82,8 @@ class TypeVar(BaseTypingValue):
             return self._bound_lazy_value.infer()
         if self._constraints_lazy_values:
             return self.constraints
-        debug.warning(
-            "Tried to infer the TypeVar %s without a given type", self._var_name
-        )
+        debug.warning("Tried to infer the TypeVar %s without a given type",
+                      self._var_name)
         return NO_VALUES
 
     def is_same_class(self, other):
@@ -92,9 +92,8 @@ class TypeVar(BaseTypingValue):
 
     @property
     def constraints(self):
-        return ValueSet.from_sets(
-            lazy.infer() for lazy in self._constraints_lazy_values
-        )
+        return ValueSet.from_sets(lazy.infer()
+                                  for lazy in self._constraints_lazy_values)
 
     def define_generics(self, type_var_dict):
         try:
@@ -110,6 +109,7 @@ class TypeVar(BaseTypingValue):
         return self._get_classes().execute_annotation()
 
     def infer_type_vars(self, value_set):
+
         def iterate():
             for v in value_set:
                 cls = v.py__class__()
@@ -125,6 +125,7 @@ class TypeVar(BaseTypingValue):
 
 
 class TypeWrapper(ValueWrapper):
+
     def __init__(self, wrapped_value, original_value):
         super().__init__(wrapped_value)
         self._original_value = original_value

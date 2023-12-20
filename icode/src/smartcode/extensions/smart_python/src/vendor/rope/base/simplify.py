@@ -50,18 +50,12 @@ def real_code(source):
 @utils.cached(7)
 def ignored_regions(source):
     """Return ignored regions like strings and comments in `source`"""
-    return [
-        (match.start(), match.end(), match.groupdict())
-        for match in _str.finditer(source)
-    ]
+    return [(match.start(), match.end(), match.groupdict())
+            for match in _str.finditer(source)]
 
 
-_str = re.compile(
-    "|".join(
-        [
-            codeanalyze.get_comment_pattern(),
-            codeanalyze.get_any_string_pattern(),
-        ]
-    )
-)
+_str = re.compile("|".join([
+    codeanalyze.get_comment_pattern(),
+    codeanalyze.get_any_string_pattern(),
+]))
 _parens = re.compile(r"[\({\[\]}\)\n]")

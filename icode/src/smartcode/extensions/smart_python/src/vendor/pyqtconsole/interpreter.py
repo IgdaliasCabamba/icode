@@ -94,10 +94,7 @@ def compile_multi(compiler, source, filename, symbol):
         block_source = source[find_nth('\n' + source, '\n', block_lineno):]
         if compiler(block_source, filename, 'single') is None:
             return None
-    return [
-        compile_single_node(node, filename)
-        for node in module.body
-    ]
+    return [compile_single_node(node, filename) for node in module.body]
 
 
 def compile_single_node(node, filename):
@@ -115,7 +112,7 @@ def compile_single_node(node, filename):
 
 def find_nth(string, char, n):
     """Find the n'th occurence of a character within a string."""
-    return [i for i, c in enumerate(string) if c == char][n-1]
+    return [i for i, c in enumerate(string) if c == char][n - 1]
 
 
 @contextlib.contextmanager

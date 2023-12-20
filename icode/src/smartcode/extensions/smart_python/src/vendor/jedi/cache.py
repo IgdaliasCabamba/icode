@@ -80,6 +80,7 @@ def signature_time_cache(time_add_setting):
 
 
 def time_cache(seconds):
+
     def decorator(func):
         cache = {}
 

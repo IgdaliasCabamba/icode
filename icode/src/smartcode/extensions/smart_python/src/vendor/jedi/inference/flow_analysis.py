@@ -45,10 +45,8 @@ def _get_flow_scopes(node):
 
 
 def reachability_check(context, value_scope, node, origin_scope=None):
-    if (
-        is_big_annoying_library(context)
-        or not context.inference_state.flow_analysis_enabled
-    ):
+    if (is_big_annoying_library(context)
+            or not context.inference_state.flow_analysis_enabled):
         return UNSURE
 
     first_flow_scope = get_parent_scope(node, include_flows=True)
@@ -60,17 +58,15 @@ def reachability_check(context, value_scope, node, origin_scope=None):
         for flow_scope in origin_flow_scopes:
             if flow_scope in node_flow_scopes:
                 node_keyword = get_flow_branch_keyword(flow_scope, node)
-                origin_keyword = get_flow_branch_keyword(flow_scope, origin_scope)
+                origin_keyword = get_flow_branch_keyword(
+                    flow_scope, origin_scope)
                 branch_matches = node_keyword == origin_keyword
                 if flow_scope.type == "if_stmt":
                     if not branch_matches:
                         return UNREACHABLE
                 elif flow_scope.type == "try_stmt":
-                    if (
-                        not branch_matches
-                        and origin_keyword == "else"
-                        and node_keyword == "except"
-                    ):
+                    if (not branch_matches and origin_keyword == "else"
+                            and node_keyword == "except"):
                         return UNREACHABLE
                 if branch_matches:
                     break

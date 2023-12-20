@@ -81,7 +81,8 @@ class MainWindow(QMainWindow):
         self.welcome = Welcome(self._notebook)
 
         self._current_notebook = self._notebook
-        self._current_notebook.last_tab_closed.connect(self.on_tabbar_last_closed)
+        self._current_notebook.last_tab_closed.connect(
+            self.on_tabbar_last_closed)
         self._current_notebook.on_user_event.connect(self.set_notebook)
 
         self.isplitter.add_notebook(self._current_notebook)
@@ -151,7 +152,8 @@ class MainWindow(QMainWindow):
         btn_layout = HeaderPushButton(self)
         btn_layout.setStyleSheet("background:transparent")
         # TODO: finish this button
-        self.frame = iwindow.ModernWindow(self, extra_buttons_right=[btn_layout] )
+        self.frame = iwindow.ModernWindow(self,
+                                          extra_buttons_right=[btn_layout])
         self.frame.set_window_menu(self.menu_bar)
         self.frame.set_menu_icon(self.icons.get_icon("menubar-menu"))
         self.frame.set_window_title("Icode")

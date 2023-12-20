@@ -28,15 +28,15 @@ from .lexers import *
 
 
 class SmartAnnotation:
+
     def __init__(self, all_notes, annotation, row):
         self.annotation = annotation
         self.row = row
         self._content = str()
         if isinstance(self.annotation, list):
             if self.annotation in all_notes:
-                self.annotation.append(
-                    QsciStyledText(" "), 216
-                )  # 216 is the AnnotationLabel style
+                self.annotation.append(QsciStyledText(" "),
+                                       216)  # 216 is the AnnotationLabel style
 
             for item in self.annotation:
                 if isinstance(item, QsciStyledText):
@@ -52,13 +52,15 @@ class SmartAnnotation:
 
 
 class KeyBoard:
+
     def __init__(self, editor):
         self.editor = editor
         self.init_bindings()
 
     def init_bindings(self):
         commands = self.editor.standardCommands()
-        command = commands.boundTo(Qt.ControlModifier | Qt.ShiftModifier | Qt.Key_T)
+        command = commands.boundTo(Qt.ControlModifier | Qt.ShiftModifier
+                                   | Qt.Key_T)
         if command is not None:
             command.setKey(Qt.ControlModifier | Qt.ShiftModifier | Qt.Key_B)
 
@@ -118,7 +120,8 @@ class Connector(QObject):
             indent_type = "Tabs:"
 
         self.editor.status_bar.indentation.setText(indent_type)
-        self.editor.status_bar.indentation_size.setText(str(self.editor.tabWidth()))
+        self.editor.status_bar.indentation_size.setText(
+            str(self.editor.tabWidth()))
         self.editor.status_bar.encode.setText(f"{code_name}")
         self.editor.status_bar.end_line_seq.setText(f"{eol_name}")
 
@@ -149,11 +152,16 @@ class IFile(QObject):
 
 
 class Debugger(QObject):
+
     def __init__(self, parent: object):
         super().__init__(parent)
         self.editor = parent
         self._current_line = 0
-        self._book_marks = {"book-marks": [], "break-points": [], "log-points": []}
+        self._book_marks = {
+            "book-marks": [],
+            "break-points": [],
+            "log-points": []
+        }
 
     @property
     def current_line(self):
@@ -187,6 +195,7 @@ class Debugger(QObject):
 
 
 class SmartScintilla(ImageScintilla):
+
     def __init__(self, parent: object) -> None:
         super().__init__(parent)
         self.parent = parent
@@ -205,6 +214,7 @@ class SmartScintilla(ImageScintilla):
 
 
 class EditorTip(QFrame):
+
     def __init__(self, parent: object) -> None:
         super().__init__(parent)
         self.parent = parent
@@ -290,9 +300,8 @@ class EditorBase(SmartScintilla):
             QsciScintilla.SCI_SETVIRTUALSPACEOPTIONS,
             QsciScintilla.SCVS_RECTANGULARSELECTION,
         )
-        self.SendScintilla(
-            QsciScintilla.SCI_SETMULTIPASTE, QsciScintilla.SC_MULTIPASTE_EACH
-        )
+        self.SendScintilla(QsciScintilla.SCI_SETMULTIPASTE,
+                           QsciScintilla.SC_MULTIPASTE_EACH)
 
     def build_indicators(self) -> None:
         self.indicatorDefine(QsciScintilla.SquiggleIndicator, 1)
@@ -350,9 +359,11 @@ class EditorBase(SmartScintilla):
 
         self.setFolding(QsciScintilla.PlainFoldStyle, 2)
 
-        mark_folderopen = self.icons.get_image("expand-arrow").scaled(QSize(12, 12))
+        mark_folderopen = self.icons.get_image("expand-arrow").scaled(
+            QSize(12, 12))
         mark_folder = self.icons.get_image("forward").scaled(QSize(12, 12))
-        mark_folderopenmind = self.icons.get_image("expand-arrow").scaled(QSize(12, 12))
+        mark_folderopenmind = self.icons.get_image("expand-arrow").scaled(
+            QSize(12, 12))
         mark_folderend = self.icons.get_image("forward").scaled(QSize(12, 12))
 
         sym_1 = self.icons.get_image("debug-breakpoint").scaled(QSize(12, 12))
@@ -362,7 +373,8 @@ class EditorBase(SmartScintilla):
 
         self.markerDefine(mark_folderopen, QsciScintilla.SC_MARKNUM_FOLDEROPEN)
         self.markerDefine(mark_folder, QsciScintilla.SC_MARKNUM_FOLDER)
-        self.markerDefine(mark_folderopenmind, QsciScintilla.SC_MARKNUM_FOLDEROPENMID)
+        self.markerDefine(mark_folderopenmind,
+                          QsciScintilla.SC_MARKNUM_FOLDEROPENMID)
         self.markerDefine(mark_folderend, QsciScintilla.SC_MARKNUM_FOLDEREND)
 
         self.update_lines()
@@ -527,11 +539,11 @@ class EditorBase(SmartScintilla):
         if until_column == -1:
             until_column = len(self.text(self.lines() - 1))
 
-        self.clearIndicatorRange(line, column, until_line, until_column, indicator_id)
+        self.clearIndicatorRange(line, column, until_line, until_column,
+                                 indicator_id)
         if minimap and self.minimap is not None:
-            self.minimap.clearIndicatorRange(
-                line, column, until_line, until_column, indicator_id
-            )
+            self.minimap.clearIndicatorRange(line, column, until_line,
+                                             until_column, indicator_id)
 
     def add_indicator_range(
         self,
@@ -542,11 +554,11 @@ class EditorBase(SmartScintilla):
         indicator_id: int,
         fill_minimap: bool,
     ) -> None:
-        self.fillIndicatorRange(line, column, until_line, until_column, indicator_id)
+        self.fillIndicatorRange(line, column, until_line, until_column,
+                                indicator_id)
         if fill_minimap and self.minimap is not None:
-            self.minimap.fillIndicatorRange(
-                line, column, until_line, until_column, indicator_id
-            )
+            self.minimap.fillIndicatorRange(line, column, until_line,
+                                            until_column, indicator_id)
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         super().mouseDoubleClickEvent(event)
@@ -564,7 +576,8 @@ class EditorBase(SmartScintilla):
         last_row, last_col = self.getCursorPosition()
         super().mousePressEvent(event)
 
-        if event.buttons() == Qt.LeftButton and event.modifiers() == Qt.AltModifier:
+        if event.buttons() == Qt.LeftButton and event.modifiers(
+        ) == Qt.AltModifier:
             self.all_cursors_pos.append((last_row, last_col))
             self.add_cursors(event.pos(), last_row, last_col)
 

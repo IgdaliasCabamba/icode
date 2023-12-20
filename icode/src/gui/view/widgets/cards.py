@@ -19,9 +19,12 @@ from functions import getfn
 
 
 class CardLab(QFrame):
-    def __init__(
-        self, parent=None, title: str = "Untitled", desc: str = "", name_id: str = None
-    ):
+
+    def __init__(self,
+                 parent=None,
+                 title: str = "Untitled",
+                 desc: str = "",
+                 name_id: str = None):
         super().__init__(parent)
         self.setObjectName("card-lab")
         self.parent = parent
@@ -62,9 +65,13 @@ class CardLab(QFrame):
 
 
 class CardApril(QFrame):
-    def __init__(
-        self, parent, content: object, title: str, pos: int, type: str = "text"
-    ):
+
+    def __init__(self,
+                 parent,
+                 content: object,
+                 title: str,
+                 pos: int,
+                 type: str = "text"):
         super().__init__(parent)
         self.icons = getfn.get_smartcode_icons("*")
         self.setObjectName("card-message")

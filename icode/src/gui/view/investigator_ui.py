@@ -24,6 +24,7 @@ from smartlibs.qtmd import HeaderPushButton, InputHistory, Animator
 
 
 class FindOptions(QMenu):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -65,6 +66,7 @@ class FindOptions(QMenu):
 
 
 class FindPanel(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("finder")
@@ -94,6 +96,7 @@ class FindPanel(QFrame):
 
 
 class ReplacePanel(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.icons = getfn.get_smartcode_icons("replacer")
@@ -147,7 +150,8 @@ class Results(QFrame):
         self.layout.addWidget(self.label)
 
     def open_file_from_item(self, item):
-        self.on_open_file_request.emit(item.item_data["file"], item.item_data["query"])
+        self.on_open_file_request.emit(item.item_data["file"],
+                                       item.item_data["query"])
 
     def clear(self):
         self.list_view.clear()
@@ -176,7 +180,10 @@ class Results(QFrame):
                 getfn.get_qicon(getfn.get_icon_from_ext(obj_path.name)),
                 obj_path.name,
                 item,
-                {"file": item, "query": query},
+                {
+                    "file": item,
+                    "query": query
+                },
             )
 
             self.list_view.addItem(row)

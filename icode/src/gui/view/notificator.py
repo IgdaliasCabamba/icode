@@ -61,8 +61,7 @@ class Notificator(QFrame):
 
         self.label_info = QLabel("No New Notifications", self.header_widget)
         self.label_info.setSizePolicy(
-            QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
-        )
+            QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum))
 
         self.btn_clear_notifications = HeaderPushButton(self)
         self.btn_clear_notifications.setIcon(self.icons.get_icon("clear"))
@@ -196,12 +195,8 @@ class Notificator(QFrame):
         return active
 
     def update_position(self):
-        y = (
-            self.view.geometry().height()
-            - self.geometry().height()
-            - self.view.status_bar.geometry().height()
-            - 10
-        )
+        y = (self.view.geometry().height() - self.geometry().height() -
+             self.view.status_bar.geometry().height() - 10)
         w = self.view.geometry().width()
         x = int(w - self.geometry().width()) - 10
         self.move(x, y)
@@ -215,8 +210,10 @@ class Notificator(QFrame):
         else:
             h = 40
 
-        if h >= self.view.geometry().height() - self.view.geometry().height() / 2:
-            h = self.view.geometry().height() - int(self.view.geometry().height() / 2)
+        if h >= self.view.geometry().height(
+        ) - self.view.geometry().height() / 2:
+            h = self.view.geometry().height() - int(
+                self.view.geometry().height() / 2)
 
         self.setFixedHeight(h)
 
@@ -231,7 +228,8 @@ class Notificator(QFrame):
         elif notifications_count > 0 and notifications_count <= 9:
             self.label_info.setText(f"{notifications_count} Notifications")
         else:
-            self.label_info.setText(f"9{get_unicon('nf', 'mid-plus')}, Notifications")
+            self.label_info.setText(
+                f"9{get_unicon('nf', 'mid-plus')}, Notifications")
 
     def show_hide(self):
         """Show or hide the Notifications and update the visiblity of notifications"""

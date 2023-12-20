@@ -33,6 +33,7 @@ from jedi.parser_utils import function_is_staticmethod, function_is_classmethod
 
 
 class InstanceExecutedParamName(ParamName):
+
     def __init__(self, instance, function_value, tree_name):
         super().__init__(function_value, tree_name, arguments=None)
         self._instance = instance
@@ -45,6 +46,7 @@ class InstanceExecutedParamName(ParamName):
 
 
 class AnonymousMethodExecutionFilter(AnonymousFunctionExecutionFilter):
+
     def __init__(self, instance, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._instance = instance
@@ -52,17 +54,16 @@ class AnonymousMethodExecutionFilter(AnonymousFunctionExecutionFilter):
     def _convert_param(self, param, name):
         if param.position_index == 0:
             if function_is_classmethod(self._function_value.tree_node):
-                return InstanceExecutedParamName(
-                    self._instance.py__class__(), self._function_value, name
-                )
+                return InstanceExecutedParamName(self._instance.py__class__(),
+                                                 self._function_value, name)
             elif not function_is_staticmethod(self._function_value.tree_node):
-                return InstanceExecutedParamName(
-                    self._instance, self._function_value, name
-                )
+                return InstanceExecutedParamName(self._instance,
+                                                 self._function_value, name)
         return super()._convert_param(param, name)
 
 
 class AnonymousMethodExecutionContext(BaseFunctionExecutionContext):
+
     def __init__(self, instance, value):
         super().__init__(value)
         self.instance = instance
@@ -79,13 +80,13 @@ class AnonymousMethodExecutionContext(BaseFunctionExecutionContext):
     def get_param_names(self):
         param_names = list(self._value.get_param_names())
         # set the self name
-        param_names[0] = InstanceExecutedParamName(
-            self.instance, self._value, param_names[0].tree_name
-        )
+        param_names[0] = InstanceExecutedParamName(self.instance, self._value,
+                                                   param_names[0].tree_name)
         return param_names
 
 
 class MethodExecutionContext(FunctionExecutionContext):
+
     def __init__(self, instance, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.instance = instance
@@ -122,8 +123,7 @@ class AbstractInstanceValue(Value):
 
     def get_signatures(self):
         call_funcs = self.py__getattribute__("__call__").py__get__(
-            self, self.class_value
-        )
+            self, self.class_value)
         return [s.bind(self) for s in call_funcs.get_signatures()]
 
     def get_function_slot_names(self, name):
@@ -132,8 +132,7 @@ class AbstractInstanceValue(Value):
 
     def execute_function_slots(self, names, *inferred_args):
         return ValueSet.from_sets(
-            name.infer().execute_with_values(*inferred_args) for name in names
-        )
+            name.infer().execute_with_values(*inferred_args) for name in names)
 
     def get_type_hint(self, add_class_info=True):
         return self.py__name__()
@@ -145,7 +144,8 @@ class AbstractInstanceValue(Value):
 class CompiledInstance(AbstractInstanceValue):
     # This is not really a compiled class, it's just an instance from a
     # compiled class.
-    def __init__(self, inference_state, parent_context, class_value, arguments):
+    def __init__(self, inference_state, parent_context, class_value,
+                 arguments):
         super().__init__(inference_state, parent_context, class_value)
         self._arguments = arguments
 
@@ -160,20 +160,20 @@ class CompiledInstance(AbstractInstanceValue):
 
     @property
     def name(self):
-        return compiled.CompiledValueName(self, self.class_value.name.string_name)
+        return compiled.CompiledValueName(self,
+                                          self.class_value.name.string_name)
 
     def is_stub(self):
         return False
 
 
 class _BaseTreeInstance(AbstractInstanceValue):
+
     @property
     def array_type(self):
         name = self.class_value.py__name__()
-        if (
-            name in ["list", "set", "dict"]
-            and self.parent_context.get_root_context().is_builtins_module()
-        ):
+        if (name in ["list", "set", "dict"] and
+                self.parent_context.get_root_context().is_builtins_module()):
             return name
         return None
 
@@ -189,9 +189,8 @@ class _BaseTreeInstance(AbstractInstanceValue):
                     # In this case we're excluding compiled objects that are
                     # not fake objects. It doesn't make sense for normal
                     # compiled objects to search for self variables.
-                    yield SelfAttributeFilter(
-                        self, class_value, cls.as_context(), origin_scope
-                    )
+                    yield SelfAttributeFilter(self, class_value,
+                                              cls.as_context(), origin_scope)
 
         class_filters = class_value.get_filters(
             origin_scope=origin_scope,
@@ -243,8 +242,7 @@ class _BaseTreeInstance(AbstractInstanceValue):
         if is_big_annoying_library(self.parent_context):
             return NO_VALUES
         names = self.get_function_slot_names(
-            "__getattr__"
-        ) or self.get_function_slot_names("__getattribute__")
+            "__getattr__") or self.get_function_slot_names("__getattribute__")
         return self.execute_function_slots(names, name)
 
     def py__getitem__(self, index_value_set, contextualized_node):
@@ -283,7 +281,8 @@ class _BaseTreeInstance(AbstractInstanceValue):
             # Means the Instance is not callable.
             return super().py__call__(arguments)
 
-        return ValueSet.from_sets(name.infer().execute(arguments) for name in names)
+        return ValueSet.from_sets(name.infer().execute(arguments)
+                                  for name in names)
 
     def py__get__(self, instance, class_value):
         """
@@ -299,7 +298,8 @@ class _BaseTreeInstance(AbstractInstanceValue):
         names = self.get_function_slot_names("__get__")
         if names:
             if instance is None:
-                instance = compiled.builtin_from_name(self.inference_state, "None")
+                instance = compiled.builtin_from_name(self.inference_state,
+                                                      "None")
             return self.execute_function_slots(names, instance, class_value)
         else:
             return ValueSet([self])
@@ -316,13 +316,13 @@ class _BaseTreeInstance(AbstractInstanceValue):
 
 
 class TreeInstance(_BaseTreeInstance):
-    def __init__(self, inference_state, parent_context, class_value, arguments):
+
+    def __init__(self, inference_state, parent_context, class_value,
+                 arguments):
         # I don't think that dynamic append lookups should happen here. That
         # sounds more like something that should go to py__iter__.
-        if (
-            class_value.py__name__() in ["list", "set"]
-            and parent_context.get_root_context().is_builtins_module()
-        ):
+        if (class_value.py__name__() in ["list", "set"]
+                and parent_context.get_root_context().is_builtins_module()):
             # compare the module path with the builtin name.
             if settings.dynamic_array_additions:
                 arguments = get_dynamic_array_instance(self, arguments)
@@ -342,33 +342,27 @@ class TreeInstance(_BaseTreeInstance):
 
         args = InstanceArguments(self, self._arguments)
         for signature in self.class_value.py__getattribute__(
-            "__init__"
-        ).get_signatures():
+                "__init__").get_signatures():
             # Just take the first result, it should always be one, because we
             # control the typeshed code.
             funcdef = signature.value.tree_node
-            if (
-                funcdef is None
-                or funcdef.type != "funcdef"
-                or not signature.matches_signature(args)
-            ):
+            if (funcdef is None or funcdef.type != "funcdef"
+                    or not signature.matches_signature(args)):
                 # First check if the signature even matches, if not we don't
                 # need to infer anything.
                 continue
-            bound_method = BoundMethod(
-                self, self.class_value.as_context(), signature.value
-            )
+            bound_method = BoundMethod(self, self.class_value.as_context(),
+                                       signature.value)
             all_annotations = py__annotations__(funcdef)
             type_var_dict = infer_type_vars_for_execution(
-                bound_method, args, all_annotations
-            )
+                bound_method, args, all_annotations)
             if type_var_dict:
-                (defined,) = self.class_value.define_generics(
-                    infer_type_vars_for_execution(
-                        signature.value, args, all_annotations
-                    ),
-                )
-                debug.dbg("Inferred instance value as %s", defined, color="BLUE")
+                (defined, ) = self.class_value.define_generics(
+                    infer_type_vars_for_execution(signature.value, args,
+                                                  all_annotations), )
+                debug.dbg("Inferred instance value as %s",
+                          defined,
+                          color="BLUE")
                 return defined
         return None
 
@@ -380,20 +374,16 @@ class TreeInstance(_BaseTreeInstance):
         if self.array_type == "dict":
             for i, (key, instance) in enumerate(self._arguments.unpack()):
                 if key is None and i == 0:
-                    values |= ValueSet.from_sets(
-                        v.get_key_values()
-                        for v in instance.infer()
-                        if v.array_type == "dict"
-                    )
+                    values |= ValueSet.from_sets(v.get_key_values()
+                                                 for v in instance.infer()
+                                                 if v.array_type == "dict")
                 if key:
-                    values |= ValueSet(
-                        [
-                            compiled.create_simple_object(
-                                self.inference_state,
-                                key,
-                            )
-                        ]
-                    )
+                    values |= ValueSet([
+                        compiled.create_simple_object(
+                            self.inference_state,
+                            key,
+                        )
+                    ])
 
         return values
 
@@ -411,8 +401,7 @@ class TreeInstance(_BaseTreeInstance):
                     values = ValueSet.from_sets(
                         dct_value.py__simple_getitem__(index)
                         for dct_value in lazy_context.infer()
-                        if dct_value.array_type == "dict"
-                    )
+                        if dct_value.array_type == "dict")
                     if values:
                         return values
                 else:
@@ -433,6 +422,7 @@ class AnonymousInstance(_BaseTreeInstance):
 
 
 class CompiledInstanceName(NameWrapper):
+
     @iterator_to_value_set
     def infer(self):
         for result_value in self._wrapped_name.infer():
@@ -443,6 +433,7 @@ class CompiledInstanceName(NameWrapper):
 
 
 class CompiledInstanceClassFilter(AbstractFilter):
+
     def __init__(self, instance, f):
         self._instance = instance
         self._class_filter = f
@@ -458,6 +449,7 @@ class CompiledInstanceClassFilter(AbstractFilter):
 
 
 class BoundMethod(FunctionMixin, ValueWrapper):
+
     def __init__(self, instance, class_context, function):
         super().__init__(function)
         self.instance = instance
@@ -471,7 +463,8 @@ class BoundMethod(FunctionMixin, ValueWrapper):
         return FunctionNameInClass(self._class_context, super().name)
 
     def py__class__(self):
-        (c,) = values_from_qualified_names(self.inference_state, "types", "MethodType")
+        (c, ) = values_from_qualified_names(self.inference_state, "types",
+                                            "MethodType")
         return c
 
     def _get_arguments(self, arguments):
@@ -487,7 +480,8 @@ class BoundMethod(FunctionMixin, ValueWrapper):
 
     def py__call__(self, arguments):
         if isinstance(self._wrapped_value, OverloadedFunctionValue):
-            return self._wrapped_value.py__call__(self._get_arguments(arguments))
+            return self._wrapped_value.py__call__(
+                self._get_arguments(arguments))
 
         function_execution = self.as_context(arguments)
         return function_execution.infer()
@@ -506,6 +500,7 @@ class BoundMethod(FunctionMixin, ValueWrapper):
 
 
 class CompiledBoundMethod(ValueWrapper):
+
     def is_bound_method(self):
         return True
 
@@ -525,9 +520,8 @@ class SelfName(TreeNameDefinition):
 
     @property
     def parent_context(self):
-        return self._instance.create_instance_context(
-            self.class_context, self.tree_name
-        )
+        return self._instance.create_instance_context(self.class_context,
+                                                      self.tree_name)
 
     def get_defining_qualified_value(self):
         return self._instance
@@ -539,14 +533,15 @@ class SelfName(TreeNameDefinition):
                 from jedi.inference.gradual.annotation import infer_annotation
 
                 values = infer_annotation(
-                    self.parent_context, stmt.children[1].children[1]
-                ).execute_annotation()
+                    self.parent_context,
+                    stmt.children[1].children[1]).execute_annotation()
                 if values:
                     return values
         return super().infer()
 
 
 class LazyInstanceClassName(NameWrapper):
+
     def __init__(self, instance, class_member_name):
         super().__init__(class_member_name)
         self._instance = instance
@@ -554,9 +549,8 @@ class LazyInstanceClassName(NameWrapper):
     @iterator_to_value_set
     def infer(self):
         for result_value in self._wrapped_name.infer():
-            yield from result_value.py__get__(
-                self._instance, self._instance.py__class__()
-            )
+            yield from result_value.py__get__(self._instance,
+                                              self._instance.py__class__())
 
     def get_signatures(self):
         return self.infer().get_signatures()
@@ -611,35 +605,35 @@ class SelfAttributeFilter(ClassFilter):
     def _filter_self_names(self, names):
         for name in names:
             trailer = name.parent
-            if (
-                trailer.type == "trailer"
-                and len(trailer.parent.children) == 2
-                and trailer.children[0] == "."
-            ):
+            if (trailer.type == "trailer" and len(trailer.parent.children) == 2
+                    and trailer.children[0] == "."):
                 if name.is_definition() and self._access_possible(name):
                     # TODO filter non-self assignments instead of this bad
                     #      filter.
-                    if self._is_in_right_scope(trailer.parent.children[0], name):
+                    if self._is_in_right_scope(trailer.parent.children[0],
+                                               name):
                         yield name
 
     def _is_in_right_scope(self, self_name, name):
         self_context = self._node_context.create_context(self_name)
         names = self_context.goto(self_name, position=self_name.start_pos)
-        return any(
-            n.api_type == "param"
-            and n.tree_name.get_definition().position_index == 0
-            and n.parent_context.tree_node is self._parser_scope
-            for n in names
-        )
+        return any(n.api_type == "param"
+                   and n.tree_name.get_definition().position_index == 0
+                   and n.parent_context.tree_node is self._parser_scope
+                   for n in names)
 
     def _convert_names(self, names):
-        return [SelfName(self._instance, self._node_context, name) for name in names]
+        return [
+            SelfName(self._instance, self._node_context, name)
+            for name in names
+        ]
 
     def _check_flows(self, names):
         return names
 
 
 class InstanceArguments(TreeArgumentsWrapper):
+
     def __init__(self, instance, arguments):
         super().__init__(arguments)
         self.instance = instance

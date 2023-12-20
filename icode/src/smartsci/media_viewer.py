@@ -24,18 +24,15 @@ class ImageView(QGraphicsView):
         self.setCursor(Qt.OpenHandCursor)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setRenderHints(
-            QPainter.Antialiasing
-            | QPainter.HighQualityAntialiasing
-            | QPainter.SmoothPixmapTransform
-        )
+        self.setRenderHints(QPainter.Antialiasing
+                            | QPainter.HighQualityAntialiasing
+                            | QPainter.SmoothPixmapTransform)
         self.setCacheMode(self.CacheBackground)
         self.setViewportUpdateMode(self.SmartViewportUpdate)
 
         self._item = QGraphicsPixmapItem()
-        self._item.setFlags(
-            QGraphicsPixmapItem.ItemIsFocusable | QGraphicsPixmapItem.ItemIsMovable
-        )
+        self._item.setFlags(QGraphicsPixmapItem.ItemIsFocusable
+                            | QGraphicsPixmapItem.ItemIsMovable)
         self._scene = QGraphicsScene(self)
         self.setScene(self._scene)
         self._scene.addItem(self._item)
@@ -62,16 +59,16 @@ class ImageView(QGraphicsView):
         self.setSceneDims()
         if fitIn:
             self.fitInView(
-                QRectF(self._item.pos(), QSizeF(self.pixmap.size())), Qt.KeepAspectRatio
-            )
+                QRectF(self._item.pos(), QSizeF(self.pixmap.size())),
+                Qt.KeepAspectRatio)
         self.update()
 
     def setSceneDims(self):
         if not self.pixmap:
             return
         self.setSceneRect(
-            QRectF(QPointF(0, 0), QPointF(self.pixmap.width(), self.pixmap.height()))
-        )
+            QRectF(QPointF(0, 0),
+                   QPointF(self.pixmap.width(), self.pixmap.height())))
 
     def fitInView(self, rect, flags=Qt.IgnoreAspectRatio):
         if not self.scene() or rect.isNull():
@@ -106,9 +103,9 @@ class ImageView(QGraphicsView):
         self.zoom(1 - self._delta)
 
     def zoom(self, factor) -> None:
-        _factor = (
-            self.transform().scale(factor, factor).mapRect(QRectF(0, 0, 1, 1)).width()
-        )
+        _factor = (self.transform().scale(factor,
+                                          factor).mapRect(QRectF(0, 0, 1,
+                                                                 1)).width())
         if _factor < 0.07 or _factor > 100:
             return None
         self.scale(factor, factor)
@@ -130,6 +127,7 @@ class ImageView(QGraphicsView):
 
 
 class EditorMedia(QFrame):
+
     def __init__(self, parent, file):
         super().__init__(parent)
         self.setObjectName("editor-media")

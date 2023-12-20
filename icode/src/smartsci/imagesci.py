@@ -6,16 +6,19 @@ from PyQt5.Qsci import *
 
 
 class ImageScintilla(QsciScintilla):
+
     class Image:
+
         def __init__(self, image, position, size=None):
             if isinstance(image, str) == False:
                 raise Exception("Enter path to image as a string.")
             elif isinstance(position, tuple) == False or len(position) != 2:
-                raise Exception("Image position should be of type tuple(int, int)!")
-            elif size != None and (
-                isinstance(position, tuple) == False or len(position) != 2
-            ):
-                raise Exception("Image size has to be of type tuple(int, int)!")
+                raise Exception(
+                    "Image position should be of type tuple(int, int)!")
+            elif size != None and (isinstance(position, tuple) == False
+                                   or len(position) != 2):
+                raise Exception(
+                    "Image size has to be of type tuple(int, int)!")
             self.image = QImage(image)
             if size != None:
                 self.image = self.image.scaled(*size)
@@ -48,9 +51,7 @@ class ImageScintilla(QsciScintilla):
         else:
             raise Exception(
                 "Too many images in the editor, the maximum is '{}'".format(
-                    self.maximum_image_count
-                )
-            )
+                    self.maximum_image_count))
 
     def delete_image(self, index):
         if isinstance(index, int) == False or index > self.maximum_image_count:
@@ -97,8 +98,7 @@ class ImageScintilla(QsciScintilla):
         first_visible_line = self.SendScintilla(self.SCI_GETFIRSTVISIBLELINE)
         column_offset_in_pixels = self.SendScintilla(self.SCI_GETXOFFSET)
         single_character_width, single_character_height = self.get_font_metrics(
-            self.calculation_font
-        )
+            self.calculation_font)
 
         painter = QPainter()
         painter.begin(self.viewport())
@@ -106,12 +106,10 @@ class ImageScintilla(QsciScintilla):
         for i in self.image_list.keys():
 
             image = self.image_list[i].image
-            paint_offset_x = (
-                self.image_list[i].position[0] * single_character_width
-            ) - column_offset_in_pixels
-            paint_offset_y = (
-                self.image_list[i].position[1] - first_visible_line
-            ) * single_character_height
+            paint_offset_x = (self.image_list[i].position[0] *
+                              single_character_width) - column_offset_in_pixels
+            paint_offset_y = (self.image_list[i].position[1] -
+                              first_visible_line) * single_character_height
 
             painter.drawImage(QPoint(paint_offset_x, paint_offset_y), image)
 

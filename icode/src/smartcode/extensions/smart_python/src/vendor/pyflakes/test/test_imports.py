@@ -12,6 +12,7 @@ from pyflakes.test.harness import TestCase, skip, skipIf
 
 
 class TestImportationObject(TestCase):
+
     def test_import_basic(self):
         binding = Importation("a", None, "a")
         assert binding.source_statement == "import a"
@@ -102,6 +103,7 @@ class TestImportationObject(TestCase):
 
 
 class Test(TestCase):
+
     def test_unusedImport(self):
         self.flakes("import fu, bar", m.UnusedImport, m.UnusedImport)
         self.flakes("from baz import fu, bar", m.UnusedImport, m.UnusedImport)
@@ -121,18 +123,17 @@ class Test(TestCase):
 
         error = checker.messages[0]
         assert error.message == "%r imported but unused"
-        assert error.message_args == (".fu",)
+        assert error.message_args == (".fu", )
 
         checker = self.flakes("from . import fu as baz", m.UnusedImport)
 
         error = checker.messages[0]
         assert error.message == "%r imported but unused"
-        assert error.message_args == (".fu as baz",)
+        assert error.message_args == (".fu as baz", )
 
     def test_aliasedImport(self):
-        self.flakes(
-            "import fu as FU, bar as FU", m.RedefinedWhileUnused, m.UnusedImport
-        )
+        self.flakes("import fu as FU, bar as FU", m.RedefinedWhileUnused,
+                    m.UnusedImport)
         self.flakes(
             "from moo import fu as FU, bar as FU",
             m.RedefinedWhileUnused,
@@ -181,15 +182,13 @@ class Test(TestCase):
         Test that importing a module twice in if
         and else blocks does not raise a warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         i = 2
         if i==1:
             import os
         else:
             import os
-        os.path"""
-        )
+        os.path""")
 
     def test_redefinedTry(self):
         """
@@ -212,34 +211,29 @@ class Test(TestCase):
         Test that importing a module twice in a try
         and except block does not raise a warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         try:
             import os
         except:
             import os
-        os.path"""
-        )
+        os.path""")
 
     def test_redefinedTryNested(self):
         """
         Test that importing a module twice using a nested
         try/except and if blocks does not issue a warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         try:
             if True:
                 if True:
                     import os
         except:
             import os
-        os.path"""
-        )
+        os.path""")
 
     def test_redefinedTryExceptMulti(self):
-        self.flakes(
-            """
+        self.flakes("""
         try:
             from aa import mixer
         except AttributeError:
@@ -249,8 +243,7 @@ class Test(TestCase):
         except:
             from dd import mixer
         mixer(123)
-        """
-        )
+        """)
 
     def test_redefinedTryElse(self):
         self.flakes(
@@ -267,8 +260,7 @@ class Test(TestCase):
         )
 
     def test_redefinedTryExceptElse(self):
-        self.flakes(
-            """
+        self.flakes("""
         try:
             import funca
         except ImportError:
@@ -277,12 +269,10 @@ class Test(TestCase):
         else:
             from bbb import funcb
         print(funca, funcb)
-        """
-        )
+        """)
 
     def test_redefinedTryExceptFinally(self):
-        self.flakes(
-            """
+        self.flakes("""
         try:
             from aa import a
         except ImportError:
@@ -290,12 +280,10 @@ class Test(TestCase):
         finally:
             a = 42
         print(a)
-        """
-        )
+        """)
 
     def test_redefinedTryExceptElseFinally(self):
-        self.flakes(
-            """
+        self.flakes("""
         try:
             import b
         except ImportError:
@@ -306,8 +294,7 @@ class Test(TestCase):
         finally:
             a = 42
         print(a, b)
-        """
-        )
+        """)
 
     def test_redefinedByFunction(self):
         self.flakes(
@@ -361,8 +348,7 @@ class Test(TestCase):
         Test that a global import which is redefined locally,
         but used later in another scope does not generate a warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import unittest, transport
 
         class GetTransportTestCase(unittest.TestCase):
@@ -373,8 +359,7 @@ class Test(TestCase):
         class TestTransportMethodArgs(unittest.TestCase):
             def test_send_defaults(self):
                 transport.Transport()
-        """
-        )
+        """)
 
     def test_redefinedByClass(self):
         self.flakes(
@@ -391,38 +376,32 @@ class Test(TestCase):
         If an imported name is redefined by a class statement which also uses
         that name in the bases list, no warning is emitted.
         """
-        self.flakes(
-            """
+        self.flakes("""
         from fu import bar
         class bar(bar):
             pass
-        """
-        )
+        """)
 
     def test_redefinedInClass(self):
         """
         Test that shadowing a global with a class attribute does not produce a
         warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         class bar:
             fu = 1
         print(fu)
-        """
-        )
+        """)
 
     def test_importInClass(self):
         """
         Test that import within class is a locally scoped attribute.
         """
-        self.flakes(
-            """
+        self.flakes("""
         class bar:
             import fu
-        """
-        )
+        """)
 
         self.flakes(
             """
@@ -435,13 +414,11 @@ class Test(TestCase):
         )
 
     def test_usedInFunction(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def fun():
             print(fu)
-        """
-        )
+        """)
 
     def test_shadowedByParameter(self):
         self.flakes(
@@ -454,14 +431,12 @@ class Test(TestCase):
             m.RedefinedWhileUnused,
         )
 
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def fun(fu):
             print(fu)
         print(fu)
-        """
-        )
+        """)
 
     def test_newAssignment(self):
         self.flakes("fu = None")
@@ -474,89 +449,71 @@ class Test(TestCase):
         self.flakes("import fu; print(fu.bar[1:])")
 
     def test_usedInIfBody(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         if True: print(fu)
-        """
-        )
+        """)
 
     def test_usedInIfConditional(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         if fu: pass
-        """
-        )
+        """)
 
     def test_usedInElifConditional(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         if False: pass
         elif fu: pass
-        """
-        )
+        """)
 
     def test_usedInElse(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         if False: pass
         else: print(fu)
-        """
-        )
+        """)
 
     def test_usedInCall(self):
         self.flakes("import fu; fu.bar()")
 
     def test_usedInClass(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         class bar:
             bar = fu
-        """
-        )
+        """)
 
     def test_usedInClassBase(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         class bar(object, fu.baz):
             pass
-        """
-        )
+        """)
 
     def test_notUsedInNestedScope(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def bleh():
             pass
         print(fu)
-        """
-        )
+        """)
 
     def test_usedInFor(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         for bar in range(9):
             print(fu)
-        """
-        )
+        """)
 
     def test_usedInForElse(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         for bar in range(10):
             pass
         else:
             print(fu)
-        """
-        )
+        """)
 
     def test_redefinedByFor(self):
         self.flakes(
@@ -609,13 +566,11 @@ class Test(TestCase):
         )
 
     def test_usedInReturn(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def fun():
             return fu
-        """
-        )
+        """)
 
     def test_usedInOperators(self):
         self.flakes("import fu; 3 + fu.bar")
@@ -652,26 +607,22 @@ class Test(TestCase):
         self.flakes("import fu; (fu,)")
 
     def test_usedInTry(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         try: fu
         except: pass
-        """
-        )
+        """)
 
     def test_usedInExcept(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         try: fu
         except: pass
-        """
-        )
+        """)
 
     def test_redefinedByExcept(self):
         expected = [m.RedefinedWhileUnused]
-        if version_info >= (3,):
+        if version_info >= (3, ):
             # The exc variable is unused inside the exception handler.
             expected.append(m.UnusedVariable)
         self.flakes(
@@ -679,39 +630,31 @@ class Test(TestCase):
         import fu
         try: pass
         except Exception as fu: pass
-        """,
-            *expected
-        )
+        """, *expected)
 
     def test_usedInRaise(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         raise fu.bar
-        """
-        )
+        """)
 
     def test_usedInYield(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def gen():
             yield fu
-        """
-        )
+        """)
 
     def test_usedInDict(self):
         self.flakes("import fu; {fu:None}")
         self.flakes("import fu; {1:fu}")
 
     def test_usedInParameterDefault(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def f(bar=fu):
             pass
-        """
-        )
+        """)
 
     def test_usedInAttributeAssign(self):
         self.flakes("import fu; fu.bar = 1")
@@ -728,44 +671,36 @@ class Test(TestCase):
         self.flakes("import fu; [1 for _ in range(1) if fu]")
 
     @skipIf(
-        version_info >= (3,),
+        version_info >= (3, ),
         "in Python 3 list comprehensions execute in a separate scope",
     )
     def test_redefinedByListComp(self):
         self.flakes("import fu; [1 for fu in range(1)]", m.RedefinedInListComp)
 
     def test_usedInTryFinally(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         try: pass
         finally: fu
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         try: fu
         finally: pass
-        """
-        )
+        """)
 
     def test_usedInWhile(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         while 0:
             fu
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         while fu: pass
-        """
-        )
+        """)
 
     def test_usedInGlobal(self):
         """
@@ -785,32 +720,28 @@ class Test(TestCase):
         A 'global' statement shadowing a used import should not cause it to be
         reported as unused.
         """
-        self.flakes(
-            """
+        self.flakes("""
             import foo
             def f(): global foo
             def g(): foo.is_used()
-        """
-        )
+        """)
 
     def test_assignedToGlobal(self):
         """
         Binding an import to a declared global should not cause it to be
         reported as unused.
         """
-        self.flakes(
-            """
+        self.flakes("""
             def f(): global foo; import foo
             def g(): foo.is_used()
-        """
-        )
+        """)
 
-    @skipIf(version_info >= (3,), "deprecated syntax")
+    @skipIf(version_info >= (3, ), "deprecated syntax")
     def test_usedInBackquote(self):
         self.flakes("import fu; `fu`")
 
     def test_usedInExec(self):
-        if version_info < (3,):
+        if version_info < (3, ):
             exec_stmt = 'exec "print 1" in fu.bar'
         else:
             exec_stmt = 'exec("print(1)", fu.bar)'
@@ -820,7 +751,8 @@ class Test(TestCase):
         self.flakes("import fu; lambda: fu")
 
     def test_shadowedByLambda(self):
-        self.flakes("import fu; lambda fu: fu", m.UnusedImport, m.RedefinedWhileUnused)
+        self.flakes("import fu; lambda fu: fu", m.UnusedImport,
+                    m.RedefinedWhileUnused)
         self.flakes("import fu; lambda fu: fu\nfu()")
 
     def test_usedInSliceObj(self):
@@ -849,25 +781,21 @@ class Test(TestCase):
         )
 
     def test_nestedFunctionsNestScope(self):
-        self.flakes(
-            """
+        self.flakes("""
         def a():
             def b():
                 fu
             import fu
-        """
-        )
+        """)
 
     def test_nestedClassAndFunctionScope(self):
-        self.flakes(
-            """
+        self.flakes("""
         def a():
             import fu
             class b:
                 def c(self):
                     print(fu)
-        """
-        )
+        """)
 
     def test_importStar(self):
         """Use of import * at module level is reported."""
@@ -883,15 +811,16 @@ class Test(TestCase):
             m.UnusedImport,
         )
 
-        checker = self.flakes("from fu import *", m.ImportStarUsed, m.UnusedImport)
+        checker = self.flakes("from fu import *", m.ImportStarUsed,
+                              m.UnusedImport)
 
         error = checker.messages[0]
         assert error.message.startswith("'from %s import *' used; unable ")
-        assert error.message_args == ("fu",)
+        assert error.message_args == ("fu", )
 
         error = checker.messages[1]
         assert error.message == "%r imported but unused"
-        assert error.message_args == ("fu.*",)
+        assert error.message_args == ("fu.*", )
 
     def test_importStar_relative(self):
         """Use of import * from a relative import is reported."""
@@ -907,27 +836,30 @@ class Test(TestCase):
             m.UnusedImport,
         )
 
-        checker = self.flakes("from .fu import *", m.ImportStarUsed, m.UnusedImport)
+        checker = self.flakes("from .fu import *", m.ImportStarUsed,
+                              m.UnusedImport)
 
         error = checker.messages[0]
         assert error.message.startswith("'from %s import *' used; unable ")
-        assert error.message_args == (".fu",)
+        assert error.message_args == (".fu", )
 
         error = checker.messages[1]
         assert error.message == "%r imported but unused"
-        assert error.message_args == (".fu.*",)
+        assert error.message_args == (".fu.*", )
 
-        checker = self.flakes("from .. import *", m.ImportStarUsed, m.UnusedImport)
+        checker = self.flakes("from .. import *", m.ImportStarUsed,
+                              m.UnusedImport)
 
         error = checker.messages[0]
         assert error.message.startswith("'from %s import *' used; unable ")
-        assert error.message_args == ("..",)
+        assert error.message_args == ("..", )
 
         error = checker.messages[1]
         assert error.message == "%r imported but unused"
-        assert error.message_args == ("from .. import *",)
+        assert error.message_args == ("from .. import *", )
 
-    @skipIf(version_info < (3,), "import * below module level is a warning on Python 2")
+    @skipIf(version_info < (3, ),
+            "import * below module level is a warning on Python 2")
     def test_localImportStar(self):
         """import * is only allowed at module level."""
         self.flakes(
@@ -954,9 +886,10 @@ class Test(TestCase):
         )
         error = checker.messages[0]
         assert error.message == "'from %s import *' only allowed at module level"
-        assert error.message_args == ("..",)
+        assert error.message_args == ("..", )
 
-    @skipIf(version_info > (3,), "import * below module level is an error on Python 3")
+    @skipIf(version_info > (3, ),
+            "import * below module level is an error on Python 3")
     def test_importStarNested(self):
         """All star imports are marked as used by an undefined variable."""
         self.flakes(
@@ -975,12 +908,10 @@ class Test(TestCase):
         """
         If a dotted name is imported and used, no warning is reported.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import fu.bar
         fu.bar
-        """
-        )
+        """)
 
     def test_unusedPackageImport(self):
         """
@@ -1015,59 +946,47 @@ class Test(TestCase):
         If two different submodules of a package are imported, no duplicate
         import warning is reported for the package.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import fu.bar, fu.baz
         fu.bar, fu.baz
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         import fu.bar
         import fu.baz
         fu.bar, fu.baz
-        """
-        )
+        """)
 
     def test_used_package_with_submodule_import(self):
         """
         Usage of package marks submodule imports as used.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         import fu.bar
         fu.x
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         import fu.bar
         import fu
         fu.x
-        """
-        )
+        """)
 
     def test_used_package_with_submodule_import_of_alias(self):
         """
         Usage of package by alias marks submodule imports as used.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import foo as f
         import foo.bar
         f.bar.do_something()
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         import foo as f
         import foo.bar.blah
         f.bar.blah.do_something()
-        """
-        )
+        """)
 
     def test_unused_package_with_submodule_import(self):
         """
@@ -1082,7 +1001,7 @@ class Test(TestCase):
         )
         error = checker.messages[0]
         assert error.message == "%r imported but unused"
-        assert error.message_args == ("fu.bar",)
+        assert error.message_args == ("fu.bar", )
         assert error.lineno == 5 if self.withDoctest else 3
 
     def test_assignRHSFirst(self):
@@ -1092,35 +1011,29 @@ class Test(TestCase):
         self.flakes("import fu; fu += fu")
 
     def test_tryingMultipleImports(self):
-        self.flakes(
-            """
+        self.flakes("""
         try:
             import fu
         except ImportError:
             import bar as fu
         fu
-        """
-        )
+        """)
 
     def test_nonGlobalDoesNotRedefine(self):
-        self.flakes(
-            """
+        self.flakes("""
         import fu
         def a():
             fu = 3
             return fu
         fu
-        """
-        )
+        """)
 
     def test_functionsRunLater(self):
-        self.flakes(
-            """
+        self.flakes("""
         def a():
             fu
         import fu
-        """
-        )
+        """)
 
     def test_functionNamesAreBoundNow(self):
         self.flakes(
@@ -1138,49 +1051,41 @@ class Test(TestCase):
 
     @skip("todo")
     def test_importingForImportError(self):
-        self.flakes(
-            """
+        self.flakes("""
         try:
             import fu
         except ImportError:
             pass
-        """
-        )
+        """)
 
     def test_importedInClass(self):
         """Imports in class scope can be used through self."""
-        self.flakes(
-            """
+        self.flakes("""
         class c:
             import i
             def __init__(self):
                 self.i
-        """
-        )
+        """)
 
     def test_importUsedInMethodDefinition(self):
         """
         Method named 'foo' with default args referring to module named 'foo'.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import foo
 
         class Thing(object):
             def foo(self, parser=foo.parse_foo):
                 pass
-        """
-        )
+        """)
 
     def test_futureImport(self):
         """__future__ is special."""
         self.flakes("from __future__ import division")
-        self.flakes(
-            """
+        self.flakes("""
         "docstring is allowed before future import"
         from __future__ import division
-        """
-        )
+        """)
 
     def test_futureImportFirst(self):
         """
@@ -1204,14 +1109,12 @@ class Test(TestCase):
 
     def test_futureImportUsed(self):
         """__future__ is special, but names are injected in the namespace."""
-        self.flakes(
-            """
+        self.flakes("""
         from __future__ import division
         from __future__ import print_function
 
         assert print_function is not division
-        """
-        )
+        """)
 
     def test_futureImportUndefined(self):
         """Importing undefined names from __future__ fails."""
@@ -1270,18 +1173,14 @@ class TestSpecialAll(TestCase):
         If a name is imported and unused but is named in C{__all__}, no warning
         is reported.
         """
-        self.flakes(
-            """
+        self.flakes("""
         import foo
         __all__ = ["foo"]
-        """
-        )
-        self.flakes(
-            """
+        """)
+        self.flakes("""
         import foo
         __all__ = ("foo",)
-        """
-        )
+        """)
 
     def test_augmentedAssignment(self):
         """
@@ -1331,39 +1230,31 @@ class TestSpecialAll(TestCase):
         )
 
     def test_all_with_attributes(self):
-        self.flakes(
-            """
+        self.flakes("""
         from foo import bar
         __all__ = [bar.__name__]
-        """
-        )
+        """)
 
     def test_all_with_names(self):
         # not actually valid, but shouldn't produce a crash
-        self.flakes(
-            """
+        self.flakes("""
         from foo import bar
         __all__ = [bar]
-        """
-        )
+        """)
 
     def test_all_with_attributes_added(self):
-        self.flakes(
-            """
+        self.flakes("""
         from foo import bar
         from bar import baz
         __all__ = [bar.__name__] + [baz.__name__]
-        """
-        )
+        """)
 
     def test_all_mixed_attributes_and_strings(self):
-        self.flakes(
-            """
+        self.flakes("""
         from foo import bar
         from foo import baz
         __all__ = ['bar', baz.__name__]
-        """
-        )
+        """)
 
     def test_unboundExported(self):
         """
@@ -1426,9 +1317,8 @@ class TestSpecialAll(TestCase):
         Re-using a global name as the loop variable for a generator
         expression results in a redefinition warning.
         """
-        self.flakes(
-            "import fu; (1 for fu in range(1))", m.RedefinedWhileUnused, m.UnusedImport
-        )
+        self.flakes("import fu; (1 for fu in range(1))",
+                    m.RedefinedWhileUnused, m.UnusedImport)
 
     def test_usedAsDecorator(self):
         """
@@ -1436,23 +1326,19 @@ class TestSpecialAll(TestCase):
         but using an undefined name in a decorator statement results in an
         undefined name warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         from interior import decorate
         @decorate
         def f():
             return "hello"
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         from interior import decorate
         @decorate('value')
         def f():
             return "hello"
-        """
-        )
+        """)
 
         self.flakes(
             """
@@ -1469,23 +1355,19 @@ class TestSpecialAll(TestCase):
         but using an undefined name as a class decorator results in an
         undefined name warning.
         """
-        self.flakes(
-            """
+        self.flakes("""
         from interior import decorate
         @decorate
         class foo:
             pass
-        """
-        )
+        """)
 
-        self.flakes(
-            """
+        self.flakes("""
         from interior import decorate
         @decorate("foo")
         class bar:
             pass
-        """
-        )
+        """)
 
         self.flakes(
             """

@@ -7,7 +7,6 @@ from radon.visitors import *
 
 dedent = lambda code: textwrap.dedent(code).strip()
 
-
 SIMPLE_BLOCKS = [
     (
         """
@@ -312,7 +311,9 @@ SIMPLE_BLOCKS = [
      assert i < 0
      """,
         1,
-        {"no_assert": True},
+        {
+            "no_assert": True
+        },
     ),
     (
         """
@@ -320,7 +321,9 @@ SIMPLE_BLOCKS = [
         assert 10 > 20
      """,
         1,
-        {"no_assert": True},
+        {
+            "no_assert": True
+        },
     ),
     (
         """
@@ -329,10 +332,11 @@ SIMPLE_BLOCKS = [
             assert self.n > 4
      """,
         1,
-        {"no_assert": True},
+        {
+            "no_assert": True
+        },
     ),
 ]
-
 
 # These run only if Python version is >= 2.7
 ADDITIONAL_BLOCKS = [
@@ -422,17 +426,15 @@ SINGLE_FUNCTIONS_CASES = [
 
 if sys.version_info[:2] >= (3, 5):
     # With and async-with statements no longer count towards CC, see #123
-    SINGLE_FUNCTIONS_CASES.append(
-        (
-            """
+    SINGLE_FUNCTIONS_CASES.append((
+        """
          async def f(a, b):
             async with open('blabla.log', 'w') as f:
                 async for i in range(100):
                     f.write(str(i) + '\\n')
          """,
-            (1, 2),
-        ),
-    )
+        (1, 2),
+    ), )
 
 
 @pytest.mark.parametrize("code,expected", SINGLE_FUNCTIONS_CASES)
@@ -656,7 +658,7 @@ CLOSURES_CASES = [
              return res
          return aux
      """,
-        ("aux",),
+        ("aux", ),
         (2, 1),
     ),
 ]

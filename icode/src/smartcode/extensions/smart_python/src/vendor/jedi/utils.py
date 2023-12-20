@@ -12,7 +12,6 @@ import sys
 
 from jedi import Interpreter
 
-
 READLINE_DEBUG = False
 
 
@@ -59,9 +58,12 @@ def setup_readline(namespace_module=__main__, fuzzy=False):
     bash).
     """
     if READLINE_DEBUG:
-        logging.basicConfig(filename="/tmp/jedi.log", filemode="a", level=logging.DEBUG)
+        logging.basicConfig(filename="/tmp/jedi.log",
+                            filemode="a",
+                            level=logging.DEBUG)
 
     class JediRL:
+
         def complete(self, text, state):
             """
             This complete stuff is pretty weird, a generator would make
@@ -77,17 +79,19 @@ def setup_readline(namespace_module=__main__, fuzzy=False):
                 # Calling python doesn't have a path, so add to sys.path.
                 try:
                     logging.debug("Start REPL completion: " + repr(text))
-                    interpreter = Interpreter(text, [namespace_module.__dict__])
+                    interpreter = Interpreter(text,
+                                              [namespace_module.__dict__])
 
                     completions = interpreter.complete(fuzzy=fuzzy)
                     logging.debug("REPL completions: %s", completions)
 
                     self.matches = [
-                        text[: len(text) - c._like_name_length] + c.name_with_symbols
-                        for c in completions
+                        text[:len(text) - c._like_name_length] +
+                        c.name_with_symbols for c in completions
                     ]
                 except:
-                    logging.error("REPL Completion error:\n" + traceback.format_exc())
+                    logging.error("REPL Completion error:\n" +
+                                  traceback.format_exc())
                     raise
                 finally:
                     sys.path.pop(0)

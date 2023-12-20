@@ -8,6 +8,7 @@ except ImportError:
 
 
 class OrderedSet(MutableSet):
+
     def __init__(self, iterable=None):
         self.end = end = []
         end += [None, end, end]  # sentinel
@@ -60,7 +61,7 @@ class OrderedSet(MutableSet):
 
     def __repr__(self):
         if not self:
-            return "%s()" % (self.__class__.__name__,)
+            return "%s()" % (self.__class__.__name__, )
         return "%s(%r)" % (self.__class__.__name__, list(self))
 
     def __eq__(self, other):

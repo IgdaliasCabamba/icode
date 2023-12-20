@@ -3,6 +3,7 @@ from typing import Dict, List
 
 
 class _NormalizerMeta(type):
+
     def __new__(cls, name, bases, dct):
         new_cls = type.__new__(cls, name, bases, dct)
         new_cls.rule_value_classes = {}
@@ -19,8 +20,10 @@ class Normalizer(metaclass=_NormalizerMeta):
         self._config = config
         self.issues = []
 
-        self._rule_type_instances = self._instantiate_rules("rule_type_classes")
-        self._rule_value_instances = self._instantiate_rules("rule_value_classes")
+        self._rule_type_instances = self._instantiate_rules(
+            "rule_type_classes")
+        self._rule_value_instances = self._instantiate_rules(
+            "rule_value_classes")
 
     def _instantiate_rules(self, attr):
         dct = {}
@@ -116,6 +119,7 @@ class NormalizerConfig:
 
 
 class Issue:
+
     def __init__(self, node, code, message):
         self.code = code
         """
@@ -182,6 +186,7 @@ class Rule:
 
 
 class RefactoringNormalizer(Normalizer):
+
     def __init__(self, node_to_str_map):
         self._node_to_str_map = node_to_str_map
 

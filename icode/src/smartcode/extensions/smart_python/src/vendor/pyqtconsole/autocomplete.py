@@ -11,6 +11,7 @@ class COMPLETE_MODE(object):
 
 
 class AutoComplete(QObject):
+
     def __init__(self, parent):
         super(AutoComplete, self).__init__(parent)
         self.mode = COMPLETE_MODE.INLINE
@@ -113,8 +114,9 @@ class AutoComplete(QObject):
             self.completer.complete(cr)
         elif self.mode == COMPLETE_MODE.INLINE:
             cl = columnize(words, colsep='  |  ')
-            self.parent()._insert_output_text(
-                '\n\n' + cl + '\n', lf=True, keep_buffer=True)
+            self.parent()._insert_output_text('\n\n' + cl + '\n',
+                                              lf=True,
+                                              keep_buffer=True)
 
     def hide_completion_suggestions(self):
         if self.completing():
@@ -123,8 +125,8 @@ class AutoComplete(QObject):
 
     def completing(self):
         if self.mode == COMPLETE_MODE.DROPDOWN:
-            return (self.completer.popup() and
-                    self.completer.popup().isVisible())
+            return (self.completer.popup()
+                    and self.completer.popup().isVisible())
         else:
             return False
 

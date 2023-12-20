@@ -27,7 +27,6 @@ from jedi.inference.cache import inference_state_method_cache
 from jedi.inference.base_value import iterator_to_value_set, ValueSet, NO_VALUES
 from jedi.inference.lazy_value import LazyKnownValues
 
-
 DOCSTRING_PARAM_PATTERNS = [
     r"\s*:type\s+%s:\s*([^\n]+)",  # Sphinx
     r"\s*:param\s+(\w+)\s+%s:[^\n]*",  # Sphinx param with type
@@ -40,7 +39,6 @@ DOCSTRING_RETURN_PATTERNS = [
 ]
 
 REST_ROLE_PATTERN = re.compile(r":[^`]+:`([^`]+)`")
-
 
 _numpy_doc_string_cache = None
 
@@ -62,7 +60,8 @@ def _search_param_in_numpydocstr(docstr, param_str):
         try:
             # This is a non-public API. If it ever changes we should be
             # prepared and return gracefully.
-            params = _get_numpy_doc_string_cls()(docstr)._parsed_data["Parameters"]
+            params = _get_numpy_doc_string_cls()(
+                docstr)._parsed_data["Parameters"]
         except Exception:
             return []
     for p_name, p_type, p_descr in params:
@@ -149,7 +148,9 @@ def _search_param_in_docstr(docstr, param_str):
 
     """
     # look at #40 to see definitions of those params
-    patterns = [re.compile(p % re.escape(param_str)) for p in DOCSTRING_PARAM_PATTERNS]
+    patterns = [
+        re.compile(p % re.escape(param_str)) for p in DOCSTRING_PARAM_PATTERNS
+    ]
     for pattern in patterns:
         match = pattern.search(docstr)
         if match:
@@ -181,8 +182,7 @@ def _strip_rst_role(type_str):
 
 
 def _infer_for_statement_string(module_context, string):
-    code = dedent(
-        """
+    code = dedent("""
     def pseudo_docstring_stuff():
         '''
         Create a pseudo function for docstring statements.
@@ -190,8 +190,7 @@ def _infer_for_statement_string(module_context, string):
         is still a function.
         '''
     {}
-    """
-    )
+    """)
     if string is None:
         return []
 
@@ -203,7 +202,8 @@ def _infer_for_statement_string(module_context, string):
     debug.dbg("Parse docstring code %s", string, color="BLUE")
     grammar = module_context.inference_state.grammar
     try:
-        module = grammar.parse(code.format(indent_block(string)), error_recovery=False)
+        module = grammar.parse(code.format(indent_block(string)),
+                               error_recovery=False)
     except ParserSyntaxError:
         return []
     try:
@@ -219,9 +219,8 @@ def _infer_for_statement_string(module_context, string):
 
     from jedi.inference.value import FunctionValue
 
-    function_value = FunctionValue(
-        module_context.inference_state, module_context, funcdef
-    )
+    function_value = FunctionValue(module_context.inference_state,
+                                   module_context, funcdef)
     func_execution_context = function_value.as_context()
     # Use the module of the param.
     # TODO this module is not the module of the param in case of a function
@@ -238,8 +237,8 @@ def _execute_types_in_stmt(module_context, stmt):
     """
     definitions = module_context.infer_node(stmt)
     return ValueSet.from_sets(
-        _execute_array_values(module_context.inference_state, d) for d in definitions
-    )
+        _execute_array_values(module_context.inference_state, d)
+        for d in definitions)
 
 
 def _execute_array_values(inference_state, array):
@@ -250,15 +249,14 @@ def _execute_array_values(inference_state, array):
     from jedi.inference.value.iterable import SequenceLiteralValue, FakeTuple, FakeList
 
     if isinstance(array, SequenceLiteralValue) and array.array_type in (
-        "tuple",
-        "list",
+            "tuple",
+            "list",
     ):
         values = []
         for lazy_value in array.py__iter__():
             objects = ValueSet.from_sets(
                 _execute_array_values(inference_state, typ)
-                for typ in lazy_value.infer()
-            )
+                for typ in lazy_value.infer())
             values.append(LazyKnownValues(objects))
         cls = FakeTuple if array.array_type == "tuple" else FakeList
         return {cls(inference_state, values)}
@@ -268,12 +266,12 @@ def _execute_array_values(inference_state, array):
 
 @inference_state_method_cache()
 def infer_param(function_value, param):
+
     def infer_docstring(docstring):
         return ValueSet(
-            p
-            for param_str in _search_param_in_docstr(docstring, param.name.value)
-            for p in _infer_for_statement_string(module_context, param_str)
-        )
+            p for param_str in _search_param_in_docstr(docstring,
+                                                       param.name.value)
+            for p in _infer_for_statement_string(module_context, param_str))
 
     module_context = function_value.get_root_context()
     func = param.get_parent_function()
@@ -281,7 +279,8 @@ def infer_param(function_value, param):
         return NO_VALUES
 
     types = infer_docstring(function_value.py__doc__())
-    if function_value.is_bound_method() and function_value.py__name__() == "__init__":
+    if function_value.is_bound_method() and function_value.py__name__(
+    ) == "__init__":
         types |= infer_docstring(function_value.class_context.py__doc__())
 
     debug.dbg("Found param types for docstring: %s", types, color="BLUE")
@@ -291,6 +290,7 @@ def infer_param(function_value, param):
 @inference_state_method_cache()
 @iterator_to_value_set
 def infer_return_types(function_value):
+
     def search_return_in_docstr(code):
         for p in DOCSTRING_RETURN_PATTERNS:
             match = p.search(code)
@@ -301,5 +301,4 @@ def infer_return_types(function_value):
 
     for type_str in search_return_in_docstr(function_value.py__doc__()):
         yield from _infer_for_statement_string(
-            function_value.get_root_context(), type_str
-        )
+            function_value.get_root_context(), type_str)

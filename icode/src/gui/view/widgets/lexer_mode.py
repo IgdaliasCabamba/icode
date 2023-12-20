@@ -80,9 +80,8 @@ class LexerMode(QFrame):
                 height += self.lang_list.sizeHintForRow(i)
 
         self.lang_list.setFixedHeight(height + 10)
-        self.setFixedHeight(
-            self.lang_input.size().height() + self.lang_list.size().height() + 20
-        )
+        self.setFixedHeight(self.lang_input.size().height() +
+                            self.lang_list.size().height() + 20)
 
     def mirror_in_editor(self, item):
         for editor in self.api.current_editors:
@@ -93,9 +92,8 @@ class LexerMode(QFrame):
         if data:
             self.lang_list.clear()
             for lang in data:
-                row = IListWidgetItem(
-                    lang["icon"], lang["name"].title(), None, {"object": lang["lexer"]}
-                )
+                row = IListWidgetItem(lang["icon"], lang["name"].title(), None,
+                                      {"object": lang["lexer"]})
                 self.lang_list.addItem(row)
         self.update_size()
 

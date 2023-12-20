@@ -20,7 +20,6 @@ from typing import NamedTuple, Tuple, Iterator, Iterable, List, Dict, Pattern, S
 from parso.python.token import PythonTokenTypes
 from parso.utils import split_lines, PythonVersionInfo, parse_version_string
 
-
 # Maximum code point of Unicode 6.0: 0x10ffff (1,114,111)
 MAX_UNICODE = "\U0010ffff"
 
@@ -69,6 +68,7 @@ def maybe(*choices):
 
 # Return the empty string, plus all of the valid string prefixes.
 def _all_string_prefixes(*, include_fstring=False, only_fstring=False):
+
     def different_case_versions(prefix):
         for s in _itertools.product(*[(c, c.upper()) for c in prefix]):
             yield "".join(s)
@@ -106,21 +106,18 @@ def _get_token_collection(version_info):
     try:
         return _token_collection_cache[tuple(version_info)]
     except KeyError:
-        _token_collection_cache[
-            tuple(version_info)
-        ] = result = _create_token_collection(version_info)
+        _token_collection_cache[tuple(
+            version_info)] = result = _create_token_collection(version_info)
         return result
 
 
 unicode_character_name = r"[A-Za-z0-9\-]+(?: [A-Za-z0-9\-]+)*"
 fstring_string_single_line = _compile(
-    r"(?:\{\{|\}\}|\\N\{"
-    + unicode_character_name
-    + r"\}|\\(?:\r\n?|\n)|\\[^\r\nN]|[^{}\r\n\\])+"
-)
-fstring_string_multi_line = _compile(
-    r"(?:\{\{|\}\}|\\N\{" + unicode_character_name + r"\}|\\[^N]|[^{}\\])+"
-)
+    r"(?:\{\{|\}\}|\\N\{" + unicode_character_name +
+    r"\}|\\(?:\r\n?|\n)|\\[^\r\nN]|[^{}\r\n\\])+")
+fstring_string_multi_line = _compile(r"(?:\{\{|\}\}|\\N\{" +
+                                     unicode_character_name +
+                                     r"\}|\\[^N]|[^{}\\])+")
 fstring_format_spec_single_line = _compile(r"(?:\\(?:\r\n?|\n)|[^{}\r\n])+")
 fstring_format_spec_multi_line = _compile(r"[^{}]+")
 
@@ -139,9 +136,8 @@ def _create_token_collection(version_info):
     Decnumber = r"(?:0(?:_?0)*|[1-9](?:_?[0-9])*)"
     Intnumber = group(Hexnumber, Binnumber, Octnumber, Decnumber)
     Exponent = r"[eE][-+]?[0-9](?:_?[0-9])*"
-    Pointfloat = group(
-        r"[0-9](?:_?[0-9])*\.(?:[0-9](?:_?[0-9])*)?", r"\.[0-9](?:_?[0-9])*"
-    ) + maybe(Exponent)
+    Pointfloat = group(r"[0-9](?:_?[0-9])*\.(?:[0-9](?:_?[0-9])*)?",
+                       r"\.[0-9](?:_?[0-9])*") + maybe(Exponent)
     Expfloat = r"[0-9](?:_?[0-9])*" + Exponent
     Floatnumber = group(Pointfloat, Expfloat)
     Imagnumber = group(r"[0-9](?:_?[0-9])*[jJ]", Floatnumber + r"[jJ]")
@@ -152,7 +148,8 @@ def _create_token_collection(version_info):
     possible_prefixes = _all_string_prefixes()
     StringPrefix = group(*possible_prefixes)
     StringPrefixWithF = group(*_all_string_prefixes(include_fstring=True))
-    fstring_prefixes = _all_string_prefixes(include_fstring=True, only_fstring=True)
+    fstring_prefixes = _all_string_prefixes(include_fstring=True,
+                                            only_fstring=True)
     FStringStart = group(*fstring_prefixes)
 
     # Tail end of ' string.
@@ -168,9 +165,8 @@ def _create_token_collection(version_info):
     # Because of leftmost-then-longest match semantics, be sure to put the
     # longest operators first (e.g., if = came before ==, == would get
     # recognized as two instances of =).
-    Operator = group(
-        r"\*\*=?", r">>=?", r"<<=?", r"//=?", r"->", r"[+\-*/%&@`|^!=<>]=?", r"~"
-    )
+    Operator = group(r"\*\*=?", r">>=?", r"<<=?", r"//=?", r"->",
+                     r"[+\-*/%&@`|^!=<>]=?", r"~")
 
     Bracket = "[][(){}]"
 
@@ -185,12 +181,10 @@ def _create_token_collection(version_info):
 
     # First (or only) line of ' or " string.
     ContStr = group(
-        StringPrefix
-        + r"'[^\r\n'\\]*(?:\\.[^\r\n'\\]*)*"
-        + group("'", r"\\(?:\r\n?|\n)"),
-        StringPrefix
-        + r'"[^\r\n"\\]*(?:\\.[^\r\n"\\]*)*'
-        + group('"', r"\\(?:\r\n?|\n)"),
+        StringPrefix + r"'[^\r\n'\\]*(?:\\.[^\r\n'\\]*)*" +
+        group("'", r"\\(?:\r\n?|\n)"),
+        StringPrefix + r'"[^\r\n"\\]*(?:\\.[^\r\n"\\]*)*' +
+        group('"', r"\\(?:\r\n?|\n)"),
     )
     pseudo_extra_pool = [Comment, Triple]
     all_quotes = '"', "'", '"""', "'''"
@@ -199,8 +193,7 @@ def _create_token_collection(version_info):
 
     PseudoExtras = group(r"\\(?:\r\n?|\n)|\Z", *pseudo_extra_pool)
     PseudoToken = group(Whitespace, capture=True) + group(
-        PseudoExtras, Number, Funny, ContStr, Name, capture=True
-    )
+        PseudoExtras, Number, Funny, ContStr, Name, capture=True)
 
     # For a given string prefix plus quotes, endpats maps it to a regex
     #  to match the remainder of that string. _prefix can be empty, for
@@ -275,13 +268,14 @@ class Token(NamedTuple):
 
 
 class PythonToken(Token):
+
     def __repr__(self):
         return "TokenInfo(type=%s, string=%r, start_pos=%r, prefix=%r)" % self._replace(
-            type=self.type.name
-        )
+            type=self.type.name)
 
 
 class FStringNode:
+
     def __init__(self, quote):
         self.quote = quote
         self.parentheses_count = 0
@@ -310,9 +304,8 @@ class FStringNode:
         return not self.is_in_expr() and self.format_spec_count
 
 
-def _close_fstring_if_necessary(
-    fstring_stack, string, line_nr, column, additional_prefix
-):
+def _close_fstring_if_necessary(fstring_stack, string, line_nr, column,
+                                additional_prefix):
     for fstring_stack_index, node in enumerate(fstring_stack):
         lstripped_string = string.lstrip()
         len_lstrip = len(string) - len(lstripped_string)
@@ -355,7 +348,7 @@ def _find_fstring_string(endpats, fstring_stack, line, lnum, pos):
     for fstring_stack_node in fstring_stack:
         end_match = endpats[fstring_stack_node.quote].match(string)
         if end_match is not None:
-            string = end_match.group(0)[: -len(fstring_stack_node.quote)]
+            string = end_match.group(0)[:-len(fstring_stack_node.quote)]
 
     new_pos = pos
     new_pos += len(string)
@@ -371,11 +364,16 @@ def _find_fstring_string(endpats, fstring_stack, line, lnum, pos):
 
 
 def tokenize(
-    code: str, *, version_info: PythonVersionInfo, start_pos: Tuple[int, int] = (1, 0)
+    code: str,
+    *,
+    version_info: PythonVersionInfo,
+    start_pos: Tuple[int, int] = (1, 0)
 ) -> Iterator[PythonToken]:
     """Generate tokens from a the source code (string)."""
     lines = split_lines(code, keepends=True)
-    return tokenize_lines(lines, version_info=version_info, start_pos=start_pos)
+    return tokenize_lines(lines,
+                          version_info=version_info,
+                          start_pos=start_pos)
 
 
 def _print_tokens(func):
@@ -465,9 +463,8 @@ def tokenize_lines(
             endmatch = endprog.match(line)  # noqa: F821
             if endmatch:
                 pos = endmatch.end(0)
-                yield PythonToken(
-                    STRING, contstr + line[:pos], contstr_start, prefix
-                )  # noqa: F821
+                yield PythonToken(STRING, contstr + line[:pos], contstr_start,
+                                  prefix)  # noqa: F821
                 contstr = ""
                 contline = ""
             else:
@@ -479,9 +476,8 @@ def tokenize_lines(
             if fstring_stack:
                 tos = fstring_stack[-1]
                 if not tos.is_in_expr():
-                    string, pos = _find_fstring_string(
-                        endpats, fstring_stack, line, lnum, pos
-                    )
+                    string, pos = _find_fstring_string(endpats, fstring_stack,
+                                                       line, lnum, pos)
                     if string:
                         yield PythonToken(
                             FSTRING_STRING,
@@ -521,8 +517,10 @@ def tokenize_lines(
                     end_match = endpats[quote].match(line, pos)
                     if end_match is not None:
                         end_match_string = end_match.group(0)
-                        if len(end_match_string) - len(quote) + pos < len(string_line):
-                            string_line = line[:pos] + end_match_string[: -len(quote)]
+                        if len(end_match_string) - len(quote) + pos < len(
+                                string_line):
+                            string_line = line[:pos] + end_match_string[:-len(
+                                quote)]
                 pseudomatch = pseudo_token.match(string_line, pos)
             else:
                 pseudomatch = pseudo_token.match(line, pos)
@@ -546,11 +544,8 @@ def tokenize_lines(
                 start = match.end()
                 spos = (lnum, start)
 
-            if (
-                new_line
-                and initial not in "\r\n#"
-                and (initial != "\\" or pseudomatch is None)
-            ):
+            if (new_line and initial not in "\r\n#"
+                    and (initial != "\\" or pseudomatch is None)):
                 new_line = False
                 if paren_level == 0 and not fstring_stack:
                     indent_start = start
@@ -576,11 +571,11 @@ def tokenize_lines(
                 continue
 
             if initial in numchars or (  # ordinary number
-                initial == "." and token != "." and token != "..."
-            ):
+                    initial == "." and token != "." and token != "..."):
                 yield PythonToken(NUMBER, token, spos, prefix)
             elif pseudomatch.group(3) is not None:  # ordinary name
-                if token in always_break_tokens and (fstring_stack or paren_level):
+                if token in always_break_tokens and (fstring_stack
+                                                     or paren_level):
                     fstring_stack[:] = []
                     paren_level = 0
                     # We only want to dedent if the token is on a new line.
@@ -631,20 +626,14 @@ def tokenize_lines(
             # Note that initial == token[:1].
             # Also note that single quote checking must come after
             #  triple quote checking (above).
-            elif (
-                initial in single_quoted
-                or token[:2] in single_quoted
-                or token[:3] in single_quoted
-            ):
+            elif (initial in single_quoted or token[:2] in single_quoted
+                  or token[:3] in single_quoted):
                 if token[-1] in "\r\n":  # continued string
                     # This means that a single quoted string ends with a
                     # backslash and is continued.
                     contstr_start = lnum, start
-                    endprog = (
-                        endpats.get(initial)
-                        or endpats.get(token[1])
-                        or endpats.get(token[2])
-                    )
+                    endprog = (endpats.get(initial) or endpats.get(token[1])
+                               or endpats.get(token[2]))
                     contstr = line[start:]
                     contline = line
                     break
@@ -654,9 +643,9 @@ def tokenize_lines(
                 fstring_stack.append(FStringNode(fstring_pattern_map[token]))
                 yield PythonToken(FSTRING_START, token, spos, prefix)
             elif initial == "\\" and line[start:] in (
-                "\\\n",
-                "\\\r\n",
-                "\\\r",
+                    "\\\n",
+                    "\\\r\n",
+                    "\\\r",
             ):  # continued stmt
                 additional_prefix += prefix + line[start:]
                 break
@@ -672,13 +661,9 @@ def tokenize_lines(
                     else:
                         if paren_level:
                             paren_level -= 1
-                elif (
-                    token.startswith(":")
-                    and fstring_stack
-                    and fstring_stack[-1].parentheses_count
-                    - fstring_stack[-1].format_spec_count
-                    == 1
-                ):
+                elif (token.startswith(":") and fstring_stack
+                      and fstring_stack[-1].parentheses_count -
+                      fstring_stack[-1].format_spec_count == 1):
                     # `:` and `:=` both count
                     fstring_stack[-1].format_spec_count += 1
                     token = ":"
@@ -713,8 +698,10 @@ def tokenize_lines(
 
 
 def _split_illegal_unicode_name(token, start_pos, prefix):
+
     def create_token():
-        return PythonToken(ERRORTOKEN if is_illegal else NAME, found, pos, prefix)
+        return PythonToken(ERRORTOKEN if is_illegal else NAME, found, pos,
+                           prefix)
 
     found = ""
     is_illegal = False

@@ -48,8 +48,8 @@ def add_methods(pymodule, class_scope, methods_sources):
     methods = "\n\n" + "\n\n".join(methods_sources)
     indented_methods = fix_indentation(
         methods,
-        get_indents(lines, class_scope.get_start())
-        + get_indent(pymodule.pycore.project),
+        get_indents(lines, class_scope.get_start()) +
+        get_indent(pymodule.pycore.project),
     )
     result = []
     result.append(source_code[:insertion_offset])

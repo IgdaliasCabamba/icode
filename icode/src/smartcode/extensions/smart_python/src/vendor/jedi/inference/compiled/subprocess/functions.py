@@ -22,7 +22,8 @@ def load_module(inference_state, **kwargs):
     return access.load_module(inference_state, **kwargs)
 
 
-def get_compiled_method_return(inference_state, id, attribute, *args, **kwargs):
+def get_compiled_method_return(inference_state, id, attribute, *args,
+                               **kwargs):
     handle = inference_state.compiled_subprocess.get_access_handle(id)
     return getattr(handle.access, attribute)(*args, **kwargs)
 
@@ -149,17 +150,18 @@ def _find_module(string, path=None, full_name=None, is_global_search=True):
                 # This is a namespace package.
                 full_name = string if not path else full_name
                 implicit_ns_info = ImplicitNSInfo(
-                    full_name, spec.submodule_search_locations._path
-                )
+                    full_name, spec.submodule_search_locations._path)
                 return implicit_ns_info, True
             break
 
     return _find_module_py33(string, path, loader)
 
 
-def _find_module_py33(
-    string, path=None, loader=None, full_name=None, is_global_search=True
-):
+def _find_module_py33(string,
+                      path=None,
+                      loader=None,
+                      full_name=None,
+                      is_global_search=True):
     loader = loader or importlib.machinery.PathFinder.find_module(string, path)
 
     if loader is None and path is None:  # Fallback to find builtins
@@ -216,7 +218,8 @@ def _from_loader(loader, string):
     if code is None:
         return None, is_package
     if isinstance(loader, zipimporter):
-        return ZipFileIO(module_path, code, Path(cast_path(loader.archive))), is_package
+        return ZipFileIO(module_path, code,
+                         Path(cast_path(loader.archive))), is_package
 
     return KnownContentFileIO(module_path, code), is_package
 
@@ -230,7 +233,8 @@ def _get_source(loader, fullname):
     try:
         return loader.get_data(path)
     except OSError:
-        raise ImportError("source not available through get_data()", name=fullname)
+        raise ImportError("source not available through get_data()",
+                          name=fullname)
 
 
 class ImplicitNSInfo:

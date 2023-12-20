@@ -17,6 +17,7 @@ from extension_api import settings
 
 
 class Screen1(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("child")
@@ -56,6 +57,7 @@ class Screen1(QFrame):
 
 
 class Screen2(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("child")
@@ -127,8 +129,7 @@ class PythonEnvs(QFrame):
         self.btn_rem_env.clicked.connect(self.rem_selected_env)
         self.env_list.itemActivated.connect(self.change_env)
         self.input_path.returnPressed.connect(
-            lambda: self.enter_env(self.input_path.text())
-        )
+            lambda: self.enter_env(self.input_path.text()))
         self.btn_select_path.clicked.connect(self.pick_env)
         self.btn_select_env.clicked.connect(self.select_env_mode)
 
@@ -149,12 +150,9 @@ class PythonEnvs(QFrame):
                     height += self.env_list.sizeHintForRow(i)
 
             self.env_list.setFixedHeight(height + 10)
-            self.setFixedHeight(
-                self.input_env.size().height()
-                + self.btn_add_env.size().height()
-                + self.env_list.size().height()
-                + 20
-            )
+            self.setFixedHeight(self.input_env.size().height() +
+                                self.btn_add_env.size().height() +
+                                self.env_list.size().height() + 20)
         else:
             self.setFixedHeight(self.input_path.size().height() + 10)
 
@@ -205,7 +203,8 @@ class PythonEnvs(QFrame):
 
     def pick_env(self):
         home_dir = settings.ipwd()
-        env_path = QFileDialog.getOpenFileName(None, "Select Interpreter", home_dir)
+        env_path = QFileDialog.getOpenFileName(None, "Select Interpreter",
+                                               home_dir)
         self.enter_env(env_path[0])
 
     def enter_env(self, env_path):

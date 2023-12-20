@@ -33,12 +33,16 @@ class CodeWarningsCore(QObject):
         warnings_list = []
 
         if results["warnings"] and results["lines"]:
-            for warning, line in zip_longest(results["warnings"], results["lines"]):
+            for warning, line in zip_longest(results["warnings"],
+                                             results["lines"]):
                 row = IListWidgetItem(
                     self.parent.icons.get_icon("code-warning"),
                     str(warning),
                     f"line: {str(line+1)}",
-                    {"editor": editor, "line": line},
+                    {
+                        "editor": editor,
+                        "line": line
+                    },
                 )
                 warnings_list.append(row)
 

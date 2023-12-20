@@ -74,11 +74,9 @@ class BaseName:
     }
 
     _tuple_mapping = dict(
-        (tuple(k.split(".")), v)
-        for (k, v) in {
+        (tuple(k.split(".")), v) for (k, v) in {
             "argparse._ActionsContainer": "argparse.ArgumentParser",
-        }.items()
-    )
+        }.items())
 
     def __init__(self, inference_state, name):
         self._inference_state = inference_state
@@ -183,11 +181,8 @@ class BaseName:
         if tree_name is not None:
             # TODO move this to their respective names.
             definition = tree_name.get_definition()
-            if (
-                definition is not None
-                and definition.type == "import_from"
-                and tree_name.is_definition()
-            ):
+            if (definition is not None and definition.type == "import_from"
+                    and tree_name.is_definition()):
                 resolve = True
 
         if isinstance(self._name, SubModuleName) or resolve:
@@ -317,8 +312,7 @@ class BaseName:
     def _get_docstring_signature(self):
         return "\n".join(
             signature.to_string()
-            for signature in self._get_signatures(for_docstring=True)
-        )
+            for signature in self._get_signatures(for_docstring=True))
 
     @property
     def description(self):
@@ -353,13 +347,15 @@ class BaseName:
         tree_name = self._name.tree_name
         if typ == "param":
             return typ + " " + self._name.to_string()
-        if typ in ("function", "class", "module", "instance") or tree_name is None:
+        if typ in ("function", "class", "module",
+                   "instance") or tree_name is None:
             if typ == "function":
                 # For the description we want a short and a pythonic way.
                 typ = "def"
             return typ + " " + self._name.get_public_name()
 
-        definition = tree_name.get_definition(include_setitem=True) or tree_name
+        definition = tree_name.get_definition(
+            include_setitem=True) or tree_name
         # Remove the prefix, because that's not what we want for get_code
         # here.
         txt = definition.get_code(include_prefix=False)
@@ -428,15 +424,12 @@ class BaseName:
         return tree_name.is_definition() and tree_name.parent.type == "trailer"
 
     @debug.increase_indent_cm("goto on name")
-    def goto(
-        self,
-        *,
-        follow_imports=False,
-        follow_builtin_imports=False,
-        only_stubs=False,
-        prefer_stubs=False
-    ):
-
+    def goto(self,
+             *,
+             follow_imports=False,
+             follow_builtin_imports=False,
+             only_stubs=False,
+             prefer_stubs=False):
         """
         Like :meth:`.Script.goto` (also supports the same params), but does it
         for the current name. This is typically useful if you are using
@@ -461,7 +454,8 @@ class BaseName:
             prefer_stubs=prefer_stubs,
         )
         return [
-            self if n == self._name else Name(self._inference_state, n) for n in names
+            self if n == self._name else Name(self._inference_state, n)
+            for n in names
         ]
 
     @debug.increase_indent_cm("infer on name")
@@ -511,10 +505,8 @@ class BaseName:
         if not self._name.is_value_name:
             return None
 
-        if (
-            self.type in ("function", "class", "param")
-            and self._name.tree_name is not None
-        ):
+        if (self.type in ("function", "class", "param")
+                and self._name.tree_name is not None):
             # Since the parent_context doesn't really match what the user
             # thinks of that the parent is here, we do these cases separately.
             # The reason for this is the following:
@@ -525,10 +517,10 @@ class BaseName:
             # - param: The parent_context of a param is not its function but
             #   e.g. the outer class or module.
             cls_or_func_node = self._name.tree_name.get_definition()
-            parent = search_ancestor(
-                cls_or_func_node, "funcdef", "classdef", "file_input"
-            )
-            context = self._get_module_context().create_value(parent).as_context()
+            parent = search_ancestor(cls_or_func_node, "funcdef", "classdef",
+                                     "file_input")
+            context = self._get_module_context().create_value(
+                parent).as_context()
         else:
             context = self._name.parent_context
 
@@ -568,10 +560,11 @@ class BaseName:
 
         index = self._name.start_pos[0] - 1
         start_index = max(index - before, 0)
-        return "".join(lines[start_index : index + after + 1])
+        return "".join(lines[start_index:index + after + 1])
 
     def _get_signatures(self, for_docstring=False):
-        if for_docstring and self._name.api_type == "statement" and not self.is_stub():
+        if for_docstring and self._name.api_type == "statement" and not self.is_stub(
+        ):
             # For docstrings we don't resolve signatures if they are simple
             # statements and not stubs. This is a speed optimization.
             return []
@@ -592,7 +585,10 @@ class BaseName:
 
         :rtype: list of :class:`BaseSignature`
         """
-        return [BaseSignature(self._inference_state, s) for s in self._get_signatures()]
+        return [
+            BaseSignature(self._inference_state, s)
+            for s in self._get_signatures()
+        ]
 
     def execute(self):
         """
@@ -622,9 +618,13 @@ class Completion(BaseName):
     provide additional information about a completion.
     """
 
-    def __init__(
-        self, inference_state, name, stack, like_name_length, is_fuzzy, cached_name=None
-    ):
+    def __init__(self,
+                 inference_state,
+                 name,
+                 stack,
+                 like_name_length,
+                 is_fuzzy,
+                 cached_name=None):
         super().__init__(inference_state, name)
 
         self._like_name_length = like_name_length
@@ -643,7 +643,7 @@ class Completion(BaseName):
 
         name = self._name.get_public_name()
         if like_name:
-            name = name[self._like_name_length :]
+            name = name[self._like_name_length:]
         return name + append
 
     @property
@@ -777,7 +777,9 @@ class Name(BaseName):
         """
         defs = self._name.infer()
         return sorted(
-            unite(defined_names(self._inference_state, d.as_context()) for d in defs),
+            unite(
+                defined_names(self._inference_state, d.as_context())
+                for d in defs),
             key=lambda s: s._name.start_pos or (0, 0),
         )
 
@@ -792,20 +794,17 @@ class Name(BaseName):
             return self._name.tree_name.is_definition()
 
     def __eq__(self, other):
-        return (
-            self._name.start_pos == other._name.start_pos
-            and self.module_path == other.module_path
-            and self.name == other.name
-            and self._inference_state == other._inference_state
-        )
+        return (self._name.start_pos == other._name.start_pos
+                and self.module_path == other.module_path
+                and self.name == other.name
+                and self._inference_state == other._inference_state)
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash(
-            (self._name.start_pos, self.module_path, self.name, self._inference_state)
-        )
+        return hash((self._name.start_pos, self.module_path, self.name,
+                     self._inference_state))
 
 
 class BaseSignature(Name):
@@ -861,8 +860,7 @@ class Signature(BaseSignature):
         :rtype: int
         """
         return self._call_details.calculate_index(
-            self._signature.get_param_names(resolve_stars=True)
-        )
+            self._signature.get_param_names(resolve_stars=True))
 
     @property
     def bracket_start(self):
@@ -883,6 +881,7 @@ class Signature(BaseSignature):
 
 
 class ParamName(Name):
+
     def infer_default(self):
         """
         Returns default values like the ``1`` of ``def foo(x=1):``.
@@ -898,8 +897,7 @@ class ParamName(Name):
         :rtype: list of :class:`.Name`
         """
         return _values_to_definitions(
-            self._name.infer_annotation(ignore_stars=True, **kwargs)
-        )
+            self._name.infer_annotation(ignore_stars=True, **kwargs))
 
     def to_string(self):
         """

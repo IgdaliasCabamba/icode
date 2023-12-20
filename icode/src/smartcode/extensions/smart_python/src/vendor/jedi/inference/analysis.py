@@ -6,7 +6,6 @@ from parso.python import tree
 from jedi import debug
 from jedi.inference.helpers import is_string
 
-
 CODES = {
     "attribute-error": (1, AttributeError, "Potential AttributeError."),
     "name-error": (2, NameError, "Potential NameError."),
@@ -27,6 +26,7 @@ CODES = {
 
 
 class Error:
+
     def __init__(self, name, module_path, start_pos, message=None):
         self.path = module_path
         self._start_pos = start_pos
@@ -59,11 +59,8 @@ class Error:
         )
 
     def __eq__(self, other):
-        return (
-            self.path == other.path
-            and self.name == other.name
-            and self._start_pos == other._start_pos
-        )
+        return (self.path == other.path and self.name == other.name
+                and self._start_pos == other._start_pos)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -114,12 +111,10 @@ def _check_for_setattr(instance):
     except KeyError:
         return False
 
-    return any(
-        node.start_pos < n.start_pos < node.end_pos
-        # Check if it's a function called setattr.
-        and not (n.parent.type == "funcdef" and n.parent.name == n)
-        for n in stmt_names
-    )
+    return any(node.start_pos < n.start_pos < node.end_pos
+               # Check if it's a function called setattr.
+               and not (n.parent.type == "funcdef" and n.parent.name == n)
+               for n in stmt_names)
 
 
 def add_attribute_error(name_context, lookup_value, name):
@@ -137,7 +132,10 @@ def add_attribute_error(name_context, lookup_value, name):
     add(name_context, "attribute-error", name, message, typ, payload)
 
 
-def _check_for_exception_catch(node_context, jedi_name, exception, payload=None):
+def _check_for_exception_catch(node_context,
+                               jedi_name,
+                               exception,
+                               payload=None):
     """
     Checks if a jedi object (e.g. `Statement`) sits inside a try/catch and
     doesn't count as an error (if equal to `exception`).
@@ -151,10 +149,8 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
             return False
 
         for python_cls in exception.mro():
-            if (
-                cls.py__name__() == python_cls.__name__
-                and cls.parent_context.is_builtins_module()
-            ):
+            if (cls.py__name__() == python_cls.__name__
+                    and cls.parent_context.is_builtins_module()):
                 return True
         return False
 
@@ -164,9 +160,8 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
         for branch_type in iterator:
             next(iterator)  # The colon
             suite = next(iterator)
-            if branch_type == "try" and not (
-                branch_type.start_pos < jedi_name.start_pos <= suite.end_pos
-            ):
+            if branch_type == "try" and not (branch_type.start_pos < jedi_name.
+                                             start_pos <= suite.end_pos):
                 return False
 
         for node in obj.get_except_clause_tests():
@@ -177,7 +172,9 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
                 for cls in except_classes:
                     from jedi.inference.value import iterable
 
-                    if isinstance(cls, iterable.Sequence) and cls.array_type == "tuple":
+                    if isinstance(
+                            cls,
+                            iterable.Sequence) and cls.array_type == "tuple":
                         # multiple exceptions
                         for lazy_value in cls.py__iter__():
                             for typ in lazy_value.infer():
@@ -199,7 +196,8 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
             assert arglist.type == "arglist"
             from jedi.inference.arguments import TreeArguments
 
-            args = TreeArguments(node_context.inference_state, node_context, arglist)
+            args = TreeArguments(node_context.inference_state, node_context,
+                                 arglist)
             unpacked_args = list(args.unpack())
             # Arguments should be very simple
             assert len(unpacked_args) == 2
@@ -224,7 +222,8 @@ def _check_for_exception_catch(node_context, jedi_name, exception, payload=None)
             if obj.type == "try_stmt" and check_try_for_except(obj, exception):
                 return True
             # hasattr check
-            if exception == AttributeError and obj.type in ("if_stmt", "while_stmt"):
+            if exception == AttributeError and obj.type in ("if_stmt",
+                                                            "while_stmt"):
                 if check_hasattr(obj.children[1], obj.children[3]):
                     return True
         obj = obj.parent

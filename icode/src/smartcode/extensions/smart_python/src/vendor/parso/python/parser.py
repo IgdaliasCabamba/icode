@@ -2,7 +2,6 @@ from parso.python import tree
 from parso.python.token import PythonTokenTypes
 from parso.parser import BaseParser
 
-
 NAME = PythonTokenTypes.NAME
 INDENT = PythonTokenTypes.INDENT
 DEDENT = PythonTokenTypes.DEDENT
@@ -61,10 +60,13 @@ class Parser(BaseParser):
         PythonTokenTypes.FSTRING_END: tree.FStringEnd,
     }
 
-    def __init__(
-        self, pgen_grammar, error_recovery=True, start_nonterminal="file_input"
-    ):
-        super().__init__(pgen_grammar, start_nonterminal, error_recovery=error_recovery)
+    def __init__(self,
+                 pgen_grammar,
+                 error_recovery=True,
+                 start_nonterminal="file_input"):
+        super().__init__(pgen_grammar,
+                         start_nonterminal,
+                         error_recovery=error_recovery)
 
         self.syntax_errors = []
         self._omit_dedent_list = []
@@ -107,7 +109,8 @@ class Parser(BaseParser):
             else:
                 return tree.Name(value, start_pos, prefix)
 
-        return self._leaf_map.get(type, tree.Operator)(value, start_pos, prefix)
+        return self._leaf_map.get(type, tree.Operator)(value, start_pos,
+                                                       prefix)
 
     def error_recovery(self, token):
         tos_nodes = self.stack[-1].nodes
@@ -117,18 +120,17 @@ class Parser(BaseParser):
             last_leaf = None
 
         if self._start_nonterminal == "file_input" and (
-            token.type == PythonTokenTypes.ENDMARKER
-            or token.type == DEDENT
-            and not last_leaf.value.endswith("\n")
-            and not last_leaf.value.endswith("\r")
-        ):
+                token.type == PythonTokenTypes.ENDMARKER
+                or token.type == DEDENT and not last_leaf.value.endswith("\n")
+                and not last_leaf.value.endswith("\r")):
             # In Python statements need to end with a newline. But since it's
             # possible (and valid in Python) that there's no newline at the
             # end of a file, we have to recover even if the user doesn't want
             # error recovery.
             if self.stack[-1].dfa.from_rule == "simple_stmt":
                 try:
-                    plan = self.stack[-1].dfa.transitions[PythonTokenTypes.NEWLINE]
+                    plan = self.stack[-1].dfa.transitions[
+                        PythonTokenTypes.NEWLINE]
                 except KeyError:
                     pass
                 else:
@@ -168,7 +170,8 @@ class Parser(BaseParser):
                 # Otherwise the parser will get into trouble and DEDENT too early.
                 self._omit_dedent_list.append(self._indent_counter)
 
-            error_leaf = tree.PythonErrorLeaf(typ.name, value, start_pos, prefix)
+            error_leaf = tree.PythonErrorLeaf(typ.name, value, start_pos,
+                                              prefix)
             self.stack[-1].nodes.append(error_leaf)
 
         tos = self.stack[-1]
@@ -183,7 +186,8 @@ class Parser(BaseParser):
 
     def _stack_removal(self, start_index):
         all_nodes = [
-            node for stack_node in self.stack[start_index:] for node in stack_node.nodes
+            node for stack_node in self.stack[start_index:]
+            for node in stack_node.nodes
         ]
 
         if all_nodes:

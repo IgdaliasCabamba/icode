@@ -3,6 +3,7 @@ from rope.refactor.rename import Rename
 
 
 class LocalToField(object):
+
     def __init__(self, project, resource, offset):
         self.project = project
         self.resource = resource
@@ -15,8 +16,7 @@ class LocalToField(object):
         if not self._is_a_method_local(pyname):
             raise exceptions.RefactoringError(
                 "Convert local variable to field should be performed on \n"
-                "a local variable of a method."
-            )
+                "a local variable of a method.")
 
         pymodule, lineno = pyname.get_definition_location()
         function_scope = pymodule.get_scope().get_inner_scope_for_line(lineno)
@@ -24,15 +24,16 @@ class LocalToField(object):
         # self._check_redefinition(name, function_scope)
 
         new_name = self._get_field_name(function_scope.pyobject, name)
-        changes = Rename(self.project, self.resource, self.offset).get_changes(
-            new_name, resources=[self.resource]
-        )
+        changes = Rename(self.project, self.resource,
+                         self.offset).get_changes(new_name,
+                                                  resources=[self.resource])
         return changes
 
     def _check_redefinition(self, name, function_scope):
         class_scope = function_scope.parent
         if name in class_scope.pyobject:
-            raise exceptions.RefactoringError("The field %s already exists" % name)
+            raise exceptions.RefactoringError("The field %s already exists" %
+                                              name)
 
     def _get_field_name(self, pyfunction, name):
         self_name = pyfunction.get_param_names()[0]
@@ -43,10 +44,7 @@ class LocalToField(object):
         pymodule, lineno = pyname.get_definition_location()
         holding_scope = pymodule.get_scope().get_inner_scope_for_line(lineno)
         parent = holding_scope.parent
-        return (
-            isinstance(pyname, pynames.AssignedName)
-            and pyname in holding_scope.get_names().values()
-            and holding_scope.get_kind() == "Function"
-            and parent is not None
-            and parent.get_kind() == "Class"
-        )
+        return (isinstance(pyname, pynames.AssignedName)
+                and pyname in holding_scope.get_names().values()
+                and holding_scope.get_kind() == "Function"
+                and parent is not None and parent.get_kind() == "Class")

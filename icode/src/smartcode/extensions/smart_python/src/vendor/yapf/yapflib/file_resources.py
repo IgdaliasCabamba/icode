@@ -43,7 +43,8 @@ def _GetExcludePatternsFromFile(filename):
                     ignore_patterns.append(line.strip())
 
         if any(e.startswith("./") for e in ignore_patterns):
-            raise errors.YapfError("path in .yapfignore should not start with ./")
+            raise errors.YapfError(
+                "path in .yapfignore should not start with ./")
 
     return ignore_patterns
 
@@ -117,11 +118,8 @@ def GetDefaultStyleForDir(dirname, default_style=style.DEFAULT_STYLE):
                 if style_dict is not None:
                     return config_file
 
-        if (
-            not dirname
-            or not os.path.basename(dirname)
-            or dirname == os.path.abspath(os.path.sep)
-        ):
+        if (not dirname or not os.path.basename(dirname)
+                or dirname == os.path.abspath(os.path.sep)):
             break
         dirname = os.path.dirname(dirname)
 
@@ -137,7 +135,10 @@ def GetCommandLineFiles(command_line_file_list, recursive, exclude):
     return _FindPythonFiles(command_line_file_list, recursive, exclude)
 
 
-def WriteReformattedCode(filename, reformatted_code, encoding="", in_place=False):
+def WriteReformattedCode(filename,
+                         reformatted_code,
+                         encoding="",
+                         in_place=False):
     """Emit the reformatted code.
 
     Write the reformatted code into the file, if in_place is True. Otherwise,
@@ -150,9 +151,10 @@ def WriteReformattedCode(filename, reformatted_code, encoding="", in_place=False
       in_place: (bool) If True, then write the reformatted code to the file.
     """
     if in_place:
-        with py3compat.open_with_encoding(
-            filename, mode="w", encoding=encoding, newline=""
-        ) as fd:
+        with py3compat.open_with_encoding(filename,
+                                          mode="w",
+                                          encoding=encoding,
+                                          newline="") as fd:
             fd.write(reformatted_code)
     else:
         py3compat.EncodeAndWriteToStdout(reformatted_code)
@@ -184,8 +186,8 @@ def _FindPythonFiles(filenames, recursive, exclude):
         if os.path.isdir(filename):
             if not recursive:
                 raise errors.YapfError(
-                    "directory specified without '--recursive' flag: %s" % filename
-                )
+                    "directory specified without '--recursive' flag: %s" %
+                    filename)
 
             # TODO(morbo): Look into a version of os.walk that can handle recursion.
             excluded_dirs = []
@@ -240,7 +242,9 @@ def IsPythonFile(filename):
             encoding = tokenize.detect_encoding(fd.readline)[0]
 
         # Check for correctness of encoding.
-        with py3compat.open_with_encoding(filename, mode="r", encoding=encoding) as fd:
+        with py3compat.open_with_encoding(filename,
+                                          mode="r",
+                                          encoding=encoding) as fd:
             fd.read()
     except UnicodeDecodeError:
         encoding = "latin-1"
@@ -251,7 +255,9 @@ def IsPythonFile(filename):
         return False
 
     try:
-        with py3compat.open_with_encoding(filename, mode="r", encoding=encoding) as fd:
+        with py3compat.open_with_encoding(filename,
+                                          mode="r",
+                                          encoding=encoding) as fd:
             first_line = fd.readline(256)
     except IOError:
         return False

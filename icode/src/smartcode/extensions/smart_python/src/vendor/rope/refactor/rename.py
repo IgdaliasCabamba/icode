@@ -30,19 +30,18 @@ class Rename(object):
             self.old_name = worder.get_name_at(self.resource, offset)
             this_pymodule = self.project.get_pymodule(self.resource)
             self.old_instance, self.old_pyname = evaluate.eval_location2(
-                this_pymodule, offset
-            )
+                this_pymodule, offset)
             if self.old_pyname is None:
                 raise exceptions.RefactoringError(
                     "Rename refactoring should be performed"
-                    " on resolvable python identifiers."
-                )
+                    " on resolvable python identifiers.")
         else:
             if not resource.is_folder() and resource.name == "__init__.py":
                 resource = resource.parent
             dummy_pymodule = libutils.get_string_module(self.project, "")
             self.old_instance = None
-            self.old_pyname = pynames.ImportedModule(dummy_pymodule, resource=resource)
+            self.old_pyname = pynames.ImportedModule(dummy_pymodule,
+                                                     resource=resource)
             if resource.is_folder():
                 self.old_name = resource.name
             else:
@@ -52,14 +51,14 @@ class Rename(object):
         return self.old_name
 
     def get_changes(
-        self,
-        new_name,
-        in_file=None,
-        in_hierarchy=False,
-        unsure=None,
-        docs=False,
-        resources=None,
-        task_handle=taskhandle.NullTaskHandle(),
+            self,
+            new_name,
+            in_file=None,
+            in_hierarchy=False,
+            unsure=None,
+            docs=False,
+            resources=None,
+            task_handle=taskhandle.NullTaskHandle(),
     ):
         """Get the changes needed for this refactoring
 
@@ -84,7 +83,8 @@ class Rename(object):
         """
         if unsure in (True, False):
             warnings.warn(
-                "unsure parameter should be a function that returns " "True or False",
+                "unsure parameter should be a function that returns "
+                "True or False",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -95,7 +95,8 @@ class Rename(object):
             unsure = unsure_func
         if in_file is not None:
             warnings.warn(
-                "`in_file` argument has been deprecated; use `resources` " "instead. ",
+                "`in_file` argument has been deprecated; use `resources` "
+                "instead. ",
                 DeprecationWarning,
                 stacklevel=2,
             )
@@ -105,7 +106,8 @@ class Rename(object):
             resources = [self.resource]
         if resources is None:
             resources = self.project.get_python_files()
-        changes = ChangeSet("Renaming <%s> to <%s>" % (self.old_name, new_name))
+        changes = ChangeSet("Renaming <%s> to <%s>" %
+                            (self.old_name, new_name))
         finder = occurrences.create_finder(
             self.project,
             self.old_name,
@@ -115,7 +117,8 @@ class Rename(object):
             instance=self.old_instance,
             in_hierarchy=in_hierarchy and self.is_method(),
         )
-        job_set = task_handle.create_jobset("Collecting Changes", len(resources))
+        job_set = task_handle.create_jobset("Collecting Changes",
+                                            len(resources))
         for file_ in resources:
             job_set.started_job(file_.path)
             new_content = rename_in_module(finder, new_name, resource=file_)
@@ -144,11 +147,9 @@ class Rename(object):
 
     def is_method(self):
         pyname = self.old_pyname
-        return (
-            isinstance(pyname, pynames.DefinedName)
-            and isinstance(pyname.get_object(), pyobjects.PyFunction)
-            and isinstance(pyname.get_object().parent, pyobjects.PyClass)
-        )
+        return (isinstance(pyname, pynames.DefinedName)
+                and isinstance(pyname.get_object(), pyobjects.PyFunction)
+                and isinstance(pyname.get_object().parent, pyobjects.PyClass))
 
     def _rename_module(self, resource, new_name, changes):
         if not resource.is_folder():
@@ -187,13 +188,13 @@ class ChangeOccurrences(object):
         return word_finder.get_primary_at(self.offset)
 
     def _get_scope_offset(self):
-        scope = self.pymodule.get_scope().get_inner_scope_for_offset(self.offset)
+        scope = self.pymodule.get_scope().get_inner_scope_for_offset(
+            self.offset)
         return scope.get_region()
 
     def get_changes(self, new_name, only_calls=False, reads=True, writes=True):
-        changes = ChangeSet(
-            "Changing <%s> occurrences to <%s>" % (self.old_name, new_name)
-        )
+        changes = ChangeSet("Changing <%s> occurrences to <%s>" %
+                            (self.old_name, new_name))
         scope_start, scope_end = self._get_scope_offset()
         finder = occurrences.create_finder(
             self.project,
@@ -240,8 +241,7 @@ def rename_in_module(
         else:
             start, end = occurrence.get_word_range()
         if (not reads and not occurrence.is_written()) or (
-            not writes and occurrence.is_written()
-        ):
+                not writes and occurrence.is_written()):
             continue
         if region is None or region[0] <= start < region[1]:
             change_collector.add_change(start, end, new_name)
@@ -254,12 +254,10 @@ def _is_local(pyname):
         return False
     scope = module.get_scope().get_inner_scope_for_line(lineno)
     if isinstance(pyname, pynames.DefinedName) and scope.get_kind() in (
-        "Function",
-        "Class",
+            "Function",
+            "Class",
     ):
         scope = scope.parent
-    return (
-        scope.get_kind() == "Function"
-        and pyname in scope.get_names().values()
-        and isinstance(pyname, pynames.AssignedName)
-    )
+    return (scope.get_kind() == "Function"
+            and pyname in scope.get_names().values()
+            and isinstance(pyname, pynames.AssignedName))

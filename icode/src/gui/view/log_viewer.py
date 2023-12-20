@@ -4,6 +4,7 @@ from functions import getfn
 
 
 class ProblemStandardItem(QStandardItem):
+
     def __init__(self, icon, text, tooltip=None, item_data=None) -> None:
         super().__init__()
         self.setText(text)
@@ -14,6 +15,7 @@ class ProblemStandardItem(QStandardItem):
 
 
 class ProblemLogs(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setObjectName("problems")
@@ -33,14 +35,11 @@ class ProblemLogs(QFrame):
         self.problems_tree.setModel(self.problems_model)
 
         self.app_problems = ProblemStandardItem(
-            self.icons.get_icon("app-problem"), "APP"
-        )
+            self.icons.get_icon("app-problem"), "APP")
         self.code_problems = ProblemStandardItem(
-            self.icons.get_icon("code-problem"), "EDITORS"
-        )
+            self.icons.get_icon("code-problem"), "EDITORS")
         self.other_problems = ProblemStandardItem(
-            self.icons.get_icon("app-problem"), "OTHERS"
-        )
+            self.icons.get_icon("app-problem"), "OTHERS")
         self.build_problems()
 
     def build_problems(self):
@@ -49,21 +48,20 @@ class ProblemLogs(QFrame):
         self.problems_model.appendRow(self.code_problems)
         self.problems_model.appendRow(self.other_problems)
 
-        self.problems_tree.expand(self.problems_model.indexFromItem(self.app_problems))
-        self.problems_tree.expand(self.problems_model.indexFromItem(self.code_problems))
+        self.problems_tree.expand(
+            self.problems_model.indexFromItem(self.app_problems))
+        self.problems_tree.expand(
+            self.problems_model.indexFromItem(self.code_problems))
         index = self.problems_model.indexFromItem(self.app_problems)
         self.problems_tree.setCurrentIndex(index)
 
     def add_problem(self, type, text, tooltip, data):
         if type == "app-problem":
             self.app_problems.appendRow(
-                ProblemStandardItem("code-warning", text, tooltip, data)
-            )
+                ProblemStandardItem("code-warning", text, tooltip, data))
         elif type == "code-problem":
             self.code_problems.appendRow(
-                ProblemStandardItem("code-error", text, tooltip, data)
-            )
+                ProblemStandardItem("code-error", text, tooltip, data))
         else:
             self.other_problems.appendRow(
-                ProblemStandardItem(type, text, tooltip, data)
-            )
+                ProblemStandardItem(type, text, tooltip, data))

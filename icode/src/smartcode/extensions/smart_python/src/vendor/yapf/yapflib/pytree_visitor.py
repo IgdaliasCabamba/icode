@@ -121,7 +121,8 @@ class PyTreeDumper(PyTreeVisitor):
         self._current_indent = 0
 
     def _DumpString(self, s):
-        self._target_stream.write("{0}{1}\n".format(" " * self._current_indent, s))
+        self._target_stream.write("{0}{1}\n".format(" " * self._current_indent,
+                                                    s))
 
     def DefaultNodeVisit(self, node):
         # Dump information about the current node, and then use the generic

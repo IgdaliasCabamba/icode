@@ -4,6 +4,7 @@ from typing import Union
 
 
 class FileIO:
+
     def __init__(self, path: Union[os.PathLike, str]):
         if isinstance(path, str):
             path = Path(path)
@@ -30,6 +31,7 @@ class FileIO:
 
 
 class KnownContentFileIO(FileIO):
+
     def __init__(self, path, content):
         super().__init__(path)
         self._content = content

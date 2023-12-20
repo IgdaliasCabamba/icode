@@ -4,7 +4,6 @@
 # Modifications:
 # Copyright David Halter and Contributors
 # Modifications are dual-licensed: MIT and PSF.
-
 """
 This module defines the data structures used to represent a grammar.
 
@@ -61,12 +60,15 @@ class DFAPlan:
     DFA state transitions.
     """
 
-    def __init__(self, next_dfa: "DFAState", dfa_pushes: Sequence["DFAState"] = []):
+    def __init__(self,
+                 next_dfa: "DFAState",
+                 dfa_pushes: Sequence["DFAState"] = []):
         self.next_dfa = next_dfa
         self.dfa_pushes = dfa_pushes
 
     def __repr__(self):
-        return "%s(%s, %s)" % (self.__class__.__name__, self.next_dfa, self.dfa_pushes)
+        return "%s(%s, %s)" % (self.__class__.__name__, self.next_dfa,
+                               self.dfa_pushes)
 
 
 class DFAState(Generic[_TokenTypeT]):
@@ -80,7 +82,8 @@ class DFAState(Generic[_TokenTypeT]):
     different nonterminals.
     """
 
-    def __init__(self, from_rule: str, nfa_set: Set[NFAState], final: NFAState):
+    def __init__(self, from_rule: str, nfa_set: Set[NFAState],
+                 final: NFAState):
         assert isinstance(nfa_set, set)
         assert isinstance(next(iter(nfa_set)), NFAState)
         assert isinstance(final, NFAState)
@@ -94,7 +97,8 @@ class DFAState(Generic[_TokenTypeT]):
 
         # Transitions are basically the only thing that  the parser is using
         # with is_final. Everyting else is purely here to create a parser.
-        self.transitions: Mapping[Union[_TokenTypeT, ReservedString], DFAPlan] = {}
+        self.transitions: Mapping[Union[_TokenTypeT, ReservedString],
+                                  DFAPlan] = {}
         self.is_final = final in nfa_set
 
     def add_arc(self, next_, label):
@@ -198,7 +202,8 @@ def _make_dfas(start, finish):
         for nfa_state in state.nfa_set:
             for nfa_arc in nfa_state.arcs:
                 if nfa_arc.nonterminal_or_string is not None:
-                    nfa_set = arcs.setdefault(nfa_arc.nonterminal_or_string, set())
+                    nfa_set = arcs.setdefault(nfa_arc.nonterminal_or_string,
+                                              set())
                     addclosure(nfa_arc.next, nfa_set)
 
         # Now create the dfa's with no None's in arcs anymore. All Nones have
@@ -272,15 +277,17 @@ def generate_grammar(bnf_grammar: str, token_namespace) -> Grammar:
         for dfa_state in dfas:
             for terminal_or_nonterminal, next_dfa in dfa_state.arcs.items():
                 if terminal_or_nonterminal in rule_to_dfas:
-                    dfa_state.nonterminal_arcs[terminal_or_nonterminal] = next_dfa
+                    dfa_state.nonterminal_arcs[
+                        terminal_or_nonterminal] = next_dfa
                 else:
-                    transition = _make_transition(
-                        token_namespace, reserved_strings, terminal_or_nonterminal
-                    )
+                    transition = _make_transition(token_namespace,
+                                                  reserved_strings,
+                                                  terminal_or_nonterminal)
                     dfa_state.transitions[transition] = DFAPlan(next_dfa)
 
     _calculate_tree_traversal(rule_to_dfas)
-    return Grammar(start_nonterminal, rule_to_dfas, reserved_strings)  # type: ignore
+    return Grammar(start_nonterminal, rule_to_dfas,
+                   reserved_strings)  # type: ignore
 
 
 def _make_transition(token_namespace, reserved_syntax_strings, label):
@@ -315,7 +322,8 @@ def _calculate_tree_traversal(nonterminal_to_dfas):
     nonterminals.sort()
     for nonterminal in nonterminals:
         if nonterminal not in first_plans:
-            _calculate_first_plans(nonterminal_to_dfas, first_plans, nonterminal)
+            _calculate_first_plans(nonterminal_to_dfas, first_plans,
+                                   nonterminal)
 
     # Now that we have calculated the first terminals, we are sure that
     # there is no left recursion.
@@ -329,27 +337,20 @@ def _calculate_tree_traversal(nonterminal_to_dfas):
                         prev_plan = transitions[transition]
                         # Make sure these are sorted so that error messages are
                         # at least deterministic
-                        choices = sorted(
-                            [
-                                (
-                                    prev_plan.dfa_pushes[0].from_rule
-                                    if prev_plan.dfa_pushes
-                                    else prev_plan.next_dfa.from_rule
-                                ),
-                                (pushes[0].from_rule if pushes else next_dfa.from_rule),
-                            ]
-                        )
+                        choices = sorted([
+                            (prev_plan.dfa_pushes[0].from_rule
+                             if prev_plan.dfa_pushes else
+                             prev_plan.next_dfa.from_rule),
+                            (pushes[0].from_rule
+                             if pushes else next_dfa.from_rule),
+                        ])
                         raise ValueError(
                             "Rule %s is ambiguous; given a %s token, we "
-                            "can't determine if we should evaluate %s or %s."
-                            % (
-                                (
-                                    dfa_state.from_rule,
-                                    transition,
-                                )
-                                + tuple(choices)
-                            )
-                        )
+                            "can't determine if we should evaluate %s or %s." %
+                            ((
+                                dfa_state.from_rule,
+                                transition,
+                            ) + tuple(choices)))
                     transitions[transition] = DFAPlan(next_dfa, pushes)
 
 
@@ -374,9 +375,8 @@ def _calculate_first_plans(nonterminal_to_dfas, first_plans, nonterminal):
         try:
             first_plans2 = first_plans[nonterminal2]
         except KeyError:
-            first_plans2 = _calculate_first_plans(
-                nonterminal_to_dfas, first_plans, nonterminal2
-            )
+            first_plans2 = _calculate_first_plans(nonterminal_to_dfas,
+                                                  first_plans, nonterminal2)
         else:
             if first_plans2 is None:
                 raise ValueError("left recursion for rule %r" % nonterminal)

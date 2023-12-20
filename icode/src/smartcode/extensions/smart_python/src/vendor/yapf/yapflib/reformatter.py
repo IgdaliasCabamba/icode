@@ -69,8 +69,7 @@ def Reformat(uwlines, verify=False, lines=None):
                 # Keep the vertical spacing between a disabled and enabled formatting
                 # region.
                 _RetainRequiredVerticalSpacingBetweenTokens(
-                    uwline.first, prev_uwline.last, lines
-                )
+                    uwline.first, prev_uwline.last, lines)
             if any(tok.is_comment for tok in uwline.tokens):
                 _RetainVerticalSpacingBeforeComments(uwline)
 
@@ -79,14 +78,14 @@ def Reformat(uwlines, verify=False, lines=None):
             _RetainRequiredVerticalSpacing(uwline, prev_uwline, lines)
             _EmitLineUnformatted(state)
 
-        elif _LineContainsPylintDisableLineTooLong(uwline) or _LineContainsI18n(uwline):
+        elif _LineContainsPylintDisableLineTooLong(
+                uwline) or _LineContainsI18n(uwline):
             # Don't modify vertical spacing, but fix any horizontal spacing issues.
             _RetainRequiredVerticalSpacing(uwline, prev_uwline, lines)
             _EmitLineUnformatted(state)
 
         elif _CanPlaceOnSingleLine(uwline) and not any(
-            tok.must_split for tok in uwline.tokens
-        ):
+                tok.must_split for tok in uwline.tokens):
             # The unwrapped line fits on one line.
             while state.next_token:
                 state.AddTokenToState(newline=False, dry_run=False)
@@ -95,7 +94,8 @@ def Reformat(uwlines, verify=False, lines=None):
             if not _AnalyzeSolutionSpace(state):
                 # Failsafe mode. If there isn't a solution to the line, then just emit
                 # it as is.
-                state = format_decision_state.FormatDecisionState(uwline, indent_amt)
+                state = format_decision_state.FormatDecisionState(
+                    uwline, indent_amt)
                 state.MoveStateToNextToken()
                 _RetainHorizontalSpacing(uwline)
                 _RetainRequiredVerticalSpacing(uwline, prev_uwline, None)
@@ -161,7 +161,8 @@ def _RetainRequiredVerticalSpacingBetweenTokens(cur_tok, prev_tok, lines):
         desired_newlines = cur_tok.whitespace_prefix.count("\n")
         whitespace_lines = range(prev_lineno + 1, cur_lineno)
         deletable_lines = len(lines.intersection(whitespace_lines))
-        required_newlines = max(required_newlines - deletable_lines, desired_newlines)
+        required_newlines = max(required_newlines - deletable_lines,
+                                desired_newlines)
 
     cur_tok.AdjustNewlinesBefore(required_newlines)
 
@@ -218,7 +219,8 @@ def _LineContainsI18n(uwline):
     """
     if style.Get("I18N_COMMENT"):
         for tok in uwline.tokens:
-            if tok.is_comment and re.match(style.Get("I18N_COMMENT"), tok.value):
+            if tok.is_comment and re.match(style.Get("I18N_COMMENT"),
+                                           tok.value):
                 # Contains an i18n comment.
                 return True
 
@@ -227,8 +229,7 @@ def _LineContainsI18n(uwline):
         index = 0
         while index < length - 1:
             if uwline.tokens[index + 1].value == "(" and uwline.tokens[
-                index
-            ].value in style.Get("I18N_FUNCTION_CALL"):
+                    index].value in style.Get("I18N_FUNCTION_CALL"):
                 return True
             index += 1
 
@@ -265,9 +266,9 @@ def _CanPlaceOnSingleLine(uwline):
         last_index = -2
     if last is None:
         return True
-    return last.total_length + indent_amt <= style.Get("COLUMN_LIMIT") and not any(
-        tok.is_comment for tok in uwline.tokens[:last_index]
-    )
+    return last.total_length + indent_amt <= style.Get(
+        "COLUMN_LIMIT") and not any(tok.is_comment
+                                    for tok in uwline.tokens[:last_index])
 
 
 def _AlignTrailingComments(final_lines):
@@ -280,11 +281,8 @@ def _AlignTrailingComments(final_lines):
         processed_content = False
 
         for tok in line.tokens:
-            if (
-                tok.is_comment
-                and isinstance(tok.spaces_required_before, list)
-                and tok.value.startswith("#")
-            ):
+            if (tok.is_comment and isinstance(tok.spaces_required_before, list)
+                    and tok.value.startswith("#")):
                 # All trailing comments and comments that appear on a line by themselves
                 # in this block should be indented at the same level. The block is
                 # terminated by an empty line or EOF. Enumerate through each line in
@@ -296,19 +294,18 @@ def _AlignTrailingComments(final_lines):
 
                 while True:
                     # EOF
-                    if final_lines_index + len(all_pc_line_lengths) == len(final_lines):
+                    if final_lines_index + len(all_pc_line_lengths) == len(
+                            final_lines):
                         break
 
-                    this_line = final_lines[
-                        final_lines_index + len(all_pc_line_lengths)
-                    ]
+                    this_line = final_lines[final_lines_index +
+                                            len(all_pc_line_lengths)]
 
                     # Blank line - note that content is preformatted so we don't need to
                     # worry about spaces/tabs; a blank line will always be '\n\n'.
                     assert this_line.tokens
                     if all_pc_line_lengths and this_line.tokens[
-                        0
-                    ].formatted_whitespace_prefix.startswith("\n\n"):
+                            0].formatted_whitespace_prefix.startswith("\n\n"):
                         break
 
                     if this_line.disable:
@@ -324,20 +321,22 @@ def _AlignTrailingComments(final_lines):
 
                         newline_index = whitespace_prefix.rfind("\n")
                         if newline_index != -1:
-                            max_line_length = max(max_line_length, len(line_content))
+                            max_line_length = max(max_line_length,
+                                                  len(line_content))
                             line_content = ""
 
-                            whitespace_prefix = whitespace_prefix[newline_index + 1 :]
+                            whitespace_prefix = whitespace_prefix[
+                                newline_index + 1:]
 
                         if line_tok.is_comment:
                             pc_line_lengths.append(len(line_content))
                         else:
                             line_content += "{}{}".format(
-                                whitespace_prefix, line_tok.value
-                            )
+                                whitespace_prefix, line_tok.value)
 
                     if pc_line_lengths:
-                        max_line_length = max(max_line_length, max(pc_line_lengths))
+                        max_line_length = max(max_line_length,
+                                              max(pc_line_lengths))
 
                     all_pc_line_lengths.append(pc_line_lengths)
 
@@ -355,36 +354,33 @@ def _AlignTrailingComments(final_lines):
 
                 # Update the comment token values based on the aligned values
                 for all_pc_line_lengths_index, pc_line_lengths in enumerate(
-                    all_pc_line_lengths
-                ):
+                        all_pc_line_lengths):
                     if not pc_line_lengths:
                         continue
 
-                    this_line = final_lines[
-                        final_lines_index + all_pc_line_lengths_index
-                    ]
+                    this_line = final_lines[final_lines_index +
+                                            all_pc_line_lengths_index]
 
                     pc_line_length_index = 0
                     for line_tok in this_line.tokens:
                         if line_tok.is_comment:
                             assert pc_line_length_index < len(pc_line_lengths)
-                            assert pc_line_lengths[pc_line_length_index] < aligned_col
+                            assert pc_line_lengths[
+                                pc_line_length_index] < aligned_col
 
                             # Note that there may be newlines embedded in the comments, so
                             # we need to apply a whitespace prefix to each line.
                             whitespace = " " * (
-                                aligned_col - pc_line_lengths[pc_line_length_index] - 1
-                            )
+                                aligned_col -
+                                pc_line_lengths[pc_line_length_index] - 1)
                             pc_line_length_index += 1
 
                             line_content = []
 
                             for comment_line_index, comment_line in enumerate(
-                                line_tok.value.split("\n")
-                            ):
-                                line_content.append(
-                                    "{}{}".format(whitespace, comment_line.strip())
-                                )
+                                    line_tok.value.split("\n")):
+                                line_content.append("{}{}".format(
+                                    whitespace, comment_line.strip()))
 
                                 if comment_line_index == 0:
                                     whitespace = " " * (aligned_col - 1)
@@ -394,13 +390,13 @@ def _AlignTrailingComments(final_lines):
                             # Account for initial whitespace already slated for the
                             # beginning of the line.
                             existing_whitespace_prefix = (
-                                line_tok.formatted_whitespace_prefix.lstrip("\n")
-                            )
+                                line_tok.formatted_whitespace_prefix.lstrip(
+                                    "\n"))
 
-                            if line_content.startswith(existing_whitespace_prefix):
+                            if line_content.startswith(
+                                    existing_whitespace_prefix):
                                 line_content = line_content[
-                                    len(existing_whitespace_prefix) :
-                                ]
+                                    len(existing_whitespace_prefix):]
 
                             line_tok.value = line_content
 
@@ -426,12 +422,10 @@ def _FormatFinalLines(final_lines, verify):
                 formatted_line.append(tok.value)
             else:
                 if not tok.next_token.whitespace_prefix.startswith(
-                    "\n"
+                        "\n"
                 ) and not tok.next_token.whitespace_prefix.startswith(" "):
-                    if (
-                        tok.previous_token.value == ":"
-                        or tok.next_token.value not in ",}])"
-                    ):
+                    if (tok.previous_token.value == ":"
+                            or tok.next_token.value not in ",}])"):
                         formatted_line.append(" ")
 
         formatted_code.append("".join(formatted_line))
@@ -461,19 +455,20 @@ class _StateNode(object):
 
     def __repr__(self):  # pragma: no cover
         return "StateNode(state=[\n{0}\n], newline={1})".format(
-            self.state, self.newline
-        )
+            self.state, self.newline)
 
 
 # A tuple of (penalty, count) that is used to prioritize the BFS. In case of
 # equal penalties, we prefer states that were inserted first. During state
 # generation, we make sure that we insert states first that break the line as
 # late as possible.
-_OrderedPenalty = collections.namedtuple("OrderedPenalty", ["penalty", "count"])
+_OrderedPenalty = collections.namedtuple("OrderedPenalty",
+                                         ["penalty", "count"])
 
 # An item in the prioritized BFS search queue. The 'StateNode's 'state' has
 # the given '_OrderedPenalty'.
-_QueueItem = collections.namedtuple("QueueItem", ["ordered_penalty", "state_node"])
+_QueueItem = collections.namedtuple("QueueItem",
+                                    ["ordered_penalty", "state_node"])
 
 
 def _AnalyzeSolutionSpace(initial_state):
@@ -555,9 +550,9 @@ def _AddNextStateToQueue(penalty, previous_node, newline, count, p_queue):
         return count
 
     node = _StateNode(previous_node.state, newline, previous_node)
-    penalty += node.state.AddTokenToState(
-        newline=newline, dry_run=True, must_split=must_split
-    )
+    penalty += node.state.AddTokenToState(newline=newline,
+                                          dry_run=True,
+                                          must_split=must_split)
     heapq.heappush(p_queue, _QueueItem(_OrderedPenalty(penalty, count), node))
     return count + 1
 
@@ -612,9 +607,8 @@ def _FormatFirstToken(first_token, indent_depth, prev_uwline, final_lines):
             NESTED_DEPTH.append(indent_depth)
 
     first_token.AddWhitespacePrefix(
-        _CalculateNumberOfNewlines(
-            first_token, indent_depth, prev_uwline, final_lines, first_nested
-        ),
+        _CalculateNumberOfNewlines(first_token, indent_depth, prev_uwline,
+                                   final_lines, first_nested),
         indent_level=indent_depth,
     )
 
@@ -630,9 +624,8 @@ def _IsClassOrDef(tok):
     return tok.next_token and tok.value == "async" and tok.next_token.value == "def"
 
 
-def _CalculateNumberOfNewlines(
-    first_token, indent_depth, prev_uwline, final_lines, first_nested
-):
+def _CalculateNumberOfNewlines(first_token, indent_depth, prev_uwline,
+                               final_lines, first_nested):
     """Calculate the number of newlines we need to add.
 
     Arguments:
@@ -654,20 +647,18 @@ def _CalculateNumberOfNewlines(
         # The first line in the file. Don't add blank lines.
         # FIXME(morbo): Is this correct?
         if first_token.newlines is not None:
-            pytree_utils.SetNodeAnnotation(
-                first_token.node, pytree_utils.Annotation.NEWLINES, None
-            )
+            pytree_utils.SetNodeAnnotation(first_token.node,
+                                           pytree_utils.Annotation.NEWLINES,
+                                           None)
         return 0
 
     if first_token.is_docstring:
         if prev_uwline.first.value == "class" and style.Get(
-            "BLANK_LINE_BEFORE_CLASS_DOCSTRING"
-        ):
+                "BLANK_LINE_BEFORE_CLASS_DOCSTRING"):
             # Enforce a blank line before a class's docstring.
             return ONE_BLANK_LINE
         elif prev_uwline.first.value.startswith("#") and style.Get(
-            "BLANK_LINE_BEFORE_MODULE_DOCSTRING"
-        ):
+                "BLANK_LINE_BEFORE_MODULE_DOCSTRING"):
             # Enforce a blank line before a module's docstring.
             return ONE_BLANK_LINE
         # The docstring shouldn't have a newline before it.
@@ -677,7 +668,8 @@ def _CalculateNumberOfNewlines(
         if prev_uwline.first.value == "from" or prev_uwline.first.value == "import":
             # Support custom number of blank lines between top-level imports and
             # variable definitions.
-            return 1 + style.Get("BLANK_LINES_BETWEEN_TOP_LEVEL_IMPORTS_AND_VARIABLES")
+            return 1 + style.Get(
+                "BLANK_LINES_BETWEEN_TOP_LEVEL_IMPORTS_AND_VARIABLES")
 
     prev_last_token = prev_uwline.last
     if prev_last_token.is_docstring:
@@ -685,18 +677,15 @@ def _CalculateNumberOfNewlines(
             # Separate a class or function from the module-level docstring with
             # appropriate number of blank lines.
             return 1 + style.Get("BLANK_LINES_AROUND_TOP_LEVEL_DEFINITION")
-        if (
-            first_nested
-            and not style.Get("BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF")
-            and _IsClassOrDef(first_token)
-        ):
-            pytree_utils.SetNodeAnnotation(
-                first_token.node, pytree_utils.Annotation.NEWLINES, None
-            )
+        if (first_nested
+                and not style.Get("BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF")
+                and _IsClassOrDef(first_token)):
+            pytree_utils.SetNodeAnnotation(first_token.node,
+                                           pytree_utils.Annotation.NEWLINES,
+                                           None)
             return NO_BLANK_LINES
-        if _NoBlankLinesBeforeCurrentToken(
-            prev_last_token.value, first_token, prev_last_token
-        ):
+        if _NoBlankLinesBeforeCurrentToken(prev_last_token.value, first_token,
+                                           prev_last_token):
             return NO_BLANK_LINES
         else:
             return ONE_BLANK_LINE
@@ -706,16 +695,14 @@ def _CalculateNumberOfNewlines(
         # sophisticated.
         if not indent_depth:
             # This is a top-level class or function.
-            is_inline_comment = prev_last_token.whitespace_prefix.count("\n") == 0
-            if (
-                not prev_uwline.disable
-                and prev_last_token.is_comment
-                and not is_inline_comment
-            ):
+            is_inline_comment = prev_last_token.whitespace_prefix.count(
+                "\n") == 0
+            if (not prev_uwline.disable and prev_last_token.is_comment
+                    and not is_inline_comment):
                 # This token follows a non-inline comment.
-                if _NoBlankLinesBeforeCurrentToken(
-                    prev_last_token.value, first_token, prev_last_token
-                ):
+                if _NoBlankLinesBeforeCurrentToken(prev_last_token.value,
+                                                   first_token,
+                                                   prev_last_token):
                     # Assume that the comment is "attached" to the current line.
                     # Therefore, we want two blank lines before the comment.
                     index = len(final_lines) - 1
@@ -724,21 +711,21 @@ def _CalculateNumberOfNewlines(
                             break
                         index -= 1
                     if final_lines[index - 1].first.value == "@":
-                        final_lines[index].first.AdjustNewlinesBefore(NO_BLANK_LINES)
+                        final_lines[index].first.AdjustNewlinesBefore(
+                            NO_BLANK_LINES)
                     else:
-                        prev_last_token.AdjustNewlinesBefore(
-                            1 + style.Get("BLANK_LINES_AROUND_TOP_LEVEL_DEFINITION")
-                        )
+                        prev_last_token.AdjustNewlinesBefore(1 + style.Get(
+                            "BLANK_LINES_AROUND_TOP_LEVEL_DEFINITION"))
                     if first_token.newlines is not None:
                         pytree_utils.SetNodeAnnotation(
-                            first_token.node, pytree_utils.Annotation.NEWLINES, None
-                        )
+                            first_token.node, pytree_utils.Annotation.NEWLINES,
+                            None)
                     return NO_BLANK_LINES
         elif _IsClassOrDef(prev_uwline.first):
-            if first_nested and not style.Get("BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF"):
+            if first_nested and not style.Get(
+                    "BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF"):
                 pytree_utils.SetNodeAnnotation(
-                    first_token.node, pytree_utils.Annotation.NEWLINES, None
-                )
+                    first_token.node, pytree_utils.Annotation.NEWLINES, None)
                 return NO_BLANK_LINES
 
     # Calculate how many newlines were between the original lines. We want to
@@ -789,13 +776,15 @@ def _SingleOrMergedLines(uwlines):
                     uwline.AppendToken(tok)
                 index += 1
             yield uwline
-        elif line_joiner.CanMergeMultipleLines(uwlines[index:], last_was_merged):
+        elif line_joiner.CanMergeMultipleLines(uwlines[index:],
+                                               last_was_merged):
             # TODO(morbo): This splice is potentially very slow. Come up with a more
             # performance-friendly way of determining if two lines can be merged.
             next_uwline = uwlines[index + 1]
             for tok in next_uwline.tokens:
                 uwlines[index].AppendToken(tok)
-            if len(next_uwline.tokens) == 1 and next_uwline.first.is_multiline_string:
+            if len(next_uwline.tokens
+                   ) == 1 and next_uwline.first.is_multiline_string:
                 # This may be a multiline shebang. In that case, we want to retain the
                 # formatting. Otherwise, it could mess up the shell script's syntax.
                 uwlines[index].disable = True

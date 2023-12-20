@@ -17,10 +17,12 @@ def __rope_start_everything():
     import hmac
 
     class _MessageSender(object):
+
         def send_data(self, data):
             pass
 
     class _SocketSender(_MessageSender):
+
         def __init__(self, port, key):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect(("127.0.0.1", port))
@@ -30,15 +32,17 @@ def __rope_start_everything():
         def send_data(self, data):
             if not self.my_file.closed:
                 pickled_data = base64.b64encode(
-                    pickle.dumps(data, pickle.HIGHEST_PROTOCOL)
-                )
-                dgst = hmac.new(self.key, pickled_data, hashlib.sha256).digest()
-                self.my_file.write(base64.b64encode(dgst) + b":" + pickled_data + b"\n")
+                    pickle.dumps(data, pickle.HIGHEST_PROTOCOL))
+                dgst = hmac.new(self.key, pickled_data,
+                                hashlib.sha256).digest()
+                self.my_file.write(
+                    base64.b64encode(dgst) + b":" + pickled_data + b"\n")
 
         def close(self):
             self.my_file.close()
 
     class _FileSender(_MessageSender):
+
         def __init__(self, file_name):
             self.my_file = open(file_name, "wb")
 
@@ -62,6 +66,7 @@ def __rope_start_everything():
         return newfunc
 
     class _FunctionCallDataSender(object):
+
         def __init__(self, send_info, project_root):
             self.project_root = project_root
             if send_info[0].isdigit():
@@ -83,14 +88,15 @@ def __rope_start_everything():
             if event != "return":
                 return
             args = []
-            returned = ("unknown",)
+            returned = ("unknown", )
             code = frame.f_code
-            for argname in code.co_varnames[: code.co_argcount]:
+            for argname in code.co_varnames[:code.co_argcount]:
                 try:
-                    argvalue = self._object_to_persisted_form(frame.f_locals[argname])
+                    argvalue = self._object_to_persisted_form(
+                        frame.f_locals[argname])
                     args.append(argvalue)
                 except (TypeError, AttributeError):
-                    args.append(("unknown",))
+                    args.append(("unknown", ))
             try:
                 returned = self._object_to_persisted_form(arg)
             except (TypeError, AttributeError):
@@ -112,19 +118,15 @@ def __rope_start_everything():
             # return not frame.f_back or
             #    not self._is_code_inside_project(frame.f_back.f_code)
             if not self._is_code_inside_project(frame.f_code) and (
-                not frame.f_back
-                or not self._is_code_inside_project(frame.f_back.f_code)
-            ):
+                    not frame.f_back
+                    or not self._is_code_inside_project(frame.f_back.f_code)):
                 return False
             return True
 
         def _is_code_inside_project(self, code):
             source = self._path(code.co_filename)
-            return (
-                source is not None
-                and os.path.exists(source)
-                and _realpath(source).startswith(self.project_root)
-            )
+            return (source is not None and os.path.exists(source)
+                    and _realpath(source).startswith(self.project_root))
 
         @_cached
         def _get_persisted_code(self, object_):
@@ -142,7 +144,7 @@ def __rope_start_everything():
                     object_.__name__,
                 )
             except (TypeError, AttributeError):
-                return ("unknown",)
+                return ("unknown", )
 
         def _get_persisted_builtin(self, object_):
             if isinstance(object_, pycompat.string_types):
@@ -151,14 +153,17 @@ def __rope_start_everything():
                 holding = None
                 if len(object_) > 0:
                     holding = object_[0]
-                return ("builtin", "list", self._object_to_persisted_form(holding))
+                return ("builtin", "list",
+                        self._object_to_persisted_form(holding))
             if isinstance(object_, dict):
                 keys = None
                 values = None
                 if len(object_) > 0:
                     # @todo - fix it properly, why is __locals__ being
                     # duplicated ?
-                    keys = [key for key in object_.keys() if key != "__locals__"][0]
+                    keys = [
+                        key for key in object_.keys() if key != "__locals__"
+                    ][0]
                     values = object_[keys]
                 return (
                     "builtin",
@@ -180,12 +185,13 @@ def __rope_start_everything():
                     for o in object_:
                         holding = o
                         break
-                return ("builtin", "set", self._object_to_persisted_form(holding))
-            return ("unknown",)
+                return ("builtin", "set",
+                        self._object_to_persisted_form(holding))
+            return ("unknown", )
 
         def _object_to_persisted_form(self, object_):
             if object_ is None:
-                return ("none",)
+                return ("none", )
             if isinstance(object_, types.CodeType):
                 return self._get_persisted_code(object_)
             if isinstance(object_, types.FunctionType):
@@ -194,7 +200,8 @@ def __rope_start_everything():
                 return self._get_persisted_code(object_.__func__.__code__)
             if isinstance(object_, types.ModuleType):
                 return self._get_persisted_module(object_)
-            if isinstance(object_, pycompat.string_types + (list, dict, tuple, set)):
+            if isinstance(object_,
+                          pycompat.string_types + (list, dict, tuple, set)):
                 return self._get_persisted_builtin(object_)
             if isinstance(object_, type):
                 return self._get_persisted_class(object_)
@@ -205,7 +212,7 @@ def __rope_start_everything():
             path = self._path(object_.__file__)
             if path and os.path.exists(path):
                 return ("defined", _realpath(path))
-            return ("unknown",)
+            return ("unknown", )
 
         def _path(self, path):
             if path.endswith(".pyc"):
@@ -224,9 +231,11 @@ def __rope_start_everything():
     project_root = sys.argv[2]
     file_to_run = sys.argv[3]
     run_globals = globals()
-    run_globals.update(
-        {"__name__": "__main__", "__builtins__": __builtins__, "__file__": file_to_run}
-    )
+    run_globals.update({
+        "__name__": "__main__",
+        "__builtins__": __builtins__,
+        "__file__": file_to_run
+    })
 
     if send_info != "-":
         data_sender = _FunctionCallDataSender(send_info, project_root)

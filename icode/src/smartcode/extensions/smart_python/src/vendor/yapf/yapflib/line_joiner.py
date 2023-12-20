@@ -56,11 +56,8 @@ def CanMergeMultipleLines(lines, last_was_merged=False):
     if len(lines) == 1 or indent_amt > style.Get("COLUMN_LIMIT"):
         return False
 
-    if (
-        len(lines) >= 3
-        and lines[2].depth >= lines[1].depth
-        and lines[0].depth != lines[2].depth
-    ):
+    if (len(lines) >= 3 and lines[2].depth >= lines[1].depth
+            and lines[0].depth != lines[2].depth):
         # If lines[2]'s depth is greater than or equal to line[1]'s depth, we're not
         # looking at a single statement (e.g., if-then, while, etc.). A following
         # line with the same depth as the first line isn't part of the lines we

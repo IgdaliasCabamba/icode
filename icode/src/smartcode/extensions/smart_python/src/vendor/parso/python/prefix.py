@@ -8,6 +8,7 @@ unicode_bom = BOM_UTF8.decode("utf-8")
 
 
 class PrefixPart:
+
     def __init__(self, leaf, typ, value, spacing="", start_pos=None):
         assert start_pos is not None
         self.parent = leaf
@@ -27,9 +28,10 @@ class PrefixPart:
 
     def create_spacing_part(self):
         column = self.start_pos[1] - len(self.spacing)
-        return PrefixPart(
-            self.parent, "spacing", self.spacing, start_pos=(self.start_pos[0], column)
-        )
+        return PrefixPart(self.parent,
+                          "spacing",
+                          self.spacing,
+                          start_pos=(self.start_pos[0], column))
 
     def __repr__(self):
         return "%s(%s, %s, %s)" % (
@@ -56,11 +58,14 @@ _only_spacing = "$"
 _spacing = r"[ \t]*"
 _bom = unicode_bom
 
-_regex = group(
-    _comment, _backslash, _newline, _form_feed, _only_spacing, _bom, capture=True
-)
+_regex = group(_comment,
+               _backslash,
+               _newline,
+               _form_feed,
+               _only_spacing,
+               _bom,
+               capture=True)
 _regex = re.compile(group(_spacing, capture=True) + _regex)
-
 
 _types = {
     "#": "comment",
@@ -101,4 +106,7 @@ def split_prefix(leaf, start_pos):
 
     if value:
         spacing = ""
-    yield PrefixPart(leaf, "spacing", spacing, start_pos=(line, column + start))
+    yield PrefixPart(leaf,
+                     "spacing",
+                     spacing,
+                     start_pos=(line, column + start))

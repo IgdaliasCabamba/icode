@@ -48,6 +48,7 @@ class CheckAttribute:
 
 
 class CompiledValue(Value):
+
     def __init__(self, inference_state, access_handle, parent_context=None):
         super().__init__(inference_state, parent_context)
         self.access_handle = access_handle
@@ -57,8 +58,7 @@ class CompiledValue(Value):
         if return_annotation is not None:
             # TODO the return annotation may also be a string.
             return create_from_access_path(
-                self.inference_state, return_annotation
-            ).execute_annotation()
+                self.inference_state, return_annotation).execute_annotation()
 
         try:
             self.access_handle.getattr_paths("__call__")
@@ -68,35 +68,29 @@ class CompiledValue(Value):
             if self.access_handle.is_class():
                 from jedi.inference.value import CompiledInstance
 
-                return ValueSet(
-                    [
-                        CompiledInstance(
-                            self.inference_state, self.parent_context, self, arguments
-                        )
-                    ]
-                )
+                return ValueSet([
+                    CompiledInstance(self.inference_state, self.parent_context,
+                                     self, arguments)
+                ])
             else:
                 return ValueSet(self._execute_function(arguments))
 
     @CheckAttribute()
     def py__class__(self):
-        return create_from_access_path(
-            self.inference_state, self.access_handle.py__class__()
-        )
+        return create_from_access_path(self.inference_state,
+                                       self.access_handle.py__class__())
 
     @CheckAttribute()
     def py__mro__(self):
-        return (self,) + tuple(
+        return (self, ) + tuple(
             create_from_access_path(self.inference_state, access)
-            for access in self.access_handle.py__mro__accesses()
-        )
+            for access in self.access_handle.py__mro__accesses())
 
     @CheckAttribute()
     def py__bases__(self):
         return tuple(
             create_from_access_path(self.inference_state, access)
-            for access in self.access_handle.py__bases__()
-        )
+            for access in self.access_handle.py__bases__())
 
     def get_qualified_names(self):
         return self.access_handle.get_qualified_names()
@@ -149,7 +143,8 @@ class CompiledValue(Value):
         return [BuiltinSignature(self, return_string)]
 
     def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.access_handle.get_repr())
+        return "<%s: %s>" % (self.__class__.__name__,
+                             self.access_handle.get_repr())
 
     @memoize_method
     def _parse_function_doc(self):
@@ -179,7 +174,8 @@ class CompiledValue(Value):
         if access is None:
             return NO_VALUES
 
-        return ValueSet([create_from_access_path(self.inference_state, access)])
+        return ValueSet(
+            [create_from_access_path(self.inference_state, access)])
 
     def py__getitem__(self, index_value_set, contextualized_node):
         all_access_paths = self.access_handle.py__getitem__all_values()
@@ -189,8 +185,7 @@ class CompiledValue(Value):
             return super().py__getitem__(index_value_set, contextualized_node)
         return ValueSet(
             create_from_access_path(self.inference_state, access)
-            for access in all_access_paths
-        )
+            for access in all_access_paths)
 
     def py__iter__(self, contextualized_node=None):
         if not self.access_handle.has_iter():
@@ -202,7 +197,8 @@ class CompiledValue(Value):
             return
 
         for access in access_path_list:
-            yield LazyKnownValue(create_from_access_path(self.inference_state, access))
+            yield LazyKnownValue(
+                create_from_access_path(self.inference_state, access))
 
     def py__name__(self):
         return self.access_handle.py__name__()
@@ -225,7 +221,8 @@ class CompiledValue(Value):
             try:
                 # TODO wtf is this? this is exactly the same as the thing
                 # below. It uses getattr as well.
-                self.inference_state.builtins_module.access_handle.getattr_paths(name)
+                self.inference_state.builtins_module.access_handle.getattr_paths(
+                    name)
             except AttributeError:
                 continue
             else:
@@ -243,16 +240,13 @@ class CompiledValue(Value):
 
     def execute_operation(self, other, operator):
         try:
-            return ValueSet(
-                [
-                    create_from_access_path(
-                        self.inference_state,
-                        self.access_handle.execute_operation(
-                            other.access_handle, operator
-                        ),
-                    )
-                ]
-            )
+            return ValueSet([
+                create_from_access_path(
+                    self.inference_state,
+                    self.access_handle.execute_operation(
+                        other.access_handle, operator),
+                )
+            ])
         except TypeError:
             return NO_VALUES
 
@@ -267,23 +261,21 @@ class CompiledValue(Value):
             for path in args
         ]
         if name == "Union":
-            return ValueSet.from_sets(arg.execute_annotation() for arg in arguments)
+            return ValueSet.from_sets(arg.execute_annotation()
+                                      for arg in arguments)
         elif name:
             # While with_generics only exists on very specific objects, we
             # should probably be fine, because we control all the typing
             # objects.
-            return ValueSet(
-                [
-                    v.with_generics(arguments)
-                    for v in self.inference_state.typing_module.py__getattribute__(name)
-                ]
-            ).execute_annotation()
+            return ValueSet([
+                v.with_generics(arguments) for v in
+                self.inference_state.typing_module.py__getattribute__(name)
+            ]).execute_annotation()
         return super().execute_annotation()
 
     def negate(self):
-        return create_from_access_path(
-            self.inference_state, self.access_handle.negate()
-        )
+        return create_from_access_path(self.inference_state,
+                                       self.access_handle.negate())
 
     def get_metaclasses(self):
         return NO_VALUES
@@ -338,6 +330,7 @@ class CompiledModule(CompiledValue):
 
 
 class CompiledName(AbstractNameDefinition):
+
     def __init__(self, inference_state, parent_value, name):
         self._inference_state = inference_state
         self.parent_context = parent_value.as_context()
@@ -351,7 +344,7 @@ class CompiledName(AbstractNameDefinition):
         parent_qualified_names = self.parent_context.get_qualified_names()
         if parent_qualified_names is None:
             return None
-        return parent_qualified_names + (self.string_name,)
+        return parent_qualified_names + (self.string_name, )
 
     def get_defining_qualified_value(self):
         context = self.parent_context
@@ -365,7 +358,8 @@ class CompiledName(AbstractNameDefinition):
             name = self.parent_context.name  # __name__ is not defined all the time
         except AttributeError:
             name = None
-        return "<%s: (%s).%s>" % (self.__class__.__name__, name, self.string_name)
+        return "<%s: (%s).%s>" % (self.__class__.__name__, name,
+                                  self.string_name)
 
     @property
     def api_type(self):
@@ -376,12 +370,12 @@ class CompiledName(AbstractNameDefinition):
 
     @memoize_method
     def infer_compiled_value(self):
-        return create_from_name(
-            self._inference_state, self._parent_value, self.string_name
-        )
+        return create_from_name(self._inference_state, self._parent_value,
+                                self.string_name)
 
 
 class SignatureParamName(ParamNameInterface, AbstractNameDefinition):
+
     def __init__(self, compiled_value, signature_param):
         self.parent_context = compiled_value.parent_context
         self._signature_param = signature_param
@@ -406,7 +400,8 @@ class SignatureParamName(ParamNameInterface, AbstractNameDefinition):
         inference_state = self.parent_context.inference_state
         values = NO_VALUES
         if p.has_default:
-            values = ValueSet([create_from_access_path(inference_state, p.default)])
+            values = ValueSet(
+                [create_from_access_path(inference_state, p.default)])
         if p.has_annotation:
             annotation = create_from_access_path(inference_state, p.annotation)
             values |= annotation.execute_with_values()
@@ -414,6 +409,7 @@ class SignatureParamName(ParamNameInterface, AbstractNameDefinition):
 
 
 class UnresolvableParamName(ParamNameInterface, AbstractNameDefinition):
+
     def __init__(self, compiled_value, name, default):
         self.parent_context = compiled_value.parent_context
         self.string_name = name
@@ -433,6 +429,7 @@ class UnresolvableParamName(ParamNameInterface, AbstractNameDefinition):
 
 
 class CompiledValueName(ValueNameMixin, AbstractNameDefinition):
+
     def __init__(self, value, name):
         self.string_name = name
         self._value = value
@@ -455,6 +452,7 @@ class EmptyCompiledName(AbstractNameDefinition):
 
 
 class CompiledValueFilter(AbstractFilter):
+
     def __init__(self, inference_state, compiled_value, is_instance=False):
         self._inference_state = inference_state
         self.compiled_value = compiled_value
@@ -464,14 +462,17 @@ class CompiledValueFilter(AbstractFilter):
         access_handle = self.compiled_value.access_handle
         return self._get(
             name,
-            lambda name, unsafe: access_handle.is_allowed_getattr(name, unsafe),
+            lambda name, unsafe: access_handle.is_allowed_getattr(
+                name, unsafe),
             lambda name: name in access_handle.dir(),
             check_has_attribute=True,
         )
 
-    def _get(
-        self, name, allowed_getattr_callback, in_dir_callback, check_has_attribute=False
-    ):
+    def _get(self,
+             name,
+             allowed_getattr_callback,
+             in_dir_callback,
+             check_has_attribute=False):
         """
         To remove quite a few access calls we introduced the callback here.
         """
@@ -479,14 +480,12 @@ class CompiledValueFilter(AbstractFilter):
             pass
 
         has_attribute, is_descriptor = allowed_getattr_callback(
-            name, unsafe=self._inference_state.allow_descriptor_getattr
-        )
+            name, unsafe=self._inference_state.allow_descriptor_getattr)
         if check_has_attribute and not has_attribute:
             return []
 
-        if (
-            is_descriptor or not has_attribute
-        ) and not self._inference_state.allow_descriptor_getattr:
+        if (is_descriptor or not has_attribute
+            ) and not self._inference_state.allow_descriptor_getattr:
             return [self._get_cached_name(name, is_empty=True)]
 
         if self.is_instance and not in_dir_callback(name):
@@ -522,9 +521,8 @@ class CompiledValueFilter(AbstractFilter):
 
         # ``dir`` doesn't include the type names.
         if not self.is_instance and needs_type_completions:
-            for filter in builtin_from_name(
-                self._inference_state, "type"
-            ).get_filters():
+            for filter in builtin_from_name(self._inference_state,
+                                            "type").get_filters():
                 names += filter.values()
         return names
 
@@ -564,7 +562,7 @@ def _parse_function_doc(doc):
             if count == 0:
                 end = start + i
                 break
-        param_str = doc[start + 1 : end]
+        param_str = doc[start + 1:end]
     except (ValueError, UnboundLocalError):
         # ValueError for doc.index
         # UnboundLocalError for undefined end in last line
@@ -581,13 +579,14 @@ def _parse_function_doc(doc):
             return ",".join(args)
 
         while True:
-            param_str, changes = re.subn(r" ?\[([^\[\]]+)\]", change_options, param_str)
+            param_str, changes = re.subn(r" ?\[([^\[\]]+)\]", change_options,
+                                         param_str)
             if changes == 0:
                 break
     param_str = param_str.replace("-", "_")  # see: isinstance.__doc__
 
     # parse return value
-    r = re.search("-[>-]* ", doc[end : end + 7])
+    r = re.search("-[>-]* ", doc[end:end + 7])
     if r is None:
         ret = ""
     else:
@@ -604,7 +603,8 @@ def _parse_function_doc(doc):
 
 
 def create_from_name(inference_state, compiled_value, name):
-    access_paths = compiled_value.access_handle.getattr_paths(name, default=None)
+    access_paths = compiled_value.access_handle.getattr_paths(name,
+                                                              default=None)
 
     value = None
     for access_path in access_paths:
@@ -638,7 +638,8 @@ def create_from_access_path(inference_state, access_path):
 
 @_normalize_create_args
 @inference_state_function_cache()
-def create_cached_compiled_value(inference_state, access_handle, parent_context):
+def create_cached_compiled_value(inference_state, access_handle,
+                                 parent_context):
     assert not isinstance(parent_context, CompiledValue)
     if parent_context is None:
         cls = CompiledModule

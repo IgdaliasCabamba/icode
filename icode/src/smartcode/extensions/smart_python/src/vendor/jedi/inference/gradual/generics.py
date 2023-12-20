@@ -25,6 +25,7 @@ def _resolve_forward_references(context, value_set):
 
 
 class _AbstractGenericManager:
+
     def get_index_and_execute(self, index):
         try:
             return self[index].execute_annotation()
@@ -34,11 +35,11 @@ class _AbstractGenericManager:
 
     def get_type_hint(self):
         return "[%s]" % ", ".join(
-            t.get_type_hint(add_class_info=False) for t in self.to_tuple()
-        )
+            t.get_type_hint(add_class_info=False) for t in self.to_tuple())
 
 
 class LazyGenericManager(_AbstractGenericManager):
+
     def __init__(self, context_of_index, index_value):
         self._context_of_index = context_of_index
         self._index_value = index_value
@@ -53,20 +54,20 @@ class LazyGenericManager(_AbstractGenericManager):
     @memoize_method
     @to_tuple
     def _tuple(self):
+
         def lambda_scoping_in_for_loop_sucks(lazy_value):
             return lambda: ValueSet(
-                _resolve_forward_references(self._context_of_index, lazy_value.infer())
-            )
+                _resolve_forward_references(self._context_of_index,
+                                            lazy_value.infer()))
 
         if isinstance(self._index_value, SequenceLiteralValue):
-            for lazy_value in self._index_value.py__iter__(contextualized_node=None):
+            for lazy_value in self._index_value.py__iter__(
+                    contextualized_node=None):
                 yield lambda_scoping_in_for_loop_sucks(lazy_value)
         else:
             yield lambda: ValueSet(
-                _resolve_forward_references(
-                    self._context_of_index, ValueSet([self._index_value])
-                )
-            )
+                _resolve_forward_references(self._context_of_index,
+                                            ValueSet([self._index_value])))
 
     @to_tuple
     def to_tuple(self):
@@ -85,6 +86,7 @@ class LazyGenericManager(_AbstractGenericManager):
 
 
 class TupleGenericManager(_AbstractGenericManager):
+
     def __init__(self, tup):
         self._tuple = tup
 

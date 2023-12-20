@@ -1,4 +1,5 @@
 class IParamProvider(object):
+
     def __call__(self, pyfunc, param_name):
         """
         :type pyfunc: rope.base.pyobjectsdef.PyFunction

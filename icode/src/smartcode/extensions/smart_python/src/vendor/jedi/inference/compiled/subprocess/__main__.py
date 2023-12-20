@@ -18,6 +18,7 @@ def _get_paths():
 
 
 class _ExactImporter(MetaPathFinder):
+
     def __init__(self, path_dct):
         self._path_dct = path_dct
 

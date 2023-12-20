@@ -28,6 +28,7 @@ from rope.base.oi.type_hinting.providers import interfaces
 
 
 class ParamProvider(interfaces.IParamProvider):
+
     def __init__(self, docstring_parser, resolver):
         """
         :type docstring_parser: rope.base.oi.type_hinting.providers.docstrings.IParamParser
@@ -48,6 +49,7 @@ class ParamProvider(interfaces.IParamProvider):
 
 
 class ReturnProvider(interfaces.IReturnProvider):
+
     def __init__(self, docstring_parser, resolver):
         """
         :type docstring_parser: rope.base.oi.type_hinting.providers.docstrings.IReturnParser
@@ -67,6 +69,7 @@ class ReturnProvider(interfaces.IReturnProvider):
 
 
 class AssignmentProvider(interfaces.IAssignmentProvider):
+
     def __init__(self, docstring_parser, resolver):
         """
         :type docstring_parser: rope.base.oi.type_hinting.providers.docstrings.IParamParser
@@ -91,6 +94,7 @@ class AssignmentProvider(interfaces.IAssignmentProvider):
 
 
 class IParamParser(object):
+
     def __call__(self, docstring, param_name):
         """
         :type docstring: str
@@ -99,6 +103,7 @@ class IParamParser(object):
 
 
 class IReturnParser(object):
+
     def __call__(self, docstring):
         """
         :type docstring: str
@@ -133,7 +138,8 @@ class DocstringParamParser(IParamParser):
         if not docstring:
             return []
         patterns = [
-            re.compile(p % re.escape(param_name)) for p in self.DOCSTRING_PARAM_PATTERNS
+            re.compile(p % re.escape(param_name))
+            for p in self.DOCSTRING_PARAM_PATTERNS
         ]
         for pattern in patterns:
             match = pattern.search(docstring)

@@ -63,8 +63,8 @@ MAX_CONFIG_SEARCH_DEPTH: int = (
 )
 STOP_CONFIG_SEARCH_ON_DIRS: Tuple[str, ...] = (".git", ".hg")
 VALID_PY_TARGETS: Tuple[str, ...] = tuple(
-    target.replace("py", "") for target in dir(stdlibs) if not target.startswith("_")
-)
+    target.replace("py", "") for target in dir(stdlibs)
+    if not target.startswith("_"))
 CONFIG_SOURCES: Tuple[str, ...] = (
     ".isort.cfg",
     "pyproject.toml",
@@ -72,37 +72,36 @@ CONFIG_SOURCES: Tuple[str, ...] = (
     "tox.ini",
     ".editorconfig",
 )
-DEFAULT_SKIP: FrozenSet[str] = frozenset(
-    {
-        ".venv",
-        "venv",
-        ".tox",
-        ".eggs",
-        ".git",
-        ".hg",
-        ".mypy_cache",
-        ".nox",
-        ".svn",
-        ".bzr",
-        "_build",
-        "buck-out",
-        "build",
-        "dist",
-        ".pants.d",
-        ".direnv",
-        "node_modules",
-        "__pypackages__",
-    }
-)
+DEFAULT_SKIP: FrozenSet[str] = frozenset({
+    ".venv",
+    "venv",
+    ".tox",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".svn",
+    ".bzr",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    ".pants.d",
+    ".direnv",
+    "node_modules",
+    "__pypackages__",
+})
 
 CONFIG_SECTIONS: Dict[str, Tuple[str, ...]] = {
     ".isort.cfg": ("settings", "isort"),
-    "pyproject.toml": ("tool.isort",),
+    "pyproject.toml": ("tool.isort", ),
     "setup.cfg": ("isort", "tool:isort"),
     "tox.ini": ("isort", "tool:isort"),
     ".editorconfig": ("*", "*.py", "**.py", "*.{py}"),
 }
-FALLBACK_CONFIG_SECTIONS: Tuple[str, ...] = ("isort", "tool:isort", "tool.isort")
+FALLBACK_CONFIG_SECTIONS: Tuple[str,
+                                ...] = ("isort", "tool:isort", "tool.isort")
 
 IMPORT_HEADING_PREFIX = "import_heading_"
 IMPORT_FOOTER_PREFIX = "import_footer_"
@@ -155,7 +154,7 @@ class _Config:
     line_ending: str = ""
     sections: Tuple[str, ...] = SECTION_DEFAULTS
     no_sections: bool = False
-    known_future_library: FrozenSet[str] = frozenset(("__future__",))
+    known_future_library: FrozenSet[str] = frozenset(("__future__", ))
     known_third_party: FrozenSet[str] = frozenset()
     known_first_party: FrozenSet[str] = frozenset()
     known_local_folder: FrozenSet[str] = frozenset()
@@ -250,9 +249,9 @@ class _Config:
         if py_version == "auto":  # pragma: no cover
             if sys.version_info.major == 2 and sys.version_info.minor <= 6:
                 py_version = "2"
-            elif sys.version_info.major == 3 and (
-                sys.version_info.minor <= 5 or sys.version_info.minor >= 10
-            ):
+            elif sys.version_info.major == 3 and (sys.version_info.minor <= 5
+                                                  or sys.version_info.minor
+                                                  >= 10):
                 py_version = "3"
             else:
                 py_version = f"{sys.version_info.major}{sys.version_info.minor}"
@@ -261,8 +260,7 @@ class _Config:
             raise ValueError(
                 f"The python version {py_version} is not supported. "
                 "You can set a python version with the -py or --python-version flag. "
-                f"The following versions are supported: {VALID_PY_TARGETS}"
-            )
+                f"The following versions are supported: {VALID_PY_TARGETS}")
 
         if py_version != "all":
             object.__setattr__(self, "py_version", f"py{py_version}")
@@ -276,17 +274,18 @@ class _Config:
 
         if self.multi_line_output == WrapModes.VERTICAL_GRID_GROUPED_NO_COMMA:  # type: ignore
             vertical_grid_grouped = WrapModes.VERTICAL_GRID_GROUPED  # type: ignore
-            object.__setattr__(self, "multi_line_output", vertical_grid_grouped)
+            object.__setattr__(self, "multi_line_output",
+                               vertical_grid_grouped)
         if self.force_alphabetical_sort:
-            object.__setattr__(self, "force_alphabetical_sort_within_sections", True)
+            object.__setattr__(self, "force_alphabetical_sort_within_sections",
+                               True)
             object.__setattr__(self, "no_sections", True)
             object.__setattr__(self, "lines_between_types", 1)
             object.__setattr__(self, "from_first", True)
         if self.wrap_length > self.line_length:
             raise ValueError(
                 "wrap_length must be set lower than or equal to line_length: "
-                f"{self.wrap_length} > {self.line_length}."
-            )
+                f"{self.wrap_length} > {self.line_length}.")
 
     def __hash__(self) -> int:
         return id(self)
@@ -296,6 +295,7 @@ _DEFAULT_SETTINGS = {**vars(_Config()), "source": "defaults"}
 
 
 class Config(_Config):
+
     def __init__(
         self,
         settings_file: str = "",
@@ -313,7 +313,8 @@ class Config(_Config):
         if config:
             config_vars = vars(config).copy()
             config_vars.update(config_overrides)
-            config_vars["py_version"] = config_vars["py_version"].replace("py", "")
+            config_vars["py_version"] = config_vars["py_version"].replace(
+                "py", "")
             config_vars.pop("_known_patterns")
             config_vars.pop("_section_comments")
             config_vars.pop("_section_comments_end")
@@ -335,9 +336,8 @@ class Config(_Config):
         if settings_file:
             config_settings = _get_config_data(
                 settings_file,
-                CONFIG_SECTIONS.get(
-                    os.path.basename(settings_file), FALLBACK_CONFIG_SECTIONS
-                ),
+                CONFIG_SECTIONS.get(os.path.basename(settings_file),
+                                    FALLBACK_CONFIG_SECTIONS),
             )
             project_root = os.path.dirname(settings_file)
             if not config_settings and not quiet:
@@ -346,8 +346,7 @@ class Config(_Config):
                     "was found inside. This can happen when [settings] is used as the config "
                     "header instead of [isort]. "
                     "See: https://pycqa.github.io/isort/docs/configuration/config_files"
-                    "/#custom_config_files for more information."
-                )
+                    "/#custom_config_files for more information.")
         elif settings_path:
             if not os.path.exists(settings_path):
                 raise InvalidSettingsPath(settings_path)
@@ -358,15 +357,15 @@ class Config(_Config):
             config_settings = {}
             project_root = os.getcwd()
 
-        profile_name = config_overrides.get(
-            "profile", config_settings.get("profile", "")
-        )
+        profile_name = config_overrides.get("profile",
+                                            config_settings.get("profile", ""))
         profile: Dict[str, Any] = {}
         if profile_name:
             if profile_name not in profiles:
                 import pkg_resources
 
-                for plugin in pkg_resources.iter_entry_points("isort.profiles"):
+                for plugin in pkg_resources.iter_entry_points(
+                        "isort.profiles"):
                     profiles.setdefault(plugin.name, plugin.load())
 
             if profile_name not in profiles:
@@ -399,13 +398,13 @@ class Config(_Config):
         for key, value in tuple(combined_config.items()):
             # Collect all known sections beyond those that have direct entries
             if key.startswith(KNOWN_PREFIX) and key not in (
-                "known_standard_library",
-                "known_future_library",
-                "known_third_party",
-                "known_first_party",
-                "known_local_folder",
+                    "known_standard_library",
+                    "known_future_library",
+                    "known_third_party",
+                    "known_first_party",
+                    "known_local_folder",
             ):
-                import_heading = key[len(KNOWN_PREFIX) :].lower()
+                import_heading = key[len(KNOWN_PREFIX):].lower()
                 maps_to_section = import_heading.upper()
                 combined_config.pop(key)
                 if maps_to_section in KNOWN_SECTION_MAPPING:
@@ -418,27 +417,25 @@ class Config(_Config):
                             f"Default to {section_name} if unsure."
                             "\n\n"
                             "See: https://pycqa.github.io/isort/"
-                            "#custom-sections-and-ordering."
-                        )
+                            "#custom-sections-and-ordering.")
                     else:
                         combined_config[section_name] = frozenset(value)
                 else:
                     known_other[import_heading] = frozenset(value)
-                    if (
-                        maps_to_section not in combined_config.get("sections", ())
-                        and not quiet
-                    ):
+                    if (maps_to_section not in combined_config.get(
+                            "sections", ()) and not quiet):
                         warn(
                             f"`{key}` setting is defined, but {maps_to_section} is not"
                             " included in `sections` config option:"
                             f" {combined_config.get('sections', SECTION_DEFAULTS)}.\n\n"
                             "See: https://pycqa.github.io/isort/"
-                            "#custom-sections-and-ordering."
-                        )
+                            "#custom-sections-and-ordering.")
             if key.startswith(IMPORT_HEADING_PREFIX):
-                import_headings[key[len(IMPORT_HEADING_PREFIX) :].lower()] = str(value)
+                import_headings[
+                    key[len(IMPORT_HEADING_PREFIX):].lower()] = str(value)
             if key.startswith(IMPORT_FOOTER_PREFIX):
-                import_footers[key[len(IMPORT_FOOTER_PREFIX) :].lower()] = str(value)
+                import_footers[key[len(IMPORT_FOOTER_PREFIX):].lower()] = str(
+                    value)
 
             # Coerce all provided config values into their correct type
             default_value = _DEFAULT_SETTINGS.get(key, None)
@@ -460,24 +457,20 @@ class Config(_Config):
                 )
 
         if "directory" not in combined_config:
-            combined_config["directory"] = (
-                os.path.dirname(config_settings["source"])
-                if config_settings.get("source", None)
-                else os.getcwd()
-            )
+            combined_config["directory"] = (os.path.dirname(
+                config_settings["source"]) if config_settings.get(
+                    "source", None) else os.getcwd())
 
-        path_root = Path(combined_config.get("directory", project_root)).resolve()
+        path_root = Path(combined_config.get("directory",
+                                             project_root)).resolve()
         path_root = path_root if path_root.is_dir() else path_root.parent
         if "src_paths" not in combined_config:
             combined_config["src_paths"] = (path_root / "src", path_root)
         else:
             src_paths: List[Path] = []
             for src_path in combined_config.get("src_paths", ()):
-                full_paths = (
-                    path_root.glob(src_path)
-                    if "*" in str(src_path)
-                    else [path_root / src_path]
-                )
+                full_paths = (path_root.glob(src_path) if "*" in str(src_path)
+                              else [path_root / src_path])
                 for path in full_paths:
                     if path not in src_paths:
                         src_paths.append(path)
@@ -492,7 +485,8 @@ class Config(_Config):
                     combined_config["formatting_function"] = plugin.load()
                     break
             else:
-                raise FormattingPluginDoesNotExist(combined_config["formatter"])
+                raise FormattingPluginDoesNotExist(
+                    combined_config["formatter"])
 
         # Remove any config values that are used for creating config object but
         # aren't defined in dataclass
@@ -501,7 +495,8 @@ class Config(_Config):
         combined_config.pop("runtime_src_paths", None)
 
         deprecated_options_used = [
-            option for option in combined_config if option in DEPRECATED_SETTINGS
+            option for option in combined_config
+            if option in DEPRECATED_SETTINGS
         ]
         if deprecated_options_used:
             for deprecated_option in deprecated_options_used:
@@ -518,17 +513,18 @@ class Config(_Config):
             combined_config["known_other"] = known_other
         if import_headings:
             for import_heading_key in import_headings:
-                combined_config.pop(f"{IMPORT_HEADING_PREFIX}{import_heading_key}")
+                combined_config.pop(
+                    f"{IMPORT_HEADING_PREFIX}{import_heading_key}")
             combined_config["import_headings"] = import_headings
         if import_footers:
             for import_footer_key in import_footers:
-                combined_config.pop(f"{IMPORT_FOOTER_PREFIX}{import_footer_key}")
+                combined_config.pop(
+                    f"{IMPORT_FOOTER_PREFIX}{import_footer_key}")
             combined_config["import_footers"] = import_footers
 
         unsupported_config_errors = {}
         for option in set(combined_config.keys()).difference(
-            getattr(_Config, "__dataclass_fields__", {}).keys()
-        ):
+                getattr(_Config, "__dataclass_fields__", {}).keys()):
             for source in reversed(sources):
                 if option in source:
                     unsupported_config_errors[option] = {
@@ -538,7 +534,8 @@ class Config(_Config):
         if unsupported_config_errors:
             raise UnsupportedSettings(unsupported_config_errors)
 
-        super().__init__(sources=tuple(sources), **combined_config)  # type: ignore
+        super().__init__(sources=tuple(sources),
+                         **combined_config)  # type: ignore
 
     def is_supported_filetype(self, file_name: str) -> bool:
         _root, ext = os.path.splitext(file_name)
@@ -590,7 +587,10 @@ class Config(_Config):
         git_options = ["-C", str(git_folder), "-c", "core.quotePath="]
         try:
             ignored = subprocess.check_output(  # nosec # skipcq: PYL-W1510
-                ["git", *git_options, "check-ignore", "-z", "--stdin", "--no-index"],
+                [
+                    "git", *git_options, "check-ignore", "-z", "--stdin",
+                    "--no-index"
+                ],
                 encoding="utf-8",
                 env=env,
                 input="\0".join(files),
@@ -599,13 +599,15 @@ class Config(_Config):
             return None
 
         self.git_ignore[git_folder] = {
-            Path(f) for f in ignored.rstrip("\0").split("\0")
+            Path(f)
+            for f in ignored.rstrip("\0").split("\0")
         }
         return git_folder
 
     def is_skipped(self, file_path: Path) -> bool:
         """Returns True if the file and/or folder should be skipped based on current settings."""
-        if self.directory and Path(self.directory) in file_path.resolve().parents:
+        if self.directory and Path(
+                self.directory) in file_path.resolve().parents:
             file_name = os.path.relpath(file_path.resolve(), self.directory)
         else:
             file_name = str(file_path)
@@ -618,8 +620,7 @@ class Config(_Config):
 
         for skip_path in self.skips:
             if posixpath.abspath(normalized_path) == posixpath.abspath(
-                skip_path.replace("\\", "/")
-            ):
+                    skip_path.replace("\\", "/")):
                 return True
 
         position = os.path.split(file_name)
@@ -630,13 +631,11 @@ class Config(_Config):
 
         for sglob in self.skip_globs:
             if fnmatch.fnmatch(file_name, sglob) or fnmatch.fnmatch(
-                "/" + file_name, sglob
-            ):
+                    "/" + file_name, sglob):
                 return True
 
-        if not (
-            os.path.isfile(os_path) or os.path.isdir(os_path) or os.path.islink(os_path)
-        ):
+        if not (os.path.isfile(os_path) or os.path.isdir(os_path)
+                or os.path.islink(os_path)):
             return True
 
         if self.skip_gitignore:
@@ -651,11 +650,11 @@ class Config(_Config):
                     git_folder = folder
                     break
             else:
-                git_folder = self._check_folder_gitignore(str(file_path.parent))
+                git_folder = self._check_folder_gitignore(str(
+                    file_path.parent))
 
-            if git_folder and any(
-                path in self.git_ignore[git_folder] for path in file_paths
-            ):
+            if git_folder and any(path in self.git_ignore[git_folder]
+                                  for path in file_paths):
                 return True
 
         return False
@@ -670,20 +669,20 @@ class Config(_Config):
             section for section in self.sections if section != STDLIB
         ]
         for placement in reversed(pattern_sections):
-            known_placement = KNOWN_SECTION_MAPPING.get(placement, placement).lower()
+            known_placement = KNOWN_SECTION_MAPPING.get(placement,
+                                                        placement).lower()
             config_key = f"{KNOWN_PREFIX}{known_placement}"
-            known_modules = getattr(
-                self, config_key, self.known_other.get(known_placement, ())
-            )
+            known_modules = getattr(self, config_key,
+                                    self.known_other.get(known_placement, ()))
             extra_modules = getattr(self, f"extra_{known_placement}", ())
             all_modules = set(extra_modules).union(known_modules)
             known_patterns = [
-                pattern
-                for known_pattern in all_modules
+                pattern for known_pattern in all_modules
                 for pattern in self._parse_known_pattern(known_pattern)
             ]
             for known_pattern in known_patterns:
-                regexp = "^" + known_pattern.replace("*", ".*").replace("?", ".?") + "$"
+                regexp = "^" + known_pattern.replace("*", ".*").replace(
+                    "?", ".?") + "$"
                 self._known_patterns.append((re.compile(regexp), placement))
 
         return self._known_patterns
@@ -694,8 +693,7 @@ class Config(_Config):
             return self._section_comments
 
         self._section_comments = tuple(
-            f"# {heading}" for heading in self.import_headings.values()
-        )
+            f"# {heading}" for heading in self.import_headings.values())
         return self._section_comments
 
     @property
@@ -704,8 +702,7 @@ class Config(_Config):
             return self._section_comments_end
 
         self._section_comments_end = tuple(
-            f"# {footer}" for footer in self.import_footers.values()
-        )
+            f"# {footer}" for footer in self.import_footers.values())
         return self._section_comments_end
 
     @property
@@ -737,15 +734,15 @@ class Config(_Config):
             available_sort_orders = ["natural", "native"]
             import pkg_resources
 
-            for sort_plugin in pkg_resources.iter_entry_points("isort.sort_function"):
+            for sort_plugin in pkg_resources.iter_entry_points(
+                    "isort.sort_function"):
                 available_sort_orders.append(sort_plugin.name)
                 if sort_plugin.name == self.sort_order:
                     self._sorting_function = sort_plugin.load()
                     break
             else:
-                raise SortingFunctionDoesNotExist(
-                    self.sort_order, available_sort_orders
-                )
+                raise SortingFunctionDoesNotExist(self.sort_order,
+                                                  available_sort_orders)
 
         return self._sorting_function
 
@@ -753,9 +750,9 @@ class Config(_Config):
         """Expand pattern if identified as a directory and return found sub packages"""
         if pattern.endswith(os.path.sep):
             patterns = [
-                filename
-                for filename in os.listdir(os.path.join(self.directory, pattern))
-                if os.path.isdir(os.path.join(self.directory, pattern, filename))
+                filename for filename in os.listdir(
+                    os.path.join(self.directory, pattern)) if os.path.isdir(
+                        os.path.join(self.directory, pattern, filename))
             ]
         else:
             patterns = [pattern]
@@ -764,11 +761,9 @@ class Config(_Config):
 
 
 def _get_str_to_type_converter(
-    setting_name: str,
-) -> Union[Callable[[str], Any], Type[Any]]:
+    setting_name: str, ) -> Union[Callable[[str], Any], Type[Any]]:
     type_converter: Union[Callable[[str], Any], Type[Any]] = type(
-        _DEFAULT_SETTINGS.get(setting_name, "")
-    )
+        _DEFAULT_SETTINGS.get(setting_name, ""))
     if type_converter == WrapModes:
         type_converter = wrap_mode_from_string
     return type_converter
@@ -778,16 +773,16 @@ def _as_list(value: str) -> List[str]:
     if isinstance(value, list):
         return [item.strip() for item in value]
     filtered = [
-        item.strip() for item in value.replace("\n", ",").split(",") if item.strip()
+        item.strip() for item in value.replace("\n", ",").split(",")
+        if item.strip()
     ]
     return filtered
 
 
 def _abspaths(cwd: str, values: Iterable[str]) -> Set[str]:
     paths = {
-        os.path.join(cwd, value)
-        if not value.startswith(os.path.sep) and value.endswith(os.path.sep)
-        else value
+        os.path.join(cwd, value) if not value.startswith(os.path.sep)
+        and value.endswith(os.path.sep) else value
         for value in values
     }
     return paths
@@ -799,13 +794,14 @@ def _find_config(path: str) -> Tuple[str, Dict[str, Any]]:
     tries = 0
     while current_directory and tries < MAX_CONFIG_SEARCH_DEPTH:
         for config_file_name in CONFIG_SOURCES:
-            potential_config_file = os.path.join(current_directory, config_file_name)
+            potential_config_file = os.path.join(current_directory,
+                                                 config_file_name)
             if os.path.isfile(potential_config_file):
                 config_data: Dict[str, Any]
                 try:
                     config_data = _get_config_data(
-                        potential_config_file, CONFIG_SECTIONS[config_file_name]
-                    )
+                        potential_config_file,
+                        CONFIG_SECTIONS[config_file_name])
                 except Exception:
                     warn(
                         f"Failed to pull configuration information from {potential_config_file}"
@@ -844,8 +840,8 @@ def find_all_configs(path: str) -> Trie:
                 config_data: Dict[str, Any]
                 try:
                     config_data = _get_config_data(
-                        potential_config_file, CONFIG_SECTIONS[config_file_name]
-                    )
+                        potential_config_file,
+                        CONFIG_SECTIONS[config_file_name])
                 except Exception:
                     warn(
                         f"Failed to pull configuration information from {potential_config_file}"
@@ -887,16 +883,14 @@ def _get_config_data(file_path: str, sections: Tuple[str]) -> Dict[str, Any]:
             config.read_file(config_file)
         for section in sections:
             if section.startswith("*.{") and section.endswith("}"):
-                extension = section[len("*.{") : -1]
+                extension = section[len("*.{"):-1]
                 for config_key in config.keys():
-                    if (
-                        config_key.startswith("*.{")
-                        and config_key.endswith("}")
-                        and extension
-                        in map(
-                            lambda text: text.strip(), config_key[len("*.{") : -1].split(",")  # type: ignore # noqa
-                        )
-                    ):
+                    if (config_key.startswith("*.{")
+                            and config_key.endswith("}") and extension in map(
+                                lambda text: text.strip(),
+                                config_key[len("*.{"):-1].split(
+                                    ",")  # type: ignore # noqa
+                            )):
                         settings.update(config.items(config_key))
 
             elif config.has_section(section):
@@ -912,22 +906,22 @@ def _get_config_data(file_path: str, sections: Tuple[str]) -> Dict[str, Any]:
                 indent_size = settings.pop("tab_width", "").strip()
 
             if indent_style == "space":
-                settings["indent"] = " " * (indent_size and int(indent_size) or 4)
+                settings["indent"] = " " * (indent_size and int(indent_size)
+                                            or 4)
 
             elif indent_style == "tab":
-                settings["indent"] = "\t" * (indent_size and int(indent_size) or 1)
+                settings["indent"] = "\t" * (indent_size and int(indent_size)
+                                             or 1)
 
             max_line_length = settings.pop("max_line_length", "").strip()
-            if max_line_length and (
-                max_line_length == "off" or max_line_length.isdigit()
-            ):
-                settings["line_length"] = (
-                    float("inf") if max_line_length == "off" else int(max_line_length)
-                )
+            if max_line_length and (max_line_length == "off"
+                                    or max_line_length.isdigit()):
+                settings["line_length"] = (float("inf") if max_line_length
+                                           == "off" else int(max_line_length))
             settings = {
                 key: value
-                for key, value in settings.items()
-                if key in _DEFAULT_SETTINGS.keys() or key.startswith(KNOWN_PREFIX)
+                for key, value in settings.items() if
+                key in _DEFAULT_SETTINGS.keys() or key.startswith(KNOWN_PREFIX)
             }
 
         for key, value in settings.items():
@@ -935,14 +929,16 @@ def _get_config_data(file_path: str, sections: Tuple[str]) -> Dict[str, Any]:
             if existing_value_type == tuple:
                 settings[key] = tuple(_as_list(value))
             elif existing_value_type == frozenset:
-                settings[key] = frozenset(_as_list(settings.get(key)))  # type: ignore
+                settings[key] = frozenset(_as_list(
+                    settings.get(key)))  # type: ignore
             elif existing_value_type == bool:
                 # Only some configuration formats support native boolean values.
                 if not isinstance(value, bool):
                     value = _as_bool(value)
                 settings[key] = value
             elif key.startswith(KNOWN_PREFIX):
-                settings[key] = _abspaths(os.path.dirname(file_path), _as_list(value))
+                settings[key] = _abspaths(os.path.dirname(file_path),
+                                          _as_list(value))
             elif key == "force_grid_wrap":
                 try:
                     result = existing_value_type(value)

@@ -26,12 +26,13 @@ class Labs(QFrame):
 
         self.btn_notes = QPushButton("Open", self)
         self.btn_notes.setObjectName("btn-get-notes")
-        self.btn_notes.clicked.connect(lambda: self.on_open_workspace.emit("inotes"))
-        self.new_work_space(
-            "Notes and Tasks", "inotes", "<p>Create notes and tasks</p>", self.btn_notes
-        )
+        self.btn_notes.clicked.connect(
+            lambda: self.on_open_workspace.emit("inotes"))
+        self.new_work_space("Notes and Tasks", "inotes",
+                            "<p>Create notes and tasks</p>", self.btn_notes)
 
-    def new_work_space(self, title: str, name_id: str, desc: str, widget: object):
+    def new_work_space(self, title: str, name_id: str, desc: str,
+                       widget: object):
         card = CardLab(self, title, desc, name_id)
         card.add_widget(widget)
         self.layout.addWidget(card)

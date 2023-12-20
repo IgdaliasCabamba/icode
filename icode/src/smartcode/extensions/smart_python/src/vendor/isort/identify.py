@@ -40,10 +40,8 @@ class Import(NamedTuple):
         return import_string
 
     def __str__(self) -> str:
-        return (
-            f"{self.file_path or ''}:{self.line_number} "
-            f"{'indented ' if self.indented else ''}{self.statement()}"
-        )
+        return (f"{self.file_path or ''}:{self.line_number} "
+                f"{'indented ' if self.indented else ''}{self.statement()}")
 
 
 def imports(
@@ -64,13 +62,15 @@ def imports(
             section_comments=config.section_comments,
         )
 
-        if top_only and not in_quote and raw_line.startswith(STATEMENT_DECLARATIONS):
+        if top_only and not in_quote and raw_line.startswith(
+                STATEMENT_DECLARATIONS):
             break
         if skipping_line:
             continue
 
         stripped_line = raw_line.strip().split("#")[0]
-        if stripped_line.startswith("raise") or stripped_line.startswith("yield"):
+        if stripped_line.startswith("raise") or stripped_line.startswith(
+                "yield"):
             if stripped_line == "yield":
                 while not stripped_line or stripped_line == "yield":
                     try:
@@ -103,15 +103,10 @@ def imports(
                 continue  # pragma: no cover
 
             import_string, _ = parse_comments(line)
-            normalized_import_string = (
-                import_string.replace("import(", "import (")
-                .replace("\\", " ")
-                .replace("\n", " ")
-            )
-            cimports: bool = (
-                " cimport " in normalized_import_string
-                or normalized_import_string.startswith("cimport")
-            )
+            normalized_import_string = (import_string.replace(
+                "import(", "import (").replace("\\", " ").replace("\n", " "))
+            cimports: bool = (" cimport " in normalized_import_string or
+                              normalized_import_string.startswith("cimport"))
             identified_import = partial(
                 Import,
                 index + 1,  # line numbers use 1 based indexing
@@ -139,7 +134,8 @@ def imports(
                     line, _ = parse_comments(next_line)
 
                     # Still need to check for parentheses after an escaped line
-                    if "(" in line.split("#")[0] and ")" not in line.split("#")[0]:
+                    if "(" in line.split("#")[0] and ")" not in line.split(
+                            "#")[0]:
                         import_string += "\n" + line
 
                         while not line.split("#")[0].strip().endswith(")"):
@@ -151,28 +147,26 @@ def imports(
                             import_string += "\n" + line
                     else:
                         if import_string.strip().endswith(
-                            (" import", " cimport")
-                        ) or line.strip().startswith(("import ", "cimport ")):
+                            (" import",
+                             " cimport")) or line.strip().startswith(
+                                 ("import ", "cimport ")):
                             import_string += "\n" + line
                         else:
                             import_string = (
-                                import_string.rstrip().rstrip("\\")
-                                + " "
-                                + line.lstrip()
-                            )
+                                import_string.rstrip().rstrip("\\") + " " +
+                                line.lstrip())
 
             if type_of_import == "from":
-                import_string = (
-                    import_string.replace("import(", "import (")
-                    .replace("\\", " ")
-                    .replace("\n", " ")
-                )
-                parts = import_string.split(" cimport " if cimports else " import ")
+                import_string = (import_string.replace(
+                    "import(", "import (").replace("\\",
+                                                   " ").replace("\n", " "))
+                parts = import_string.split(
+                    " cimport " if cimports else " import ")
 
                 from_import = parts[0].split(" ")
                 import_string = (" cimport " if cimports else " import ").join(
-                    [from_import[0] + " " + "".join(from_import[1:])] + parts[1:]
-                )
+                    [from_import[0] + " " + "".join(from_import[1:])] +
+                    parts[1:])
 
             just_imports = [
                 item.replace("{|", "{ ").replace("|}", " }")
@@ -181,9 +175,8 @@ def imports(
 
             direct_imports = just_imports[1:]
             top_level_module = ""
-            if "as" in just_imports and (just_imports.index("as") + 1) < len(
-                just_imports
-            ):
+            if "as" in just_imports and (just_imports.index("as") +
+                                         1) < len(just_imports):
                 while "as" in just_imports:
                     attribute = None
                     as_index = just_imports.index("as")
@@ -197,11 +190,12 @@ def imports(
                         direct_imports.remove("as")
                         just_imports[1:] = direct_imports
                         if attribute == alias and config.remove_redundant_aliases:
-                            yield identified_import(top_level_module, attribute)
+                            yield identified_import(top_level_module,
+                                                    attribute)
                         else:
-                            yield identified_import(
-                                top_level_module, attribute, alias=alias
-                            )
+                            yield identified_import(top_level_module,
+                                                    attribute,
+                                                    alias=alias)
 
                     else:
                         module = just_imports[as_index - 1]

@@ -24,7 +24,7 @@ google = {
     "force_single_line": True,
     "force_sort_within_sections": True,
     "lexicographical": True,
-    "single_line_exclusions": ("typing",),
+    "single_line_exclusions": ("typing", ),
     "order_by_type": False,
     "group_by_package": True,
 }
@@ -63,11 +63,16 @@ wemake = {
 }
 appnexus = {
     **black,
-    "force_sort_within_sections": True,
-    "order_by_type": False,
-    "case_sensitive": False,
-    "reverse_relative": True,
-    "sort_relative_in_force_sorted_sections": True,
+    "force_sort_within_sections":
+    True,
+    "order_by_type":
+    False,
+    "case_sensitive":
+    False,
+    "reverse_relative":
+    True,
+    "sort_relative_in_force_sorted_sections":
+    True,
     "sections": [
         "FUTURE",
         "STDLIB",
@@ -76,7 +81,8 @@ appnexus = {
         "APPLICATION",
         "LOCALFOLDER",
     ],
-    "no_lines_before": "LOCALFOLDER",
+    "no_lines_before":
+    "LOCALFOLDER",
 }
 
 profiles: Dict[str, Dict[str, Any]] = {

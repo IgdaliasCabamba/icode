@@ -71,8 +71,8 @@ def infer_call_of_leaf(context, leaf, cut_own_trailer=False):
     # different trailers: `( x )`, `[ x ]` and `.x`. In the first two examples
     # we should not match anything more than x.
     if trailer.type != "trailer" or leaf not in (
-        trailer.children[0],
-        trailer.children[-1],
+            trailer.children[0],
+            trailer.children[-1],
     ):
         if leaf == ":":
             # Basically happens with foo[:] when the cursor is on the colon
@@ -97,7 +97,7 @@ def infer_call_of_leaf(context, leaf, cut_own_trailer=False):
             base = power.children[start]
             if base.type != "trailer":
                 break
-        trailers = power.children[start + 1 : cut]
+        trailers = power.children[start + 1:cut]
     else:
         base = power.children[0]
         trailers = power.children[1:cut]
@@ -123,11 +123,13 @@ def get_names_of_node(node):
         else:
             return []
     else:
-        return list(chain.from_iterable(get_names_of_node(c) for c in children))
+        return list(chain.from_iterable(
+            get_names_of_node(c) for c in children))
 
 
 def is_string(value):
-    return value.is_compiled() and isinstance(value.get_safe_value(default=None), str)
+    return value.is_compiled() and isinstance(
+        value.get_safe_value(default=None), str)
 
 
 def is_literal(value):
@@ -194,7 +196,8 @@ def parse_dotted_names(nodes, is_import_from, until_node=None):
 
 
 def values_from_qualified_names(inference_state, *names):
-    return inference_state.import_module(names[:-1]).py__getattribute__(names[-1])
+    return inference_state.import_module(names[:-1]).py__getattribute__(
+        names[-1])
 
 
 def is_big_annoying_library(context):

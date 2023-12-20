@@ -40,17 +40,15 @@ BARE_KEY_CHARS = frozenset(string.ascii_letters + string.digits + "-_")
 KEY_INITIAL_CHARS = BARE_KEY_CHARS | frozenset("\"'")
 HEXDIGIT_CHARS = frozenset(string.hexdigits)
 
-BASIC_STR_ESCAPE_REPLACEMENTS = MappingProxyType(
-    {
-        "\\b": "\u0008",  # backspace
-        "\\t": "\u0009",  # tab
-        "\\n": "\u000A",  # linefeed
-        "\\f": "\u000C",  # form feed
-        "\\r": "\u000D",  # carriage return
-        '\\"': "\u0022",  # quote
-        "\\\\": "\u005C",  # backslash
-    }
-)
+BASIC_STR_ESCAPE_REPLACEMENTS = MappingProxyType({
+    "\\b": "\u0008",  # backspace
+    "\\t": "\u0009",  # tab
+    "\\n": "\u000A",  # linefeed
+    "\\f": "\u000C",  # form feed
+    "\\r": "\u000D",  # carriage return
+    '\\"': "\u0022",  # quote
+    "\\\\": "\u005C",  # backslash
+})
 
 # Type annotations
 ParseFloat = Callable[[str], Any]
@@ -76,7 +74,9 @@ def load(fp: IO, *, parse_float: ParseFloat = float) -> Dict[str, Any]:
     return loads(s, parse_float=parse_float)
 
 
-def loads(s: str, *, parse_float: ParseFloat = float) -> Dict[str, Any]:  # noqa: C901
+def loads(s: str,
+          *,
+          parse_float: ParseFloat = float) -> Dict[str, Any]:  # noqa: C901
     """Parse TOML from a string."""
 
     # The spec allows converting "\r\n" to "\n", even in string
@@ -133,8 +133,8 @@ def loads(s: str, *, parse_float: ParseFloat = float) -> Dict[str, Any]:  # noqa
             break
         if char != "\n":
             raise suffixed_err(
-                src, pos, "Expected newline or end of document after a statement"
-            )
+                src, pos,
+                "Expected newline or end of document after a statement")
         pos += 1
 
     return out.data.dict
@@ -160,28 +160,46 @@ class Flags:
             cont = cont[k]["nested"]
         cont.pop(key[-1], None)
 
-    def set_for_relative_key(self, head_key: Key, rel_key: Key, flag: int) -> None:
+    def set_for_relative_key(self, head_key: Key, rel_key: Key,
+                             flag: int) -> None:
         cont = self._flags
         for k in head_key:
             if k not in cont:
-                cont[k] = {"flags": set(), "recursive_flags": set(), "nested": {}}
+                cont[k] = {
+                    "flags": set(),
+                    "recursive_flags": set(),
+                    "nested": {}
+                }
             cont = cont[k]["nested"]
         for k in rel_key:
             if k in cont:
                 cont[k]["flags"].add(flag)
             else:
-                cont[k] = {"flags": {flag}, "recursive_flags": set(), "nested": {}}
+                cont[k] = {
+                    "flags": {flag},
+                    "recursive_flags": set(),
+                    "nested": {}
+                }
             cont = cont[k]["nested"]
 
-    def set(self, key: Key, flag: int, *, recursive: bool) -> None:  # noqa: A003
+    def set(self, key: Key, flag: int, *,
+            recursive: bool) -> None:  # noqa: A003
         cont = self._flags
         key_parent, key_stem = key[:-1], key[-1]
         for k in key_parent:
             if k not in cont:
-                cont[k] = {"flags": set(), "recursive_flags": set(), "nested": {}}
+                cont[k] = {
+                    "flags": set(),
+                    "recursive_flags": set(),
+                    "nested": {}
+                }
             cont = cont[k]["nested"]
         if key_stem not in cont:
-            cont[key_stem] = {"flags": set(), "recursive_flags": set(), "nested": {}}
+            cont[key_stem] = {
+                "flags": set(),
+                "recursive_flags": set(),
+                "nested": {}
+            }
         cont[key_stem]["recursive_flags" if recursive else "flags"].add(flag)
 
     def is_(self, key: Key, flag: int) -> bool:
@@ -203,6 +221,7 @@ class Flags:
 
 
 class NestedDict:
+
     def __init__(self) -> None:
         # The parsed content of the TOML document
         self.dict: Dict[str, Any] = {}
@@ -230,7 +249,8 @@ class NestedDict:
         if last_key in cont:
             list_ = cont[last_key]
             if not isinstance(list_, list):
-                raise KeyError("An object other than list found behind this key")
+                raise KeyError(
+                    "An object other than list found behind this key")
             list_.append({})
         else:
             cont[last_key] = [{}]
@@ -278,9 +298,11 @@ def skip_comment(src: str, pos: Pos) -> Pos:
     except IndexError:
         char = None
     if char == "#":
-        return skip_until(
-            src, pos + 1, "\n", error_on=ILLEGAL_COMMENT_CHARS, error_on_eof=False
-        )
+        return skip_until(src,
+                          pos + 1,
+                          "\n",
+                          error_on=ILLEGAL_COMMENT_CHARS,
+                          error_on_eof=False)
     return pos
 
 
@@ -298,7 +320,8 @@ def create_dict_rule(src: str, pos: Pos, out: Output) -> Tuple[Pos, Key]:
     pos = skip_chars(src, pos, TOML_WS)
     pos, key = parse_key(src, pos)
 
-    if out.flags.is_(key, Flags.EXPLICIT_NEST) or out.flags.is_(key, Flags.FROZEN):
+    if out.flags.is_(key, Flags.EXPLICIT_NEST) or out.flags.is_(
+            key, Flags.FROZEN):
         raise suffixed_err(src, pos, f"Can not declare {key} twice")
     out.flags.set(key, Flags.EXPLICIT_NEST, recursive=False)
     try:
@@ -307,7 +330,8 @@ def create_dict_rule(src: str, pos: Pos, out: Output) -> Tuple[Pos, Key]:
         raise suffixed_err(src, pos, "Can not overwrite a value")
 
     if not src.startswith("]", pos):
-        raise suffixed_err(src, pos, 'Expected "]" at the end of a table declaration')
+        raise suffixed_err(src, pos,
+                           'Expected "]" at the end of a table declaration')
     return pos + 1, key
 
 
@@ -317,7 +341,8 @@ def create_list_rule(src: str, pos: Pos, out: Output) -> Tuple[Pos, Key]:
     pos, key = parse_key(src, pos)
 
     if out.flags.is_(key, Flags.FROZEN):
-        raise suffixed_err(src, pos, f"Can not mutate immutable namespace {key}")
+        raise suffixed_err(src, pos,
+                           f"Can not mutate immutable namespace {key}")
     # Free the namespace now that it points to another empty list item...
     out.flags.unset_all(key)
     # ...but this key precisely is still prohibited from table declaration
@@ -328,21 +353,20 @@ def create_list_rule(src: str, pos: Pos, out: Output) -> Tuple[Pos, Key]:
         raise suffixed_err(src, pos, "Can not overwrite a value")
 
     if not src.startswith("]]", pos):
-        raise suffixed_err(src, pos, 'Expected "]]" at the end of an array declaration')
+        raise suffixed_err(src, pos,
+                           'Expected "]]" at the end of an array declaration')
     return pos + 2, key
 
 
-def key_value_rule(
-    src: str, pos: Pos, out: Output, header: Key, parse_float: ParseFloat
-) -> Pos:
+def key_value_rule(src: str, pos: Pos, out: Output, header: Key,
+                   parse_float: ParseFloat) -> Pos:
     pos, key, value = parse_key_value_pair(src, pos, parse_float)
     key_parent, key_stem = key[:-1], key[-1]
     abs_key_parent = header + key_parent
 
     if out.flags.is_(abs_key_parent, Flags.FROZEN):
         raise suffixed_err(
-            src, pos, f"Can not mutate immutable namespace {abs_key_parent}"
-        )
+            src, pos, f"Can not mutate immutable namespace {abs_key_parent}")
     # Containers in the relative path can't be opened with the table syntax after this
     out.flags.set_for_relative_key(header, key, Flags.EXPLICIT_NEST)
     try:
@@ -358,16 +382,16 @@ def key_value_rule(
     return pos
 
 
-def parse_key_value_pair(
-    src: str, pos: Pos, parse_float: ParseFloat
-) -> Tuple[Pos, Key, Any]:
+def parse_key_value_pair(src: str, pos: Pos,
+                         parse_float: ParseFloat) -> Tuple[Pos, Key, Any]:
     pos, key = parse_key(src, pos)
     try:
         char: Optional[str] = src[pos]
     except IndexError:
         char = None
     if char != "=":
-        raise suffixed_err(src, pos, 'Expected "=" after a key in a key/value pair')
+        raise suffixed_err(src, pos,
+                           'Expected "=" after a key in a key/value pair')
     pos += 1
     pos = skip_chars(src, pos, TOML_WS)
     pos, value = parse_value(src, pos, parse_float)
@@ -376,7 +400,7 @@ def parse_key_value_pair(
 
 def parse_key(src: str, pos: Pos) -> Tuple[Pos, Key]:
     pos, key_part = parse_key_part(src, pos)
-    key: Key = (key_part,)
+    key: Key = (key_part, )
     pos = skip_chars(src, pos, TOML_WS)
     while True:
         try:
@@ -388,7 +412,7 @@ def parse_key(src: str, pos: Pos) -> Tuple[Pos, Key]:
         pos += 1
         pos = skip_chars(src, pos, TOML_WS)
         pos, key_part = parse_key_part(src, pos)
-        key += (key_part,)
+        key += (key_part, )
         pos = skip_chars(src, pos, TOML_WS)
 
 
@@ -413,7 +437,8 @@ def parse_one_line_basic_str(src: str, pos: Pos) -> Tuple[Pos, str]:
     return parse_basic_str(src, pos, multiline=False)
 
 
-def parse_array(src: str, pos: Pos, parse_float: ParseFloat) -> Tuple[Pos, list]:
+def parse_array(src: str, pos: Pos,
+                parse_float: ParseFloat) -> Tuple[Pos, list]:
     pos += 1
     array: list = []
 
@@ -425,7 +450,7 @@ def parse_array(src: str, pos: Pos, parse_float: ParseFloat) -> Tuple[Pos, list]
         array.append(val)
         pos = skip_comments_and_array_ws(src, pos)
 
-        c = src[pos : pos + 1]
+        c = src[pos:pos + 1]
         if c == "]":
             return pos + 1, array
         if c != ",":
@@ -437,7 +462,8 @@ def parse_array(src: str, pos: Pos, parse_float: ParseFloat) -> Tuple[Pos, list]
             return pos + 1, array
 
 
-def parse_inline_table(src: str, pos: Pos, parse_float: ParseFloat) -> Tuple[Pos, dict]:
+def parse_inline_table(src: str, pos: Pos,
+                       parse_float: ParseFloat) -> Tuple[Pos, dict]:
     pos += 1
     nested_dict = NestedDict()
     flags = Flags()
@@ -449,16 +475,19 @@ def parse_inline_table(src: str, pos: Pos, parse_float: ParseFloat) -> Tuple[Pos
         pos, key, value = parse_key_value_pair(src, pos, parse_float)
         key_parent, key_stem = key[:-1], key[-1]
         if flags.is_(key, Flags.FROZEN):
-            raise suffixed_err(src, pos, f"Can not mutate immutable namespace {key}")
+            raise suffixed_err(src, pos,
+                               f"Can not mutate immutable namespace {key}")
         try:
-            nest = nested_dict.get_or_create_nest(key_parent, access_lists=False)
+            nest = nested_dict.get_or_create_nest(key_parent,
+                                                  access_lists=False)
         except KeyError:
             raise suffixed_err(src, pos, "Can not overwrite a value")
         if key_stem in nest:
-            raise suffixed_err(src, pos, f'Duplicate inline table key "{key_stem}"')
+            raise suffixed_err(src, pos,
+                               f'Duplicate inline table key "{key_stem}"')
         nest[key_stem] = value
         pos = skip_chars(src, pos, TOML_WS)
-        c = src[pos : pos + 1]
+        c = src[pos:pos + 1]
         if c == "}":
             return pos + 1, nested_dict.dict
         if c != ",":
@@ -470,9 +499,8 @@ def parse_inline_table(src: str, pos: Pos, parse_float: ParseFloat) -> Tuple[Pos
 
 
 def parse_basic_str_escape(  # noqa: C901
-    src: str, pos: Pos, *, multiline: bool = False
-) -> Tuple[Pos, str]:
-    escape_id = src[pos : pos + 2]
+        src: str, pos: Pos, *, multiline: bool = False) -> Tuple[Pos, str]:
+    escape_id = src[pos:pos + 2]
     pos += 2
     if multiline and escape_id in {"\\ ", "\\\t", "\\\n"}:
         # Skip whitespace until next non-whitespace character or end of
@@ -505,26 +533,30 @@ def parse_basic_str_escape_multiline(src: str, pos: Pos) -> Tuple[Pos, str]:
 
 
 def parse_hex_char(src: str, pos: Pos, hex_len: int) -> Tuple[Pos, str]:
-    hex_str = src[pos : pos + hex_len]
+    hex_str = src[pos:pos + hex_len]
     if len(hex_str) != hex_len or not HEXDIGIT_CHARS.issuperset(hex_str):
         raise suffixed_err(src, pos, "Invalid hex value")
     pos += hex_len
     hex_int = int(hex_str, 16)
     if not is_unicode_scalar_value(hex_int):
-        raise suffixed_err(src, pos, "Escaped character is not a Unicode scalar value")
+        raise suffixed_err(src, pos,
+                           "Escaped character is not a Unicode scalar value")
     return pos, chr(hex_int)
 
 
 def parse_literal_str(src: str, pos: Pos) -> Tuple[Pos, str]:
     pos += 1  # Skip starting apostrophe
     start_pos = pos
-    pos = skip_until(
-        src, pos, "'", error_on=ILLEGAL_LITERAL_STR_CHARS, error_on_eof=True
-    )
+    pos = skip_until(src,
+                     pos,
+                     "'",
+                     error_on=ILLEGAL_LITERAL_STR_CHARS,
+                     error_on_eof=True)
     return pos + 1, src[start_pos:pos]  # Skip ending apostrophe
 
 
-def parse_multiline_str(src: str, pos: Pos, *, literal: bool) -> Tuple[Pos, str]:
+def parse_multiline_str(src: str, pos: Pos, *,
+                        literal: bool) -> Tuple[Pos, str]:
     pos += 3
     if src.startswith("\n", pos):
         pos += 1
@@ -587,9 +619,8 @@ def parse_basic_str(src: str, pos: Pos, *, multiline: bool) -> Tuple[Pos, str]:
         pos += 1
 
 
-def parse_value(
-    src: str, pos: Pos, parse_float: ParseFloat
-) -> Tuple[Pos, Any]:  # noqa: C901
+def parse_value(src: str, pos: Pos,
+                parse_float: ParseFloat) -> Tuple[Pos, Any]:  # noqa: C901
     try:
         char: Optional[str] = src[pos]
     except IndexError:
@@ -643,10 +674,10 @@ def parse_value(
         return parse_inline_table(src, pos, parse_float)
 
     # Special floats
-    first_three = src[pos : pos + 3]
+    first_three = src[pos:pos + 3]
     if first_three in {"inf", "nan"}:
         return pos + 3, parse_float(first_three)
-    first_four = src[pos : pos + 4]
+    first_four = src[pos:pos + 4]
     if first_four in {"-inf", "+inf", "-nan", "+nan"}:
         return pos + 4, parse_float(first_four)
 

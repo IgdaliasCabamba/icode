@@ -5,6 +5,7 @@ from core.code_api import icode_api
 
 
 class GenericEditor(QsciScintilla):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setUtf8(True)
@@ -25,6 +26,9 @@ class GenericEditor(QsciScintilla):
         self.setPaper(QColor(styles["paper"]))
         self.setMarginsBackgroundColor(QColor(styles["margin-background"]))
         self.setMarginsForegroundColor(QColor(styles["margin-foreround"]))
-        self.setSelectionForegroundColor(QColor(styles["selection-foreground"]))
-        self.setWhitespaceBackgroundColor(QColor(styles["whitespace-background"]))
-        self.setWhitespaceForegroundColor(QColor(styles["whitespace-foreground"]))
+        self.setSelectionForegroundColor(QColor(
+            styles["selection-foreground"]))
+        self.setWhitespaceBackgroundColor(
+            QColor(styles["whitespace-background"]))
+        self.setWhitespaceForegroundColor(
+            QColor(styles["whitespace-foreground"]))

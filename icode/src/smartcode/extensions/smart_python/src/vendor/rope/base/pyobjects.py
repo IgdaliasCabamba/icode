@@ -3,6 +3,7 @@ from rope.base import ast, exceptions, utils
 
 
 class PyObject(object):
+
     def __init__(self, type_):
         if type_ is None:
             type_ = self
@@ -15,7 +16,8 @@ class PyObject(object):
 
     def get_attribute(self, name):
         if name not in self.get_attributes():
-            raise exceptions.AttributeNotFoundError("Attribute %s not found" % name)
+            raise exceptions.AttributeNotFoundError("Attribute %s not found" %
+                                                    name)
         return self.get_attributes()[name]
 
     def get_type(self):
@@ -117,6 +119,7 @@ def get_unknown():
 
 
 class AbstractClass(PyObject):
+
     def __init__(self):
         super(AbstractClass, self).__init__(get_base_type("Type"))
 
@@ -131,6 +134,7 @@ class AbstractClass(PyObject):
 
 
 class AbstractFunction(PyObject):
+
     def __init__(self):
         super(AbstractFunction, self).__init__(get_base_type("Function"))
 
@@ -148,6 +152,7 @@ class AbstractFunction(PyObject):
 
 
 class AbstractModule(PyObject):
+
     def __init__(self, doc=None):
         super(AbstractModule, self).__init__(get_base_type("Module"))
 
@@ -198,7 +203,8 @@ class PyDefinedObject(object):
             return self._get_structural_attributes()[name]
         if name in self._get_concluded_attributes():
             return self._get_concluded_attributes()[name]
-        raise exceptions.AttributeNotFoundError("Attribute %s not found" % name)
+        raise exceptions.AttributeNotFoundError("Attribute %s not found" %
+                                                name)
 
     def get_scope(self):
         if self.scope is None:
@@ -256,6 +262,7 @@ class PyClass(PyDefinedObject, AbstractClass):
 
 
 class _ConcludedData(object):
+
     def __init__(self):
         self.data_ = None
 
@@ -275,6 +282,7 @@ class _ConcludedData(object):
 
 
 class _PyModule(PyDefinedObject, AbstractModule):
+
     def __init__(self, pycore, ast_node, resource):
         self.resource = resource
         self.concluded_data = []

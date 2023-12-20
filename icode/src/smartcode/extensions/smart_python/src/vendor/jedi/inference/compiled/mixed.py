@@ -53,9 +53,8 @@ class MixedObject(ValueWrapper):
         self.access_handle = compiled_value.access_handle
 
     def get_filters(self, *args, **kwargs):
-        yield MixedObjectFilter(
-            self.inference_state, self.compiled_value, self._wrapped_value
-        )
+        yield MixedObjectFilter(self.inference_state, self.compiled_value,
+                                self._wrapped_value)
 
     def get_signatures(self):
         # Prefer `inspect.signature` over somehow analyzing Python code. It
@@ -106,6 +105,7 @@ class MixedObject(ValueWrapper):
 
 
 class MixedContext(CompiledContext, TreeContextMixin):
+
     @property
     def compiled_value(self):
         return self._value.compiled_value
@@ -139,13 +139,16 @@ class MixedName(NameWrapper):
         if tree_value.is_instance() or tree_value.is_class():
             tree_values = tree_value.py__getattribute__(self.string_name)
             if compiled_value.is_function():
-                return ValueSet({MixedObject(compiled_value, v) for v in tree_values})
+                return ValueSet(
+                    {MixedObject(compiled_value, v)
+                     for v in tree_values})
 
         module_context = tree_value.get_root_context()
         return _create(self._inference_state, compiled_value, module_context)
 
 
 class MixedObjectFilter(compiled.CompiledValueFilter):
+
     def __init__(self, inference_state, compiled_value, tree_value):
         super().__init__(inference_state, compiled_value)
         self._tree_value = tree_value
@@ -175,15 +178,12 @@ def _get_object_to_check(python_object):
         # Can return a ValueError when it wraps around
         pass
 
-    if (
-        inspect.ismodule(python_object)
-        or inspect.isclass(python_object)
-        or inspect.ismethod(python_object)
-        or inspect.isfunction(python_object)
-        or inspect.istraceback(python_object)
-        or inspect.isframe(python_object)
-        or inspect.iscode(python_object)
-    ):
+    if (inspect.ismodule(python_object) or inspect.isclass(python_object)
+            or inspect.ismethod(python_object)
+            or inspect.isfunction(python_object)
+            or inspect.istraceback(python_object)
+            or inspect.isframe(python_object)
+            or inspect.iscode(python_object)):
         return python_object
 
     try:
@@ -237,8 +237,7 @@ def _find_syntax_node_name(inference_state, python_object):
     # import, it's probably a builtin (like collections.deque) and needs to be
     # ignored.
     names = [
-        n
-        for n in names
+        n for n in names
         if n.parent.type in ("funcdef", "classdef") and n.parent.name == n
     ]
     if not names:
@@ -267,7 +266,8 @@ def _find_syntax_node_name(inference_state, python_object):
     # inference, because people tend to define a public name in a module only
     # once.
     tree_node = names[-1].parent
-    if tree_node.type == "funcdef" and get_api_type(original_object) == "instance":
+    if tree_node.type == "funcdef" and get_api_type(
+            original_object) == "instance":
         # If an instance is given and we're landing on a function (e.g.
         # partial in 3.5), something is completely wrong and we should not
         # return that.
@@ -306,7 +306,8 @@ def _create(inference_state, compiled_value, module_context):
                 is_package=root_compiled_value.is_package(),
             )
             if name is not None:
-                inference_state.module_cache.add(string_names, ValueSet([module_value]))
+                inference_state.module_cache.add(string_names,
+                                                 ValueSet([module_value]))
             module_context = module_value.as_context()
 
         tree_values = ValueSet({module_context.create_value(tree_node)})
@@ -316,5 +317,5 @@ def _create(inference_state, compiled_value, module_context):
                 tree_values = tree_values.execute_with_values()
 
     return ValueSet(
-        MixedObject(compiled_value, tree_value=tree_value) for tree_value in tree_values
-    )
+        MixedObject(compiled_value, tree_value=tree_value)
+        for tree_value in tree_values)

@@ -10,6 +10,7 @@ def log_mock(mocker):
 
 
 class RadonConfig(object):
+
     def __init__(self):
         self._fname = os.path.join(os.path.dirname(__file__), "radon.cfg")
 

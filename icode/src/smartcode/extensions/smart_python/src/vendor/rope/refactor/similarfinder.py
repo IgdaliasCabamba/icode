@@ -25,9 +25,9 @@ class SimilarFinder(object):
         """Construct a SimilarFinder"""
         self.source = pymodule.source_code
         try:
-            self.raw_finder = RawSimilarFinder(
-                pymodule.source_code, pymodule.get_ast(), self._does_match
-            )
+            self.raw_finder = RawSimilarFinder(pymodule.source_code,
+                                               pymodule.get_ast(),
+                                               self._does_match)
         except MismatchedTokenError:
             print("in file %s" % pymodule.resource.path)
             raise
@@ -35,7 +35,8 @@ class SimilarFinder(object):
         if wildcards is None:
             self.wildcards = {}
             for wildcard in [
-                rope.refactor.wildcards.DefaultWildcard(pymodule.pycore.project)
+                    rope.refactor.wildcards.DefaultWildcard(
+                        pymodule.pycore.project)
             ]:
                 self.wildcards[wildcard.get_name()] = wildcard
         else:
@@ -50,7 +51,10 @@ class SimilarFinder(object):
             resource, region = args[""]["skip"]
             if resource == self.pymodule.get_resource():
                 skip_region = region
-        return self.raw_finder.get_matches(code, start=start, end=end, skip=skip_region)
+        return self.raw_finder.get_matches(code,
+                                           start=start,
+                                           end=end,
+                                           skip=skip_region)
 
     def get_match_regions(self, *args, **kwds):
         for match in self.get_matches(*args, **kwds):
@@ -106,14 +110,16 @@ class RawSimilarFinder(object):
         for match in self._get_matched_asts(code):
             match_start, match_end = match.get_region()
             if start <= match_start and match_end <= end:
-                if skip is not None and (skip[0] < match_end and skip[1] > match_start):
+                if skip is not None and (skip[0] < match_end
+                                         and skip[1] > match_start):
                     continue
                 yield match
 
     def _get_matched_asts(self, code):
         if code not in self._matched_asts:
             wanted = self._create_pattern(code)
-            matches = _ASTMatcher(self.ast, wanted, self.does_match).find_matches()
+            matches = _ASTMatcher(self.ast, wanted,
+                                  self.does_match).find_matches()
             self._matched_asts[code] = matches
         return self._matched_asts[code]
 
@@ -139,6 +145,7 @@ class RawSimilarFinder(object):
 
 
 class _ASTMatcher(object):
+
     def __init__(self, body, pattern, does_match):
         """Searches the given pattern in the body AST.
 
@@ -176,7 +183,7 @@ class _ASTMatcher(object):
     def __check_stmt_list(self, nodes):
         for index in range(len(nodes)):
             if len(nodes) - index >= len(self.pattern):
-                current_stmts = nodes[index : index + len(self.pattern)]
+                current_stmts = nodes[index:index + len(self.pattern)]
                 mapping = {}
                 if self._match_stmts(current_stmts, mapping):
                     self.matches.append(StatementMatch(current_stmts, mapping))
@@ -199,7 +206,8 @@ class _ASTMatcher(object):
                 if not self._match_nodes(child1, child2, mapping):
                     return False
             elif isinstance(child1, (list, tuple)):
-                if not isinstance(child2, (list, tuple)) or len(child1) != len(child2):
+                if not isinstance(child2,
+                                  (list, tuple)) or len(child1) != len(child2):
                     return False
                 for c1, c2 in zip(child1, child2):
                     if not self._match_nodes(c1, c2, mapping):
@@ -212,7 +220,10 @@ class _ASTMatcher(object):
     def _get_children(self, node):
         """Return not `ast.expr_context` children of `node`"""
         children = ast.get_children(node)
-        return [child for child in children if not isinstance(child, ast.expr_context)]
+        return [
+            child for child in children
+            if not isinstance(child, ast.expr_context)
+        ]
 
     def _match_stmts(self, current_stmts, mapping):
         if len(current_stmts) != len(self.pattern):
@@ -234,6 +245,7 @@ class _ASTMatcher(object):
 
 
 class Match(object):
+
     def __init__(self, mapping):
         self.mapping = mapping
 
@@ -246,6 +258,7 @@ class Match(object):
 
 
 class ExpressionMatch(Match):
+
     def __init__(self, ast, mapping):
         super(ExpressionMatch, self).__init__(mapping)
         self.ast = ast
@@ -255,6 +268,7 @@ class ExpressionMatch(Match):
 
 
 class StatementMatch(Match):
+
     def __init__(self, ast_list, mapping):
         super(StatementMatch, self).__init__(mapping)
         self.ast_list = ast_list
@@ -264,6 +278,7 @@ class StatementMatch(Match):
 
 
 class CodeTemplate(object):
+
     def __init__(self, template):
         self.template = template
         self._find_names()
@@ -273,7 +288,7 @@ class CodeTemplate(object):
         for match in CodeTemplate._get_pattern().finditer(self.template):
             if "name" in match.groupdict() and match.group("name") is not None:
                 start, end = match.span("name")
-                name = self.template[start + 2 : end - 1]
+                name = self.template[start + 2:end - 1]
                 if name not in self.names:
                     self.names[name] = []
                 self.names[name].append((start, end))
@@ -296,13 +311,9 @@ class CodeTemplate(object):
     @classmethod
     def _get_pattern(cls):
         if cls._match_pattern is None:
-            pattern = (
-                codeanalyze.get_comment_pattern()
-                + "|"
-                + codeanalyze.get_string_pattern()
-                + "|"
-                + r"(?P<name>\$\{[^\s\$\}]*\})"
-            )
+            pattern = (codeanalyze.get_comment_pattern() + "|" +
+                       codeanalyze.get_string_pattern() + "|" +
+                       r"(?P<name>\$\{[^\s\$\}]*\})")
             cls._match_pattern = re.compile(pattern)
         return cls._match_pattern
 
@@ -324,9 +335,9 @@ class _RopeVariable(object):
 
     def get_base(self, name):
         if self._is_normal(name):
-            return name[len(self._normal_prefix) :]
+            return name[len(self._normal_prefix):]
         if self._is_var(name):
-            return "?" + name[len(self._any_prefix) :]
+            return "?" + name[len(self._any_prefix):]
 
     def _get_normal(self, name):
         return self._normal_prefix + name
@@ -359,7 +370,8 @@ def make_pattern(code, variables):
 
 def _pydefined_to_str(pydefined):
     address = []
-    if isinstance(pydefined, (builtins.BuiltinClass, builtins.BuiltinFunction)):
+    if isinstance(pydefined,
+                  (builtins.BuiltinClass, builtins.BuiltinFunction)):
         return "__builtins__." + pydefined.get_name()
     else:
         while pydefined.parent is not None:

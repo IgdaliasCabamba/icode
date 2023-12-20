@@ -96,7 +96,8 @@ class ChangeSet(Change):
             date = datetime.datetime.fromtimestamp(self.time)
             if date.date() == datetime.date.today():
                 string_date = "today"
-            elif date.date() == (datetime.date.today() - datetime.timedelta(1)):
+            elif date.date() == (datetime.date.today() -
+                                 datetime.timedelta(1)):
                 string_date = "yesterday"
             elif date.year == datetime.date.today().year:
                 string_date = date.strftime("%b %d")
@@ -153,7 +154,8 @@ class ChangeContents(Change):
     @_handle_job_set
     def undo(self):
         if self.old_contents is None:
-            raise exceptions.HistoryError("Undoing a change that is not performed yet!")
+            raise exceptions.HistoryError(
+                "Undoing a change that is not performed yet!")
         self._operations.write_file(self.resource, self.old_contents)
 
     def __str__(self):
@@ -262,7 +264,8 @@ class CreateFolder(CreateResource):
     """
 
     def __init__(self, parent, name):
-        resource = parent.project.get_folder(self._get_child_path(parent, name))
+        resource = parent.project.get_folder(self._get_child_path(
+            parent, name))
         super(CreateFolder, self).__init__(resource)
 
 
@@ -295,7 +298,8 @@ class RemoveResource(Change):
     # TODO: Undoing remove operations
     @_handle_job_set
     def undo(self):
-        raise NotImplementedError("Undoing `RemoveResource` is not implemented yet.")
+        raise NotImplementedError(
+            "Undoing `RemoveResource` is not implemented yet.")
 
     def __str__(self):
         return "Remove <%s>" % (self.resource.path)
@@ -319,6 +323,7 @@ def create_job_set(task_handle, change):
 
 
 class _ResourceOperations(object):
+
     def __init__(self, project):
         self.project = project
         self.fscommands = project.fscommands
@@ -359,12 +364,12 @@ class _ResourceOperations(object):
     def _create_resource(self, file_name, kind="file"):
         resource_path = self.project._get_resource_path(file_name)
         if os.path.exists(resource_path):
-            raise exceptions.RopeError("Resource <%s> already exists" % resource_path)
+            raise exceptions.RopeError("Resource <%s> already exists" %
+                                       resource_path)
         resource = self.project.get_file(file_name)
         if not resource.parent.exists():
             raise exceptions.ResourceNotFoundError(
-                "Parent folder of <%s> does not exist" % resource.path
-            )
+                "Parent folder of <%s> does not exist" % resource.path)
         fscommands = self._get_fscommands(resource)
         try:
             if kind == "file":
@@ -386,6 +391,7 @@ def _get_destination_for_move(resource, destination):
 
 
 class ChangeToData(object):
+
     def convertChangeSet(self, change):
         description = change.description
         changes = []
@@ -414,6 +420,7 @@ class ChangeToData(object):
 
 
 class DataToChange(object):
+
     def __init__(self, project):
         self.project = project
 

@@ -19,6 +19,7 @@ from core.code_api import icode_api
 
 
 class SmartJupyterConsole(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -40,7 +41,6 @@ class SmartJupyterConsole(QFrame):
         self.console.kernel_client = self.console._kernel_manager.client()
         self.console.kernel_client.start_channels()
 
-        
         # TODO: put this styles on qss file
         self.console.setStyleSheet(f"background:{self.color_map['paper']}")
 
@@ -98,6 +98,7 @@ class SmartJupyterConsole(QFrame):
 
 
 class JupyterConsole(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent

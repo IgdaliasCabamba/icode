@@ -47,12 +47,14 @@ def create_arguments(primary, pyfunction, call_node, scope):
     args.extend(call_node.keywords)
     called = call_node.func
     # XXX: Handle constructors
-    if _is_method_call(primary, pyfunction) and isinstance(called, ast.Attribute):
+    if _is_method_call(primary, pyfunction) and isinstance(
+            called, ast.Attribute):
         args.insert(0, called.value)
     return Arguments(args, scope)
 
 
 class ObjectArguments(object):
+
     def __init__(self, pynames):
         self.pynames = pynames
 
@@ -73,6 +75,7 @@ class ObjectArguments(object):
 
 
 class MixedArguments(object):
+
     def __init__(self, pyname, arguments, scope):
         """`argumens` is an instance of `Arguments`"""
         self.pyname = pyname
@@ -98,14 +101,12 @@ def _is_method_call(primary, pyfunction):
     if primary is None:
         return False
     pyobject = primary.get_object()
-    if (
-        isinstance(pyobject.get_type(), rope.base.pyobjects.PyClass)
-        and isinstance(pyfunction, rope.base.pyobjects.PyFunction)
-        and isinstance(pyfunction.parent, rope.base.pyobjects.PyClass)
-    ):
+    if (isinstance(pyobject.get_type(), rope.base.pyobjects.PyClass)
+            and isinstance(pyfunction, rope.base.pyobjects.PyFunction)
+            and isinstance(pyfunction.parent, rope.base.pyobjects.PyClass)):
         return True
-    if isinstance(
-        pyobject.get_type(), rope.base.pyobjects.AbstractClass
-    ) and isinstance(pyfunction, rope.base.builtins.BuiltinFunction):
+    if isinstance(pyobject.get_type(),
+                  rope.base.pyobjects.AbstractClass) and isinstance(
+                      pyfunction, rope.base.builtins.BuiltinFunction):
         return True
     return False

@@ -51,9 +51,11 @@ class BreadcrumbController(QObject):
 
     def make_headers(self):
         if self.editor.file_path is None:
-            self.on_update_header.emit(
-                {"text": " Unsaved", "widget": "first", "last": False}
-            )
+            self.on_update_header.emit({
+                "text": " Unsaved",
+                "widget": "first",
+                "last": False
+            })
         else:
             widgets = ["second", "third", "fourth", "last"]
             path_levels = getfn.get_path_splited(self.editor.idocument.file)
@@ -65,59 +67,81 @@ class BreadcrumbController(QObject):
                 if path.replace(" ", "") == "":
                     continue
                 if i < len(widgets):
-                    self.on_update_header.emit(
-                        {"text": f" {str(path)}", "widget": widgets[i], "last": False}
-                    )
+                    self.on_update_header.emit({
+                        "text": f" {str(path)}",
+                        "widget": widgets[i],
+                        "last": False
+                    })
                 else:
-                    self.on_update_header.emit(
-                        {
-                            "text": f" {str(self.editor.idocument.file_name)}",
-                            "widget": widgets[i],
-                            "last": True,
-                        }
-                    )
+                    self.on_update_header.emit({
+                        "text": f" {str(self.editor.idocument.file_name)}",
+                        "widget": widgets[i],
+                        "last": True,
+                    })
                     break
                 i += 1
-        self.on_update_header.emit(
-            {"widget": "first", "icon": self.editor.idocument.icon, "last": False}
-        )
+        self.on_update_header.emit({
+            "widget": "first",
+            "icon": self.editor.idocument.icon,
+            "last": False
+        })
 
     def file_deleted(self, file):
-        self.on_update_header.emit(
-            {"text": "D", "widget": "info-file", "type": "red", "last": True}
-        )
+        self.on_update_header.emit({
+            "text": "D",
+            "widget": "info-file",
+            "type": "red",
+            "last": True
+        })
 
     def file_modified(self, file):
         if filefn.read_file(file) != self.editor.text():
-            self.on_update_header.emit(
-                {"text": "M", "widget": "info-file", "type": "red", "last": True}
-            )
+            self.on_update_header.emit({
+                "text": "M",
+                "widget": "info-file",
+                "type": "red",
+                "last": True
+            })
 
     def text_changed(self):
         if self.editor.file_path is not None:
-            self.on_update_header.emit(
-                {"text": "M", "widget": "info-file", "type": "orange", "last": True}
-            )
+            self.on_update_header.emit({
+                "text": "M",
+                "widget": "info-file",
+                "type": "orange",
+                "last": True
+            })
         else:
-            self.on_update_header.emit(
-                {"text": "U", "widget": "info-file", "type": "orange", "last": True}
-            )
+            self.on_update_header.emit({
+                "text": "U",
+                "widget": "info-file",
+                "type": "orange",
+                "last": True
+            })
 
     def editor_saved(self):
-        self.on_update_header.emit(
-            {"text": "S", "widget": "info-file", "type": "green", "last": True}
-        )
+        self.on_update_header.emit({
+            "text": "S",
+            "widget": "info-file",
+            "type": "green",
+            "last": True
+        })
 
     def display_cords(self, cords):
-        self.on_update_header.emit(
-            {"text": f"X = {cords.x()}", "widget": "code-first", "last": False}
-        )
-        self.on_update_header.emit(
-            {"text": f"Y = {cords.y()}", "widget": "code-second", "last": True}
-        )
+        self.on_update_header.emit({
+            "text": f"X = {cords.x()}",
+            "widget": "code-first",
+            "last": False
+        })
+        self.on_update_header.emit({
+            "text": f"Y = {cords.y()}",
+            "widget": "code-second",
+            "last": True
+        })
 
 
 class Breadcrumbs(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -176,7 +200,8 @@ class Breadcrumbs(QFrame):
         self.file_info.clicked.connect(lambda: self.file_info.showMenu())
 
         self.src_ctrl_info = QPushButton(self)
-        self.src_ctrl_info.setIcon(self.parent.icons.get_icon("source_control"))
+        self.src_ctrl_info.setIcon(
+            self.parent.icons.get_icon("source_control"))
 
         self.warnings_info = QPushButton(self)
         self.warnings_info.setIcon(self.parent.icons.get_icon("warnings"))
@@ -210,6 +235,7 @@ class Breadcrumbs(QFrame):
 
 
 class FileMenu(QMenu):
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -223,6 +249,7 @@ class FileMenu(QMenu):
 
 
 class SourceMenu(QMenu):
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -234,6 +261,7 @@ class SourceMenu(QMenu):
 
 
 class Div(QSplitter):
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName("editor-splitter")

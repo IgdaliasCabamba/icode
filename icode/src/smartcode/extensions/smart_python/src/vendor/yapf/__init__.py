@@ -76,9 +76,8 @@ def main(argv):
     if not args.files:
         # No arguments specified. Read code from stdin.
         if args.in_place or args.diff:
-            parser.error(
-                "cannot use --in-place or --diff flags when reading " "from stdin"
-            )
+            parser.error("cannot use --in-place or --diff flags when reading "
+                         "from stdin")
 
         original_source = []
         while True:
@@ -117,8 +116,7 @@ def main(argv):
 
     # Get additional exclude patterns from ignorefile
     exclude_patterns_from_ignore_file = file_resources.GetExcludePatternsForDir(
-        os.getcwd()
-    )
+        os.getcwd())
 
     files = file_resources.GetCommandLineFiles(
         args.files,
@@ -126,7 +124,8 @@ def main(argv):
         (args.exclude or []) + exclude_patterns_from_ignore_file,
     )
     if not files:
-        raise errors.YapfError("Input filenames did not match any python files")
+        raise errors.YapfError(
+            "Input filenames did not match any python files")
 
     changed = FormatFiles(
         files,
@@ -213,8 +212,7 @@ def FormatFiles(
                     verify,
                     quiet,
                     verbose,
-                )
-                for filename in filenames
+                ) for filename in filenames
             ]
             for future in concurrent.futures.as_completed(future_formats):
                 changed |= future.result()
@@ -250,7 +248,8 @@ def _FormatFile(
         print("Reformatting %s" % filename)
 
     if style_config is None and not no_local_style:
-        style_config = file_resources.GetDefaultStyleForDir(os.path.dirname(filename))
+        style_config = file_resources.GetDefaultStyleForDir(
+            os.path.dirname(filename))
 
     try:
         reformatted_code, encoding, has_change = yapf_api.FormatFile(
@@ -263,15 +262,15 @@ def _FormatFile(
             logger=logging.warning,
         )
     except tokenize.TokenError as e:
-        raise errors.YapfError("%s:%s:%s" % (filename, e.args[1][0], e.args[0]))
+        raise errors.YapfError("%s:%s:%s" %
+                               (filename, e.args[1][0], e.args[0]))
     except SyntaxError as e:
         e.filename = filename
         raise
 
     if not in_place and not quiet and reformatted_code:
-        file_resources.WriteReformattedCode(
-            filename, reformatted_code, encoding, in_place
-        )
+        file_resources.WriteReformattedCode(filename, reformatted_code,
+                                            encoding, in_place)
     return has_change
 
 
@@ -295,7 +294,8 @@ def _GetLines(line_strings):
         if line[0] < 1:
             raise errors.YapfError("invalid start of line range: %r" % line)
         if line[0] > line[1]:
-            raise errors.YapfError("end comes before start in line range: %r" % line)
+            raise errors.YapfError("end comes before start in line range: %r" %
+                                   line)
         lines.append(tuple(line))
     return lines
 
@@ -307,20 +307,27 @@ def _BuildParser():
       An ArgumentParser instance for the CLI.
     """
     parser = argparse.ArgumentParser(description="Formatter for Python code.")
-    parser.add_argument(
-        "-v", "--version", action="store_true", help="show version number and exit"
-    )
+    parser.add_argument("-v",
+                        "--version",
+                        action="store_true",
+                        help="show version number and exit")
 
     diff_inplace_quiet_group = parser.add_mutually_exclusive_group()
     diff_inplace_quiet_group.add_argument(
-        "-d", "--diff", action="store_true", help="print the diff for the fixed source"
-    )
+        "-d",
+        "--diff",
+        action="store_true",
+        help="print the diff for the fixed source")
     diff_inplace_quiet_group.add_argument(
-        "-i", "--in-place", action="store_true", help="make changes to files in place"
-    )
+        "-i",
+        "--in-place",
+        action="store_true",
+        help="make changes to files in place")
     diff_inplace_quiet_group.add_argument(
-        "-q", "--quiet", action="store_true", help="output nothing and set return value"
-    )
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="output nothing and set return value")
 
     lines_recursive_group = parser.add_mutually_exclusive_group()
     lines_recursive_group.add_argument(
@@ -354,33 +361,30 @@ def _BuildParser():
             'or "google"), or the name of a file with style settings. The '
             "default is pep8 unless a %s or %s or %s file located in the same "
             "directory as the source or one of its parent directories "
-            "(for stdin, the current directory is used)."
-            % (style.LOCAL_STYLE, style.SETUP_CONFIG, style.PYPROJECT_TOML)
-        ),
+            "(for stdin, the current directory is used)." %
+            (style.LOCAL_STYLE, style.SETUP_CONFIG, style.PYPROJECT_TOML)),
     )
     parser.add_argument(
         "--style-help",
         action="store_true",
-        help=(
-            "show style settings and exit; this output can be "
-            "saved to .style.yapf to make your settings "
-            "permanent"
-        ),
+        help=("show style settings and exit; this output can be "
+              "saved to .style.yapf to make your settings "
+              "permanent"),
     )
     parser.add_argument(
         "--no-local-style",
         action="store_true",
         help="don't search for local style definition",
     )
-    parser.add_argument("--verify", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--verify",
+                        action="store_true",
+                        help=argparse.SUPPRESS)
     parser.add_argument(
         "-p",
         "--parallel",
         action="store_true",
-        help=(
-            "run yapf in parallel when formatting multiple files. Requires "
-            "concurrent.futures in Python 2.X"
-        ),
+        help=("run yapf in parallel when formatting multiple files. Requires "
+              "concurrent.futures in Python 2.X"),
     )
     parser.add_argument(
         "-vv",
@@ -389,9 +393,9 @@ def _BuildParser():
         help="print out file names while processing",
     )
 
-    parser.add_argument(
-        "files", nargs="*", help="reads from stdin when no files are specified."
-    )
+    parser.add_argument("files",
+                        nargs="*",
+                        help="reads from stdin when no files are specified.")
     return parser
 
 

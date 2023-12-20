@@ -27,7 +27,6 @@ from jedi.inference.compiled.access import (
 )
 from jedi.api.exceptions import InternalError
 
-
 _MAIN_PATH = os.path.join(os.path.dirname(__file__), "__main__.py")
 PICKLE_PROTOCOL = 4
 
@@ -85,6 +84,7 @@ def _cleanup_process(process, thread):
 
 
 class _InferenceStateProcess:
+
     def __init__(self, inference_state):
         self._inference_state_weakref = weakref.ref(inference_state)
         self._inference_state_id = id(inference_state)
@@ -119,6 +119,7 @@ class InferenceStateSameProcess(_InferenceStateProcess):
 
 
 class InferenceStateSubprocess(_InferenceStateProcess):
+
     def __init__(self, inference_state, compiled_subprocess):
         super().__init__(inference_state)
         self._used = False
@@ -163,7 +164,8 @@ class InferenceStateSubprocess(_InferenceStateProcess):
 
     def __del__(self):
         if self._used and not self._compiled_subprocess.is_crashed:
-            self._compiled_subprocess.delete_inference_state(self._inference_state_id)
+            self._compiled_subprocess.delete_inference_state(
+                self._inference_state_id)
 
 
 class CompiledSubprocess:
@@ -202,14 +204,15 @@ class CompiledSubprocess:
             env=self._env_vars,
         )
         self._stderr_queue = queue.Queue()
-        self._stderr_thread = t = Thread(
-            target=_enqueue_output, args=(process.stderr, self._stderr_queue)
-        )
+        self._stderr_thread = t = Thread(target=_enqueue_output,
+                                         args=(process.stderr,
+                                               self._stderr_queue))
         t.daemon = True
         t.start()
         # Ensure the subprocess is properly cleaned up when the object
         # is garbage collected.
-        self._cleanup_callable = weakref.finalize(self, _cleanup_process, process, t)
+        self._cleanup_callable = weakref.finalize(self, _cleanup_process,
+                                                  process, t)
         return process
 
     def run(self, inference_state, function, args=(), kwargs={}):
@@ -234,7 +237,8 @@ class CompiledSubprocess:
 
     def _send(self, inference_state_id, function, args=(), kwargs={}):
         if self.is_crashed:
-            raise InternalError("The subprocess %s has crashed." % self._executable)
+            raise InternalError("The subprocess %s has crashed." %
+                                self._executable)
 
         data = inference_state_id, function, args, kwargs
         try:
@@ -242,33 +246,33 @@ class CompiledSubprocess:
         except BrokenPipeError:
             self._kill()
             raise InternalError(
-                "The subprocess %s was killed. Maybe out of memory?" % self._executable
-            )
+                "The subprocess %s was killed. Maybe out of memory?" %
+                self._executable)
 
         try:
-            is_exception, traceback, result = pickle_load(self._get_process().stdout)
+            is_exception, traceback, result = pickle_load(
+                self._get_process().stdout)
         except EOFError as eof_error:
             try:
-                stderr = self._get_process().stderr.read().decode("utf-8", "replace")
+                stderr = self._get_process().stderr.read().decode(
+                    "utf-8", "replace")
             except Exception as exc:
                 stderr = "<empty/not available (%r)>" % exc
             self._kill()
             _add_stderr_to_debug(self._stderr_queue)
             raise InternalError(
-                "The subprocess %s has crashed (%r, stderr=%s)."
-                % (
+                "The subprocess %s has crashed (%r, stderr=%s)." % (
                     self._executable,
                     eof_error,
                     stderr,
-                )
-            )
+                ))
 
         _add_stderr_to_debug(self._stderr_queue)
 
         if is_exception:
             # Replace the attribute error message with a the traceback. It's
             # way more informative.
-            result.args = (traceback,)
+            result.args = (traceback, )
             raise result
         return result
 
@@ -284,6 +288,7 @@ class CompiledSubprocess:
 
 
 class Listener:
+
     def __init__(self):
         self._inference_states = {}
         # TODO refactor so we don't need to process anymore just handle
@@ -313,20 +318,21 @@ class Listener:
         elif function is None:
             del self._inference_states[inference_state_id]
         else:
-            inference_state = self._get_inference_state(function, inference_state_id)
+            inference_state = self._get_inference_state(
+                function, inference_state_id)
 
             # Exchange all handles
             args = list(args)
             for i, arg in enumerate(args):
                 if isinstance(arg, AccessHandle):
-                    args[i] = inference_state.compiled_subprocess.get_access_handle(
-                        arg.id
-                    )
+                    args[
+                        i] = inference_state.compiled_subprocess.get_access_handle(
+                            arg.id)
             for key, value in kwargs.items():
                 if isinstance(value, AccessHandle):
-                    kwargs[key] = inference_state.compiled_subprocess.get_access_handle(
-                        value.id
-                    )
+                    kwargs[
+                        key] = inference_state.compiled_subprocess.get_access_handle(
+                            value.id)
 
             return function(inference_state, *args, **kwargs)
 
@@ -355,6 +361,7 @@ class Listener:
 
 
 class AccessHandle:
+
     def __init__(self, subprocess, access, id_):
         self.access = access
         self._subprocess = subprocess
@@ -391,12 +398,10 @@ class AccessHandle:
         """
         if args and isinstance(args[0], slice):
             return self._subprocess.get_compiled_method_return(
-                self.id, name, *args, **kwargs
-            )
+                self.id, name, *args, **kwargs)
         return self._cached_results(name, *args, **kwargs)
 
     @memoize_method
     def _cached_results(self, name, *args, **kwargs):
         return self._subprocess.get_compiled_method_return(
-            self.id, name, *args, **kwargs
-        )
+            self.id, name, *args, **kwargs)

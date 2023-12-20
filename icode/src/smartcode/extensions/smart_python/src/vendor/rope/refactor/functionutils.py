@@ -5,9 +5,9 @@ from rope.base import worder
 
 
 class DefinitionInfo(object):
-    def __init__(
-        self, function_name, is_method, args_with_defaults, args_arg, keywords_arg
-    ):
+
+    def __init__(self, function_name, is_method, args_with_defaults, args_arg,
+                 keywords_arg):
         self.function_name = function_name
         self.is_method = is_method
         self.args_with_defaults = args_with_defaults
@@ -69,6 +69,7 @@ class DefinitionInfo(object):
 
 
 class CallInfo(object):
+
     def __init__(
         self,
         function_name,
@@ -98,7 +99,8 @@ class CallInfo(object):
         if self.args[start:]:
             params.extend(self.args[start:])
         if self.keywords:
-            params.extend(["%s=%s" % (name, value) for name, value in self.keywords])
+            params.extend(
+                ["%s=%s" % (name, value) for name, value in self.keywords])
         if self.args_arg is not None:
             params.append("*" + self.args_arg)
         if self.keywords_arg:
@@ -134,36 +136,32 @@ class CallInfo(object):
 
     @staticmethod
     def _is_method_call(primary, pyname):
-        return (
-            primary is not None
-            and isinstance(primary.get_object().get_type(), rope.base.pyobjects.PyClass)
-            and CallInfo._is_method(pyname)
-        )
+        return (primary is not None and isinstance(
+            primary.get_object().get_type(), rope.base.pyobjects.PyClass)
+                and CallInfo._is_method(pyname))
 
     @staticmethod
     def _is_class(pyname):
-        return pyname is not None and isinstance(
-            pyname.get_object(), rope.base.pyobjects.PyClass
-        )
+        return pyname is not None and isinstance(pyname.get_object(),
+                                                 rope.base.pyobjects.PyClass)
 
     @staticmethod
     def _is_method(pyname):
-        if pyname is not None and isinstance(
-            pyname.get_object(), rope.base.pyobjects.PyFunction
-        ):
+        if pyname is not None and isinstance(pyname.get_object(),
+                                             rope.base.pyobjects.PyFunction):
             return pyname.get_object().get_kind() == "method"
         return False
 
     @staticmethod
     def _is_classmethod(pyname):
-        if pyname is not None and isinstance(
-            pyname.get_object(), rope.base.pyobjects.PyFunction
-        ):
+        if pyname is not None and isinstance(pyname.get_object(),
+                                             rope.base.pyobjects.PyFunction):
             return pyname.get_object().get_kind() == "classmethod"
         return False
 
 
 class ArgumentMapping(object):
+
     def __init__(self, definition_info, call_info):
         self.call_info = call_info
         self.param_dict = {}
@@ -211,6 +209,7 @@ class ArgumentMapping(object):
 
 
 class _FunctionParser(object):
+
     def __init__(self, call, implicit_arg, is_lambda=False):
         self.call = call
         self.implicit_arg = implicit_arg
@@ -219,22 +218,21 @@ class _FunctionParser(object):
             self.last_parens = self.call.rindex(":")
         else:
             self.last_parens = self.call.rindex(")")
-        self.first_parens = self.word_finder._find_parens_start(self.last_parens)
+        self.first_parens = self.word_finder._find_parens_start(
+            self.last_parens)
 
     def get_parameters(self):
         args, keywords = self.word_finder.get_parameters(
-            self.first_parens, self.last_parens
-        )
+            self.first_parens, self.last_parens)
         if self.is_called_as_a_method():
-            instance = self.call[: self.call.rindex(".", 0, self.first_parens)]
+            instance = self.call[:self.call.rindex(".", 0, self.first_parens)]
             args.insert(0, instance.strip())
         return args, keywords
 
     def get_instance(self):
         if self.is_called_as_a_method():
             return self.word_finder.get_primary_at(
-                self.call.rindex(".", 0, self.first_parens) - 1
-            )
+                self.call.rindex(".", 0, self.first_parens) - 1)
 
     def get_function_name(self):
         if self.is_called_as_a_method():
@@ -243,4 +241,4 @@ class _FunctionParser(object):
             return self.word_finder.get_primary_at(self.first_parens - 1)
 
     def is_called_as_a_method(self):
-        return self.implicit_arg and "." in self.call[: self.first_parens]
+        return self.implicit_arg and "." in self.call[:self.first_parens]

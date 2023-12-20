@@ -14,12 +14,12 @@ from jedi.inference.base_value import LazyValueWrapper
 def builtin_from_name(inference_state, string):
     typing_builtins_module = inference_state.builtins_module
     if string in ("None", "True", "False"):
-        (builtins,) = typing_builtins_module.non_stub_value_set
+        (builtins, ) = typing_builtins_module.non_stub_value_set
         filter_ = next(builtins.get_filters())
     else:
         filter_ = next(typing_builtins_module.get_filters())
-    (name,) = filter_.get(string)
-    (value,) = name.infer()
+    (name, ) = filter_.get(string)
+    (value, ) = name.infer()
     return value
 
 
@@ -35,20 +35,20 @@ class ExactValue(LazyValueWrapper):
 
     def __getattribute__(self, name):
         if name in (
-            "get_safe_value",
-            "execute_operation",
-            "access_handle",
-            "negate",
-            "py__bool__",
-            "is_compiled",
+                "get_safe_value",
+                "execute_operation",
+                "access_handle",
+                "negate",
+                "py__bool__",
+                "is_compiled",
         ):
             return getattr(self._compiled_value, name)
         return super().__getattribute__(name)
 
     def _get_wrapped_value(self):
-        (instance,) = builtin_from_name(
-            self.inference_state, self._compiled_value.name.string_name
-        ).execute_with_values()
+        (instance, ) = builtin_from_name(
+            self.inference_state,
+            self._compiled_value.name.string_name).execute_with_values()
         return instance
 
     def __repr__(self):
@@ -60,10 +60,11 @@ def create_simple_object(inference_state, obj):
     Only allows creations of objects that are easily picklable across Python
     versions.
     """
-    assert type(obj) in (int, float, str, bytes, slice, complex, bool), repr(obj)
+    assert type(obj) in (int, float, str, bytes, slice, complex,
+                         bool), repr(obj)
     compiled_value = create_from_access_path(
-        inference_state, inference_state.compiled_subprocess.create_simple_object(obj)
-    )
+        inference_state,
+        inference_state.compiled_subprocess.create_simple_object(obj))
     return ExactValue(compiled_value)
 
 
@@ -77,8 +78,7 @@ def load_module(inference_state, dotted_name, **kwargs):
     if dotted_name.startswith("tensorflow."):
         return None
     access_path = inference_state.compiled_subprocess.load_module(
-        dotted_name=dotted_name, **kwargs
-    )
+        dotted_name=dotted_name, **kwargs)
     if access_path is None:
         return None
     return create_from_access_path(inference_state, access_path)

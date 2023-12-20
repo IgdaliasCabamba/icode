@@ -24,6 +24,7 @@ from radon import visitors
 
 
 class EnvApi(QSettings):
+
     def __init__(self, file_with_path: str, format=QSettings.IniFormat):
         super().__init__(file_with_path, format)
         self._python_envs = [jedi.get_default_environment()]
@@ -36,8 +37,10 @@ class EnvApi(QSettings):
 
         if SYS_NAME == "linux":
             try:
-                self._python_envs.append(jedi.create_environment("/usr/bin/python3"))
-                self._python_envs.append(jedi.create_environment("/bin/python3"))
+                self._python_envs.append(
+                    jedi.create_environment("/usr/bin/python3"))
+                self._python_envs.append(
+                    jedi.create_environment("/bin/python3"))
             except Exception as e:
                 print(e)
                 pass
@@ -85,6 +88,7 @@ class EnvApi(QSettings):
 
 
 class PythonApi:
+
     def __init__(self):
         pass
 
@@ -191,6 +195,7 @@ class PythonApi:
         try:
             # Node object
             class PythonNode:
+
                 def __init__(self, name, type, line_number, level):
                     self.name = name
                     self.type = type
@@ -204,9 +209,8 @@ class PythonApi:
                 nonlocal python_node_tree
                 new_node = None
                 if isinstance(ast_node, ast.ClassDef):
-                    new_node = PythonNode(
-                        ast_node.name, "class", ast_node.lineno, level
-                    )
+                    new_node = PythonNode(ast_node.name, "class",
+                                          ast_node.lineno, level)
                     for child_node in ast_node.body:
                         result = parse_node(child_node, level + 1, new_node)
                         if result != None:
@@ -215,11 +219,11 @@ class PythonApi:
                                     new_node.children.append(n)
                             else:
                                 new_node.children.append(result)
-                    new_node.children = sorted(new_node.children, key=lambda x: x.name)
+                    new_node.children = sorted(new_node.children,
+                                               key=lambda x: x.name)
                 elif isinstance(ast_node, ast.FunctionDef):
-                    new_node = PythonNode(
-                        ast_node.name, "function", ast_node.lineno, level
-                    )
+                    new_node = PythonNode(ast_node.name, "function",
+                                          ast_node.lineno, level)
                     for child_node in ast_node.body:
                         result = parse_node(child_node, level + 1, new_node)
                         if result != None:
@@ -228,14 +232,14 @@ class PythonApi:
                                     new_node.children.append(n)
                             else:
                                 new_node.children.append(result)
-                    new_node.children = sorted(new_node.children, key=lambda x: x.name)
+                    new_node.children = sorted(new_node.children,
+                                               key=lambda x: x.name)
                 elif isinstance(ast_node, ast.Import):
-                    new_node = PythonNode(
-                        ast_node.names[0].name, "import", ast_node.lineno, level
-                    )
-                elif isinstance(ast_node, ast.Assign) and (
-                    level == 0 or parent_node == None
-                ):
+                    new_node = PythonNode(ast_node.names[0].name, "import",
+                                          ast_node.lineno, level)
+                elif isinstance(ast_node,
+                                ast.Assign) and (level == 0
+                                                 or parent_node == None):
                     # Globals that do are not defined with the 'global' keyword,
                     # but are defined on the top level
                     new_nodes = []
@@ -244,15 +248,13 @@ class PythonApi:
                             name = target.id
                             if not (name in globals_list):
                                 new_nodes.append(
-                                    PythonNode(
-                                        name, "global_variable", ast_node.lineno, level
-                                    )
-                                )
+                                    PythonNode(name, "global_variable",
+                                               ast_node.lineno, level))
                                 globals_list.append(name)
                     return new_nodes
-                elif isinstance(ast_node, ast.AnnAssign) and (
-                    level == 0 or parent_node == None
-                ):
+                elif isinstance(ast_node,
+                                ast.AnnAssign) and (level == 0
+                                                    or parent_node == None):
                     # Type annotated globals
                     new_nodes = []
                     target = ast_node.target
@@ -260,10 +262,8 @@ class PythonApi:
                         name = target.id
                         if not (name in globals_list):
                             new_nodes.append(
-                                PythonNode(
-                                    name, "global_variable", ast_node.lineno, level
-                                )
-                            )
+                                PythonNode(name, "global_variable",
+                                           ast_node.lineno, level))
                             globals_list.append(name)
                     return new_nodes
                 elif isinstance(ast_node, ast.Global):
@@ -272,29 +272,28 @@ class PythonApi:
                     for name in ast_node.names:
                         if not (name in globals_list):
                             python_node_tree.append(
-                                PythonNode(
-                                    name, "global_variable", ast_node.lineno, level
-                                )
-                            )
+                                PythonNode(name, "global_variable",
+                                           ast_node.lineno, level))
                             globals_list.append(name)
                 else:
                     if parent_node != None and hasattr(ast_node, "body"):
                         for child_node in ast_node.body:
-                            result = parse_node(child_node, level + 1, parent_node)
+                            result = parse_node(child_node, level + 1,
+                                                parent_node)
                             if result != None:
                                 if isinstance(result, list):
                                     for n in result:
                                         parent_node.children.append(n)
                                 else:
                                     parent_node.children.append(result)
-                        parent_node.children = sorted(
-                            parent_node.children, key=lambda x: x.name
-                        )
+                        parent_node.children = sorted(parent_node.children,
+                                                      key=lambda x: x.name)
                     else:
                         new_nodes = []
                         if hasattr(ast_node, "body"):
                             for child_node in ast_node.body:
-                                result = parse_node(child_node, level + 1, None)
+                                result = parse_node(child_node, level + 1,
+                                                    None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -303,7 +302,8 @@ class PythonApi:
                                         new_nodes.append(result)
                         if hasattr(ast_node, "orelse"):
                             for child_node in ast_node.orelse:
-                                result = parse_node(child_node, level + 1, None)
+                                result = parse_node(child_node, level + 1,
+                                                    None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -312,7 +312,8 @@ class PythonApi:
                                         new_nodes.append(result)
                         if hasattr(ast_node, "finalbody"):
                             for child_node in ast_node.finalbody:
-                                result = parse_node(child_node, level + 1, None)
+                                result = parse_node(child_node, level + 1,
+                                                    None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -321,7 +322,8 @@ class PythonApi:
                                         new_nodes.append(result)
                         if hasattr(ast_node, "handlers"):
                             for child_node in ast_node.handlers:
-                                result = parse_node(child_node, level + 1, None)
+                                result = parse_node(child_node, level + 1,
+                                                    None)
                                 if result != None:
                                     if isinstance(result, list):
                                         for n in result:
@@ -349,9 +351,11 @@ class PythonApi:
 
             # Sort the node list
             if sort_way == "name":
-                python_node_tree = sorted(python_node_tree, key=lambda x: x.name)
+                python_node_tree = sorted(python_node_tree,
+                                          key=lambda x: x.name)
             elif sort_way == "number":
-                python_node_tree = sorted(python_node_tree, key=lambda x: x.line_number)
+                python_node_tree = sorted(python_node_tree,
+                                          key=lambda x: x.line_number)
 
             return python_node_tree
 

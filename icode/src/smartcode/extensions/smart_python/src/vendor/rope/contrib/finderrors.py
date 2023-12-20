@@ -38,6 +38,7 @@ def find_errors(project, resource):
 
 
 class _BadAccessFinder(object):
+
     def __init__(self, pymodule):
         self.pymodule = pymodule
         self.scope = pymodule.get_scope()
@@ -57,7 +58,8 @@ class _BadAccessFinder(object):
         if not isinstance(node.ctx, ast.Store):
             scope = self.scope.get_inner_scope_for_line(node.lineno)
             pyname = evaluate.eval_node(scope, node.value)
-            if pyname is not None and pyname.get_object() != pyobjects.get_unknown():
+            if pyname is not None and pyname.get_object(
+            ) != pyobjects.get_unknown():
                 if node.attr not in pyname.get_object():
                     self._add_error(node, "Unresolved attribute")
         ast.walk(node.value, self)
@@ -74,14 +76,13 @@ class _BadAccessFinder(object):
     def _is_defined_after(self, scope, pyname, lineno):
         location = pyname.get_definition_location()
         if location is not None and location[1] is not None:
-            if (
-                location[0] == self.pymodule
-                and lineno <= location[1] <= scope.get_end()
-            ):
+            if (location[0] == self.pymodule
+                    and lineno <= location[1] <= scope.get_end()):
                 return True
 
 
 class Error(object):
+
     def __init__(self, lineno, error):
         self.lineno = lineno
         self.error = error

@@ -7,7 +7,7 @@ def parse(line: str) -> Tuple[str, str]:
     """
     comment_start = line.find("#")
     if comment_start != -1:
-        return (line[:comment_start], line[comment_start + 1 :].strip())
+        return (line[:comment_start], line[comment_start + 1:].strip())
 
     return (line, "")
 

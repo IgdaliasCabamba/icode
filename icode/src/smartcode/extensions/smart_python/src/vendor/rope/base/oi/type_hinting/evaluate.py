@@ -34,7 +34,9 @@ class SymbolBase(object):
 
 
 class SymbolTable(object):
+
     def multi(func):
+
         def _inner(self, names, *a, **kw):
             for name in names.split():
                 func(self, name, *a, **kw)
@@ -157,10 +159,8 @@ class Lexer(object):
                 s.value = value
             else:
                 raise SyntaxError(
-                    "Unknown operator ({0}). Possible operators are {1!r}".format(
-                        value, list(self.symbol_table)
-                    )
-                )
+                    "Unknown operator ({0}). Possible operators are {1!r}".
+                    format(value, list(self.symbol_table)))
 
             yield s
 
@@ -207,9 +207,8 @@ class Parser(object):
 
     def advance(self, name=None):
         if name and self.token.name != name:
-            raise SyntaxError(
-                "Expected {0!r} but found {1!r}".format(name, self.token.name)
-            )
+            raise SyntaxError("Expected {0!r} but found {1!r}".format(
+                name, self.token.name))
         self.token = self.next()
 
 
@@ -274,9 +273,8 @@ def led(self, left, parser):
 
 @method(symbol("["))
 def evaluate(self, pyobject):
-    return utils.parametrize_type(
-        self.first.evaluate(pyobject), *[i.evaluate(pyobject) for i in self.second]
-    )
+    return utils.parametrize_type(self.first.evaluate(pyobject),
+                                  *[i.evaluate(pyobject) for i in self.second])
 
 
 # Anonymous Function Calls
@@ -356,11 +354,8 @@ class Evaluator(object):
         :type program: str or rope.base.oi.type_hinting.evaluate.SymbolBase
         :rtype: rope.base.pyobjects.PyDefinedObject | rope.base.pyobjects.PyObject or None
         """
-        ast = (
-            self.compile(program)
-            if isinstance(program, pycompat.string_types)
-            else program
-        )
+        ast = (self.compile(program)
+               if isinstance(program, pycompat.string_types) else program)
         return ast.evaluate(pyobject)
 
 

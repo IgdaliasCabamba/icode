@@ -47,13 +47,13 @@ class Brain(QObject):
             answer = self.get_wiki_answer(self.remove_commands(text, "wiki:"))
             type = 0
         elif text.startswith("april:"):
-            answer = self.get_april_answer(self.remove_commands(text, "april:"))
+            answer = self.get_april_answer(self.remove_commands(
+                text, "april:"))
             type = 1
         elif text.startswith("code:"):
             try:
                 answer = self.get_code_snippets(
-                    self.remove_commands(text, "code:"), settings
-                )
+                    self.remove_commands(text, "code:"), settings)
                 type = 2
             except Exception as e:
                 answer = self.templates.error_log

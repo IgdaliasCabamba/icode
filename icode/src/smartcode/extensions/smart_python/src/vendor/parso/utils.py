@@ -70,9 +70,9 @@ def split_lines(string: str, keepends: bool = False) -> Sequence[str]:
         return re.split(r"\n|\r\n|\r", string)
 
 
-def python_bytes_to_unicode(
-    source: Union[str, bytes], encoding: str = "utf-8", errors: str = "strict"
-) -> str:
+def python_bytes_to_unicode(source: Union[str, bytes],
+                            encoding: str = "utf-8",
+                            errors: str = "strict") -> str:
     """
     Checks for unicode BOMs and PEP 263 encoding declarations. Then returns a
     unicode object like in :py:meth:`bytes.decode`.
@@ -93,8 +93,10 @@ def python_bytes_to_unicode(
             # UTF-8 byte-order mark
             return "utf-8"
 
-        first_two_lines = re.match(rb"(?:[^\r\n]*(?:\r\n|\r|\n)){0,2}", source).group(0)
-        possible_encoding = re.search(rb"coding[=:]\s*([-\w.]+)", first_two_lines)
+        first_two_lines = re.match(rb"(?:[^\r\n]*(?:\r\n|\r|\n)){0,2}",
+                                   source).group(0)
+        possible_encoding = re.search(rb"coding[=:]\s*([-\w.]+)",
+                                      first_two_lines)
         if possible_encoding:
             e = possible_encoding.group(1)
             if not isinstance(e, str):
@@ -140,6 +142,7 @@ class _PythonVersionInfo(NamedTuple):
 
 @total_ordering
 class PythonVersionInfo(_PythonVersionInfo):
+
     def __gt__(self, other):
         if isinstance(other, tuple):
             if len(other) != 2:
@@ -163,10 +166,8 @@ class PythonVersionInfo(_PythonVersionInfo):
 def _parse_version(version) -> PythonVersionInfo:
     match = re.match(r"(\d+)(?:\.(\d{1,2})(?:\.\d+)?)?((a|b|rc)\d)?$", version)
     if match is None:
-        raise ValueError(
-            "The given version is not in the right format. "
-            'Use something like "3.8" or "3".'
-        )
+        raise ValueError("The given version is not in the right format. "
+                         'Use something like "3.8" or "3".')
 
     major = int(match.group(1))
     minor = match.group(2)
@@ -179,8 +180,7 @@ def _parse_version(version) -> PythonVersionInfo:
             minor = "6"
         else:
             raise NotImplementedError(
-                "Sorry, no support yet for those fancy new/old versions."
-            )
+                "Sorry, no support yet for those fancy new/old versions.")
     minor = int(minor)
     return PythonVersionInfo(major, minor)
 

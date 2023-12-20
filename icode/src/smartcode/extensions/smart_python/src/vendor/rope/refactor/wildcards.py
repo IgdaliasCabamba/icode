@@ -3,6 +3,7 @@ from rope.refactor import patchedast, occurrences
 
 
 class Wildcard(object):
+
     def get_name(self):
         """Return the name of this wildcard"""
 
@@ -11,6 +12,7 @@ class Wildcard(object):
 
 
 class Suspect(object):
+
     def __init__(self, pymodule, node, name):
         self.name = name
         self.pymodule = pymodule
@@ -56,7 +58,10 @@ class DefaultWildcard(object):
                 kind = check
                 expected = args[check]
             if expected is not None:
-                checker = _CheckObject(self.project, expected, kind, unsure=unsure)
+                checker = _CheckObject(self.project,
+                                       expected,
+                                       kind,
+                                       unsure=unsure)
                 return checker(suspect.pymodule, suspect.node)
         return True
 
@@ -86,6 +91,7 @@ def parse_arg(arg):
 
 
 class _CheckObject(object):
+
     def __init__(self, project, expected, kind="object", unsure=False):
         self.project = project
         self.kind = kind
@@ -142,7 +148,8 @@ class _CheckObject(object):
     def _evaluate_node(self, pymodule, node):
         scope = pymodule.get_scope().get_inner_scope_for_line(node.lineno)
         expression = node
-        if isinstance(expression, ast.Name) and isinstance(expression.ctx, ast.Store):
+        if isinstance(expression, ast.Name) and isinstance(
+                expression.ctx, ast.Store):
             start, end = patchedast.node_region(expression)
             text = pymodule.source_code[start:end]
             return evaluate.eval_str(scope, text)
@@ -155,6 +162,7 @@ class _CheckObject(object):
         if attributes[0] in ("__builtin__", "__builtins__"):
 
             class _BuiltinsStub(object):
+
                 def get_attribute(self, name):
                     return builtins.builtins[name]
 

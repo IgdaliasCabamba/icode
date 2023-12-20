@@ -21,6 +21,7 @@ from .ui.ui_light_alpha import Ui_ColorPicker as Ui_Light_Alpha
 
 
 class ColorPicker(QDialog):
+
     def __init__(self, lightTheme=False, useAlpha=False):
         super(ColorPicker, self).__init__()
 
@@ -96,7 +97,8 @@ class ColorPicker(QDialog):
         self.setRGB(lc)
         self.rgbChanged()
         r, g, b = lc
-        self.ui.lastcolor_vis.setStyleSheet(f"background-color: rgb({r},{g},{b})")
+        self.ui.lastcolor_vis.setStyleSheet(
+            f"background-color: rgb({r},{g},{b})")
 
         if self.exec_():
             r, g, b = self.hsv2rgb(self.color)
@@ -219,7 +221,7 @@ class ColorPicker(QDialog):
             hex += "0" * (6 - len(hex))
         elif len(hex) > 6:
             hex = hex[0:6]
-        rgb = tuple(int(hex[i : i + 2], 16) for i in (0, 2, 4))
+        rgb = tuple(int(hex[i:i + 2], 16) for i in (0, 2, 4))
         return rgb
 
     def rgb2hex(self, r_or_color, g=0, b=0, a=0):

@@ -30,10 +30,8 @@ def _iter_nodes_for_param(param_name):
         if start <= name.start_pos < end:
             # Is used in the function
             argument = name.parent
-            if (
-                argument.type == "argument"
-                and argument.children[0] == "*" * param_name.star_count
-            ):
+            if (argument.type == "argument"
+                    and argument.children[0] == "*" * param_name.star_count):
                 trailer = search_ancestor(argument, "trailer")
                 if trailer is not None:  # Make sure we're in a function
                     context = execution_context.create_context(trailer)
@@ -56,11 +54,8 @@ def _goes_to_param_name(param_name, context, potential_name):
     from jedi.inference.names import TreeNameDefinition
 
     found = TreeNameDefinition(context, potential_name).goto()
-    return any(
-        param_name.parent_context == p.parent_context
-        and param_name.start_pos == p.start_pos
-        for p in found
-    )
+    return any(param_name.parent_context == p.parent_context
+               and param_name.start_pos == p.start_pos for p in found)
 
 
 def _to_callables(context, trailer):
@@ -70,7 +65,7 @@ def _to_callables(context, trailer):
     index = atom_expr.children[0] == "await"
     # Infer atom first
     values = context.infer_node(atom_expr.children[index])
-    for trailer2 in atom_expr.children[index + 1 :]:
+    for trailer2 in atom_expr.children[index + 1:]:
         if trailer == trailer2:
             break
         values = infer_trailer(context, values, trailer2)
@@ -133,7 +128,8 @@ def process_params(param_names, star_count=3):  # default means both * and **
             if star_count == 1:
                 yield ParamNameFixedKind(p, Parameter.POSITIONAL_ONLY)
             elif star_count == 2:
-                kw_only_names.append(ParamNameFixedKind(p, Parameter.KEYWORD_ONLY))
+                kw_only_names.append(
+                    ParamNameFixedKind(p, Parameter.KEYWORD_ONLY))
             else:
                 used_names.add(p.string_name)
                 yield p
@@ -156,12 +152,11 @@ def process_params(param_names, star_count=3):  # default means both * and **
                 found_kwarg_signature = True
             args_for_this_func = []
             for p in process_params(
-                list(
-                    _remove_given_params(
-                        arguments, signature.get_param_names(resolve_stars=False)
-                    )
-                ),
-                new_star_count,
+                    list(
+                        _remove_given_params(
+                            arguments,
+                            signature.get_param_names(resolve_stars=False))),
+                    new_star_count,
             ):
                 if p.get_kind() == Parameter.VAR_KEYWORD:
                     kwarg_names.append(p)
@@ -192,12 +187,11 @@ def process_params(param_names, star_count=3):  # default means both * and **
         for signature in func.get_signatures():
             found_kwarg_signature = True
             for p in process_params(
-                list(
-                    _remove_given_params(
-                        arguments, signature.get_param_names(resolve_stars=False)
-                    )
-                ),
-                star_count=2,
+                    list(
+                        _remove_given_params(
+                            arguments,
+                            signature.get_param_names(resolve_stars=False))),
+                    star_count=2,
             ):
                 if p.get_kind() == Parameter.VAR_KEYWORD:
                     kwarg_names.append(p)
@@ -217,6 +211,7 @@ def process_params(param_names, star_count=3):  # default means both * and **
 
 
 class ParamNameFixedKind(ParamNameWrapper):
+
     def __init__(self, param_name, new_kind):
         super().__init__(param_name)
         self._new_kind = new_kind

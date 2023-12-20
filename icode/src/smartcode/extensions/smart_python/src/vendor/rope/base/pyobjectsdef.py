@@ -24,13 +24,15 @@ except NameError:
 
 
 class PyFunction(pyobjects.PyFunction):
+
     def __init__(self, pycore, ast_node, parent):
         rope.base.pyobjects.AbstractFunction.__init__(self)
-        rope.base.pyobjects.PyDefinedObject.__init__(self, pycore, ast_node, parent)
+        rope.base.pyobjects.PyDefinedObject.__init__(self, pycore, ast_node,
+                                                     parent)
         self.arguments = self.ast_node.args
         self.parameter_pyobjects = pynames._Inferred(
-            self._infer_parameters, self.get_module()._get_concluded_data()
-        )
+            self._infer_parameters,
+            self.get_module()._get_concluded_data())
         self.returned = pynames._Inferred(self._infer_returned)
         self.parameter_pynames = None
 
@@ -41,7 +43,8 @@ class PyFunction(pyobjects.PyFunction):
         return {}
 
     def _create_scope(self):
-        return rope.base.pyscopes.FunctionScope(self.pycore, self, _FunctionVisitor)
+        return rope.base.pyscopes.FunctionScope(self.pycore, self,
+                                                _FunctionVisitor)
 
     def _infer_parameters(self):
         pyobjects = rope.base.oi.soi.infer_parameter_objects(self)
@@ -85,8 +88,7 @@ class PyFunction(pyobjects.PyFunction):
     def get_param_names(self, special_args=True):
         # TODO: handle tuple parameters
         result = [
-            pycompat.get_ast_arg_arg(node)
-            for node in self.arguments.args
+            pycompat.get_ast_arg_arg(node) for node in self.arguments.args
             if isinstance(node, pycompat.ast_arg_type)
         ]
         if special_args:
@@ -123,22 +125,25 @@ class PyFunction(pyobjects.PyFunction):
 
 
 class PyComprehension(pyobjects.PyComprehension):
+
     def __init__(self, pycore, ast_node, parent):
         self.visitor_class = _ComprehensionVisitor
         rope.base.pyobjects.PyObject.__init__(self, type_="Comp")
-        rope.base.pyobjects.PyDefinedObject.__init__(self, pycore, ast_node, parent)
+        rope.base.pyobjects.PyDefinedObject.__init__(self, pycore, ast_node,
+                                                     parent)
 
     def _create_scope(self):
-        return rope.base.pyscopes.ComprehensionScope(
-            self.pycore, self, _ComprehensionVisitor
-        )
+        return rope.base.pyscopes.ComprehensionScope(self.pycore, self,
+                                                     _ComprehensionVisitor)
 
 
 class PyClass(pyobjects.PyClass):
+
     def __init__(self, pycore, ast_node, parent):
         self.visitor_class = _ClassVisitor
         rope.base.pyobjects.AbstractClass.__init__(self)
-        rope.base.pyobjects.PyDefinedObject.__init__(self, pycore, ast_node, parent)
+        rope.base.pyobjects.PyDefinedObject.__init__(self, pycore, ast_node,
+                                                     parent)
         self.parent = parent
         self._superclasses = self.get_module()._get_concluded_data()
 
@@ -159,12 +164,10 @@ class PyClass(pyobjects.PyClass):
     def _get_bases(self):
         result = []
         for base_name in self.ast_node.bases:
-            base = rope.base.evaluate.eval_node(self.parent.get_scope(), base_name)
-            if (
-                base is not None
-                and base.get_object().get_type()
-                == rope.base.pyobjects.get_base_type("Type")
-            ):
+            base = rope.base.evaluate.eval_node(self.parent.get_scope(),
+                                                base_name)
+            if (base is not None and base.get_object().get_type()
+                    == rope.base.pyobjects.get_base_type("Type")):
                 result.append(base.get_object())
         return result
 
@@ -173,6 +176,7 @@ class PyClass(pyobjects.PyClass):
 
 
 class PyModule(pyobjects.PyModule):
+
     def __init__(self, pycore, source=None, resource=None, force_errors=False):
         ignore = pycore.project.prefs.get("ignore_syntax_errors", False)
         syntax_errors = force_errors or not ignore
@@ -239,13 +243,13 @@ class PyModule(pyobjects.PyModule):
 
 
 class PyPackage(pyobjects.PyPackage):
+
     def __init__(self, pycore, resource=None, force_errors=False):
         self.resource = resource
         init_dot_py = self._get_init_dot_py()
         if init_dot_py is not None:
             ast_node = pycore.project.get_pymodule(
-                init_dot_py, force_errors=force_errors
-            ).get_ast()
+                init_dot_py, force_errors=force_errors).get_ast()
         else:
             ast_node = ast.parse("\n")
         super(PyPackage, self).__init__(pycore, ast_node, resource)
@@ -281,7 +285,8 @@ class PyPackage(pyobjects.PyPackage):
         return result
 
     def _get_init_dot_py(self):
-        if self.resource is not None and self.resource.has_child("__init__.py"):
+        if self.resource is not None and self.resource.has_child(
+                "__init__.py"):
             return self.resource.get_child("__init__.py")
         else:
             return None
@@ -297,6 +302,7 @@ class PyPackage(pyobjects.PyPackage):
 
 
 class _AnnAssignVisitor(object):
+
     def __init__(self, scope_visitor):
         self.scope_visitor = scope_visitor
         self.assigned_ast = None
@@ -312,9 +318,9 @@ class _AnnAssignVisitor(object):
         self.scope_visitor._assigned(name, assignment)
 
     def _Name(self, node):
-        assignment = pynames.AssignmentValue(
-            self.assigned_ast, assign_type=True, type_hint=self.type_hint
-        )
+        assignment = pynames.AssignmentValue(self.assigned_ast,
+                                             assign_type=True,
+                                             type_hint=self.type_hint)
         self._assigned(node.id, assignment)
 
     def _Tuple(self, node):
@@ -339,6 +345,7 @@ class _AnnAssignVisitor(object):
 
 
 class _ExpressionVisitor(object):
+
     def __init__(self, scope_visitor):
         self.scope_visitor = scope_visitor
 
@@ -346,9 +353,8 @@ class _ExpressionVisitor(object):
         self.scope_visitor._assigned(name, assignment)
 
     def _GeneratorExp(self, node):
-        list_comp = PyComprehension(
-            self.scope_visitor.pycore, node, self.scope_visitor.owner_object
-        )
+        list_comp = PyComprehension(self.scope_visitor.pycore, node,
+                                    self.scope_visitor.owner_object)
         self.scope_visitor.defineds.append(list_comp)
 
     def _SetComp(self, node):
@@ -366,6 +372,7 @@ class _ExpressionVisitor(object):
 
 
 class _AssignVisitor(object):
+
     def __init__(self, scope_visitor):
         self.scope_visitor = scope_visitor
         self.assigned_ast = None
@@ -404,6 +411,7 @@ class _AssignVisitor(object):
 
 
 class _ScopeVisitor(_ExpressionVisitor):
+
     def __init__(self, pycore, owner_object):
         _ExpressionVisitor.__init__(self, scope_visitor=self)
         self.pycore = pycore
@@ -429,19 +437,16 @@ class _ScopeVisitor(_ExpressionVisitor):
                 if isinstance(self, _ClassVisitor):
                     type_ = rope.base.builtins.Property(pyfunction)
                     arg = pynames.UnboundName(
-                        rope.base.pyobjects.PyObject(self.owner_object)
-                    )
+                        rope.base.pyobjects.PyObject(self.owner_object))
 
                     def _eval(type_=type_, arg=arg):
                         return type_.get_property_object(
-                            arguments.ObjectArguments([arg])
-                        )
+                            arguments.ObjectArguments([arg]))
 
                     lineno = utils.guess_def_lineno(self.get_module(), node)
 
                     self.names[node.name] = pynames.EvaluatedName(
-                        _eval, module=self.get_module(), lineno=lineno
-                    )
+                        _eval, module=self.get_module(), lineno=lineno)
                     break
         else:
             self.names[node.name] = pynames.DefinedName(pyfunction)
@@ -461,7 +466,9 @@ class _ScopeVisitor(_ExpressionVisitor):
 
     def _For(self, node):
         names = self._update_evaluated(
-            node.target, node.iter, ".__iter__().next()"  # noqa
+            node.target,
+            node.iter,
+            ".__iter__().next()"  # noqa
         )
         for child in node.body + node.orelse:
             ast.walk(child, self)
@@ -478,28 +485,30 @@ class _ScopeVisitor(_ExpressionVisitor):
                 pyname.assignments.append(assignment)
             self.names[name] = pyname
 
-    def _update_evaluated(
-        self, targets, assigned, evaluation="", eval_type=False, type_hint=None
-    ):
+    def _update_evaluated(self,
+                          targets,
+                          assigned,
+                          evaluation="",
+                          eval_type=False,
+                          type_hint=None):
         result = {}
         if isinstance(targets, str):
-            assignment = pynames.AssignmentValue(assigned, [], evaluation, eval_type)
+            assignment = pynames.AssignmentValue(assigned, [], evaluation,
+                                                 eval_type)
             self._assigned(targets, assignment)
         else:
             names = astutils.get_name_levels(targets)
             for name, levels in names:
-                assignment = pynames.AssignmentValue(
-                    assigned, levels, evaluation, eval_type
-                )
+                assignment = pynames.AssignmentValue(assigned, levels,
+                                                     evaluation, eval_type)
                 self._assigned(name, assignment)
         return result
 
     def _With(self, node):
         for item in pycompat.get_ast_with_items(node):
             if item.optional_vars:
-                self._update_evaluated(
-                    item.optional_vars, item.context_expr, ".__enter__()"
-                )
+                self._update_evaluated(item.optional_vars, item.context_expr,
+                                       ".__enter__()")
         for child in node.body:
             ast.walk(child, self)
 
@@ -526,11 +535,13 @@ class _ScopeVisitor(_ExpressionVisitor):
             alias = import_pair.asname
             first_package = module_name.split(".")[0]
             if alias is not None:
-                imported = pynames.ImportedModule(self.get_module(), module_name)
+                imported = pynames.ImportedModule(self.get_module(),
+                                                  module_name)
                 if not self._is_ignored_import(imported):
                     self.names[alias] = imported
             else:
-                imported = pynames.ImportedModule(self.get_module(), first_package)
+                imported = pynames.ImportedModule(self.get_module(),
+                                                  first_package)
                 if not self._is_ignored_import(imported):
                     self.names[first_package] = imported
 
@@ -538,12 +549,14 @@ class _ScopeVisitor(_ExpressionVisitor):
         level = 0
         if node.level:
             level = node.level
-        imported_module = pynames.ImportedModule(self.get_module(), node.module, level)
+        imported_module = pynames.ImportedModule(self.get_module(),
+                                                 node.module, level)
         if self._is_ignored_import(imported_module):
             return
         if len(node.names) == 1 and node.names[0].name == "*":
             if isinstance(self.owner_object, PyModule):
-                self.owner_object.star_imports.append(StarImport(imported_module))
+                self.owner_object.star_imports.append(
+                    StarImport(imported_module))
         else:
             for imported_name in node.names:
                 imported = imported_name.name
@@ -551,15 +564,13 @@ class _ScopeVisitor(_ExpressionVisitor):
                 if alias is not None:
                     imported = alias
                 self.names[imported] = pynames.ImportedName(
-                    imported_module, imported_name.name
-                )
+                    imported_module, imported_name.name)
 
     def _is_ignored_import(self, imported_module):
         if not self.pycore.project.prefs.get("ignore_bad_imports", False):
             return False
-        return not isinstance(
-            imported_module.get_object(), rope.base.pyobjects.AbstractModule
-        )
+        return not isinstance(imported_module.get_object(),
+                              rope.base.pyobjects.AbstractModule)
 
     def _Global(self, node):
         module = self.get_module()
@@ -573,6 +584,7 @@ class _ScopeVisitor(_ExpressionVisitor):
 
 
 class _ComprehensionVisitor(_ScopeVisitor):
+
     def _comprehension(self, node):
         ast.walk(node.target, self)
         ast.walk(node.iter, self)
@@ -582,15 +594,18 @@ class _ComprehensionVisitor(_ScopeVisitor):
             self.names[node.id] = self._get_pyobject(node)
 
     def _get_pyobject(self, node):
-        return pynames.AssignedName(lineno=node.lineno, module=self.get_module())
+        return pynames.AssignedName(lineno=node.lineno,
+                                    module=self.get_module())
 
 
 class _GlobalVisitor(_ScopeVisitor):
+
     def __init__(self, pycore, owner_object):
         super(_GlobalVisitor, self).__init__(pycore, owner_object)
 
 
 class _ClassVisitor(_ScopeVisitor):
+
     def __init__(self, pycore, owner_object):
         super(_ClassVisitor, self).__init__(pycore, owner_object)
 
@@ -600,13 +615,15 @@ class _ClassVisitor(_ScopeVisitor):
             first = node.args.args[0]
             new_visitor = None
             if isinstance(first, pycompat.ast_arg_type):
-                new_visitor = _ClassInitVisitor(self, pycompat.get_ast_arg_arg(first))
+                new_visitor = _ClassInitVisitor(
+                    self, pycompat.get_ast_arg_arg(first))
             if new_visitor is not None:
                 for child in ast.get_child_nodes(node):
                     ast.walk(child, new_visitor)
 
 
 class _FunctionVisitor(_ScopeVisitor):
+
     def __init__(self, pycore, owner_object):
         super(_FunctionVisitor, self).__init__(pycore, owner_object)
         self.returned_asts = []
@@ -623,6 +640,7 @@ class _FunctionVisitor(_ScopeVisitor):
 
 
 class _ClassInitVisitor(_AssignVisitor):
+
     def __init__(self, scope_visitor, self_name):
         super(_ClassInitVisitor, self).__init__(scope_visitor)
         self.self_name = self_name
@@ -630,17 +648,16 @@ class _ClassInitVisitor(_AssignVisitor):
     def _Attribute(self, node):
         if not isinstance(node.ctx, ast.Store):
             return
-        if isinstance(node.value, ast.Name) and node.value.id == self.self_name:
+        if isinstance(node.value,
+                      ast.Name) and node.value.id == self.self_name:
             if node.attr not in self.scope_visitor.names:
                 self.scope_visitor.names[node.attr] = pynames.AssignedName(
-                    lineno=node.lineno, module=self.scope_visitor.get_module()
-                )
+                    lineno=node.lineno, module=self.scope_visitor.get_module())
             if self.assigned_ast is not None:
                 pyname = self.scope_visitor.names[node.attr]
                 if isinstance(pyname, pynames.AssignedName):
                     pyname.assignments.append(
-                        pynames.AssignmentValue(self.assigned_ast)
-                    )
+                        pynames.AssignmentValue(self.assigned_ast))
 
     def _Tuple(self, node):
         if not isinstance(node.ctx, ast.Store):
@@ -665,6 +682,7 @@ class _ClassInitVisitor(_AssignVisitor):
 
 
 class StarImport(object):
+
     def __init__(self, imported_module):
         self.imported_module = imported_module
 

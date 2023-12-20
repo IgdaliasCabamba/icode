@@ -31,12 +31,11 @@ class CodeDoctorCore(QObject):
         self.parent.on_get_analyze.connect(self.do_analyze)
 
     def format_diagnosis(self, results, editor):
-        code_metrics = IStandardItem(
-            self.parent.icons.get_icon("code-metric"), "CODE METRICS", None, None
-        )
+        code_metrics = IStandardItem(self.parent.icons.get_icon("code-metric"),
+                                     "CODE METRICS", None, None)
         code_errors = IStandardItem(
-            self.parent.icons.get_icon("code-syntax-error"), "CODE ERRORS", None, None
-        )
+            self.parent.icons.get_icon("code-syntax-error"), "CODE ERRORS",
+            None, None)
 
         if results["analyze"]:
             items_metrics_list = [
@@ -95,14 +94,16 @@ class CodeDoctorCore(QObject):
                     self.parent.icons.get_icon("code-error"),
                     f"{error.get_message()}",
                     f"from ({error.line},{error.column}) to ({error.until_line+1},{error.until_column})",
-                    {"editor": editor, "error": error},
+                    {
+                        "editor": editor,
+                        "error": error
+                    },
                 )
                 code_errors.appendRow(row)
 
         else:
-            row = IStandardItem(
-                self.parent.icons.get_icon("good"), f"No errors found", None, None
-            )
+            row = IStandardItem(self.parent.icons.get_icon("good"),
+                                f"No errors found", None, None)
             code_errors.appendRow(row)
 
         return [code_metrics, code_errors]

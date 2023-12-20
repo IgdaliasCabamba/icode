@@ -181,9 +181,11 @@ class CodeTree(QTreeView):
                             index_from,
                             line_to,
                             index_to,
-                        ) = getfn.get_selection_from_item_data(editor, name, line)
+                        ) = getfn.get_selection_from_item_data(
+                            editor, name, line)
                         editor.setCursorPosition(line_from + 1, index_to)
-                        editor.setSelection(line_from, index_from, line_to, index_to)
+                        editor.setSelection(line_from, index_from, line_to,
+                                            index_to)
                         editor.replaceSelectedText(item.text())
 
                         item.item_data["name"] = editor.text(line - 1)
@@ -195,7 +197,8 @@ class CodeTree(QTreeView):
                         index_to,
                     ) = getfn.get_selection_from_item_data(editor, name, line)
                     editor.setCursorPosition(line_from + 1, index_to)
-                    editor.setSelection(line_from, index_from, line_to, index_to)
+                    editor.setSelection(line_from, index_from, line_to,
+                                        index_to)
 
             except Exception as e:
                 print(e)
@@ -208,33 +211,28 @@ class CodeTree(QTreeView):
         if file is not None:
             file_name = self.file.name
 
-        self.doc = IStandardItem(
-            self.icons.get_icon("file"), f"DOCUMENT:{file_name}", f"{file}", None, 0
-        )
+        self.doc = IStandardItem(self.icons.get_icon("file"),
+                                 f"DOCUMENT:{file_name}", f"{file}", None, 0)
         self.doc.setCheckable(False)
         self.model.appendRow(self.doc)
 
-        self.modules = IStandardItem(
-            self.icons.get_icon("import"), "MODULES", None, None, 0
-        )
+        self.modules = IStandardItem(self.icons.get_icon("import"), "MODULES",
+                                     None, None, 0)
         self.modules.setCheckable(False)
         self.model.appendRow(self.modules)
 
-        self.classes = IStandardItem(
-            self.icons.get_icon("class"), "CLASSES", None, None, 0
-        )
+        self.classes = IStandardItem(self.icons.get_icon("class"), "CLASSES",
+                                     None, None, 0)
         self.classes.setCheckable(False)
         self.model.appendRow(self.classes)
 
-        self.functions = IStandardItem(
-            self.icons.get_icon("function"), "FUNCTIONS", None, None, 0
-        )
+        self.functions = IStandardItem(self.icons.get_icon("function"),
+                                       "FUNCTIONS", None, None, 0)
         self.functions.setCheckable(False)
         self.model.appendRow(self.functions)
 
-        self.variables = IStandardItem(
-            self.icons.get_icon("global_variable"), "VARIABLES", None, None, 0
-        )
+        self.variables = IStandardItem(self.icons.get_icon("global_variable"),
+                                       "VARIABLES", None, None, 0)
         self.model.appendRow(self.variables)
 
     def build_tree(self, editor):

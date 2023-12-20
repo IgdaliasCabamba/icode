@@ -18,9 +18,13 @@ def _add_argument_issue(error_name, lazy_value, message):
 
 
 class ExecutedParamName(ParamName):
-    def __init__(
-        self, function_value, arguments, param_node, lazy_value, is_default=False
-    ):
+
+    def __init__(self,
+                 function_value,
+                 arguments,
+                 param_node,
+                 lazy_value,
+                 is_default=False):
         super().__init__(function_value, param_node.name, arguments=arguments)
         self._lazy_value = lazy_value
         self._is_default = is_default
@@ -32,7 +36,8 @@ class ExecutedParamName(ParamName):
         if self._is_default:
             return True
         argument_values = self.infer().py__class__()
-        if self.get_kind() in (Parameter.VAR_POSITIONAL, Parameter.VAR_KEYWORD):
+        if self.get_kind() in (Parameter.VAR_POSITIONAL,
+                               Parameter.VAR_KEYWORD):
             return True
         annotations = self.infer_annotation(execute_annotation=False)
         if not annotations:
@@ -40,10 +45,8 @@ class ExecutedParamName(ParamName):
             # that the signature matches.
             return True
         matches = any(
-            c1.is_sub_class_of(c2)
-            for c1 in argument_values
-            for c2 in annotations.gather_annotation_classes()
-        )
+            c1.is_sub_class_of(c2) for c1 in argument_values
+            for c2 in annotations.gather_annotation_classes())
         debug.dbg(
             "param compare %s: %s <=> %s",
             matches,
@@ -85,10 +88,9 @@ def get_executed_param_names_and_issues(function_value, arguments):
         if arguments.get_calling_nodes():
             # There might not be a valid calling node so check for that first.
             issues.append(
-                _add_argument_issue(
-                    "type-error-too-many-arguments", argument, message=m
-                )
-            )
+                _add_argument_issue("type-error-too-many-arguments",
+                                    argument,
+                                    message=m))
         else:
             issues.append(None)
             debug.warning("non-public warning: %s", m)
@@ -129,8 +131,7 @@ def get_executed_param_names_and_issues(function_value, arguments):
                     had_multiple_value_error = True
                     m = (
                         "TypeError: %s() got multiple values for keyword argument '%s'."
-                        % (funcdef.name, key)
-                    )
+                        % (funcdef.name, key))
                     for contextualized_node in arguments.get_calling_nodes():
                         issues.append(
                             analysis.add(
@@ -138,12 +139,11 @@ def get_executed_param_names_and_issues(function_value, arguments):
                                 "type-error-multiple-values",
                                 contextualized_node.node,
                                 message=m,
-                            )
-                        )
+                            ))
                 else:
-                    keys_used[key] = ExecutedParamName(
-                        function_value, arguments, key_param, argument
-                    )
+                    keys_used[key] = ExecutedParamName(function_value,
+                                                       arguments, key_param,
+                                                       argument)
             key, argument = next(var_arg_iterator, (None, None))
 
         try:
@@ -163,15 +163,15 @@ def get_executed_param_names_and_issues(function_value, arguments):
                         var_arg_iterator.push_back((key, argument))
                         break
                     lazy_value_list.append(argument)
-            seq = iterable.FakeTuple(function_value.inference_state, lazy_value_list)
+            seq = iterable.FakeTuple(function_value.inference_state,
+                                     lazy_value_list)
             result_arg = LazyKnownValue(seq)
         elif param.star_count == 2:
             if argument is not None:
                 too_many_args(argument)
             # **kwargs param
-            dct = iterable.FakeDict(
-                function_value.inference_state, dict(non_matching_keys)
-            )
+            dct = iterable.FakeDict(function_value.inference_state,
+                                    dict(non_matching_keys))
             result_arg = LazyKnownValue(dct)
             non_matching_keys = {}
         else:
@@ -181,27 +181,30 @@ def get_executed_param_names_and_issues(function_value, arguments):
                 if param.default is None:
                     result_arg = LazyUnknownValue()
                     if not keys_only:
-                        for contextualized_node in arguments.get_calling_nodes():
-                            m = _error_argument_count(funcdef, len(unpacked_va))
+                        for contextualized_node in arguments.get_calling_nodes(
+                        ):
+                            m = _error_argument_count(funcdef,
+                                                      len(unpacked_va))
                             issues.append(
                                 analysis.add(
                                     contextualized_node.context,
                                     "type-error-too-few-arguments",
                                     contextualized_node.node,
                                     message=m,
-                                )
-                            )
+                                ))
                 else:
-                    result_arg = LazyTreeValue(default_param_context, param.default)
+                    result_arg = LazyTreeValue(default_param_context,
+                                               param.default)
                     is_default = True
             else:
                 result_arg = argument
 
         result_params.append(
-            ExecutedParamName(
-                function_value, arguments, param, result_arg, is_default=is_default
-            )
-        )
+            ExecutedParamName(function_value,
+                              arguments,
+                              param,
+                              result_arg,
+                              is_default=is_default))
         if not isinstance(result_arg, LazyUnknownValue):
             keys_used[param.name.value] = result_params[-1]
 
@@ -212,12 +215,8 @@ def get_executed_param_names_and_issues(function_value, arguments):
         for k in set(param_dict) - set(keys_used):
             param = param_dict[k]
 
-            if not (
-                non_matching_keys
-                or had_multiple_value_error
-                or param.star_count
-                or param.default
-            ):
+            if not (non_matching_keys or had_multiple_value_error
+                    or param.star_count or param.default):
                 # add a warning only if there's not another one.
                 for contextualized_node in arguments.get_calling_nodes():
                     m = _error_argument_count(funcdef, len(unpacked_va))
@@ -227,8 +226,7 @@ def get_executed_param_names_and_issues(function_value, arguments):
                             "type-error-too-few-arguments",
                             contextualized_node.node,
                             message=m,
-                        )
-                    )
+                        ))
 
     for key, lazy_value in non_matching_keys.items():
         m = "TypeError: %s() got an unexpected keyword argument '%s'." % (
@@ -236,8 +234,9 @@ def get_executed_param_names_and_issues(function_value, arguments):
             key,
         )
         issues.append(
-            _add_argument_issue("type-error-keyword-argument", lazy_value, message=m)
-        )
+            _add_argument_issue("type-error-keyword-argument",
+                                lazy_value,
+                                message=m))
 
     remaining_arguments = list(var_arg_iterator)
     if remaining_arguments:

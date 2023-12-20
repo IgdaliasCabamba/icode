@@ -10,8 +10,8 @@ import rope.base.pyobjects
 from rope.base import evaluate, utils, arguments
 from rope.base.oi.type_hinting.factory import get_type_hinting_factory
 
-
-_ignore_inferred = utils.ignore_exception(rope.base.pyobjects.IsBeingInferredError)
+_ignore_inferred = utils.ignore_exception(
+    rope.base.pyobjects.IsBeingInferredError)
 
 
 @_ignore_inferred
@@ -24,15 +24,15 @@ def infer_returned_object(pyfunction, args):
     result = _infer_returned(pyfunction, args)
     if result is not None:
         if args and pyfunction.get_module().get_resource() is not None:
-            params = args.get_arguments(pyfunction.get_param_names(special_args=False))
+            params = args.get_arguments(
+                pyfunction.get_param_names(special_args=False))
             object_info.function_called(pyfunction, params, result)
         return result
     result = object_info.get_returned(pyfunction, args)
     if result is not None:
         return result
     hint_return = get_type_hinting_factory(
-        pyfunction.pycore.project
-    ).make_return_provider()
+        pyfunction.pycore.project).make_return_provider()
     type_ = hint_return(pyfunction)
     if type_ is not None:
         return rope.base.pyobjects.PyObject(type_)
@@ -69,10 +69,8 @@ def infer_assigned_object(pyname):
         return
     for assignment in reversed(pyname.assignments):
         result = _infer_assignment(assignment, pyname.module)
-        if (
-            isinstance(result, rope.base.builtins.BuiltinUnknown)
-            and result.get_name() == "NotImplementedType"
-        ):
+        if (isinstance(result, rope.base.builtins.BuiltinUnknown)
+                and result.get_name() == "NotImplementedType"):
             break
         elif result == rope.base.pyobjects.get_unknown():
             break
@@ -80,8 +78,7 @@ def infer_assigned_object(pyname):
             return result
 
     hint_assignment = get_type_hinting_factory(
-        pyname.module.pycore.project
-    ).make_assignment_provider()
+        pyname.module.pycore.project).make_assignment_provider()
     hinting_result = hint_assignment(pyname)
     if hinting_result is not None:
         return rope.base.pyobjects.PyObject(hinting_result)
@@ -105,8 +102,7 @@ def _infer_returned(pyobject, args):
         # does not come from a good call site
         pyobject.get_scope().invalidate_data()
         pyobject._set_parameter_pyobjects(
-            args.get_arguments(pyobject.get_param_names(special_args=False))
-        )
+            args.get_arguments(pyobject.get_param_names(special_args=False)))
     scope = pyobject.get_scope()
     if not scope._get_returned_asts():
         return
@@ -130,7 +126,8 @@ def _infer_returned(pyobject, args):
 def _parameter_objects(pyobject):
     result = []
     params = pyobject.get_param_names(special_args=False)
-    hint_param = get_type_hinting_factory(pyobject.pycore.project).make_param_provider()
+    hint_param = get_type_hinting_factory(
+        pyobject.pycore.project).make_param_provider()
     for name in params:
         type_ = hint_param(pyobject, name)
         if type_ is not None:
@@ -181,16 +178,12 @@ def _follow_pyname(assignment, pymodule, lineno=None):
     pyname = evaluate.eval_node(holding_scope, assign_node)
     if pyname is not None:
         result = pyname.get_object()
-        if (
-            isinstance(result.get_type(), rope.base.builtins.Property)
-            and holding_scope.get_kind() == "Class"
-        ):
+        if (isinstance(result.get_type(), rope.base.builtins.Property)
+                and holding_scope.get_kind() == "Class"):
             arg = rope.base.pynames.UnboundName(
-                rope.base.pyobjects.PyObject(holding_scope.pyobject)
-            )
+                rope.base.pyobjects.PyObject(holding_scope.pyobject))
             return pyname, result.get_type().get_property_object(
-                arguments.ObjectArguments([arg])
-            )
+                arguments.ObjectArguments([arg]))
         return pyname, result
 
 

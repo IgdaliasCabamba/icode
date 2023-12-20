@@ -23,6 +23,7 @@ sentinel = object()
 
 
 class HelperValueMixin:
+
     def get_root_context(self):
         value = self
         if value.parent_context is None:
@@ -39,7 +40,8 @@ class HelperValueMixin:
     def execute_with_values(self, *value_list):
         from jedi.inference.arguments import ValuesArguments
 
-        arguments = ValuesArguments([ValueSet([value]) for value in value_list])
+        arguments = ValuesArguments(
+            [ValueSet([value]) for value in value_list])
         return self.inference_state.execute(self, arguments)
 
     def execute_annotation(self):
@@ -51,8 +53,7 @@ class HelperValueMixin:
     def merge_types_of_iterate(self, contextualized_node=None, is_async=False):
         return ValueSet.from_sets(
             lazy_value.infer()
-            for lazy_value in self.iterate(contextualized_node, is_async)
-        )
+            for lazy_value in self.iterate(contextualized_node, is_async))
 
     def _get_value_filters(self, name_or_str):
         origin_scope = name_or_str if isinstance(name_or_str, Name) else None
@@ -72,9 +73,11 @@ class HelperValueMixin:
         debug.dbg("context.goto %s in (%s): %s", name_or_str, self, names)
         return names
 
-    def py__getattribute__(
-        self, name_or_str, name_context=None, position=None, analysis_errors=True
-    ):
+    def py__getattribute__(self,
+                           name_or_str,
+                           name_context=None,
+                           position=None,
+                           analysis_errors=True):
         """
         :param position: Position of the last statement -> tuple of line, column
         """
@@ -83,7 +86,8 @@ class HelperValueMixin:
         names = self.goto(name_or_str, name_context, analysis_errors)
         values = ValueSet.from_sets(name.infer() for name in names)
         if not values:
-            n = name_or_str.value if isinstance(name_or_str, Name) else name_or_str
+            n = name_or_str.value if isinstance(name_or_str,
+                                                Name) else name_or_str
             values = self.py__getattribute__alternatives(n)
 
         if not names and not values and analysis_errors:
@@ -110,25 +114,19 @@ class HelperValueMixin:
 
             # TODO if no __aiter__ values are there, error should be:
             # TypeError: 'async for' requires an object with __aiter__ method, got int
-            return iter(
-                [
-                    LazyKnownValues(
-                        self.py__getattribute__("__aiter__")
-                        .execute_with_values()
-                        .py__getattribute__("__anext__")
-                        .execute_with_values()
-                        .py__getattribute__("__await__")
-                        .execute_with_values()
-                        .py__stop_iteration_returns()
-                    )  # noqa: E124
-                ]
-            )
+            return iter([
+                LazyKnownValues(
+                    self.py__getattribute__("__aiter__").execute_with_values(
+                    ).py__getattribute__("__anext__").execute_with_values(
+                    ).py__getattribute__("__await__").execute_with_values().
+                    py__stop_iteration_returns())  # noqa: E124
+            ])
         return self.py__iter__(contextualized_node)
 
     def is_sub_class_of(self, class_value):
-        with debug.increase_indent_cm(
-            "subclass matching of %s <=> %s" % (self, class_value), color="BLUE"
-        ):
+        with debug.increase_indent_cm("subclass matching of %s <=> %s" %
+                                      (self, class_value),
+                                      color="BLUE"):
             for cls in self.py__mro__():
                 if cls.is_same_class(class_value):
                     debug.dbg("matched subclass True", color="BLUE")
@@ -243,7 +241,8 @@ class Value(HelperValueMixin):
         return default
 
     def execute_operation(self, other, operator):
-        debug.warning("%s not possible between %s and %s", operator, self, other)
+        debug.warning("%s not possible between %s and %s", operator, self,
+                      other)
         return NO_VALUES
 
     def py__call__(self, arguments):
@@ -277,8 +276,7 @@ class Value(HelperValueMixin):
 
     def _as_context(self):
         raise NotImplementedError(
-            "Not all values need to be converted to contexts: %s", self
-        )
+            "Not all values need to be converted to contexts: %s", self)
 
     @property
     def name(self):
@@ -322,13 +320,13 @@ def iterate_values(values, contextualized_node=None, is_async=False):
     Calls `iterate`, on all values but ignores the ordering and just returns
     all values that the iterate functions yield.
     """
-    return ValueSet.from_sets(
-        lazy_value.infer()
-        for lazy_value in values.iterate(contextualized_node, is_async=is_async)
-    )
+    return ValueSet.from_sets(lazy_value.infer()
+                              for lazy_value in values.iterate(
+                                  contextualized_node, is_async=is_async))
 
 
 class _ValueWrapperBase(HelperValueMixin):
+
     @safe_property
     def name(self):
         from jedi.inference.names import ValueName
@@ -352,6 +350,7 @@ class _ValueWrapperBase(HelperValueMixin):
 
 
 class LazyValueWrapper(_ValueWrapperBase):
+
     @safe_property
     @memoize_method
     def _wrapped_value(self):
@@ -366,6 +365,7 @@ class LazyValueWrapper(_ValueWrapperBase):
 
 
 class ValueWrapper(_ValueWrapperBase):
+
     def __init__(self, wrapped_value):
         self._wrapped_value = wrapped_value
 
@@ -374,6 +374,7 @@ class ValueWrapper(_ValueWrapperBase):
 
 
 class TreeValue(Value):
+
     def __init__(self, inference_state, parent_context, tree_node):
         super().__init__(inference_state, parent_context)
         self.tree_node = tree_node
@@ -383,6 +384,7 @@ class TreeValue(Value):
 
 
 class ContextualizedNode:
+
     def __init__(self, context, node):
         self.context = context
         self.node = node
@@ -394,7 +396,8 @@ class ContextualizedNode:
         return self.context.infer_node(self.node)
 
     def __repr__(self):
-        return "<%s: %s in %s>" % (self.__class__.__name__, self.node, self.context)
+        return "<%s: %s in %s>" % (self.__class__.__name__, self.node,
+                                   self.context)
 
 
 def _getitem(value, index_values, contextualized_node):
@@ -416,12 +419,14 @@ def _getitem(value, index_values, contextualized_node):
     # Therefore we now iterate through all the values and just take
     # all results.
     if unused_values or not index_values:
-        result |= value.py__getitem__(ValueSet(unused_values), contextualized_node)
+        result |= value.py__getitem__(ValueSet(unused_values),
+                                      contextualized_node)
     debug.dbg("py__getitem__ result: %s", result)
     return result
 
 
 class ValueSet:
+
     def __init__(self, iterable):
         self._set = frozenset(iterable)
         for value in iterable:
@@ -468,10 +473,10 @@ class ValueSet:
         return self.__class__(filter(filter_func, self._set))
 
     def __getattr__(self, name):
+
         def mapper(*args, **kwargs):
             return self.from_sets(
-                getattr(value, name)(*args, **kwargs) for value in self._set
-            )
+                getattr(value, name)(*args, **kwargs) for value in self._set)
 
         return mapper
 
@@ -491,31 +496,31 @@ class ValueSet:
         from jedi.inference.lazy_value import get_merged_lazy_value
 
         type_iters = [
-            c.iterate(contextualized_node, is_async=is_async) for c in self._set
+            c.iterate(contextualized_node, is_async=is_async)
+            for c in self._set
         ]
         for lazy_values in zip_longest(*type_iters):
-            yield get_merged_lazy_value([l for l in lazy_values if l is not None])
+            yield get_merged_lazy_value(
+                [l for l in lazy_values if l is not None])
 
     def execute(self, arguments):
         return ValueSet.from_sets(
-            c.inference_state.execute(c, arguments) for c in self._set
-        )
+            c.inference_state.execute(c, arguments) for c in self._set)
 
     def execute_with_values(self, *args, **kwargs):
         return ValueSet.from_sets(
-            c.execute_with_values(*args, **kwargs) for c in self._set
-        )
+            c.execute_with_values(*args, **kwargs) for c in self._set)
 
     def goto(self, *args, **kwargs):
         return reduce(add, [c.goto(*args, **kwargs) for c in self._set], [])
 
     def py__getattribute__(self, *args, **kwargs):
         return ValueSet.from_sets(
-            c.py__getattribute__(*args, **kwargs) for c in self._set
-        )
+            c.py__getattribute__(*args, **kwargs) for c in self._set)
 
     def get_item(self, *args, **kwargs):
-        return ValueSet.from_sets(_getitem(c, *args, **kwargs) for c in self._set)
+        return ValueSet.from_sets(
+            _getitem(c, *args, **kwargs) for c in self._set)
 
     def try_merge(self, function_name):
         value_set = self.__class__([])
@@ -529,7 +534,8 @@ class ValueSet:
         return value_set
 
     def gather_annotation_classes(self):
-        return ValueSet.from_sets([c.gather_annotation_classes() for c in self._set])
+        return ValueSet.from_sets(
+            [c.gather_annotation_classes() for c in self._set])
 
     def get_signatures(self):
         return [sig for c in self._set for sig in c.get_signatures()]
@@ -571,6 +577,7 @@ NO_VALUES = ValueSet([])
 
 
 def iterator_to_value_set(func):
+
     def wrapper(*args, **kwargs):
         return ValueSet(func(*args, **kwargs))
 

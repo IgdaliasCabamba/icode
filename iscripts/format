@@ -1,4 +1,0 @@
-#!/usr/bin/bash
-source ~/SmartCode/tools_env/bin/activate
-cd ~/SmartCode
-black icode/

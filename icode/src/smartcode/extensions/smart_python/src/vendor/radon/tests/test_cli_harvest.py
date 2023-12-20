@@ -16,21 +16,17 @@ BASE_CONFIG = Config(
     ipynb_cells=False,
 )
 
-CC_CONFIG = Config(
-    order=getattr(cc_mod, "SCORE"),
-    no_assert=False,
-    min="A",
-    max="F",
-    show_complexity=False,
-    show_closures=False,
-    average=True,
-    total_average=False,
-    **BASE_CONFIG.config_values
-)
+CC_CONFIG = Config(order=getattr(cc_mod, "SCORE"),
+                   no_assert=False,
+                   min="A",
+                   max="F",
+                   show_complexity=False,
+                   show_closures=False,
+                   average=True,
+                   total_average=False,
+                   **BASE_CONFIG.config_values)
 
-RAW_CONFIG = Config(
-    summary=True,
-)
+RAW_CONFIG = Config(summary=True, )
 
 MI_CONFIG = Config(
     multi=True,
@@ -144,7 +140,8 @@ def test_cc_gobble(cc_config, mocker):
     h.gobble(fobj)
 
     assert fobj.read.called
-    cc_mock.assert_called_with(mocker.sentinel.one, no_assert=cc_config.no_assert)
+    cc_mock.assert_called_with(mocker.sentinel.one,
+                               no_assert=cc_config.no_assert)
     sr_mock.assert_called_with([], order=cc_config.order)
 
 
@@ -153,9 +150,15 @@ def test_cc_to_dicts(cc_config, mocker):
     c2d_mock.side_effect = lambda i: i
     h = harvest.CCHarvester([], cc_config)
     sample_results = [
-        ("a", [{"rank": "A"}]),
-        ("b", [{"rank": "B"}]),
-        ("c", {"error": "An ERROR!"}),
+        ("a", [{
+            "rank": "A"
+        }]),
+        ("b", [{
+            "rank": "B"
+        }]),
+        ("c", {
+            "error": "An ERROR!"
+        }),
     ]
     h._results = sample_results
 
@@ -214,10 +217,14 @@ def test_cc_to_terminal(cc_config, mocker):
         cc_config.total_average,
     )
     assert results == [
-        ("a", ("mystr",), {"error": True}),
+        ("a", ("mystr", ), {
+            "error": True
+        }),
         ("b", (), {}),
-        (["res"], (), {"indent": 1}),
-        ("\n{0} blocks (classes, functions, methods) analyzed.", (3,), {}),
+        (["res"], (), {
+            "indent": 1
+        }),
+        ("\n{0} blocks (classes, functions, methods) analyzed.", (3, ), {}),
         (
             "Average complexity: {0}{1} ({2}){3}",
             ("<|A|>", "A", 3, "__R__"),
@@ -250,7 +257,9 @@ def test_raw_as_xml(raw_config):
 def test_raw_to_terminal(raw_config):
     h = harvest.RawHarvester([], raw_config)
     h._results = [
-        ("a", {"error": "mystr"}),
+        ("a", {
+            "error": "mystr"
+        }),
         (
             "b",
             {
@@ -290,55 +299,145 @@ def test_raw_to_terminal(raw_config):
     ]
 
     assert list(h.to_terminal()) == [
-        ("a", ("mystr",), {"error": True}),
+        ("a", ("mystr", ), {
+            "error": True
+        }),
         ("b", (), {}),
-        ("{0}: {1}", ("LOC", 24), {"indent": 1}),
-        ("{0}: {1}", ("LLOC", 27), {"indent": 1}),
-        ("{0}: {1}", ("SLOC", 15), {"indent": 1}),
-        ("{0}: {1}", ("Comments", 3), {"indent": 1}),
-        ("{0}: {1}", ("Single comments", 3), {"indent": 1}),
-        ("{0}: {1}", ("Multi", 3), {"indent": 1}),
-        ("{0}: {1}", ("Blank", 9), {"indent": 1}),
-        ("- Comment Stats", (), {"indent": 1}),
-        ("(C % L): {0:.0%}", (0.125,), {"indent": 2}),
-        ("(C % S): {0:.0%}", (0.2,), {"indent": 2}),
-        ("(C + M % L): {0:.0%}", (0.25,), {"indent": 2}),
+        ("{0}: {1}", ("LOC", 24), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("LLOC", 27), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("SLOC", 15), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Comments", 3), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Single comments", 3), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Multi", 3), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Blank", 9), {
+            "indent": 1
+        }),
+        ("- Comment Stats", (), {
+            "indent": 1
+        }),
+        ("(C % L): {0:.0%}", (0.125, ), {
+            "indent": 2
+        }),
+        ("(C % S): {0:.0%}", (0.2, ), {
+            "indent": 2
+        }),
+        ("(C + M % L): {0:.0%}", (0.25, ), {
+            "indent": 2
+        }),
         ("c", (), {}),
-        ("{0}: {1}", ("LOC", 24), {"indent": 1}),
-        ("{0}: {1}", ("LLOC", 27), {"indent": 1}),
-        ("{0}: {1}", ("SLOC", 15), {"indent": 1}),
-        ("{0}: {1}", ("Comments", 3), {"indent": 1}),
-        ("{0}: {1}", ("Single comments", 13), {"indent": 1}),
-        ("{0}: {1}", ("Multi", 3), {"indent": 1}),
-        ("{0}: {1}", ("Blank", 9), {"indent": 1}),
-        ("- Comment Stats", (), {"indent": 1}),
-        ("(C % L): {0:.0%}", (0.125,), {"indent": 2}),
-        ("(C % S): {0:.0%}", (0.2,), {"indent": 2}),
-        ("(C + M % L): {0:.0%}", (0.25,), {"indent": 2}),
+        ("{0}: {1}", ("LOC", 24), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("LLOC", 27), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("SLOC", 15), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Comments", 3), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Single comments", 13), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Multi", 3), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Blank", 9), {
+            "indent": 1
+        }),
+        ("- Comment Stats", (), {
+            "indent": 1
+        }),
+        ("(C % L): {0:.0%}", (0.125, ), {
+            "indent": 2
+        }),
+        ("(C % S): {0:.0%}", (0.2, ), {
+            "indent": 2
+        }),
+        ("(C + M % L): {0:.0%}", (0.25, ), {
+            "indent": 2
+        }),
         ("e", (), {}),
-        ("{0}: {1}", ("LOC", 0), {"indent": 1}),
-        ("{0}: {1}", ("LLOC", 0), {"indent": 1}),
-        ("{0}: {1}", ("SLOC", 0), {"indent": 1}),
-        ("{0}: {1}", ("Comments", 0), {"indent": 1}),
-        ("{0}: {1}", ("Single comments", 12), {"indent": 1}),
-        ("{0}: {1}", ("Multi", 0), {"indent": 1}),
-        ("{0}: {1}", ("Blank", 0), {"indent": 1}),
-        ("- Comment Stats", (), {"indent": 1}),
-        ("(C % L): {0:.0%}", (0.0,), {"indent": 2}),
-        ("(C % S): {0:.0%}", (0.0,), {"indent": 2}),
-        ("(C + M % L): {0:.0%}", (0.0,), {"indent": 2}),
+        ("{0}: {1}", ("LOC", 0), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("LLOC", 0), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("SLOC", 0), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Comments", 0), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Single comments", 12), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Multi", 0), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Blank", 0), {
+            "indent": 1
+        }),
+        ("- Comment Stats", (), {
+            "indent": 1
+        }),
+        ("(C % L): {0:.0%}", (0.0, ), {
+            "indent": 2
+        }),
+        ("(C % S): {0:.0%}", (0.0, ), {
+            "indent": 2
+        }),
+        ("(C + M % L): {0:.0%}", (0.0, ), {
+            "indent": 2
+        }),
         ("** Total **", (), {}),
-        ("{0}: {1}", ("LOC", 48), {"indent": 1}),
-        ("{0}: {1}", ("LLOC", 54), {"indent": 1}),
-        ("{0}: {1}", ("SLOC", 30), {"indent": 1}),
-        ("{0}: {1}", ("Comments", 6), {"indent": 1}),
-        ("{0}: {1}", ("Single comments", 28), {"indent": 1}),
-        ("{0}: {1}", ("Multi", 6), {"indent": 1}),
-        ("{0}: {1}", ("Blank", 18), {"indent": 1}),
-        ("- Comment Stats", (), {"indent": 1}),
-        ("(C % L): {0:.0%}", (0.125,), {"indent": 2}),
-        ("(C % S): {0:.0%}", (0.2,), {"indent": 2}),
-        ("(C + M % L): {0:.0%}", (0.25,), {"indent": 2}),
+        ("{0}: {1}", ("LOC", 48), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("LLOC", 54), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("SLOC", 30), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Comments", 6), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Single comments", 28), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Multi", 6), {
+            "indent": 1
+        }),
+        ("{0}: {1}", ("Blank", 18), {
+            "indent": 1
+        }),
+        ("- Comment Stats", (), {
+            "indent": 1
+        }),
+        ("(C % L): {0:.0%}", (0.125, ), {
+            "indent": 2
+        }),
+        ("(C % S): {0:.0%}", (0.2, ), {
+            "indent": 2
+        }),
+        ("(C + M % L): {0:.0%}", (0.25, ), {
+            "indent": 2
+        }),
     ]
 
 
@@ -361,10 +460,21 @@ def test_mi_as_json(mi_config, mocker):
     h = harvest.MIHarvester([], mi_config)
     h.config.min = "C"
     h._results = [
-        ("a", {"error": "mystr"}),
-        ("b", {"mi": 25, "rank": "A"}),
-        ("c", {"mi": 15, "rank": "B"}),
-        ("d", {"mi": 0, "rank": "C"}),
+        ("a", {
+            "error": "mystr"
+        }),
+        ("b", {
+            "mi": 25,
+            "rank": "A"
+        }),
+        ("c", {
+            "mi": 15,
+            "rank": "B"
+        }),
+        ("d", {
+            "mi": 0,
+            "rank": "C"
+        }),
     ]
 
     h.as_json()
@@ -385,14 +495,27 @@ def test_mi_to_terminal(mi_config, mocker):
 
     h = harvest.MIHarvester([], mi_config)
     h._results = [
-        ("a", {"error": "mystr"}),
-        ("b", {"mi": 25, "rank": "A"}),
-        ("c", {"mi": 15, "rank": "B"}),
-        ("d", {"mi": 0, "rank": "C"}),
+        ("a", {
+            "error": "mystr"
+        }),
+        ("b", {
+            "mi": 25,
+            "rank": "A"
+        }),
+        ("c", {
+            "mi": 15,
+            "rank": "B"
+        }),
+        ("d", {
+            "mi": 0,
+            "rank": "C"
+        }),
     ]
 
     assert list(h.to_terminal()) == [
-        ("a", ("mystr",), {"error": True}),
+        ("a", ("mystr", ), {
+            "error": True
+        }),
         ("{0} - {1}{2}{3}{4}", ("c", "<|B|>", "B", " (15.00)", "__R__"), {}),
         ("{0} - {1}{2}{3}{4}", ("d", "<|C|>", "C", " (0.00)", "__R__"), {}),
     ]

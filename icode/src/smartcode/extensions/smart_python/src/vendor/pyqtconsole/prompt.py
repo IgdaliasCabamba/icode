@@ -4,7 +4,6 @@ from qtpy.QtGui import QPainter
 
 
 class PromptArea(QWidget):
-
     """Widget that displays the prompts on the left of the input area."""
 
     def __init__(self, edit, get_text, highlighter):
@@ -58,7 +57,7 @@ class PromptArea(QWidget):
         painter.setFont(self.edit.font())
 
         for index, length, format in self.highlighter.highlight(text):
-            formats[index:index+length] = [format] * length
+            formats[index:index + length] = [format] * length
 
         for idx, (char, format) in enumerate(zip(text, formats)):
             rpos = len(text) - idx - 1
@@ -70,6 +69,5 @@ class PromptArea(QWidget):
 def calc_text_width(widget, text):
     """Estimate the width that the given text would take within the widget."""
     return (widget.fontMetrics().width(text) +
-            widget.fontMetrics().width('M') +
-            widget.contentsMargins().left() +
+            widget.fontMetrics().width('M') + widget.contentsMargins().left() +
             widget.contentsMargins().right())

@@ -4,31 +4,32 @@ import rope.base.pynames
 from rope.base import pyobjects, evaluate, astutils, arguments
 
 
-def analyze_module(pycore, pymodule, should_analyze, search_subscopes, followed_calls):
+def analyze_module(pycore, pymodule, should_analyze, search_subscopes,
+                   followed_calls):
     """Analyze `pymodule` for static object inference
 
     Analyzes scopes for collecting object information.  The analysis
     starts from inner scopes.
 
     """
-    _analyze_node(pycore, pymodule, should_analyze, search_subscopes, followed_calls)
+    _analyze_node(pycore, pymodule, should_analyze, search_subscopes,
+                  followed_calls)
 
 
-def _analyze_node(pycore, pydefined, should_analyze, search_subscopes, followed_calls):
+def _analyze_node(pycore, pydefined, should_analyze, search_subscopes,
+                  followed_calls):
     if search_subscopes(pydefined):
         for scope in pydefined.get_scope().get_scopes():
-            _analyze_node(
-                pycore, scope.pyobject, should_analyze, search_subscopes, followed_calls
-            )
+            _analyze_node(pycore, scope.pyobject, should_analyze,
+                          search_subscopes, followed_calls)
     if should_analyze(pydefined):
         new_followed_calls = max(0, followed_calls - 1)
         return_true = lambda pydefined: True
         return_false = lambda pydefined: False
 
         def _follow(pyfunction):
-            _analyze_node(
-                pycore, pyfunction, return_true, return_false, new_followed_calls
-            )
+            _analyze_node(pycore, pyfunction, return_true, return_false,
+                          new_followed_calls)
 
         if not followed_calls:
             _follow = None
@@ -38,6 +39,7 @@ def _analyze_node(pycore, pydefined, should_analyze, search_subscopes, followed_
 
 
 class SOAVisitor(object):
+
     def __init__(self, pycore, pydefined, follow_callback=None):
         self.pycore = pycore
         self.pymodule = pydefined.get_module()
@@ -58,7 +60,8 @@ class SOAVisitor(object):
             return
         pyfunction = pyname.get_object()
         if isinstance(pyfunction, pyobjects.AbstractFunction):
-            args = arguments.create_arguments(primary, pyfunction, node, self.scope)
+            args = arguments.create_arguments(primary, pyfunction, node,
+                                              self.scope)
         elif isinstance(pyfunction, pyobjects.PyClass):
             pyclass = pyfunction
             if "__init__" in pyfunction:
@@ -73,7 +76,8 @@ class SOAVisitor(object):
         self._call(pyfunction, args)
 
     def _args_with_self(self, primary, self_pyname, pyfunction, node):
-        base_args = arguments.create_arguments(primary, pyfunction, node, self.scope)
+        base_args = arguments.create_arguments(primary, pyfunction, node,
+                                               self.scope)
         return arguments.MixedArguments(self_pyname, base_args, self.scope)
 
     def _call(self, pyfunction, args):
@@ -81,8 +85,7 @@ class SOAVisitor(object):
             if self.follow is not None:
                 before = self._parameter_objects(pyfunction)
             self.pycore.object_info.function_called(
-                pyfunction, args.get_arguments(pyfunction.get_param_names())
-            )
+                pyfunction, args.get_arguments(pyfunction.get_param_names()))
             pyfunction._set_parameter_pyobjects(None)
             if self.follow is not None:
                 after = self._parameter_objects(pyfunction)
@@ -124,9 +127,9 @@ class SOAVisitor(object):
             instance = evaluate.eval_node(self.scope, subscript.value)
             args_pynames = [evaluate.eval_node(self.scope, subscript.slice)]
             value = rope.base.oi.soi._infer_assignment(
-                rope.base.pynames.AssignmentValue(
-                    node.value, levels, type_hint=type_hint
-                ),
+                rope.base.pynames.AssignmentValue(node.value,
+                                                  levels,
+                                                  type_hint=type_hint),
                 self.pymodule,
             )
             args_pynames.append(rope.base.pynames.UnboundName(value))
@@ -140,12 +143,12 @@ class SOAVisitor(object):
 
 
 class _SOAAssignVisitor(astutils._NodeNameCollector):
+
     def __init__(self):
         super(_SOAAssignVisitor, self).__init__()
         self.nodes = []
 
     def _added(self, node, levels):
         if isinstance(node, rope.base.ast.Subscript) and isinstance(
-            node.slice, (rope.base.ast.Index, rope.base.ast.expr)
-        ):
+                node.slice, (rope.base.ast.Index, rope.base.ast.expr)):
             self.nodes.append((node, levels))

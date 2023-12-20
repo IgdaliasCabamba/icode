@@ -84,18 +84,22 @@ from jedi.plugins import plugin_manager
 
 
 class InferenceState:
+
     def __init__(self, project, environment=None, script_path=None):
         if environment is None:
             environment = project.get_environment()
         self.environment = environment
         self.script_path = script_path
-        self.compiled_subprocess = environment.get_inference_state_subprocess(self)
+        self.compiled_subprocess = environment.get_inference_state_subprocess(
+            self)
         self.grammar = environment.get_grammar()
 
         self.latest_grammar = parso.load_grammar(version="3.7")
         self.memoize_cache = {}  # for memoize decorators
-        self.module_cache = imports.ModuleCache()  # does the job of `sys.modules`.
-        self.stub_module_cache = {}  # Dict[Tuple[str, ...], Optional[ModuleValue]]
+        self.module_cache = imports.ModuleCache(
+        )  # does the job of `sys.modules`.
+        self.stub_module_cache = {
+        }  # Dict[Tuple[str, ...], Optional[ModuleValue]]
         self.compiled_cache = {}  # see `inference.compiled.create()`
         self.inferred_element_counts = {}
         self.mixed_cache = {}  # see `inference.compiled.mixed._create()`
@@ -110,9 +114,10 @@ class InferenceState:
         self.reset_recursion_limitations()
 
     def import_module(self, import_names, sys_path=None, prefer_stubs=True):
-        return imports.import_module_by_names(
-            self, import_names, sys_path, prefer_stubs=prefer_stubs
-        )
+        return imports.import_module_by_names(self,
+                                              import_names,
+                                              sys_path,
+                                              prefer_stubs=prefer_stubs)
 
     @staticmethod
     @plugin_manager.decorate()
@@ -128,18 +133,19 @@ class InferenceState:
     @inference_state_function_cache()
     def builtins_module(self):
         module_name = "builtins"
-        (builtins_module,) = self.import_module((module_name,), sys_path=())
+        (builtins_module, ) = self.import_module((module_name, ), sys_path=())
         return builtins_module
 
     @property  # type: ignore[misc]
     @inference_state_function_cache()
     def typing_module(self):
-        (typing_module,) = self.import_module(("typing",))
+        (typing_module, ) = self.import_module(("typing", ))
         return typing_module
 
     def reset_recursion_limitations(self):
         self.recursion_detector = recursion.RecursionDetector()
-        self.execution_recursion_detector = recursion.ExecutionRecursionDetector(self)
+        self.execution_recursion_detector = recursion.ExecutionRecursionDetector(
+            self)
 
     def get_sys_path(self, **kwargs):
         """Convenience function"""
@@ -172,7 +178,8 @@ class InferenceState:
             if type_ == "with_stmt":
                 return tree_name_to_values(self, context, name)
             elif type_ == "param":
-                return context.py__getattribute__(name.value, position=name.end_pos)
+                return context.py__getattribute__(name.value,
+                                                  position=name.end_pos)
             elif type_ == "namedexpr_test":
                 return context.infer_node(def_)
         else:
@@ -182,9 +189,12 @@ class InferenceState:
 
         return helpers.infer_call_of_leaf(context, name)
 
-    def parse_and_get_code(
-        self, code=None, path=None, use_latest_grammar=False, file_io=None, **kwargs
-    ):
+    def parse_and_get_code(self,
+                           code=None,
+                           path=None,
+                           use_latest_grammar=False,
+                           file_io=None,
+                           **kwargs):
         if path is not None:
             path = str(path)
         if code is None:
@@ -192,13 +202,16 @@ class InferenceState:
                 file_io = FileIO(path)
             code = file_io.read()
         # We cannot just use parso, because it doesn't use errors='replace'.
-        code = parso.python_bytes_to_unicode(code, encoding="utf-8", errors="replace")
+        code = parso.python_bytes_to_unicode(code,
+                                             encoding="utf-8",
+                                             errors="replace")
 
         if len(code) > settings._cropped_file_size:
-            code = code[: settings._cropped_file_size]
+            code = code[:settings._cropped_file_size]
 
         grammar = self.latest_grammar if use_latest_grammar else self.grammar
-        return grammar.parse(code=code, path=path, file_io=file_io, **kwargs), code
+        return grammar.parse(code=code, path=path, file_io=file_io,
+                             **kwargs), code
 
     def parse(self, *args, **kwargs):
         return self.parse_and_get_code(*args, **kwargs)[0]

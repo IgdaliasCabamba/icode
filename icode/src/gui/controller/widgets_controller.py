@@ -1,7 +1,6 @@
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import (
-    QGraphicsDropShadowEffect,
-)
+    QGraphicsDropShadowEffect, )
 from PyQt5.QtGui import QColor
 
 from functions import getfn

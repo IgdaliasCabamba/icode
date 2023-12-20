@@ -9,13 +9,15 @@ def read_file(filenames):
         basename = os.path.basename(filename)
         if basename.startswith('.'):
             continue
-        if os.path.isfile(filename) and os.path.splitext(filename)[-1] == '.py':
+        if os.path.isfile(filename) and os.path.splitext(
+                filename)[-1] == '.py':
             with open(filename) as f:
                 yield (filename, f.read())
         elif os.path.isdir(filename):
             if basename.startswith('__'):
                 continue
-            yield from read_file([filename + '/' + f for f in os.listdir(filename)])
+            yield from read_file(
+                [filename + '/' + f for f in os.listdir(filename)])
 
 
 def run(filenames, make_finder):
@@ -30,7 +32,8 @@ def run(filenames, make_finder):
     file_unused_defs = {(file, name)
                         for file in files
                         for name in file_defs[file] - uses
-                        if not is_framework(name) and not any(name.startswith(p) for p in prefs)}
+                        if not is_framework(name) and not any(
+                            name.startswith(p) for p in prefs)}
     return file_unused_defs
 
 

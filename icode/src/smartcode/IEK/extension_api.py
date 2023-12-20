@@ -39,6 +39,7 @@ def export(type: str = "extension", path: str = ""):
 
 
 class BaseApi:
+
     def __init__(self):
         pass
 
@@ -57,29 +58,11 @@ class BaseApi:
 
     def local_storage_to(self, type: str, *names, make: bool = False) -> str:
         if type == "data":
-            return (
-                BASE_PATH
-                + SYS_SEP
-                + "data"
-                + SYS_SEP
-                + "extensions"
-                + SYS_SEP
-                + self.ext_name
-                + SYS_SEP
-                + os.path.join(*names)
-            )
+            return (BASE_PATH + SYS_SEP + "data" + SYS_SEP + "extensions" +
+                    SYS_SEP + self.ext_name + SYS_SEP + os.path.join(*names))
         elif type == "cache":
-            return (
-                BASE_PATH
-                + SYS_SEP
-                + ".cache"
-                + SYS_SEP
-                + "extensions"
-                + SYS_SEP
-                + self.ext_name
-                + SYS_SEP
-                + os.path.join(*names)
-            )
+            return (BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "extensions" +
+                    SYS_SEP + self.ext_name + SYS_SEP + os.path.join(*names))
         else:
             if len(names) >= 2:
                 return self.path_to(names[0], names[1])
@@ -121,6 +104,7 @@ class BaseApi:
 
 
 class StyleMaker:
+
     def __init__(self, main, path: Union[list, str], vars: dict = {}) -> None:
         self._sheet_object = pathlib.Path(path)
         self._text = self.get_content()
@@ -144,7 +128,7 @@ class StyleMaker:
 
         if isinstance(to_replace, str) and isinstance(to_place, str):
             self._text = self._text.replace(to_replace, to_place)
-        
+
         self._text = self._text.replace("\\", "/")
 
     def compile_qsass(self):
@@ -158,6 +142,7 @@ class StyleMaker:
 
 
 class ModelUi(QObject, BaseApi):
+
     def __init__(self, data: dict, ext_name: str):
         super().__init__(data["app"])
         self.ext_name = ext_name
@@ -196,13 +181,16 @@ class ModelUi(QObject, BaseApi):
 
     def get_styles(self, dark: dict, light: dict):
         if self.is_dark():
-            return StyleMaker(self, self.path_to("src", dark["styles"]), dark["vars"])
+            return StyleMaker(self, self.path_to("src", dark["styles"]),
+                              dark["vars"])
 
         elif self.is_light():
-            return StyleMaker(self, self.path_to("src", light["styles"]), light["vars"])
+            return StyleMaker(self, self.path_to("src", light["styles"]),
+                              light["vars"])
 
         else:
-            return StyleMaker(self, self.path_to("src", dark["styles"]), dark["vars"])
+            return StyleMaker(self, self.path_to("src", dark["styles"]),
+                              dark["vars"])
 
     def set_lexer_style(self, lexer: object, key: str, dark: str, light: str):
         if self.is_light():
@@ -233,6 +221,7 @@ class ModelUi(QObject, BaseApi):
 
 
 class ModelApp(QObject, BaseApi):
+
     def __init__(self, data: dict, ext_name: str):
         super().__init__(data["app"])
         self.ext_name = ext_name

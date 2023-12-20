@@ -14,6 +14,7 @@ except ImportError:
 
 
 class NumPyDocstringParamParser(docstrings.IParamParser):
+
     def __call__(self, docstring, param_name):
         """Search `docstring` (in numpydoc format) for type(-s) of `param_name`."""
         if not docstring:
@@ -34,6 +35,7 @@ class NumPyDocstringParamParser(docstrings.IParamParser):
 
 
 class _DummyParamParser(docstrings.IParamParser):
+
     def __call__(self, docstring, param_name):
         return []
 

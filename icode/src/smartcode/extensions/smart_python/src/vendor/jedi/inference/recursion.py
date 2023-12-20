@@ -31,7 +31,6 @@ from contextlib import contextmanager
 from jedi import debug
 from jedi.inference.base_value import NO_VALUES
 
-
 recursion_limit = 15
 """
 Like :func:`sys.getrecursionlimit()`, just for |jedi|.
@@ -51,6 +50,7 @@ A function may not be executed more than this number of times recursively.
 
 
 class RecursionDetector:
+
     def __init__(self):
         self.pushed_nodes = []
 
@@ -64,9 +64,8 @@ def execution_allowed(inference_state, node):
     pushed_nodes = inference_state.recursion_detector.pushed_nodes
 
     if node in pushed_nodes:
-        debug.warning(
-            "catched stmt recursion: %s @%s", node, getattr(node, "start_pos", None)
-        )
+        debug.warning("catched stmt recursion: %s @%s", node,
+                      getattr(node, "start_pos", None))
         yield False
     else:
         try:
@@ -77,7 +76,9 @@ def execution_allowed(inference_state, node):
 
 
 def execution_recursion_decorator(default=NO_VALUES):
+
     def decorator(func):
+
         def wrapper(self, **kwargs):
             detector = self.inference_state.execution_recursion_detector
             limit_reached = detector.push_execution(self)
@@ -132,16 +133,13 @@ class ExecutionRecursionDetector:
             return True
 
         if self._execution_count >= total_function_execution_limit:
-            debug.warning(
-                "Function execution limit (%s) reached", total_function_execution_limit
-            )
+            debug.warning("Function execution limit (%s) reached",
+                          total_function_execution_limit)
             return True
         self._execution_count += 1
 
-        if (
-            self._funcdef_execution_counts.setdefault(funcdef, 0)
-            >= per_function_execution_limit
-        ):
+        if (self._funcdef_execution_counts.setdefault(funcdef, 0)
+                >= per_function_execution_limit):
             if module_context.py__name__() == "typing":
                 return False
             debug.warning(
@@ -152,7 +150,8 @@ class ExecutionRecursionDetector:
             return True
         self._funcdef_execution_counts[funcdef] += 1
 
-        if self._parent_execution_funcs.count(funcdef) > per_function_recursion_limit:
+        if self._parent_execution_funcs.count(
+                funcdef) > per_function_recursion_limit:
             debug.warning(
                 "Per function recursion limit (%s) reached: %s",
                 per_function_recursion_limit,

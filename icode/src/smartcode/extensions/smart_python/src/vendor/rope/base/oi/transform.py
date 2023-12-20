@@ -20,13 +20,13 @@ class PyObjectToTextual(object):
     def transform(self, pyobject):
         """Transform a `PyObject` to textual form"""
         if pyobject is None:
-            return ("none",)
+            return ("none", )
         object_type = type(pyobject)
         try:
             method = getattr(self, object_type.__name__ + "_to_textual")
             return method(pyobject)
         except AttributeError:
-            return ("unknown",)
+            return ("unknown", )
 
     def __call__(self, pyobject):
         return self.transform(pyobject)
@@ -37,7 +37,7 @@ class PyObjectToTextual(object):
             if result[0] == "defined":
                 return ("instance", result)
             return result
-        return ("unknown",)
+        return ("unknown", )
 
     def PyFunction_to_textual(self, pyobject):
         return self._defined_to_textual(pyobject)
@@ -75,7 +75,8 @@ class PyObjectToTextual(object):
 
     def Tuple_to_textual(self, pyobject):
         objects = [
-            self.transform(holding) for holding in pyobject.get_holding_objects()
+            self.transform(holding)
+            for holding in pyobject.get_holding_objects()
         ]
         return tuple(["builtin", "tuple"] + objects)
 
@@ -257,10 +258,12 @@ class DOITextualToPyObject(TextualToPyObject):
         suspected = None
         if name in module_scope.get_names():
             suspected = module_scope[name].get_object()
-        if suspected is not None and isinstance(suspected, rope.base.pyobjects.PyClass):
+        if suspected is not None and isinstance(suspected,
+                                                rope.base.pyobjects.PyClass):
             return suspected
         else:
-            lineno = self._find_occurrence(name, pymodule.get_resource().read())
+            lineno = self._find_occurrence(name,
+                                           pymodule.get_resource().read())
             if lineno is not None:
                 inner_scope = module_scope.get_inner_scope_for_line(lineno)
                 return inner_scope.pyobject
@@ -286,7 +289,8 @@ class DOITextualToPyObject(TextualToPyObject):
     def path_to_resource(self, path):
         import rope.base.libutils
 
-        relpath = rope.base.libutils.path_relative_to_project_root(self.project, path)
+        relpath = rope.base.libutils.path_relative_to_project_root(
+            self.project, path)
         if relpath is not None:
             path = relpath
         return super(DOITextualToPyObject, self).path_to_resource(path)

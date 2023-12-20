@@ -81,12 +81,12 @@ if PY35_PLUS:
     LOOP_TYPES = (ast.While, ast.For, ast.AsyncFor)
     FUNCTION_TYPES = (ast.FunctionDef, ast.AsyncFunctionDef)
 else:
-    FOR_TYPES = (ast.For,)
+    FOR_TYPES = (ast.For, )
     LOOP_TYPES = (ast.While, ast.For)
-    FUNCTION_TYPES = (ast.FunctionDef,)
+    FUNCTION_TYPES = (ast.FunctionDef, )
 
 if PY36_PLUS:
-    ANNASSIGN_TYPES = (ast.AnnAssign,)
+    ANNASSIGN_TYPES = (ast.AnnAssign, )
 else:
     ANNASSIGN_TYPES = ()
 
@@ -94,8 +94,7 @@ if PY38_PLUS:
 
     def _is_singleton(node):  # type: (ast.AST) -> bool
         return isinstance(node, ast.Constant) and isinstance(
-            node.value, (bool, type(Ellipsis), type(None))
-        )
+            node.value, (bool, type(Ellipsis), type(None)))
 
 elif not PY2:
 
@@ -114,7 +113,8 @@ else:
 
 
 def _is_tuple_constant(node):  # type: (ast.AST) -> bool
-    return isinstance(node, ast.Tuple) and all(_is_constant(elt) for elt in node.elts)
+    return isinstance(node, ast.Tuple) and all(
+        _is_constant(elt) for elt in node.elts)
 
 
 if PY38_PLUS:
@@ -125,14 +125,11 @@ if PY38_PLUS:
 else:
     _const_tps = (ast.Str, ast.Num)
     if not PY2:
-        _const_tps += (ast.Bytes,)
+        _const_tps += (ast.Bytes, )
 
     def _is_constant(node):
-        return (
-            isinstance(node, _const_tps)
-            or _is_singleton(node)
-            or _is_tuple_constant(node)
-        )
+        return (isinstance(node, _const_tps) or _is_singleton(node)
+                or _is_tuple_constant(node))
 
 
 def _is_const_non_singleton(node):  # type: (ast.AST) -> bool
@@ -140,21 +137,19 @@ def _is_const_non_singleton(node):  # type: (ast.AST) -> bool
 
 
 def _is_name_or_attr(node, name):  # type: (ast.Ast, str) -> bool
-    return (isinstance(node, ast.Name) and node.id == name) or (
-        isinstance(node, ast.Attribute) and node.attr == name
-    )
+    return (isinstance(node, ast.Name)
+            and node.id == name) or (isinstance(node, ast.Attribute)
+                                     and node.attr == name)
 
 
 # https://github.com/python/typed_ast/blob/1.4.0/ast27/Parser/tokenizer.c#L102-L104
 TYPE_COMMENT_RE = re.compile(r"^#\s*type:\s*")
 # https://github.com/python/typed_ast/blob/1.4.0/ast27/Parser/tokenizer.c#L1408-L1413
 ASCII_NON_ALNUM = "".join([chr(i) for i in range(128) if not chr(i).isalnum()])
-TYPE_IGNORE_RE = re.compile(
-    TYPE_COMMENT_RE.pattern + r"ignore([{}]|$)".format(ASCII_NON_ALNUM)
-)
+TYPE_IGNORE_RE = re.compile(TYPE_COMMENT_RE.pattern +
+                            r"ignore([{}]|$)".format(ASCII_NON_ALNUM))
 # https://github.com/python/typed_ast/blob/1.4.0/ast27/Grammar/Grammar#L147
 TYPE_FUNC_RE = re.compile(r"^(\(.*?\))\s*->\s*(.*)$")
-
 
 MAPPING_KEY_RE = re.compile(r"\(([^()]*)\)")
 CONVERSION_FLAG_RE = re.compile("[#0+ -]*")
@@ -366,7 +361,8 @@ class Builtin(Definition):
         super(Builtin, self).__init__(name, None)
 
     def __repr__(self):
-        return "<%s object %r at 0x%x>" % (self.__class__.__name__, self.name, id(self))
+        return "<%s object %r at 0x%x>" % (self.__class__.__name__, self.name,
+                                           id(self))
 
 
 class UnhandledKeyType(object):
@@ -470,6 +466,7 @@ class SubmoduleImportation(Importation):
 
 
 class ImportationFrom(Importation):
+
     def __init__(self, name, source, module, real_name=None):
         self.module = module
         self.real_name = real_name or name
@@ -491,7 +488,8 @@ class ImportationFrom(Importation):
     @property
     def source_statement(self):
         if self.real_name != self.name:
-            return "from %s import %s as %s" % (self.module, self.real_name, self.name)
+            return "from %s import %s as %s" % (self.module, self.real_name,
+                                                self.name)
         else:
             return "from %s import %s" % (self.module, self.name)
 
@@ -637,7 +635,9 @@ class FunctionScope(Scope):
     """
 
     usesLocals = False
-    alwaysUsed = {"__tracebackhide__", "__traceback_info__", "__traceback_supplement__"}
+    alwaysUsed = {
+        "__tracebackhide__", "__traceback_info__", "__traceback_supplement__"
+    }
 
     def __init__(self):
         super(FunctionScope, self).__init__()
@@ -651,13 +651,10 @@ class FunctionScope(Scope):
         Return a generator for the assignments which have not been used.
         """
         for name, binding in self.items():
-            if (
-                not binding.used
-                and name != "_"
-                and name not in self.globals  # see issue #202
-                and not self.usesLocals
-                and isinstance(binding, Assignment)
-            ):
+            if (not binding.used and name != "_"
+                    and name not in self.globals  # see issue #202
+                    and not self.usesLocals
+                    and isinstance(binding, Assignment)):
                 yield name, binding
 
 
@@ -722,30 +719,24 @@ def _is_typing_helper(node, is_name_match_fn, scope_stack):
     def _bare_name_is_attr(name):
         for scope in reversed(scope_stack):
             if name in scope:
-                return (
-                    isinstance(scope[name], ImportationFrom)
-                    and scope[name].module in TYPING_MODULES
-                    and is_name_match_fn(scope[name].real_name)
-                )
+                return (isinstance(scope[name], ImportationFrom)
+                        and scope[name].module in TYPING_MODULES
+                        and is_name_match_fn(scope[name].real_name))
 
         return False
 
     def _module_scope_is_typing(name):
         for scope in reversed(scope_stack):
             if name in scope:
-                return (
-                    isinstance(scope[name], Importation)
-                    and scope[name].fullName in TYPING_MODULES
-                )
+                return (isinstance(scope[name], Importation)
+                        and scope[name].fullName in TYPING_MODULES)
 
         return False
 
     return (isinstance(node, ast.Name) and _bare_name_is_attr(node.id)) or (
-        isinstance(node, ast.Attribute)
-        and isinstance(node.value, ast.Name)
+        isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name)
         and _module_scope_is_typing(node.value.id)
-        and is_name_match_fn(node.attr)
-    )
+        and is_name_match_fn(node.attr))
 
 
 def _is_typing(node, typing_attr, scope_stack):
@@ -771,8 +762,8 @@ def _is_any_typing_member(node, scope_stack):
 
 def is_typing_overload(value, scope_stack):
     return isinstance(value.source, FUNCTION_TYPES) and any(
-        _is_typing(dec, "overload", scope_stack) for dec in value.source.decorator_list
-    )
+        _is_typing(dec, "overload", scope_stack)
+        for dec in value.source.decorator_list)
 
 
 class AnnotationState:
@@ -782,6 +773,7 @@ class AnnotationState:
 
 
 def in_annotation(func):
+
     @functools.wraps(func)
     def in_annotation_func(self, *args, **kwargs):
         with self._enter_annotation():
@@ -791,6 +783,7 @@ def in_annotation(func):
 
 
 def in_string_annotation(func):
+
     @functools.wraps(func)
     def in_annotation_func(self, *args, **kwargs):
         with self._enter_annotation(AnnotationState.STRING):
@@ -836,11 +829,11 @@ def _collect_type_comments(tree, tokens):
 
     type_comments = collections.defaultdict(list)
     for tp, text, start, _, _ in tokens:
-        if (
-            tp != tokenize.COMMENT
-            or not TYPE_COMMENT_RE.match(text)  # skip non comments
-            or TYPE_IGNORE_RE.match(text)  # skip non-type comments  # skip ignores
-        ):
+        if (tp != tokenize.COMMENT
+                or not TYPE_COMMENT_RE.match(text)  # skip non comments
+                or TYPE_IGNORE_RE.match(
+                    text)  # skip non-type comments  # skip ignores
+            ):
             continue
 
         # search for the typeable node at or before the line number of the
@@ -898,12 +891,12 @@ class Checker(object):
     #       eventually make this a required positional argument.  For now it
     #       is defaulted to `()` for api compatibility.
     def __init__(
-        self,
-        tree,
-        filename="(none)",
-        builtins=None,
-        withDoctest="PYFLAKES_DOCTEST" in os.environ,
-        file_tokens=(),
+            self,
+            tree,
+            filename="(none)",
+            builtins=None,
+            withDoctest="PYFLAKES_DOCTEST" in os.environ,
+            file_tokens=(),
     ):
         self._nodeHandlers = {}
         self._deferredFunctions = []
@@ -946,14 +939,16 @@ class Checker(object):
         `callable` is called, the scope at the time this is called will be
         restored, however it will contain any new bindings added to it.
         """
-        self._deferredFunctions.append((callable, self.scopeStack[:], self.offset))
+        self._deferredFunctions.append(
+            (callable, self.scopeStack[:], self.offset))
 
     def deferAssignment(self, callable):
         """
         Schedule an assignment handler to be called just after deferred
         function handlers.
         """
-        self._deferredAssignments.append((callable, self.scopeStack[:], self.offset))
+        self._deferredAssignments.append(
+            (callable, self.scopeStack[:], self.offset))
 
     def runDeferred(self, deferred):
         """
@@ -966,12 +961,12 @@ class Checker(object):
 
     def _in_doctest(self):
         return len(self.scopeStack) >= 2 and isinstance(
-            self.scopeStack[1], DoctestScope
-        )
+            self.scopeStack[1], DoctestScope)
 
     @property
     def futuresAllowed(self):
-        if not all(isinstance(scope, ModuleScope) for scope in self.scopeStack):
+        if not all(
+                isinstance(scope, ModuleScope) for scope in self.scopeStack):
             return False
 
         return self.scope._futures_allowed
@@ -1018,20 +1013,19 @@ class Checker(object):
 
             if all_binding:
                 all_names = set(all_binding.names)
-                undefined = [name for name in all_binding.names if name not in scope]
+                undefined = [
+                    name for name in all_binding.names if name not in scope
+                ]
             else:
                 all_names = undefined = []
 
             if undefined:
-                if (
-                    not scope.importStarred
-                    and os.path.basename(self.filename) != "__init__.py"
-                ):
+                if (not scope.importStarred
+                        and os.path.basename(self.filename) != "__init__.py"):
                     # Look for possible mistakes in the export list
                     for name in undefined:
-                        self.report(
-                            messages.UndefinedExport, scope["__all__"].source, name
-                        )
+                        self.report(messages.UndefinedExport,
+                                    scope["__all__"].source, name)
 
                 # mark all import '*' as used by the undefined in __all__
                 if scope.importStarred:
@@ -1080,9 +1074,9 @@ class Checker(object):
                 return node
 
     def getCommonAncestor(self, lnode, rnode, stop):
-        if stop in (lnode, rnode) or not (
-            hasattr(lnode, "_pyflakes_parent") and hasattr(rnode, "_pyflakes_parent")
-        ):
+        if stop in (lnode,
+                    rnode) or not (hasattr(lnode, "_pyflakes_parent")
+                                   and hasattr(rnode, "_pyflakes_parent")):
             return None
         if lnode is rnode:
             return lnode
@@ -1121,9 +1115,9 @@ class Checker(object):
         parts = getAlternatives(ancestor)
         if parts:
             for items in parts:
-                if self.descendantOf(lnode, items, ancestor) ^ self.descendantOf(
-                    rnode, items, ancestor
-                ):
+                if self.descendantOf(lnode, items,
+                                     ancestor) ^ self.descendantOf(
+                                         rnode, items, ancestor):
                     return True
         return False
 
@@ -1140,25 +1134,22 @@ class Checker(object):
                 break
         existing = scope.get(value.name)
 
-        if (
-            existing
-            and not isinstance(existing, Builtin)
-            and not self.differentForks(node, existing.source)
-        ):
+        if (existing and not isinstance(existing, Builtin)
+                and not self.differentForks(node, existing.source)):
 
             parent_stmt = self.getParent(value.source)
-            if isinstance(existing, Importation) and isinstance(parent_stmt, FOR_TYPES):
-                self.report(
-                    messages.ImportShadowedByLoopVar, node, value.name, existing.source
-                )
+            if isinstance(existing, Importation) and isinstance(
+                    parent_stmt, FOR_TYPES):
+                self.report(messages.ImportShadowedByLoopVar, node, value.name,
+                            existing.source)
 
             elif scope is self.scope:
-                if isinstance(parent_stmt, ast.comprehension) and not isinstance(
-                    self.getParent(existing.source), (FOR_TYPES, ast.comprehension)
-                ):
-                    self.report(
-                        messages.RedefinedInListComp, node, value.name, existing.source
-                    )
+                if isinstance(parent_stmt,
+                              ast.comprehension) and not isinstance(
+                                  self.getParent(existing.source),
+                                  (FOR_TYPES, ast.comprehension)):
+                    self.report(messages.RedefinedInListComp, node, value.name,
+                                existing.source)
                 elif not existing.used and value.redefines(existing):
                     if value.name != "_" or isinstance(existing, Importation):
                         if not is_typing_overload(existing, self.scopeStack):
@@ -1169,7 +1160,8 @@ class Checker(object):
                                 existing.source,
                             )
 
-            elif isinstance(existing, Importation) and value.redefines(existing):
+            elif isinstance(existing,
+                            Importation) and value.redefines(existing):
                 existing.redefined.append(node)
 
         if value.name in self.scope:
@@ -1229,12 +1221,14 @@ class Checker(object):
                     continue
 
             binding = scope.get(name, None)
-            if isinstance(binding, Annotation) and not self._in_postponed_annotation:
+            if isinstance(binding,
+                          Annotation) and not self._in_postponed_annotation:
                 continue
 
             if name == "print" and isinstance(binding, Builtin):
                 parent = self.getParent(node)
-                if isinstance(parent, ast.BinOp) and isinstance(parent.op, ast.RShift):
+                if isinstance(parent, ast.BinOp) and isinstance(
+                        parent.op, ast.RShift):
                     self.report(messages.InvalidPrintSyntax, node)
 
             try:
@@ -1274,11 +1268,13 @@ class Checker(object):
             self.report(messages.ImportStarUsage, node, name, from_list)
             return
 
-        if name == "__path__" and os.path.basename(self.filename) == "__init__.py":
+        if name == "__path__" and os.path.basename(
+                self.filename) == "__init__.py":
             # the special name __path__ is valid only in packages
             return
 
-        if name in DetectClassScopedMagic.names and isinstance(self.scope, ClassScope):
+        if name in DetectClassScopedMagic.names and isinstance(
+                self.scope, ClassScope):
             return
 
         # protected with a NameError handler?
@@ -1299,7 +1295,8 @@ class Checker(object):
                 # been accessed already in the current scope, and hasn't
                 # been declared global
                 used = name in scope and scope[name].used
-                if used and used[0] is self.scope and name not in self.scope.globals:
+                if used and used[
+                        0] is self.scope and name not in self.scope.globals:
                     # then it's probably a mistake
                     self.report(
                         messages.UndefinedLocal,
@@ -1310,12 +1307,12 @@ class Checker(object):
                     break
 
         parent_stmt = self.getParent(node)
-        if isinstance(parent_stmt, ANNASSIGN_TYPES) and parent_stmt.value is None:
+        if isinstance(parent_stmt,
+                      ANNASSIGN_TYPES) and parent_stmt.value is None:
             binding = Annotation(name, node)
         elif isinstance(parent_stmt, (FOR_TYPES, ast.comprehension)) or (
-            parent_stmt != node._pyflakes_parent
-            and not self.isLiteralTupleUnpacking(parent_stmt)
-        ):
+                parent_stmt != node._pyflakes_parent
+                and not self.isLiteralTupleUnpacking(parent_stmt)):
             binding = Binding(name, node)
         elif name == "__all__" and isinstance(self.scope, ModuleScope):
             binding = ExportBinding(name, node._pyflakes_parent, self.scope)
@@ -1326,6 +1323,7 @@ class Checker(object):
         self.addBinding(node, binding)
 
     def handleNodeDelete(self, node):
+
         def on_conditional_branch():
             """
             Return `True` if node is part of a conditional body.
@@ -1346,7 +1344,8 @@ class Checker(object):
             # be executed.
             return
 
-        if isinstance(self.scope, FunctionScope) and name in self.scope.globals:
+        if isinstance(self.scope,
+                      FunctionScope) and name in self.scope.globals:
             self.scope.globals.remove(name)
         else:
             try:
@@ -1364,10 +1363,8 @@ class Checker(object):
 
     @property
     def _in_postponed_annotation(self):
-        return (
-            self._in_annotation == AnnotationState.STRING
-            or self.annotationsFutureEnabled
-        )
+        return (self._in_annotation == AnnotationState.STRING
+                or self.annotationsFutureEnabled)
 
     def _handle_type_comments(self, node):
         for (lineno, col_offset), comment in self._type_comments.get(node, ()):
@@ -1379,7 +1376,7 @@ class Checker(object):
                     func_match.group(2).strip(),
                 )
             else:
-                parts = (comment,)
+                parts = (comment, )
 
             for part in parts:
                 if PY2:
@@ -1392,8 +1389,7 @@ class Checker(object):
                         lineno,
                         col_offset,
                         messages.CommentAnnotationSyntaxError,
-                    )
-                )
+                    ))
 
     def handleChildren(self, tree, omit=None):
         self._handle_type_comments(tree)
@@ -1412,9 +1408,9 @@ class Checker(object):
         Determine if the given node is a docstring, as long as it is at the
         correct place in the node tree.
         """
-        return isinstance(node, ast.Str) or (
-            isinstance(node, ast.Expr) and isinstance(node.value, ast.Str)
-        )
+        return isinstance(node,
+                          ast.Str) or (isinstance(node, ast.Expr)
+                                       and isinstance(node.value, ast.Str))
 
     def getDocstring(self, node):
         if isinstance(node, ast.Expr):
@@ -1436,9 +1432,8 @@ class Checker(object):
         if self.offset and getattr(node, "lineno", None) is not None:
             node.lineno += self.offset[0]
             node.col_offset += self.offset[1]
-        if self.futuresAllowed and not (
-            isinstance(node, ast.ImportFrom) or self.isDocstring(node)
-        ):
+        if self.futuresAllowed and not (isinstance(node, ast.ImportFrom)
+                                        or self.isDocstring(node)):
             self.futuresAllowed = False
         self.nodeDepth += 1
         node._pyflakes_depth = self.nodeDepth
@@ -1462,9 +1457,8 @@ class Checker(object):
                 # of the function and the docstring.
                 node_lineno = node.lineno
                 if hasattr(node, "args"):
-                    node_lineno = max(
-                        [node_lineno] + [arg.lineno for arg in node.args.args]
-                    )
+                    node_lineno = max([node_lineno] +
+                                      [arg.lineno for arg in node.args.args])
             else:
                 (docstring, node_lineno) = self.getDocstring(node.body[0])
             examples = docstring and self._getDoctestExamples(docstring)
@@ -1519,10 +1513,8 @@ class Checker(object):
 
         parsed_annotation = tree.body[0].value
         for descendant in ast.walk(parsed_annotation):
-            if (
-                "lineno" in descendant._attributes
-                and "col_offset" in descendant._attributes
-            ):
+            if ("lineno" in descendant._attributes
+                    and "col_offset" in descendant._attributes):
                 descendant.lineno = ref_lineno
                 descendant.col_offset = ref_col_offset
 
@@ -1540,8 +1532,7 @@ class Checker(object):
                     annotation.lineno,
                     annotation.col_offset,
                     messages.ForwardAnnotationSyntaxError,
-                )
-            )
+                ))
         elif self.annotationsFutureEnabled:
             fn = in_annotation(Checker.handleNode)
             self.deferFunction(lambda: fn(self, annotation, node))
@@ -1552,17 +1543,7 @@ class Checker(object):
         pass
 
     # "stmt" type nodes
-    DELETE = (
-        PRINT
-    ) = (
-        FOR
-    ) = (
-        ASYNCFOR
-    ) = (
-        WHILE
-    ) = (
-        WITH
-    ) = (
+    DELETE = (PRINT) = (FOR) = (ASYNCFOR) = (WHILE) = (WITH) = (
         WITHITEM
     ) = ASYNCWITH = ASYNCWITHITEM = TRYFINALLY = EXEC = EXPR = ASSIGN = handleChildren
 
@@ -1585,8 +1566,7 @@ class Checker(object):
                 slice_tuple = node.slice
             # <py39
             elif isinstance(node.slice, ast.Index) and isinstance(
-                node.slice.value, ast.Tuple
-            ):
+                    node.slice.value, ast.Tuple):
                 slice_tuple = node.slice.value
             else:
                 slice_tuple = None
@@ -1687,16 +1667,15 @@ class Checker(object):
 
         # bail early if there is *args or **kwargs
         if (
-            # python 2.x *args / **kwargs
-            getattr(node, "starargs", None)
-            or getattr(node, "kwargs", None)
-            or
-            # python 3.x *args
-            any(isinstance(arg, getattr(ast, "Starred", ())) for arg in node.args)
-            or
-            # python 3.x **kwargs
-            any(kwd.arg is None for kwd in node.keywords)
-        ):
+                # python 2.x *args / **kwargs
+                getattr(node, "starargs", None)
+                or getattr(node, "kwargs", None) or
+                # python 3.x *args
+                any(
+                    isinstance(arg, getattr(ast, "Starred", ()))
+                    for arg in node.args) or
+                # python 3.x **kwargs
+                any(kwd.arg is None for kwd in node.keywords)):
             return
 
         substitution_positional = set(range(len(node.args)))
@@ -1706,8 +1685,7 @@ class Checker(object):
         extra_named = substitution_named - placeholder_named
 
         missing_arguments = (placeholder_positional | placeholder_named) - (
-            substitution_positional | substitution_named
-        )
+            substitution_positional | substitution_named)
 
         if extra_positional:
             self.report(
@@ -1729,18 +1707,17 @@ class Checker(object):
             )
 
     def CALL(self, node):
-        if (
-            isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Str)
-            and node.func.attr == "format"
-        ):
+        if (isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Str)
+                and node.func.attr == "format"):
             self._handle_string_dot_format(node)
 
         omit = []
         annotated = []
         not_annotated = []
 
-        if _is_typing(node.func, "cast", self.scopeStack) and len(node.args) >= 1:
+        if _is_typing(node.func, "cast", self.scopeStack) and len(
+                node.args) >= 1:
             with self._enter_annotation():
                 self.handleNode(node.args[0], node)
 
@@ -1753,19 +1730,16 @@ class Checker(object):
             # TypeVar("T", bound="str")
             omit += ["keywords"]
             annotated += [k.value for k in node.keywords if k.arg == "bound"]
-            not_annotated += [
-                (k, ["value"] if k.arg == "bound" else None) for k in node.keywords
-            ]
+            not_annotated += [(k, ["value"] if k.arg == "bound" else None)
+                              for k in node.keywords]
 
         elif _is_typing(node.func, "TypedDict", self.scopeStack):
             # TypedDict("a", {"a": int})
             if len(node.args) > 1 and isinstance(node.args[1], ast.Dict):
                 omit += ["args"]
                 annotated += node.args[1].values
-                not_annotated += [
-                    (arg, ["values"] if i == 1 else None)
-                    for i, arg in enumerate(node.args)
-                ]
+                not_annotated += [(arg, ["values"] if i == 1 else None)
+                                  for i, arg in enumerate(node.args)]
 
             # TypedDict("a", a=int)
             omit += ["keywords"]
@@ -1774,21 +1748,17 @@ class Checker(object):
 
         elif _is_typing(node.func, "NamedTuple", self.scopeStack):
             # NamedTuple("a", [("a", int)])
-            if (
-                len(node.args) > 1
-                and isinstance(node.args[1], (ast.Tuple, ast.List))
-                and all(
+            if (len(node.args) > 1 and isinstance(
+                    node.args[1],
+                (ast.Tuple, ast.List)) and all(
                     isinstance(x, (ast.Tuple, ast.List)) and len(x.elts) == 2
-                    for x in node.args[1].elts
-                )
-            ):
+                    for x in node.args[1].elts)):
                 omit += ["args"]
                 annotated += [elt.elts[1] for elt in node.args[1].elts]
-                not_annotated += [(elt.elts[0], None) for elt in node.args[1].elts]
-                not_annotated += [
-                    (arg, ["elts"] if i == 1 else None)
-                    for i, arg in enumerate(node.args)
-                ]
+                not_annotated += [(elt.elts[0], None)
+                                  for elt in node.args[1].elts]
+                not_annotated += [(arg, ["elts"] if i == 1 else None)
+                                  for i, arg in enumerate(node.args)]
                 not_annotated += [(elt, "elts") for elt in node.args[1].elts]
 
             # NamedTuple("a", a=int)
@@ -1868,14 +1838,11 @@ class Checker(object):
             else:
                 named.add(name)
 
-        if (
-            isinstance(node.right, (ast.List, ast.Tuple))
-            and
-            # does not have any *splats (py35+ feature)
-            not any(
-                isinstance(elt, getattr(ast, "Starred", ())) for elt in node.right.elts
-            )
-        ):
+        if (isinstance(node.right, (ast.List, ast.Tuple)) and
+                # does not have any *splats (py35+ feature)
+                not any(
+                    isinstance(elt, getattr(ast, "Starred", ()))
+                    for elt in node.right.elts)):
             substitution_count = len(node.right.elts)
             if positional and positional_count != substitution_count:
                 self.report(
@@ -1888,8 +1855,7 @@ class Checker(object):
                 self.report(messages.PercentFormatExpectedMapping, node)
 
         if isinstance(node.right, ast.Dict) and all(
-            isinstance(k, ast.Str) for k in node.right.keys
-        ):
+                isinstance(k, ast.Str) for k in node.right.keys):
             if positional and positional_count > 1:
                 self.report(messages.PercentFormatExpectedSequence, node)
                 return
@@ -1946,37 +1912,9 @@ class Checker(object):
     LOAD = STORE = DEL = AUGLOAD = AUGSTORE = PARAM = ignore
 
     # same for operators
-    AND = (
-        OR
-    ) = (
-        ADD
-    ) = (
-        SUB
-    ) = (
-        MULT
-    ) = (
-        DIV
-    ) = (
-        MOD
-    ) = (
-        POW
-    ) = (
-        LSHIFT
-    ) = (
+    AND = (OR) = (ADD) = (SUB) = (MULT) = (DIV) = (MOD) = (POW) = (LSHIFT) = (
         RSHIFT
-    ) = (
-        BITOR
-    ) = (
-        BITXOR
-    ) = (
-        BITAND
-    ) = (
-        FLOORDIV
-    ) = (
-        INVERT
-    ) = (
-        NOT
-    ) = (
+    ) = (BITOR) = (BITXOR) = (BITAND) = (FLOORDIV) = (INVERT) = (NOT) = (
         UADD
     ) = (
         USUB
@@ -2002,11 +1940,10 @@ class Checker(object):
 
     def JOINEDSTR(self, node):
         if (
-            # the conversion / etc. flags are parsed as f-strings without
-            # placeholders
-            not self._in_fstring
-            and not any(isinstance(x, ast.FormattedValue) for x in node.values)
-        ):
+                # the conversion / etc. flags are parsed as f-strings without
+                # placeholders
+                not self._in_fstring and not any(
+                    isinstance(x, ast.FormattedValue) for x in node.values)):
             self.report(messages.FStringMissingPlaceholders, node)
 
         self._in_fstring, orig = True, self._in_fstring
@@ -2022,21 +1959,21 @@ class Checker(object):
         keys = [convert_to_value(key) for key in node.keys]
 
         key_counts = counter(keys)
-        duplicate_keys = [key for key, count in key_counts.items() if count > 1]
+        duplicate_keys = [
+            key for key, count in key_counts.items() if count > 1
+        ]
 
         for key in duplicate_keys:
             key_indices = [i for i, i_key in enumerate(keys) if i_key == key]
 
             values = counter(
-                convert_to_value(node.values[index]) for index in key_indices
-            )
+                convert_to_value(node.values[index]) for index in key_indices)
             if any(count == 1 for value, count in values.items()):
                 for key_index in key_indices:
                     key_node = node.keys[key_index]
                     if isinstance(key, VariableKey):
-                        self.report(
-                            messages.MultiValueRepeatedKeyVariable, key_node, key.name
-                        )
+                        self.report(messages.MultiValueRepeatedKeyVariable,
+                                    key_node, key.name)
                     else:
                         self.report(
                             messages.MultiValueRepeatedKeyLiteral,
@@ -2075,8 +2012,7 @@ class Checker(object):
                 # TODO: if the global is not used in this scope, it does not
                 # become a globally defined name.  See test_unused_global.
                 self.messages = [
-                    m
-                    for m in self.messages
+                    m for m in self.messages
                     if not isinstance(m, messages.UndefinedName)
                     or m.message_args[0] != node_name
                 ]
@@ -2086,7 +2022,7 @@ class Checker(object):
 
                 # Bind name to non-global scopes, but as already "used".
                 node_value.used = (global_scope, node)
-                for scope in self.scopeStack[global_scope_index + 1 :]:
+                for scope in self.scopeStack[global_scope_index + 1:]:
                     scope[node_name] = node_value
 
     NONLOCAL = GLOBAL
@@ -2107,11 +2043,8 @@ class Checker(object):
         # Locate the name in locals / function / globals scopes.
         if isinstance(node.ctx, ast.Load):
             self.handleNodeLoad(node)
-            if (
-                node.id == "locals"
-                and isinstance(self.scope, FunctionScope)
-                and isinstance(node._pyflakes_parent, ast.Call)
-            ):
+            if (node.id == "locals" and isinstance(self.scope, FunctionScope)
+                    and isinstance(node._pyflakes_parent, ast.Call)):
                 # we are doing locals() call in current scope
                 self.scope.usesLocals = True
         elif isinstance(node.ctx, ast.Store):
@@ -2122,7 +2055,8 @@ class Checker(object):
             self.handleNodeDelete(node)
         else:
             # Unknown context
-            raise RuntimeError("Got impossible expression context: %r" % (node.ctx,))
+            raise RuntimeError("Got impossible expression context: %r" %
+                               (node.ctx, ))
 
     def CONTINUE(self, node):
         # Walk the tree up until we see a loop (OK), a function or class
@@ -2154,11 +2088,8 @@ class Checker(object):
             self.report(messages.ReturnOutsideFunction, node)
             return
 
-        if (
-            node.value
-            and hasattr(self.scope, "returnValue")
-            and not self.scope.returnValue
-        ):
+        if (node.value and hasattr(self.scope, "returnValue")
+                and not self.scope.returnValue):
             self.scope.returnValue = node.value
         self.handleNode(node.value, node)
 
@@ -2179,11 +2110,8 @@ class Checker(object):
         self.addBinding(node, FunctionDefinition(node.name, node))
         # doctest does not process doctest within a doctest,
         # or in nested functions.
-        if (
-            self.withDoctest
-            and not self._in_doctest()
-            and not isinstance(self.scope, FunctionScope)
-        ):
+        if (self.withDoctest and not self._in_doctest()
+                and not isinstance(self.scope, FunctionScope)):
             self.deferFunction(lambda: self.handleDoctests(node))
 
     ASYNCFUNCTIONDEF = FUNCTIONDEF
@@ -2303,11 +2231,8 @@ class Checker(object):
         self.pushScope(ClassScope)
         # doctest does not process doctest within a doctest
         # classes within classes are processed.
-        if (
-            self.withDoctest
-            and not self._in_doctest()
-            and not isinstance(self.scope, FunctionScope)
-        ):
+        if (self.withDoctest and not self._in_doctest()
+                and not isinstance(self.scope, FunctionScope)):
             self.deferFunction(lambda: self.handleDoctests(node))
         for stmt in node.body:
             self.handleNode(stmt, node)
@@ -2339,7 +2264,8 @@ class Checker(object):
                     has_starred = True
                     star_loc = i
             if star_loc >= 1 << 8 or len(node.elts) - star_loc - 1 >= 1 << 24:
-                self.report(messages.TooManyExpressionsInStarredAssignment, node)
+                self.report(messages.TooManyExpressionsInStarredAssignment,
+                            node)
         self.handleChildren(node)
 
     LIST = TUPLE
@@ -2356,9 +2282,8 @@ class Checker(object):
     def IMPORTFROM(self, node):
         if node.module == "__future__":
             if not self.futuresAllowed:
-                self.report(
-                    messages.LateFutureImport, node, [n.name for n in node.names]
-                )
+                self.report(messages.LateFutureImport, node,
+                            [n.name for n in node.names])
         else:
             self.futuresAllowed = False
 
@@ -2369,7 +2294,8 @@ class Checker(object):
             if node.module == "__future__":
                 importation = FutureImportation(name, node, self.scope)
                 if alias.name not in __future__.all_feature_names:
-                    self.report(messages.FutureFeatureNotDefined, node, alias.name)
+                    self.report(messages.FutureFeatureNotDefined, node,
+                                alias.name)
                 if alias.name == "annotations":
                     self.annotationsFutureEnabled = True
             elif alias.name == "*":
@@ -2462,9 +2388,10 @@ class Checker(object):
     def COMPARE(self, node):
         left = node.left
         for op, right in zip(node.ops, node.comparators):
-            if isinstance(op, (ast.Is, ast.IsNot)) and (
-                _is_const_non_singleton(left) or _is_const_non_singleton(right)
-            ):
+            if isinstance(
+                    op,
+                (ast.Is, ast.IsNot)) and (_is_const_non_singleton(left)
+                                          or _is_const_non_singleton(right)):
                 self.report(messages.IsLiteral, node)
             left = right
 

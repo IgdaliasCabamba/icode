@@ -41,27 +41,29 @@ class Grammar(Generic[_NodeT]):
     _token_namespace: Any = None
     _default_normalizer_config: NormalizerConfig = pep8.PEP8NormalizerConfig()
 
-    def __init__(self, text: str, *, tokenizer, parser=BaseParser, diff_parser=None):
+    def __init__(self,
+                 text: str,
+                 *,
+                 tokenizer,
+                 parser=BaseParser,
+                 diff_parser=None):
         self._pgen_grammar = generate_grammar(
-            text, token_namespace=self._get_token_namespace()
-        )
+            text, token_namespace=self._get_token_namespace())
         self._parser = parser
         self._tokenizer = tokenizer
         self._diff_parser = diff_parser
         self._hashed = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
-    def parse(
-        self,
-        code: Union[str, bytes] = None,
-        *,
-        error_recovery=True,
-        path: Union[os.PathLike, str] = None,
-        start_symbol: str = None,
-        cache=False,
-        diff_cache=False,
-        cache_path: Union[os.PathLike, str] = None,
-        file_io: FileIO = None
-    ) -> _NodeT:
+    def parse(self,
+              code: Union[str, bytes] = None,
+              *,
+              error_recovery=True,
+              path: Union[os.PathLike, str] = None,
+              start_symbol: str = None,
+              cache=False,
+              diff_cache=False,
+              cache_path: Union[os.PathLike, str] = None,
+              file_io: FileIO = None) -> _NodeT:
         """
         If you want to parse a Python file you want to start here, most likely.
 
@@ -117,7 +119,9 @@ class Grammar(Generic[_NodeT]):
                 file_io = KnownContentFileIO(path, code)
 
         if cache and file_io.path is not None:
-            module_node = load_module(self._hashed, file_io, cache_path=cache_path)
+            module_node = load_module(self._hashed,
+                                      file_io,
+                                      cache_path=cache_path)
             if module_node is not None:
                 return module_node  # type: ignore
 
@@ -128,9 +132,8 @@ class Grammar(Generic[_NodeT]):
         lines = split_lines(code, keepends=True)
         if diff_cache:
             if self._diff_parser is None:
-                raise TypeError(
-                    "You have to define a diff parser to be able " "to use this option."
-                )
+                raise TypeError("You have to define a diff parser to be able "
+                                "to use this option.")
             try:
                 module_cache_item = parser_cache[self._hashed][file_io.path]
             except KeyError:
@@ -142,8 +145,8 @@ class Grammar(Generic[_NodeT]):
                     return module_node  # type: ignore
 
                 new_node = self._diff_parser(
-                    self._pgen_grammar, self._tokenizer, module_node
-                ).update(old_lines=old_lines, new_lines=lines)
+                    self._pgen_grammar, self._tokenizer,
+                    module_node).update(old_lines=old_lines, new_lines=lines)
                 try_to_save_module(
                     self._hashed,
                     file_io,
@@ -202,8 +205,7 @@ class Grammar(Generic[_NodeT]):
             if normalizer_config is None:
                 raise ValueError(
                     "You need to specify a normalizer, because "
-                    "there's no default normalizer for this tree."
-                )
+                    "there's no default normalizer for this tree.")
         return normalizer_config.create_normalizer(self)
 
     def _normalize(self, node, normalizer_config=None):
@@ -258,8 +260,7 @@ def load_grammar(*, version: str = None, path: str = None):
     version_info = parse_version_string(version)
 
     file = path or os.path.join(
-        "python", "grammar%s%s.txt" % (version_info.major, version_info.minor)
-    )
+        "python", "grammar%s%s.txt" % (version_info.major, version_info.minor))
 
     global _loaded_grammars
     path = os.path.join(os.path.dirname(__file__), file)

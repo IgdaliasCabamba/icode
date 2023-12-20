@@ -174,9 +174,8 @@ class FormatToken(object):
             else:
                 indent_before = "\t" * indent_level + " " * spaces
         else:
-            indent_before = (
-                " " * indent_level * style.Get("INDENT_WIDTH") + " " * spaces
-            )
+            indent_before = (" " * indent_level * style.Get("INDENT_WIDTH") +
+                             " " * spaces)
 
         if self.is_comment:
             comment_lines = [s.lstrip() for s in self.value.splitlines()]
@@ -186,17 +185,16 @@ class FormatToken(object):
             self.value = self.node.value
 
         if not self.whitespace_prefix:
-            self.whitespace_prefix = (
-                "\n" * (self.newlines or newlines_before) + indent_before
-            )
+            self.whitespace_prefix = ("\n" *
+                                      (self.newlines or newlines_before) +
+                                      indent_before)
         else:
             self.whitespace_prefix += indent_before
 
     def AdjustNewlinesBefore(self, newlines_before):
         """Change the number of newlines before this token."""
         self.whitespace_prefix = "\n" * newlines_before + self.whitespace_prefix.lstrip(
-            "\n"
-        )
+            "\n")
 
     def RetainHorizontalSpacing(self, first_column, depth):
         """Retains a token's horizontal spacing."""
@@ -215,13 +213,10 @@ class FormatToken(object):
             prev_lineno += previous.value.count("\n")
 
         if cur_lineno != prev_lineno or (
-            previous.is_pseudo_paren
-            and previous.value != ")"
-            and cur_lineno != previous.previous_token.lineno
-        ):
-            self.spaces_required_before = (
-                self.column - first_column + depth * style.Get("INDENT_WIDTH")
-            )
+                previous.is_pseudo_paren and previous.value != ")"
+                and cur_lineno != previous.previous_token.lineno):
+            self.spaces_required_before = (self.column - first_column +
+                                           depth * style.Get("INDENT_WIDTH"))
             return
 
         cur_column = self.node.column
@@ -247,8 +242,7 @@ class FormatToken(object):
 
     def __repr__(self):
         msg = "FormatToken(name={0}, value={1}, lineno={2}".format(
-            self.name, self.value, self.lineno
-        )
+            self.name, self.value, self.lineno)
         msg += ", pseudo)" if self.is_pseudo_paren else ")"
         return msg
 
@@ -257,22 +251,19 @@ class FormatToken(object):
     def node_split_penalty(self):
         """Split penalty attached to the pytree node of this token."""
         return pytree_utils.GetNodeAnnotation(
-            self.node, pytree_utils.Annotation.SPLIT_PENALTY, default=0
-        )
+            self.node, pytree_utils.Annotation.SPLIT_PENALTY, default=0)
 
     @property
     def newlines(self):
         """The number of newlines needed before this token."""
-        return pytree_utils.GetNodeAnnotation(
-            self.node, pytree_utils.Annotation.NEWLINES
-        )
+        return pytree_utils.GetNodeAnnotation(self.node,
+                                              pytree_utils.Annotation.NEWLINES)
 
     @property
     def must_split(self):
         """Return true if the token requires a split before it."""
         return pytree_utils.GetNodeAnnotation(
-            self.node, pytree_utils.Annotation.MUST_SPLIT
-        )
+            self.node, pytree_utils.Annotation.MUST_SPLIT)
 
     @property
     def column(self):
@@ -288,9 +279,8 @@ class FormatToken(object):
     @py3compat.lru_cache()
     def subtypes(self):
         """Extra type information for directing formatting."""
-        value = pytree_utils.GetNodeAnnotation(
-            self.node, pytree_utils.Annotation.SUBTYPE
-        )
+        value = pytree_utils.GetNodeAnnotation(self.node,
+                                               pytree_utils.Annotation.SUBTYPE)
         return [Subtype.NONE] if value is None else value
 
     @property
@@ -386,17 +376,14 @@ class FormatToken(object):
     @property
     def is_pylint_comment(self):
         return self.is_comment and re.match(
-            r"#.*\bpylint:\s*(disable|enable)=", self.value
-        )
+            r"#.*\bpylint:\s*(disable|enable)=", self.value)
 
     @property
     def is_pytype_comment(self):
         return self.is_comment and re.match(
-            r"#.*\bpytype:\s*(disable|enable)=", self.value
-        )
+            r"#.*\bpytype:\s*(disable|enable)=", self.value)
 
     @property
     def is_copybara_comment(self):
         return self.is_comment and re.match(
-            r"#.*\bcopybara:(strip|insert|replace)", self.value
-        )
+            r"#.*\bcopybara:(strip|insert|replace)", self.value)

@@ -20,6 +20,7 @@ from smartpy_utils import format_analyze_rank, deep_analyze_doc
 
 
 class DataViewer(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("data_viewer")
@@ -82,9 +83,12 @@ class DataViewer(QFrame):
                         self.icons.get_icon(icon_category),
                         result.name,
                         None,
-                        {"editor": editor, "object": result, "rank": rank},
-                    )
-                )
+                        {
+                            "editor": editor,
+                            "object": result,
+                            "rank": rank
+                        },
+                    ))
 
     def show_data(self, row):
         item = self.inspect_objects.item(row)
@@ -98,6 +102,7 @@ class DataViewer(QFrame):
 
 
 class DeepAnalyze(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent

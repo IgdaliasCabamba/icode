@@ -14,6 +14,7 @@ from PyQt5.QtGui import QColor
 
 
 class Table(QFrame):
+
     def __init__(self, parent=None, title: str = "Untitled"):
         super().__init__(parent)
         self.setObjectName("research-table")
@@ -63,6 +64,7 @@ class Table(QFrame):
 
 
 class WorkSpace(QFrame):
+
     def __init__(self, space_id: str, parent=None):
         super().__init__(parent)
         self.setObjectName("research-space")
@@ -99,6 +101,7 @@ class WorkSpace(QFrame):
         until_col: int = None,
     ):
         if until_col is not None and until_row is not None:
-            self.tables_manager.addWidget(table, row, col, until_row, until_col)
+            self.tables_manager.addWidget(table, row, col, until_row,
+                                          until_col)
         else:
             self.tables_manager.addWidget(table, row, col)

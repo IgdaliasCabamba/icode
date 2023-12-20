@@ -56,20 +56,15 @@ def _find_defining_names(module_context, tree_name):
                 [name],
                 only_stubs=not name.get_root_context().is_stub(),
                 prefer_stub_to_compiled=False,
-            )
-        )
+            ))
 
     found_names |= set(_find_global_variables(found_names, tree_name.value))
     for name in list(found_names):
-        if (
-            name.api_type == "param"
-            or name.tree_name is None
-            or name.tree_name.parent.type == "trailer"
-        ):
+        if (name.api_type == "param" or name.tree_name is None
+                or name.tree_name.parent.type == "trailer"):
             continue
         found_names |= set(
-            _add_names_in_same_context(name.parent_context, name.string_name)
-        )
+            _add_names_in_same_context(name.parent_context, name.string_name))
     return set(_resolve_names(found_names))
 
 
@@ -112,7 +107,8 @@ def _find_global_variables(names, search_name):
             for global_name in method().get(search_name):
                 yield global_name
                 c = module_context.create_context(global_name.tree_name)
-                yield from _add_names_in_same_context(c, global_name.string_name)
+                yield from _add_names_in_same_context(c,
+                                                      global_name.string_name)
 
 
 def find_references(module_context, tree_name, only_in_module=False):
@@ -132,10 +128,8 @@ def find_references(module_context, tree_name, only_in_module=False):
     module_contexts = [module_context]
     if not only_in_module:
         module_contexts.extend(
-            m
-            for m in set(d.get_root_context() for d in found_names)
-            if m != module_context and m.tree_node is not None
-        )
+            m for m in set(d.get_root_context() for d in found_names)
+            if m != module_context and m.tree_node is not None)
     # For param no search for other modules is necessary.
     if only_in_module or any(n.api_type == "param" for n in found_names):
         potential_modules = module_contexts
@@ -148,7 +142,8 @@ def find_references(module_context, tree_name, only_in_module=False):
 
     non_matching_reference_maps = {}
     for module_context in potential_modules:
-        for name_leaf in module_context.tree_node.get_used_names().get(search_name, []):
+        for name_leaf in module_context.tree_node.get_used_names().get(
+                search_name, []):
             new = _dictionarize(_find_names(module_context, name_leaf))
             if any(tree_name in found_names_dct for tree_name in new):
                 found_names_dct.update(new)
@@ -163,7 +158,8 @@ def find_references(module_context, tree_name, only_in_module=False):
                         pass
             else:
                 for name in new:
-                    non_matching_reference_maps.setdefault(name, []).append(new)
+                    non_matching_reference_maps.setdefault(name,
+                                                           []).append(new)
     result = found_names_dct.values()
     if only_in_module:
         return [n for n in result if n.get_root_context() == module_context]
@@ -214,12 +210,12 @@ def recurse_find_python_folders_and_files(folder_io, except_paths=()):
                     yield None, file_io
 
             if path.name == ".gitignore":
-                ignored_paths, ignored_names = gitignored_lines(root_folder_io, file_io)
+                ignored_paths, ignored_names = gitignored_lines(
+                    root_folder_io, file_io)
                 except_paths |= ignored_paths
 
         folder_ios[:] = [
-            folder_io
-            for folder_io in folder_ios
+            folder_io for folder_io in folder_ios
             if folder_io.path not in except_paths
             and folder_io.get_base_name() not in _IGNORE_FOLDERS
         ]
@@ -229,8 +225,7 @@ def recurse_find_python_folders_and_files(folder_io, except_paths=()):
 
 def recurse_find_python_files(folder_io, except_paths=()):
     for folder_io, file_io in recurse_find_python_folders_and_files(
-        folder_io, except_paths
-    ):
+            folder_io, except_paths):
         if file_io is not None:
             yield file_io
 
@@ -247,7 +242,8 @@ def _find_python_files_in_sys_path(inference_state, module_contexts):
         folder_io = file_io.get_parent_folder()
         while True:
             path = folder_io.path
-            if not any(path.startswith(p) for p in sys_path) or path in except_paths:
+            if not any(path.startswith(p)
+                       for p in sys_path) or path in except_paths:
                 break
             for file_io in recurse_find_python_files(folder_io, except_paths):
                 if file_io.path not in yielded_paths:
@@ -256,9 +252,10 @@ def _find_python_files_in_sys_path(inference_state, module_contexts):
             folder_io = folder_io.get_parent_folder()
 
 
-def get_module_contexts_containing_name(
-    inference_state, module_contexts, name, limit_reduction=1
-):
+def get_module_contexts_containing_name(inference_state,
+                                        module_contexts,
+                                        name,
+                                        limit_reduction=1):
     """
     Search a name in the directories of modules.
 
@@ -276,13 +273,18 @@ def get_module_contexts_containing_name(
     if len(name) <= 2:
         return
 
-    file_io_iterator = _find_python_files_in_sys_path(inference_state, module_contexts)
-    yield from search_in_file_ios(
-        inference_state, file_io_iterator, name, limit_reduction=limit_reduction
-    )
+    file_io_iterator = _find_python_files_in_sys_path(inference_state,
+                                                      module_contexts)
+    yield from search_in_file_ios(inference_state,
+                                  file_io_iterator,
+                                  name,
+                                  limit_reduction=limit_reduction)
 
 
-def search_in_file_ios(inference_state, file_io_iterator, name, limit_reduction=1):
+def search_in_file_ios(inference_state,
+                       file_io_iterator,
+                       name,
+                       limit_reduction=1):
     parse_limit = _PARSED_FILE_LIMIT / limit_reduction
     open_limit = _OPENED_FILE_LIMIT / limit_reduction
     file_io_count = 0

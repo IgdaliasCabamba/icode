@@ -13,7 +13,6 @@ try:
 except ImportError:  # pragma: no cover
     import io
 
-
 __all__ = [
     "OP",
     "COMMENT",
@@ -178,8 +177,7 @@ def is_single_token(token_number, tokens):
     or NEWLINE tokens.
     """
     return TOKEN_NUMBER(tokens[0]) == token_number and all(
-        TOKEN_NUMBER(t) in (EM, NL, NEWLINE) for t in tokens[1:]
-    )
+        TOKEN_NUMBER(t) in (EM, NL, NEWLINE) for t in tokens[1:])
 
 
 def analyze(source):
@@ -213,7 +211,8 @@ def analyze(source):
 
         lineno += len(parsed_lines)
 
-        comments += sum(1 for t in tokens if TOKEN_NUMBER(t) == tokenize.COMMENT)
+        comments += sum(1 for t in tokens
+                        if TOKEN_NUMBER(t) == tokenize.COMMENT)
 
         # Identify single line comments, conservatively
         if is_single_token(tokenize.COMMENT, tokens):

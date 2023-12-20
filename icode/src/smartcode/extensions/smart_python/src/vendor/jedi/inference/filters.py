@@ -69,8 +69,7 @@ def _get_definition_names(used_names, name_key):
     except KeyError:
         names = used_names.get(name_key, ())
         result = for_module[name_key] = tuple(
-            name for name in names if name.is_definition(include_setitem=True)
-        )
+            name for name in names if name.is_definition(include_setitem=True))
         return result
 
 
@@ -85,31 +84,27 @@ class AbstractUsedNamesFilter(AbstractFilter):
 
     def get(self, name):
         return self._convert_names(
-            self._filter(
-                _get_definition_names(self._used_names, name),
-            )
-        )
+            self._filter(_get_definition_names(self._used_names, name), ))
 
     def _convert_names(self, names):
         return [self.name_class(self.parent_context, name) for name in names]
 
     def values(self):
         return self._convert_names(
-            name
-            for name_key in self._used_names
-            for name in self._filter(
-                _get_definition_names(self._used_names, name_key),
-            )
-        )
+            name for name_key in self._used_names for name in self._filter(
+                _get_definition_names(self._used_names, name_key), ))
 
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.parent_context)
 
 
 class ParserTreeFilter(AbstractUsedNamesFilter):
-    def __init__(
-        self, parent_context, node_context=None, until_position=None, origin_scope=None
-    ):
+
+    def __init__(self,
+                 parent_context,
+                 node_context=None,
+                 until_position=None,
+                 origin_scope=None):
         """
         node_context is an option to specify a second value for use cases
         like the class mro where the parent class of a new name would be the
@@ -133,12 +128,13 @@ class ParserTreeFilter(AbstractUsedNamesFilter):
         if parent.type == "trailer":
             return False
         base_node = parent if parent.type in ("classdef", "funcdef") else name
-        return (
-            get_cached_parent_scope(self._used_names, base_node) == self._parser_scope
-        )
+        return (get_cached_parent_scope(self._used_names,
+                                        base_node) == self._parser_scope)
 
     def _check_flows(self, names):
-        for name in sorted(names, key=lambda name: name.start_pos, reverse=True):
+        for name in sorted(names,
+                           key=lambda name: name.start_pos,
+                           reverse=True):
             check = flow_analysis.reachability_check(
                 context=self._node_context,
                 value_scope=self._parser_scope,
@@ -153,7 +149,9 @@ class ParserTreeFilter(AbstractUsedNamesFilter):
 
 
 class _FunctionExecutionFilter(ParserTreeFilter):
-    def __init__(self, parent_context, function_value, until_position, origin_scope):
+
+    def __init__(self, parent_context, function_value, until_position,
+                 origin_scope):
         super().__init__(
             parent_context,
             until_position=until_position,
@@ -178,6 +176,7 @@ class _FunctionExecutionFilter(ParserTreeFilter):
 
 
 class FunctionExecutionFilter(_FunctionExecutionFilter):
+
     def __init__(self, *args, arguments, **kwargs):
         super().__init__(*args, **kwargs)
         self._arguments = arguments
@@ -187,11 +186,13 @@ class FunctionExecutionFilter(_FunctionExecutionFilter):
 
 
 class AnonymousFunctionExecutionFilter(_FunctionExecutionFilter):
+
     def _convert_param(self, param, name):
         return AnonymousParamName(self._function_value, name)
 
 
 class GlobalNameFilter(AbstractUsedNamesFilter):
+
     def get(self, name):
         try:
             names = self._used_names[name]
@@ -206,14 +207,13 @@ class GlobalNameFilter(AbstractUsedNamesFilter):
                 yield name
 
     def values(self):
-        return self._convert_names(
-            name
-            for name_list in self._used_names.values()
-            for name in self._filter(name_list)
-        )
+        return self._convert_names(name
+                                   for name_list in self._used_names.values()
+                                   for name in self._filter(name_list))
 
 
 class DictFilter(AbstractFilter):
+
     def __init__(self, dct):
         self._dct = dct
 
@@ -226,6 +226,7 @@ class DictFilter(AbstractFilter):
             return list(self._filter([value]))
 
     def values(self):
+
         def yielder():
             for item in self._dct.items():
                 try:
@@ -244,6 +245,7 @@ class DictFilter(AbstractFilter):
 
 
 class MergedFilter:
+
     def __init__(self, *filters):
         self._filters = filters
 
@@ -284,7 +286,8 @@ class SpecialMethodFilter(DictFilter):
     class SpecialMethodName(AbstractNameDefinition):
         api_type = "function"
 
-        def __init__(self, parent_context, string_name, callable_, builtin_value):
+        def __init__(self, parent_context, string_name, callable_,
+                     builtin_value):
             self.parent_context = parent_context
             self.string_name = string_name
             self._callable = callable_
@@ -301,13 +304,10 @@ class SpecialMethodFilter(DictFilter):
                 else:
                     continue
                 break
-            return ValueSet(
-                [
-                    _BuiltinMappedMethod(
-                        self.parent_context, self._callable, builtin_func
-                    )
-                ]
-            )
+            return ValueSet([
+                _BuiltinMappedMethod(self.parent_context, self._callable,
+                                     builtin_func)
+            ])
 
     def __init__(self, value, dct, builtin_value):
         super().__init__(dct)
@@ -321,10 +321,12 @@ class SpecialMethodFilter(DictFilter):
         """
 
     def _convert(self, name, value):
-        return self.SpecialMethodName(self.value, name, value, self._builtin_value)
+        return self.SpecialMethodName(self.value, name, value,
+                                      self._builtin_value)
 
 
 class _OverwriteMeta(type):
+
     def __init__(cls, name, bases, dct):
         super().__init__(name, bases, dct)
 
@@ -344,25 +346,29 @@ class _OverwriteMeta(type):
 
 
 class _AttributeOverwriteMixin:
+
     def get_filters(self, *args, **kwargs):
-        yield SpecialMethodFilter(self, self.overwritten_methods, self._wrapped_value)
+        yield SpecialMethodFilter(self, self.overwritten_methods,
+                                  self._wrapped_value)
         yield from self._wrapped_value.get_filters(*args, **kwargs)
 
 
-class LazyAttributeOverwrite(
-    _AttributeOverwriteMixin, LazyValueWrapper, metaclass=_OverwriteMeta
-):
+class LazyAttributeOverwrite(_AttributeOverwriteMixin,
+                             LazyValueWrapper,
+                             metaclass=_OverwriteMeta):
+
     def __init__(self, inference_state):
         self.inference_state = inference_state
 
 
-class AttributeOverwrite(
-    _AttributeOverwriteMixin, ValueWrapper, metaclass=_OverwriteMeta
-):
+class AttributeOverwrite(_AttributeOverwriteMixin,
+                         ValueWrapper,
+                         metaclass=_OverwriteMeta):
     pass
 
 
 def publish_method(method_name):
+
     def decorator(func):
         dct = func.__dict__.setdefault("registered_overwritten_methods", {})
         dct[method_name] = func

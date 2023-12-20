@@ -30,7 +30,8 @@ def filter_name(filters, name_or_str):
     Searches names that are defined in a scope (the different
     ``filters``), until a name fits.
     """
-    string_name = name_or_str.value if isinstance(name_or_str, Name) else name_or_str
+    string_name = name_or_str.value if isinstance(name_or_str,
+                                                  Name) else name_or_str
     names = []
     for filter in filters:
         names = filter.get(string_name)
@@ -70,14 +71,16 @@ def check_flow_information(value, flow, search_name, pos):
             names = module_node.get_used_names()[search_name.value]
         except KeyError:
             return None
-        names = reversed(
-            [n for n in names if flow.start_pos <= n.start_pos < (pos or flow.end_pos)]
-        )
+        names = reversed([
+            n for n in names
+            if flow.start_pos <= n.start_pos < (pos or flow.end_pos)
+        ])
 
         for name in names:
             ass = search_ancestor(name, "assert_stmt")
             if ass is not None:
-                result = _check_isinstance_type(value, ass.assertion, search_name)
+                result = _check_isinstance_type(value, ass.assertion,
+                                                search_name)
                 if result is not None:
                     return result
 
@@ -93,12 +96,8 @@ def _get_isinstance_trailer_arglist(node):
     if node.type in ("power", "atom_expr") and len(node.children) == 2:
         # This might be removed if we analyze and, etc
         first, trailer = node.children
-        if (
-            first.type == "name"
-            and first.value == "isinstance"
-            and trailer.type == "trailer"
-            and trailer.children[0] == "("
-        ):
+        if (first.type == "name" and first.value == "isinstance"
+                and trailer.type == "trailer" and trailer.children[0] == "("):
             return trailer
     return None
 
@@ -128,10 +127,8 @@ def _check_isinstance_type(value, node, search_name):
 
     value_set = NO_VALUES
     for cls_or_tup in lazy_cls.infer():
-        if (
-            isinstance(cls_or_tup, iterable.Sequence)
-            and cls_or_tup.array_type == "tuple"
-        ):
+        if (isinstance(cls_or_tup, iterable.Sequence)
+                and cls_or_tup.array_type == "tuple"):
             for lazy_value in cls_or_tup.py__iter__():
                 value_set |= lazy_value.infer().execute_with_values()
         else:

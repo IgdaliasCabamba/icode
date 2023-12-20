@@ -71,8 +71,7 @@ class UnwrappedLine(object):
         prev_length = self.first.total_length
         for token in self._tokens[1:]:
             if token.spaces_required_before == 0 and _SpaceRequiredBetween(
-                prev_token, token, self.disable
-            ):
+                    prev_token, token, self.disable):
                 token.spaces_required_before = 1
 
             tok_len = len(token.value) if not token.is_pseudo_paren else 0
@@ -96,8 +95,7 @@ class UnwrappedLine(object):
             token.split_penalty += _SplitPenalty(prev_token, token)
             token.must_break_before = _MustBreakBefore(prev_token, token)
             token.can_break_before = token.must_break_before or _CanBreakBefore(
-                prev_token, token
-            )
+                prev_token, token)
 
             prev_length = token.total_length
             prev_token = token
@@ -120,9 +118,9 @@ class UnwrappedLine(object):
             uwlines.append(uwline)
 
         for uwline in uwlines:
-            pytree_utils.SetNodeAnnotation(
-                uwline.first.node, pytree_utils.Annotation.MUST_SPLIT, True
-            )
+            pytree_utils.SetNodeAnnotation(uwline.first.node,
+                                           pytree_utils.Annotation.MUST_SPLIT,
+                                           True)
             uwline.first.previous_token = None
             uwline.last.next_token = None
 
@@ -187,9 +185,9 @@ class UnwrappedLine(object):
 
     def __repr__(self):  # pragma: no cover
         tokens_repr = ",".join(
-            ["{0}({1!r})".format(tok.name, tok.value) for tok in self._tokens]
-        )
-        return "UnwrappedLine(depth={0}, tokens=[{1}])".format(self.depth, tokens_repr)
+            ["{0}({1!r})".format(tok.name, tok.value) for tok in self._tokens])
+        return "UnwrappedLine(depth={0}, tokens=[{1}])".format(
+            self.depth, tokens_repr)
 
     ############################################################################
     # Properties                                                               #
@@ -274,12 +272,9 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
     """Return True if a space is required between the left and right token."""
     lval = left.value
     rval = right.value
-    if (
-        left.is_pseudo_paren
-        and _IsIdNumberStringToken(right)
-        and left.previous_token
-        and _IsIdNumberStringToken(left.previous_token)
-    ):
+    if (left.is_pseudo_paren and _IsIdNumberStringToken(right)
+            and left.previous_token
+            and _IsIdNumberStringToken(left.previous_token)):
         # Space between keyword... tokens and pseudo parens.
         return True
     if left.is_pseudo_paren or right.is_pseudo_paren:
@@ -307,9 +302,8 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
         if rval in pytree_utils.CLOSING_BRACKETS and lval == ":":
             return True
     if style.Get("SPACES_AROUND_SUBSCRIPT_COLON") and (
-        _IsSubscriptColonAndValuePair(left, right)
-        or _IsSubscriptColonAndValuePair(right, left)
-    ):
+            _IsSubscriptColonAndValuePair(left, right)
+            or _IsSubscriptColonAndValuePair(right, left)):
         # Supersede the "never want a space before a colon or comma" check.
         return True
     if rval in ":,":
@@ -327,33 +321,26 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
     if lval == "." and rval == "import":
         # Space after the '.' in an import statement.
         return True
-    if (
-        lval == "="
-        and rval == "."
-        and format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN not in left.subtypes
-    ):
+    if (lval == "=" and rval == "." and
+            format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN not in left.subtypes):
         # Space between equal and '.' as in "X = ...".
         return True
-    if (right.is_keyword or right.is_name) and (left.is_keyword or left.is_name):
+    if (right.is_keyword or right.is_name) and (left.is_keyword
+                                                or left.is_name):
         # Don't merge two keywords/identifiers.
         return True
-    if (
-        format_token.Subtype.SUBSCRIPT_COLON in left.subtypes
-        or format_token.Subtype.SUBSCRIPT_COLON in right.subtypes
-    ):
+    if (format_token.Subtype.SUBSCRIPT_COLON in left.subtypes
+            or format_token.Subtype.SUBSCRIPT_COLON in right.subtypes):
         # A subscript shouldn't have spaces separating its colons.
         return False
-    if (
-        format_token.Subtype.TYPED_NAME in left.subtypes
-        or format_token.Subtype.TYPED_NAME in right.subtypes
-    ):
+    if (format_token.Subtype.TYPED_NAME in left.subtypes
+            or format_token.Subtype.TYPED_NAME in right.subtypes):
         # A typed argument should have a space after the colon.
         return True
     if left.is_string:
-        if (
-            rval == "="
-            and format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN_ARG_LIST in right.subtypes
-        ):
+        if (rval == "="
+                and format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN_ARG_LIST
+                in right.subtypes):
             # If there is a type hint, then we don't want to add a space between the
             # equal sign and the hint.
             return False
@@ -387,41 +374,31 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
         if lval in block_list or rval in block_list:
             return False
         if style.Get("ARITHMETIC_PRECEDENCE_INDICATION"):
-            if _PriorityIndicatingNoSpace(left) or _PriorityIndicatingNoSpace(right):
+            if _PriorityIndicatingNoSpace(left) or _PriorityIndicatingNoSpace(
+                    right):
                 return False
             else:
                 return True
         else:
             return True
-    if (
-        _IsUnaryOperator(left)
-        and lval != "not"
-        and (right.is_name or right.is_number or rval == "(")
-    ):
+    if (_IsUnaryOperator(left) and lval != "not"
+            and (right.is_name or right.is_number or rval == "(")):
         # The previous token was a unary op. No space is desired between it and
         # the current token.
         return False
-    if (
-        format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in left.subtypes
-        and format_token.Subtype.TYPED_NAME not in right.subtypes
-    ):
+    if (format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in left.subtypes
+            and format_token.Subtype.TYPED_NAME not in right.subtypes):
         # A named argument or default parameter shouldn't have spaces around it.
         return style.Get("SPACES_AROUND_DEFAULT_OR_NAMED_ASSIGN")
-    if (
-        format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in right.subtypes
-        and format_token.Subtype.TYPED_NAME not in left.subtypes
-    ):
+    if (format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in right.subtypes
+            and format_token.Subtype.TYPED_NAME not in left.subtypes):
         # A named argument or default parameter shouldn't have spaces around it.
         return style.Get("SPACES_AROUND_DEFAULT_OR_NAMED_ASSIGN")
-    if (
-        format_token.Subtype.VARARGS_LIST in left.subtypes
-        or format_token.Subtype.VARARGS_LIST in right.subtypes
-    ):
+    if (format_token.Subtype.VARARGS_LIST in left.subtypes
+            or format_token.Subtype.VARARGS_LIST in right.subtypes):
         return False
-    if (
-        format_token.Subtype.VARARGS_STAR in left.subtypes
-        or format_token.Subtype.KWARGS_STAR_STAR in left.subtypes
-    ):
+    if (format_token.Subtype.VARARGS_STAR in left.subtypes
+            or format_token.Subtype.KWARGS_STAR_STAR in left.subtypes):
         # Don't add a space after a vararg's star or a keyword's star-star.
         return False
     if lval == "@" and format_token.Subtype.DECORATOR in left.subtypes:
@@ -436,28 +413,28 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
     if lval == "." or rval == ".":
         # Don't place spaces between dots.
         return False
-    if (
-        (lval == "(" and rval == ")")
-        or (lval == "[" and rval == "]")
-        or (lval == "{" and rval == "}")
-    ):
+    if ((lval == "(" and rval == ")") or (lval == "[" and rval == "]")
+            or (lval == "{" and rval == "}")):
         # Empty objects shouldn't be separated by spaces.
         return False
     if not is_line_disabled and (left.OpensScope() or right.ClosesScope()):
         if style.GetOrDefault("SPACES_AROUND_DICT_DELIMITERS", False) and (
-            (lval == "{" and _IsDictListTupleDelimiterTok(left, is_opening=True))
-            or (rval == "}" and _IsDictListTupleDelimiterTok(right, is_opening=False))
-        ):
+            (lval == "{"
+             and _IsDictListTupleDelimiterTok(left, is_opening=True)) or
+            (rval == "}"
+             and _IsDictListTupleDelimiterTok(right, is_opening=False))):
             return True
         if style.GetOrDefault("SPACES_AROUND_LIST_DELIMITERS", False) and (
-            (lval == "[" and _IsDictListTupleDelimiterTok(left, is_opening=True))
-            or (rval == "]" and _IsDictListTupleDelimiterTok(right, is_opening=False))
-        ):
+            (lval == "["
+             and _IsDictListTupleDelimiterTok(left, is_opening=True)) or
+            (rval == "]"
+             and _IsDictListTupleDelimiterTok(right, is_opening=False))):
             return True
         if style.GetOrDefault("SPACES_AROUND_TUPLE_DELIMITERS", False) and (
-            (lval == "(" and _IsDictListTupleDelimiterTok(left, is_opening=True))
-            or (rval == ")" and _IsDictListTupleDelimiterTok(right, is_opening=False))
-        ):
+            (lval == "("
+             and _IsDictListTupleDelimiterTok(left, is_opening=True)) or
+            (rval == ")"
+             and _IsDictListTupleDelimiterTok(right, is_opening=False))):
             return True
     if lval in pytree_utils.OPENING_BRACKETS and rval in pytree_utils.OPENING_BRACKETS:
         # Nested objects' opening brackets shouldn't be separated, unless enabled
@@ -491,9 +468,8 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
         # by SPACE_INSIDE_BRACKETS.
         return style.Get("SPACE_INSIDE_BRACKETS")
     if lval in pytree_utils.OPENING_BRACKETS and (
-        format_token.Subtype.VARARGS_STAR in right.subtypes
-        or format_token.Subtype.KWARGS_STAR_STAR in right.subtypes
-    ):
+            format_token.Subtype.VARARGS_STAR in right.subtypes
+            or format_token.Subtype.KWARGS_STAR_STAR in right.subtypes):
         # Don't separate a '*' or '**' from the opening bracket, unless enabled
         # by SPACE_INSIDE_BRACKETS.
         return style.Get("SPACE_INSIDE_BRACKETS")
@@ -509,25 +485,20 @@ def _SpaceRequiredBetween(left, right, is_line_disabled):
 
 def _MustBreakBefore(prev_token, cur_token):
     """Return True if a line break is required before the current token."""
-    if prev_token.is_comment or (
-        prev_token.previous_token
-        and prev_token.is_pseudo_paren
-        and prev_token.previous_token.is_comment
-    ):
+    if prev_token.is_comment or (prev_token.previous_token
+                                 and prev_token.is_pseudo_paren
+                                 and prev_token.previous_token.is_comment):
         # Must break if the previous token was a comment.
         return True
-    if (
-        cur_token.is_string
-        and prev_token.is_string
-        and IsSurroundedByBrackets(cur_token)
-    ):
+    if (cur_token.is_string and prev_token.is_string
+            and IsSurroundedByBrackets(cur_token)):
         # We want consecutive strings to be on separate lines. This is a
         # reasonable assumption, because otherwise they should have written them
         # all on the same line, or with a '+'.
         return True
-    return pytree_utils.GetNodeAnnotation(
-        cur_token.node, pytree_utils.Annotation.MUST_SPLIT, default=False
-    )
+    return pytree_utils.GetNodeAnnotation(cur_token.node,
+                                          pytree_utils.Annotation.MUST_SPLIT,
+                                          default=False)
 
 
 def _CanBreakBefore(prev_token, cur_token):
@@ -565,10 +536,9 @@ def _CanBreakBefore(prev_token, cur_token):
         # Don't break after a unary token.
         return False
     if not style.Get("ALLOW_SPLIT_BEFORE_DEFAULT_OR_NAMED_ASSIGNS"):
-        if (
-            format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in cur_token.subtypes
-            or format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in prev_token.subtypes
-        ):
+        if (format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in cur_token.subtypes
+                or format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN
+                in prev_token.subtypes):
             return False
     return True
 
@@ -672,10 +642,8 @@ def _SplitPenalty(prev_token, cur_token):
         if cval in _BITWISE_OPERATORS:
             return style.Get("SPLIT_PENALTY_BITWISE_OPERATOR")
 
-    if (
-        format_token.Subtype.COMP_FOR in cur_token.subtypes
-        or format_token.Subtype.COMP_IF in cur_token.subtypes
-    ):
+    if (format_token.Subtype.COMP_FOR in cur_token.subtypes
+            or format_token.Subtype.COMP_IF in cur_token.subtypes):
         # We don't mind breaking before the 'for' or 'if' of a list comprehension.
         return 0
     if format_token.Subtype.UNARY_OPERATOR in prev_token.subtypes:
@@ -686,10 +654,8 @@ def _SplitPenalty(prev_token, cur_token):
         return 0
     if pval == "**" or cval == "**":
         return split_penalty.STRONGLY_CONNECTED
-    if (
-        format_token.Subtype.VARARGS_STAR in prev_token.subtypes
-        or format_token.Subtype.KWARGS_STAR_STAR in prev_token.subtypes
-    ):
+    if (format_token.Subtype.VARARGS_STAR in prev_token.subtypes
+            or format_token.Subtype.KWARGS_STAR_STAR in prev_token.subtypes):
         # Don't split after a varargs * or kwargs **.
         return split_penalty.UNBREAKABLE
     if prev_token.OpensScope() and cval != "(":
@@ -701,10 +667,9 @@ def _SplitPenalty(prev_token, cur_token):
     if cval == "=":
         # Don't split before an assignment.
         return split_penalty.UNBREAKABLE
-    if (
-        format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in prev_token.subtypes
-        or format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in cur_token.subtypes
-    ):
+    if (format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN in prev_token.subtypes
+            or format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN
+            in cur_token.subtypes):
         # Don't break before or after an default or named assignment.
         return split_penalty.UNBREAKABLE
     if cval == "==":

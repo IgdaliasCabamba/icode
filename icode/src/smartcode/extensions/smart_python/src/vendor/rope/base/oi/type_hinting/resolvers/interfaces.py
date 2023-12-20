@@ -1,4 +1,5 @@
 class IResolver(object):
+
     def __call__(self, hint, pyobject):
         """
         :param hint: For example "List[int]" or "(Foo, Bar) -> Baz" or simple "Foo"

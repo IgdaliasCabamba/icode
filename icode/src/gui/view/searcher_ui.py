@@ -29,6 +29,7 @@ from .widgets import *
 
 
 class FindOptions(QMenu):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -61,6 +62,7 @@ class FindOptions(QMenu):
 
 
 class FindPanel(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("finder")
@@ -100,6 +102,7 @@ class FindPanel(QFrame):
 
 
 class ReplacePanel(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.icons = getfn.get_smartcode_icons("replacer")
@@ -128,6 +131,7 @@ class ReplacePanel(QFrame):
 
 
 class FindReplace(QFrame):
+
     def __init__(self, view, parent):
         super().__init__(parent)
         self.setObjectName("finder_replacer")
@@ -153,21 +157,20 @@ class FindReplace(QFrame):
         self.btn_mode = QPushButton(self)
         self.btn_mode.setIcon(self.icons.get_icon("collapse"))
         self.btn_mode.setObjectName("btn-expand-collapse")
-        self.btn_mode.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.btn_mode.setSizePolicy(QSizePolicy.Preferred,
+                                    QSizePolicy.Preferred)
         self.btn_mode.clicked.connect(self.change_mode)
 
         self.options = self.finder.options_menu
         self.options.normal_mode.triggered.connect(self.normal_mode)
         self.options.regex_mode.triggered.connect(self.regex_mode)
         self.options.case_sensitive.triggered.connect(
-            lambda: self.set_case_sensitive(self.options.case_sensitive.isChecked())
-        )
+            lambda: self.set_case_sensitive(self.options.case_sensitive.
+                                            isChecked()))
         self.options.wrap.triggered.connect(
-            lambda: self.set_wrap(self.options.wrap.isChecked())
-        )
+            lambda: self.set_wrap(self.options.wrap.isChecked()))
         self.options.whole_word.triggered.connect(
-            lambda: self.set_whole_word(self.options.whole_word.isChecked())
-        )
+            lambda: self.set_whole_word(self.options.whole_word.isChecked()))
 
         self.re = self.options.regex_mode.isChecked()
         self.whole_word = self.options.whole_word.isChecked()
@@ -248,9 +251,9 @@ class FindReplace(QFrame):
         self.find_query = query
         if self.find_query is None:
             self.find_query = self.input_find.text()
-        self.current_editor.editor.findFirst(
-            self.find_query, self.re, self.case_sensitive, self.whole_word, self.wrap
-        )
+        self.current_editor.editor.findFirst(self.find_query, self.re,
+                                             self.case_sensitive,
+                                             self.whole_word, self.wrap)
 
     def find_next(self):
         self.current_editor.editor.findNext()

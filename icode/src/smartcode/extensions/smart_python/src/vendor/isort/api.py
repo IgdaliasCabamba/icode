@@ -162,7 +162,8 @@ def sort_stream(
     TextIO stream is provided results will be written to it, otherwise no diff will be computed.
     - ****config_kwargs**: Any config modifications.
     """
-    extension = extension or (file_path and file_path.suffix.lstrip(".")) or "py"
+    extension = extension or (file_path
+                              and file_path.suffix.lstrip(".")) or "py"
     if show_diff:
         _output_stream = StringIO()
         _input_stream = StringIO(input_stream.read())
@@ -182,7 +183,8 @@ def sort_stream(
             file_input=_input_stream.read(),
             file_output=_output_stream.read(),
             file_path=file_path,
-            output=output_stream if show_diff is True else cast(TextIO, show_diff),
+            output=output_stream if show_diff is True else cast(
+                TextIO, show_diff),
             color_output=config.color_output,
         )
         return changed
@@ -283,7 +285,8 @@ def check_stream(
             printer.success(f"{file_path or ''} Everything Looks Good!")
         return True
 
-    printer.error(f"{file_path or ''} Imports are incorrectly sorted and/or formatted.")
+    printer.error(
+        f"{file_path or ''} Imports are incorrectly sorted and/or formatted.")
     if show_diff:
         output_stream = StringIO()
         input_stream.seek(0)
@@ -362,13 +365,11 @@ def _in_memory_output_stream_context() -> Iterator[TextIO]:
 
 
 @contextlib.contextmanager
-def _file_output_stream_context(
-    filename: Union[str, Path], source_file: File
-) -> Iterator[TextIO]:
+def _file_output_stream_context(filename: Union[str, Path],
+                                source_file: File) -> Iterator[TextIO]:
     tmp_file = _tmp_file(source_file)
-    with tmp_file.open(
-        "w+", encoding=source_file.encoding, newline=""
-    ) as output_stream:
+    with tmp_file.open("w+", encoding=source_file.encoding,
+                       newline="") as output_stream:
         shutil.copymode(filename, tmp_file)
         yield output_stream
 
@@ -414,7 +415,9 @@ def sort_file(
 
     with io.File.read(filename) as source_file:
         actual_file_path = file_path or source_file.path
-        config = _config(path=actual_file_path, config=file_config, **config_kwargs)
+        config = _config(path=actual_file_path,
+                         config=file_config,
+                         **config_kwargs)
         changed: bool = False
         try:
             if write_to_stdout:
@@ -430,11 +433,11 @@ def sort_file(
                 if output is None:
                     try:
                         if config.overwrite_in_place:
-                            output_stream_context = _in_memory_output_stream_context()
+                            output_stream_context = _in_memory_output_stream_context(
+                            )
                         else:
                             output_stream_context = _file_output_stream_context(
-                                filename, source_file
-                            )
+                                filename, source_file)
                         with output_stream_context as output_stream:
                             changed = sort_stream(
                                 input_stream=source_file.stream,
@@ -452,17 +455,14 @@ def sort_file(
                                         file_input=source_file.stream.read(),
                                         file_output=output_stream.read(),
                                         file_path=actual_file_path,
-                                        output=None
-                                        if show_diff is True
-                                        else cast(TextIO, show_diff),
+                                        output=None if show_diff is True else
+                                        cast(TextIO, show_diff),
                                         color_output=config.color_output,
                                     )
                                     if show_diff or (
-                                        ask_to_apply
-                                        and not ask_whether_to_apply_changes_to_file(
-                                            str(source_file.path)
-                                        )
-                                    ):
+                                            ask_to_apply and
+                                            not ask_whether_to_apply_changes_to_file(
+                                                str(source_file.path))):
                                         return False
                                 source_file.stream.close()
                                 if config.overwrite_in_place:
@@ -498,15 +498,16 @@ def sort_file(
                             file_input=source_file.stream.read(),
                             file_output=output.read(),
                             file_path=actual_file_path,
-                            output=None
-                            if show_diff is True
-                            else cast(TextIO, show_diff),
+                            output=None if show_diff is True else cast(
+                                TextIO, show_diff),
                             color_output=config.color_output,
                         )
                     source_file.stream.close()
 
         except ExistingSyntaxErrors:
-            warn(f"{actual_file_path} unable to sort due to existing syntax errors")
+            warn(
+                f"{actual_file_path} unable to sort due to existing syntax errors"
+            )
         except IntroducedSyntaxErrors:  # pragma: no cover
             warn(
                 f"{actual_file_path} unable to sort as isort introduces new syntax errors"
@@ -562,9 +563,10 @@ def find_imports_in_stream(
     - ****config_kwargs**: Any config modifications.
     """
     config = _config(config=config, **config_kwargs)
-    identified_imports = identify.imports(
-        input_stream, config=config, file_path=file_path, top_only=top_only
-    )
+    identified_imports = identify.imports(input_stream,
+                                          config=config,
+                                          file_path=file_path,
+                                          top_only=top_only)
     if not unique:
         yield from identified_imports
 
@@ -576,9 +578,8 @@ def find_imports_in_stream(
             key = f"{identified_import.module}.{identified_import.attribute}"
         elif unique == ImportKey.MODULE:
             key = identified_import.module
-        elif (
-            unique == ImportKey.PACKAGE
-        ):  # pragma: no branch # type checking ensures this
+        elif (unique == ImportKey.PACKAGE
+              ):  # pragma: no branch # type checking ensures this
             key = identified_import.module.split(".")[0]
 
         if key and key not in seen:
@@ -635,32 +636,25 @@ def find_imports_in_paths(
     """
     config = _config(config=config, **config_kwargs)
     seen: Optional[Set[str]] = set() if unique else None
-    yield from chain(
-        *(
-            find_imports_in_file(
-                file_name, unique=unique, config=config, top_only=top_only, _seen=seen
-            )
-            for file_name in files.find(map(str, paths), config, [], [])
-        )
-    )
+    yield from chain(*(find_imports_in_file(
+        file_name, unique=unique, config=config, top_only=top_only, _seen=seen)
+                       for file_name in files.find(map(str, paths), config, [],
+                                                   [])))
 
 
-def _config(
-    path: Optional[Path] = None, config: Config = DEFAULT_CONFIG, **config_kwargs: Any
-) -> Config:
-    if path and (
-        config is DEFAULT_CONFIG
-        and "settings_path" not in config_kwargs
-        and "settings_file" not in config_kwargs
-    ):
+def _config(path: Optional[Path] = None,
+            config: Config = DEFAULT_CONFIG,
+            **config_kwargs: Any) -> Config:
+    if path and (config is DEFAULT_CONFIG
+                 and "settings_path" not in config_kwargs
+                 and "settings_file" not in config_kwargs):
         config_kwargs["settings_path"] = path
 
     if config_kwargs:
         if config is not DEFAULT_CONFIG:
             raise ValueError(
                 "You can either specify custom configuration options using kwargs or "
-                "passing in a Config object. Not Both!"
-            )
+                "passing in a Config object. Not Both!")
 
         config = Config(**config_kwargs)
 

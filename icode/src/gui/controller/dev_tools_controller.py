@@ -6,6 +6,7 @@ from core.char_utils import get_unicon
 
 
 class NotesCore(QObject):
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent
@@ -19,6 +20,7 @@ class NotesCore(QObject):
 
 
 class NotesController(QObject):
+
     def __init__(self, application_core, view):
         super().__init__()
         self.application_core = application_core
@@ -43,6 +45,7 @@ class NotesController(QObject):
 
 
 class TodosController(QObject):
+
     def __init__(self, application_core, view):
         super().__init__()
         self.application_core = application_core
@@ -53,7 +56,8 @@ class TodosController(QObject):
         self.is_showing = False
 
         self.view.display.currentRowChanged.connect(self.goto_annotation_line)
-        self.view.parent.btn_show_hide_labels.clicked.connect(self.show_hide_all)
+        self.view.parent.btn_show_hide_labels.clicked.connect(
+            self.show_hide_all)
         self.view.btn_save.clicked.connect(self.new_todo)
 
         self.update_data()
@@ -64,9 +68,8 @@ class TodosController(QObject):
             labels = labels_cache.get_all_from_list(self.file_name)
             if isinstance(labels, list):
                 for label in labels:
-                    self.view.add_todo(
-                        label["line"], label["title"], label["desc"], label["label"]
-                    )
+                    self.view.add_todo(label["line"], label["title"],
+                                       label["desc"], label["label"])
 
     def new_todo(self):
         desc = self.view.input_desc.toPlainText()
@@ -75,8 +78,12 @@ class TodosController(QObject):
         label = self.view.label_picker.currentText().lower()
 
         labels_cache.save_to_list(
-            {"line": line, "desc": desc, "title": title, "label": label}, self.file_name
-        )
+            {
+                "line": line,
+                "desc": desc,
+                "title": title,
+                "label": label
+            }, self.file_name)
 
         self.update_data()
 
@@ -108,8 +115,7 @@ class TodosController(QObject):
                 if hasattr(self.editor, "editor"):
                     self.editor.editor.go_to_line(line)
                     self.editor.editor.display_annotation(
-                        line, text + note, style, "on_text_changed", 0
-                    )
+                        line, text + note, style, "on_text_changed", 0)
 
         except Exception as e:
             print(e)

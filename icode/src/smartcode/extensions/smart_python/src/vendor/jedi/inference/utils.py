@@ -3,15 +3,16 @@ import functools
 import re
 import os
 
-
 _sep = os.path.sep
 if os.path.altsep is not None:
     _sep += os.path.altsep
-_path_re = re.compile(r"(?:\.[^{0}]+|[{0}]__init__\.py)$".format(re.escape(_sep)))
+_path_re = re.compile(r"(?:\.[^{0}]+|[{0}]__init__\.py)$".format(
+    re.escape(_sep)))
 del _sep
 
 
 def to_list(func):
+
     def wrapper(*args, **kwargs):
         return list(func(*args, **kwargs))
 
@@ -19,6 +20,7 @@ def to_list(func):
 
 
 def to_tuple(func):
+
     def wrapper(*args, **kwargs):
         return tuple(func(*args, **kwargs))
 
@@ -75,6 +77,7 @@ def reraise_uncaught(func):
 
 
 class PushBackIterator:
+
     def __init__(self, iterator):
         self.pushes = []
         self.iterator = iterator

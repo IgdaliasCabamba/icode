@@ -43,6 +43,7 @@ _SERIALIZER_VERSION = 1
 
 
 def _try_to_skip_duplicates(func):
+
     def wrapper(*args, **kwargs):
         found_tree_nodes = []
         found_modules = []
@@ -84,7 +85,8 @@ class Project:
 
     @staticmethod
     def _get_json_path(base_path):
-        return Project._get_config_folder_path(base_path).joinpath("project.json")
+        return Project._get_config_folder_path(base_path).joinpath(
+            "project.json")
 
     @classmethod
     def load(cls, path):
@@ -116,7 +118,8 @@ class Project:
         data = {k.lstrip("_"): v for k, v in data.items()}
         data["path"] = str(data["path"])
 
-        self._get_config_folder_path(self._path).mkdir(parents=True, exist_ok=True)
+        self._get_config_folder_path(self._path).mkdir(parents=True,
+                                                       exist_ok=True)
         with open(self._get_json_path(self._path), "w") as f:
             return json.dump((_SERIALIZER_VERSION, data), f)
 
@@ -141,12 +144,12 @@ class Project:
         """
 
         def py2_comp(
-            path,
-            environment_path=None,
-            load_unsafe_extensions=False,
-            sys_path=None,
-            added_sys_path=(),
-            smart_sys_path=True,
+                path,
+                environment_path=None,
+                load_unsafe_extensions=False,
+                sys_path=None,
+                added_sys_path=(),
+                smart_sys_path=True,
         ):
             if isinstance(path, str):
                 path = Path(path).absolute()
@@ -207,9 +210,10 @@ class Project:
         return sys_path
 
     @inference_state_as_method_param_cache()
-    def _get_sys_path(
-        self, inference_state, add_parent_paths=True, add_init_paths=False
-    ):
+    def _get_sys_path(self,
+                      inference_state,
+                      add_parent_paths=True,
+                      add_init_paths=False):
         """
         Keep this method private for all users of jedi. However internally this
         one is used like a public method.
@@ -228,9 +232,8 @@ class Project:
             if inference_state.script_path is not None:
                 suffixed += map(
                     str,
-                    discover_buildout_paths(
-                        inference_state, inference_state.script_path
-                    ),
+                    discover_buildout_paths(inference_state,
+                                            inference_state.script_path),
                 )
 
                 if add_parent_paths:
@@ -239,15 +242,11 @@ class Project:
                     #   2. Stopping immediately when above self._path
                     traversed = []
                     for parent_path in inference_state.script_path.parents:
-                        if (
-                            parent_path == self._path
-                            or self._path not in parent_path.parents
-                        ):
+                        if (parent_path == self._path
+                                or self._path not in parent_path.parents):
                             break
-                        if (
-                            not add_init_paths
-                            and parent_path.joinpath("__init__.py").is_file()
-                        ):
+                        if (not add_init_paths and
+                                parent_path.joinpath("__init__.py").is_file()):
                             continue
                         traversed.append(str(parent_path))
 
@@ -265,9 +264,8 @@ class Project:
     def get_environment(self):
         if self._environment is None:
             if self._environment_path is not None:
-                self._environment = create_environment(
-                    self._environment_path, safe=False
-                )
+                self._environment = create_environment(self._environment_path,
+                                                       safe=False)
             else:
                 self._environment = get_cached_default_environment()
         return self._environment
@@ -331,21 +329,23 @@ class Project:
                 if file_name == name or file_name == stub_folder_name:
                     f = folder_io.get_file_io("__init__.py")
                     try:
-                        m = load_module_from_path(inference_state, f).as_context()
+                        m = load_module_from_path(inference_state,
+                                                  f).as_context()
                     except FileNotFoundError:
                         f = folder_io.get_file_io("__init__.pyi")
                         try:
-                            m = load_module_from_path(inference_state, f).as_context()
+                            m = load_module_from_path(inference_state,
+                                                      f).as_context()
                         except FileNotFoundError:
                             m = load_namespace_from_path(
-                                inference_state, folder_io
-                            ).as_context()
+                                inference_state, folder_io).as_context()
                 else:
                     continue
             else:
                 file_ios.append(file_io)
                 if Path(file_io.path).name in (name + ".py", name + ".pyi"):
-                    m = load_module_from_path(inference_state, file_io).as_context()
+                    m = load_module_from_path(inference_state,
+                                              file_io).as_context()
                 else:
                     continue
 
@@ -362,8 +362,10 @@ class Project:
             )
 
         # 2. Search for identifiers in the project.
-        for module_context in search_in_file_ios(inference_state, file_ios, name):
-            names = get_module_names(module_context.tree_node, all_scopes=all_scopes)
+        for module_context in search_in_file_ios(inference_state, file_ios,
+                                                 name):
+            names = get_module_names(module_context.tree_node,
+                                     all_scopes=all_scopes)
             names = [module_context.create_name(n) for n in names]
             names = _remove_imports(names)
             yield from search_in_module(
@@ -378,13 +380,13 @@ class Project:
 
         # 3. Search for modules on sys.path
         sys_path = [
-            p
-            for p in self._get_sys_path(inference_state)
+            p for p in self._get_sys_path(inference_state)
             # Exclude folders that are handled by recursing of the Python
             # folders.
             if not p.startswith(str(self._path))
         ]
-        names = list(iter_module_names(inference_state, empty_module_context, sys_path))
+        names = list(
+            iter_module_names(inference_state, empty_module_context, sys_path))
         yield from search_in_module(
             inference_state,
             empty_module_context,

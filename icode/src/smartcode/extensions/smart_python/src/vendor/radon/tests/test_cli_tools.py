@@ -165,26 +165,31 @@ CC_RESULTS_CASES = [
             7,
         ),
         {
-            "type": "class",
-            "name": "Classname",
-            "lineno": 17,
-            "col_offset": 0,
-            "endline": 29,
-            "complexity": 7,
-            "rank": "B",
-            "methods": [
-                {
-                    "type": "method",
-                    "lineno": 19,
-                    "col_offset": 4,
-                    "endline": 26,
-                    "closures": [],
-                    "complexity": 7,
-                    "rank": "B",
-                    "classname": "Classname",
-                    "name": "name",
-                }
-            ],
+            "type":
+            "class",
+            "name":
+            "Classname",
+            "lineno":
+            17,
+            "col_offset":
+            0,
+            "endline":
+            29,
+            "complexity":
+            7,
+            "rank":
+            "B",
+            "methods": [{
+                "type": "method",
+                "lineno": 19,
+                "col_offset": 4,
+                "endline": 26,
+                "closures": [],
+                "complexity": 7,
+                "rank": "B",
+                "classname": "Classname",
+                "name": "name",
+            }],
         },
     ),
     (
@@ -199,25 +204,30 @@ CC_RESULTS_CASES = [
             10,
         ),
         {
-            "type": "function",
-            "name": "name",
-            "lineno": 12,
-            "col_offset": 0,
-            "endline": 16,
-            "complexity": 10,
-            "rank": "B",
-            "closures": [
-                {
-                    "name": "aux",
-                    "lineno": 13,
-                    "col_offset": 4,
-                    "endline": 17,
-                    "closures": [],
-                    "complexity": 4,
-                    "rank": "A",
-                    "type": "function",
-                }
-            ],
+            "type":
+            "function",
+            "name":
+            "name",
+            "lineno":
+            12,
+            "col_offset":
+            0,
+            "endline":
+            16,
+            "complexity":
+            10,
+            "rank":
+            "B",
+            "closures": [{
+                "name": "aux",
+                "lineno": 13,
+                "col_offset": 4,
+                "endline": 17,
+                "closures": [],
+                "complexity": 4,
+                "rank": "A",
+                "type": "function",
+            }],
         },
     ),
 ]
@@ -279,7 +289,6 @@ CC_TO_XML_CASE = [
     },
 ]
 
-
 CC_TO_CODECLIMATE_CASE = [
     {
         "closures": [],
@@ -326,9 +335,7 @@ def test_raw_to_dict():
 
 
 def test_cc_to_xml():
-    assert (
-        tools.dict_to_xml({"filename": CC_TO_XML_CASE})
-        == """<ccm>
+    assert (tools.dict_to_xml({"filename": CC_TO_XML_CASE}) == """<ccm>
               <metric>
                 <complexity>6</complexity>
                 <unit>name</unit>
@@ -369,12 +376,7 @@ def test_cc_to_xml():
                 <startLineNumber>12</startLineNumber>
                 <endLineNumber>16</endLineNumber>
               </metric>
-            </ccm>""".replace(
-            "\n", ""
-        ).replace(
-            " ", ""
-        )
-    )
+            </ccm>""".replace("\n", "").replace(" ", ""))
 
 
 CC_TO_MD_RESULTS = [
@@ -425,26 +427,30 @@ def test_cc_error_to_codeclimate():
     error_result = {"error": "Error: invalid syntax (<unknown>, line 100)"}
 
     expected_results = [
-        json.dumps(
-            {
-                "description": "Error: Error: invalid syntax (<unknown>, line 100)",
-                "check_name": "Complexity",
-                "content": {
-                    "body": "We encountered an error attempting to analyze this line."
+        json.dumps({
+            "description":
+            "Error: Error: invalid syntax (<unknown>, line 100)",
+            "check_name": "Complexity",
+            "content": {
+                "body":
+                "We encountered an error attempting to analyze this line."
+            },
+            "location": {
+                "path": "filename",
+                "lines": {
+                    "begin": 100,
+                    "end": 100
                 },
-                "location": {
-                    "path": "filename",
-                    "lines": {"begin": 100, "end": 100},
-                },
-                "type": "issue",
-                "categories": ["Bug Risk"],
-                "remediation_points": 1000000,
-                "fingerprint": "10ac332cd7f638664e8865b098a1707c",
-            }
-        ),
+            },
+            "type": "issue",
+            "categories": ["Bug Risk"],
+            "remediation_points": 1000000,
+            "fingerprint": "10ac332cd7f638664e8865b098a1707c",
+        }),
     ]
 
-    actual_results = tools.dict_to_codeclimate_issues({"filename": error_result})
+    actual_results = tools.dict_to_codeclimate_issues(
+        {"filename": error_result})
 
     actual_sorted = []
     for i in actual_results:
@@ -459,39 +465,46 @@ def test_cc_error_to_codeclimate():
 
 def test_cc_to_codeclimate():
     actual_results = tools.dict_to_codeclimate_issues(
-        {"filename": CC_TO_CODECLIMATE_CASE}
-    )
+        {"filename": CC_TO_CODECLIMATE_CASE})
     expected_results = [
-        json.dumps(
-            {
-                "description": "Cyclomatic complexity is too high in function foo. (6)",
-                "check_name": "Complexity",
-                "content": {"body": tools.get_content()},
-                "location": {
-                    "path": "filename",
-                    "lines": {"begin": 12, "end": 16},
+        json.dumps({
+            "description":
+            "Cyclomatic complexity is too high in function foo. (6)",
+            "check_name": "Complexity",
+            "content": {
+                "body": tools.get_content()
+            },
+            "location": {
+                "path": "filename",
+                "lines": {
+                    "begin": 12,
+                    "end": 16
                 },
-                "type": "issue",
-                "categories": ["Complexity"],
-                "remediation_points": 1100000,
-                "fingerprint": "afbe2b8d9a57fde5f3235ec97e7a22e1",
-            }
-        ),
-        json.dumps(
-            {
-                "description": "Cyclomatic complexity is too high in class Classname. (8)",
-                "check_name": "Complexity",
-                "content": {"body": tools.get_content()},
-                "location": {
-                    "path": "filename",
-                    "lines": {"begin": 17, "end": 29},
+            },
+            "type": "issue",
+            "categories": ["Complexity"],
+            "remediation_points": 1100000,
+            "fingerprint": "afbe2b8d9a57fde5f3235ec97e7a22e1",
+        }),
+        json.dumps({
+            "description":
+            "Cyclomatic complexity is too high in class Classname. (8)",
+            "check_name": "Complexity",
+            "content": {
+                "body": tools.get_content()
+            },
+            "location": {
+                "path": "filename",
+                "lines": {
+                    "begin": 17,
+                    "end": 29
                 },
-                "type": "issue",
-                "categories": ["Complexity"],
-                "remediation_points": 1300000,
-                "fingerprint": "8caecbb525375d825b95c23bc8f881d7",
-            }
-        ),
+            },
+            "type": "issue",
+            "categories": ["Complexity"],
+            "remediation_points": 1300000,
+            "fingerprint": "8caecbb525375d825b95c23bc8f881d7",
+        }),
     ]
 
     actual_sorted = []
@@ -595,7 +608,7 @@ def test_cc_to_terminal():
         "@<!F!>F __R__12:0 f3 - <|E|>E (32)__R__",
         "@<!F!>F __R__12:0 f4 - <|F|>F (41)__R__",
     ]
-    res_noshow = ["{0}__R__".format(r[: r.index("(") - 1]) for r in res]
+    res_noshow = ["{0}__R__".format(r[:r.index("(") - 1]) for r in res]
 
     assert tools.cc_to_terminal(results, False, "A", "F", False) == (
         res_noshow,

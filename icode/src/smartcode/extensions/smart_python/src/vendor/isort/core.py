@@ -84,22 +84,20 @@ def process(
         new_input = ""
         current = ""
         isort_off = False
-        for line in chain(input_stream, (None,)):
+        for line in chain(input_stream, (None, )):
             if isort_off and line is not None:
                 if line == "# isort: on\n":
                     isort_off = False
                 new_input += line
-            elif line in ("# isort: split\n", "# isort: off\n", None) or str(
-                line
-            ).endswith("# isort: split\n"):
+            elif line in ("# isort: split\n", "# isort: off\n",
+                          None) or str(line).endswith("# isort: split\n"):
                 if line == "# isort: off\n":
                     isort_off = True
                 if current:
                     if add_imports:
                         add_line_separator = line_separator or "\n"
                         current += add_line_separator + add_line_separator.join(
-                            add_imports
-                        )
+                            add_imports)
                         add_imports = []
                     parsed = parse.file_contents(current, config=config)
                     verbose_output += parsed.verbose_output
@@ -108,9 +106,10 @@ def process(
                         extra_space += "\n"
                         current = current[:-1]
                     extra_space = extra_space.replace("\n", "", 1)
-                    sorted_output = output.sorted_imports(
-                        parsed, config, extension, import_type="import"
-                    )
+                    sorted_output = output.sorted_imports(parsed,
+                                                          config,
+                                                          extension,
+                                                          import_type="import")
                     made_changes = made_changes or _has_changed(
                         before=current,
                         after=sorted_output,
@@ -126,7 +125,7 @@ def process(
 
         input_stream = StringIO(new_input)
 
-    for index, line in enumerate(chain(input_stream, (None,))):
+    for index, line in enumerate(chain(input_stream, (None, ))):
         if line is None:
             if index == 0 and not config.force_adds:
                 return False
@@ -157,9 +156,8 @@ def process(
         else:
             stripped_line = line.strip()
             if stripped_line and not line_separator:
-                line_separator = (
-                    line[len(line.rstrip()) :].replace(" ", "").replace("\t", "")
-                )
+                line_separator = (line[len(line.rstrip()):].replace(
+                    " ", "").replace("\t", ""))
 
             for file_skip_comment in FILE_SKIP_COMMENTS:
                 if file_skip_comment in line:
@@ -175,50 +173,41 @@ def process(
                     add_imports = []
                 elif stripped_line.startswith("# isort: dont-add-import:"):
                     import_not_to_add = stripped_line.split(
-                        "# isort: dont-add-import:", 1
-                    )[1].strip()
+                        "# isort: dont-add-import:", 1)[1].strip()
                     add_imports = [
-                        import_to_add
-                        for import_to_add in add_imports
+                        import_to_add for import_to_add in add_imports
                         if not import_to_add == import_not_to_add
                     ]
 
-            if (
-                (index == 0 or (index in (1, 2) and not contains_imports))
-                and stripped_line.startswith("#")
-                and stripped_line not in config.section_comments
-                and stripped_line not in CODE_SORT_COMMENTS
-            ):
+            if ((index == 0 or (index in (1, 2) and not contains_imports))
+                    and stripped_line.startswith("#")
+                    and stripped_line not in config.section_comments
+                    and stripped_line not in CODE_SORT_COMMENTS):
                 in_top_comment = True
-            elif in_top_comment and (
-                not line.startswith("#")
-                or stripped_line in config.section_comments
-                or stripped_line in CODE_SORT_COMMENTS
-            ):
+            elif in_top_comment and (not line.startswith("#") or stripped_line
+                                     in config.section_comments
+                                     or stripped_line in CODE_SORT_COMMENTS):
                 in_top_comment = False
                 first_comment_index_end = index - 1
 
             was_in_quote = bool(in_quote)
-            if (
-                (not stripped_line.startswith("#") or in_quote)
-                and '"' in line
-                or "'" in line
-            ):
+            if ((not stripped_line.startswith("#") or in_quote) and '"' in line
+                    or "'" in line):
                 char_index = 0
-                if first_comment_index_start == -1 and (
-                    line.startswith('"') or line.startswith("'")
-                ):
+                if first_comment_index_start == -1 and (line.startswith('"') or
+                                                        line.startswith("'")):
                     first_comment_index_start = index
                 while char_index < len(line):
                     if line[char_index] == "\\":
                         char_index += 1
                     elif in_quote:
-                        if line[char_index : char_index + len(in_quote)] == in_quote:
+                        if line[char_index:char_index +
+                                len(in_quote)] == in_quote:
                             in_quote = ""
                             if first_comment_index_end < first_comment_index_start:
                                 first_comment_index_end = index
                     elif line[char_index] in ("'", '"'):
-                        long_quote = line[char_index : char_index + 3]
+                        long_quote = line[char_index:char_index + 3]
                         if long_quote in ('"""', "'''"):
                             in_quote = long_quote
                             char_index += 2
@@ -228,7 +217,8 @@ def process(
                         break
                     char_index += 1
 
-            not_imports = bool(in_quote) or was_in_quote or in_top_comment or isort_off
+            not_imports = bool(
+                in_quote) or was_in_quote or in_top_comment or isort_off
             if not (in_quote or was_in_quote or in_top_comment):
                 if isort_off:
                     if not skip_file and stripped_line == "# isort: on":
@@ -237,7 +227,7 @@ def process(
                     not_imports = True
                 elif stripped_line in CODE_SORT_COMMENTS:
                     code_sorting = stripped_line.split("isort: ")[1].strip()
-                    code_sorting_indent = line[: -len(line.lstrip())]
+                    code_sorting_indent = line[:-len(line.lstrip())]
                     not_imports = True
                 elif code_sorting:
                     if not stripped_line:
@@ -264,36 +254,31 @@ def process(
                     else:
                         code_sorting_section += line
                         line = ""
-                elif (
-                    stripped_line in config.section_comments
-                    or stripped_line in config.section_comments_end
-                ):
+                elif (stripped_line in config.section_comments
+                      or stripped_line in config.section_comments_end):
                     if import_section and not contains_imports:
                         output_stream.write(import_section)
                         import_section = line
                         not_imports = False
                     else:
                         import_section += line
-                    indent = line[: -len(line.lstrip())]
+                    indent = line[:-len(line.lstrip())]
                 elif not (stripped_line or contains_imports):
                     not_imports = True
-                elif (
-                    not stripped_line
-                    or stripped_line.startswith("#")
-                    and (not indent or indent + line.lstrip() == line)
-                    and not config.treat_all_comments_as_code
-                    and stripped_line not in config.treat_comments_as_code
-                ):
+                elif (not stripped_line or stripped_line.startswith("#") and
+                      (not indent or indent + line.lstrip() == line)
+                      and not config.treat_all_comments_as_code
+                      and stripped_line not in config.treat_comments_as_code):
                     import_section += line
                 elif stripped_line.startswith(IMPORT_START_IDENTIFIERS):
-                    new_indent = line[: -len(line.lstrip())]
+                    new_indent = line[:-len(line.lstrip())]
                     import_statement = line
                     stripped_line = line.strip().split("#")[0]
                     while stripped_line.endswith("\\") or (
-                        "(" in stripped_line and ")" not in stripped_line
-                    ):
+                            "(" in stripped_line and ")" not in stripped_line):
                         if stripped_line.endswith("\\"):
-                            while stripped_line and stripped_line.endswith("\\"):
+                            while stripped_line and stripped_line.endswith(
+                                    "\\"):
                                 line = input_stream.readline()
                                 stripped_line = line.strip().split("#")[0]
                                 import_statement += line
@@ -303,10 +288,8 @@ def process(
                                 stripped_line = line.strip().split("#")[0]
                                 import_statement += line
 
-                    if (
-                        import_statement.lstrip().startswith("from")
-                        and "import" not in import_statement
-                    ):
+                    if (import_statement.lstrip().startswith("from")
+                            and "import" not in import_statement):
                         line = import_statement
                         not_imports = True
                     else:
@@ -314,22 +297,18 @@ def process(
                         contains_imports = True
 
                         cimport_statement: bool = False
-                        if (
-                            import_statement.lstrip().startswith(CIMPORT_IDENTIFIERS)
-                            or " cimport " in import_statement
-                            or " cimport*" in import_statement
-                            or " cimport(" in import_statement
-                            or ".cimport" in import_statement
-                        ):
+                        if (import_statement.lstrip().startswith(
+                                CIMPORT_IDENTIFIERS)
+                                or " cimport " in import_statement
+                                or " cimport*" in import_statement
+                                or " cimport(" in import_statement
+                                or ".cimport" in import_statement):
                             cimport_statement = True
 
                         if cimport_statement != cimports or (
-                            new_indent != indent
-                            and import_section
-                            and (
-                                not did_contain_imports or len(new_indent) < len(indent)
-                            )
-                        ):
+                                new_indent != indent and import_section and
+                            (not did_contain_imports
+                             or len(new_indent) < len(indent))):
                             indent = new_indent
                             if import_section:
                                 next_cimports = cimport_statement
@@ -343,8 +322,7 @@ def process(
                             if new_indent != indent:
                                 if import_section and did_contain_imports:
                                     import_statement = (
-                                        indent + import_statement.lstrip()
-                                    )
+                                        indent + import_statement.lstrip())
                                 else:
                                     indent = new_indent
                         import_section += import_statement
@@ -353,22 +331,15 @@ def process(
 
         if not_imports:
             raw_import_section: str = import_section
-            if (
-                add_imports
-                and (stripped_line or end_of_file)
-                and not config.append_only
-                and not in_top_comment
-                and not was_in_quote
-                and not import_section
-                and not line.lstrip().startswith(COMMENT_INDICATORS)
-                and not (
-                    line.rstrip().endswith(DOCSTRING_INDICATORS) and "=" not in line
-                )
-            ):
+            if (add_imports and (stripped_line or end_of_file)
+                    and not config.append_only and not in_top_comment
+                    and not was_in_quote and not import_section
+                    and not line.lstrip().startswith(COMMENT_INDICATORS)
+                    and not (line.rstrip().endswith(DOCSTRING_INDICATORS)
+                             and "=" not in line)):
                 add_line_separator = line_separator or "\n"
-                import_section = (
-                    add_line_separator.join(add_imports) + add_line_separator
-                )
+                import_section = (add_line_separator.join(add_imports) +
+                                  add_line_separator)
                 if end_of_file and index != 0:
                     output_stream.write(add_line_separator)
                 contains_imports = True
@@ -379,16 +350,11 @@ def process(
                 next_import_section = ""
 
             if import_section:
-                if (
-                    add_imports
-                    and (contains_imports or not config.append_only)
-                    and not indent
-                ):
-                    import_section = (
-                        line_separator.join(add_imports)
-                        + line_separator
-                        + import_section
-                    )
+                if (add_imports
+                        and (contains_imports or not config.append_only)
+                        and not indent):
+                    import_section = (line_separator.join(add_imports) +
+                                      line_separator + import_section)
                     contains_imports = True
                     add_imports = []
 
@@ -399,22 +365,25 @@ def process(
                     output_stream.write(import_section)
 
                 else:
-                    leading_whitespace = import_section[: -len(import_section.lstrip())]
-                    trailing_whitespace = import_section[len(import_section.rstrip()) :]
+                    leading_whitespace = import_section[:-len(import_section.
+                                                              lstrip())]
+                    trailing_whitespace = import_section[len(import_section.
+                                                             rstrip()):]
                     if first_import_section and not import_section.lstrip(
-                        line_separator
-                    ).startswith(COMMENT_INDICATORS):
+                            line_separator).startswith(COMMENT_INDICATORS):
                         import_section = import_section.lstrip(line_separator)
-                        raw_import_section = raw_import_section.lstrip(line_separator)
+                        raw_import_section = raw_import_section.lstrip(
+                            line_separator)
                         first_import_section = False
 
                     if indent:
                         import_section = "".join(
-                            line[len(indent) :]
-                            for line in import_section.splitlines(keepends=True)
-                        )
+                            line[len(indent):]
+                            for line in import_section.splitlines(
+                                keepends=True))
 
-                    parsed_content = parse.file_contents(import_section, config=config)
+                    parsed_content = parse.file_contents(import_section,
+                                                         config=config)
                     verbose_output += parsed_content.verbose_output
 
                     sorted_import_section = output.sorted_imports(
@@ -423,13 +392,13 @@ def process(
                         extension,
                         import_type="cimport" if cimports else "import",
                     )
-                    if not (import_section.strip() and not sorted_import_section):
+                    if not (import_section.strip()
+                            and not sorted_import_section):
                         if indent:
                             sorted_import_section = (
-                                leading_whitespace
-                                + textwrap.indent(sorted_import_section, indent).strip()
-                                + trailing_whitespace
-                            )
+                                leading_whitespace + textwrap.indent(
+                                    sorted_import_section, indent).strip() +
+                                trailing_whitespace)
 
                         made_changes = made_changes or _has_changed(
                             before=raw_import_section,
@@ -457,12 +426,8 @@ def process(
                 output_stream.write(line)
                 not_imports = False
 
-            if (
-                stripped_line
-                and not in_quote
-                and not import_section
-                and not next_import_section
-            ):
+            if (stripped_line and not in_quote and not import_section
+                    and not next_import_section):
                 if stripped_line == "yield":
                     while not stripped_line or stripped_line == "yield":
                         new_line = input_stream.readline()
@@ -472,9 +437,8 @@ def process(
                         output_stream.write(new_line)
                         stripped_line = new_line.strip().split("#")[0]
 
-                if stripped_line.startswith("raise") or stripped_line.startswith(
-                    "yield"
-                ):
+                if stripped_line.startswith(
+                        "raise") or stripped_line.startswith("yield"):
                     while stripped_line.endswith("\\"):
                         new_line = input_stream.readline()
                         if not new_line:
@@ -500,18 +464,17 @@ def _indented_config(config: Config, indent: str) -> Config:
         wrap_length=max(config.wrap_length - len(indent), 0),
         lines_after_imports=1,
         import_headings=config.import_headings
-        if config.indented_import_headings
-        else {},
-        import_footers=config.import_footers if config.indented_import_headings else {},
+        if config.indented_import_headings else {},
+        import_footers=config.import_footers
+        if config.indented_import_headings else {},
     )
 
 
-def _has_changed(
-    before: str, after: str, line_separator: str, ignore_whitespace: bool
-) -> bool:
+def _has_changed(before: str, after: str, line_separator: str,
+                 ignore_whitespace: bool) -> bool:
     if ignore_whitespace:
-        return (
-            remove_whitespace(before, line_separator=line_separator).strip()
-            != remove_whitespace(after, line_separator=line_separator).strip()
-        )
+        return (remove_whitespace(before,
+                                  line_separator=line_separator).strip()
+                != remove_whitespace(after,
+                                     line_separator=line_separator).strip())
     return before.strip() != after.strip()

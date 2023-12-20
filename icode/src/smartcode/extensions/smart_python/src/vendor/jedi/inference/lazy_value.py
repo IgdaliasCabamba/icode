@@ -3,6 +3,7 @@ from jedi.common import monkeypatch
 
 
 class AbstractLazyValue:
+
     def __init__(self, data, min=1, max=1):
         self.data = data
         self.min = min
@@ -30,6 +31,7 @@ class LazyKnownValues(AbstractLazyValue):
 
 
 class LazyUnknownValue(AbstractLazyValue):
+
     def __init__(self, min=1, max=1):
         super().__init__(None, min, max)
 
@@ -38,6 +40,7 @@ class LazyUnknownValue(AbstractLazyValue):
 
 
 class LazyTreeValue(AbstractLazyValue):
+
     def __init__(self, context, node, min=1, max=1):
         super().__init__(node, min, max)
         self.context = context
@@ -46,7 +49,8 @@ class LazyTreeValue(AbstractLazyValue):
         self._predefined_names = dict(context.predefined_names)
 
     def infer(self):
-        with monkeypatch(self.context, "predefined_names", self._predefined_names):
+        with monkeypatch(self.context, "predefined_names",
+                         self._predefined_names):
             return self.context.infer_node(self.data)
 
 

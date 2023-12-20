@@ -56,10 +56,8 @@ def create_inline(project, resource, offset):
 
     """
     pyname = _get_pyname(project, resource, offset)
-    message = (
-        "Inline refactoring should be performed on "
-        "a method, local variable or parameter."
-    )
+    message = ("Inline refactoring should be performed on "
+               "a method, local variable or parameter.")
     if pyname is None:
         raise rope.base.exceptions.RefactoringError(message)
     if isinstance(pyname, pynames.ImportedName):
@@ -75,6 +73,7 @@ def create_inline(project, resource, offset):
 
 
 class _Inliner(object):
+
     def __init__(self, project, resource, offset):
         self.project = project
         self.pyname = _get_pyname(project, resource, offset)
@@ -92,24 +91,26 @@ class _Inliner(object):
 
 
 class InlineMethod(_Inliner):
+
     def __init__(self, *args, **kwds):
         super(InlineMethod, self).__init__(*args, **kwds)
         self.pyfunction = self.pyname.get_object()
         self.pymodule = self.pyfunction.get_module()
         self.resource = self.pyfunction.get_module().get_resource()
         self.occurrence_finder = occurrences.create_finder(
-            self.project, self.name, self.pyname
-        )
-        self.normal_generator = _DefinitionGenerator(self.project, self.pyfunction)
+            self.project, self.name, self.pyname)
+        self.normal_generator = _DefinitionGenerator(self.project,
+                                                     self.pyfunction)
         self._init_imports()
 
     def _init_imports(self):
         body = sourceutils.get_body(self.pyfunction)
-        body, imports = move.moving_code_with_imports(self.project, self.resource, body)
+        body, imports = move.moving_code_with_imports(self.project,
+                                                      self.resource, body)
         self.imports = imports
-        self.others_generator = _DefinitionGenerator(
-            self.project, self.pyfunction, body=body
-        )
+        self.others_generator = _DefinitionGenerator(self.project,
+                                                     self.pyfunction,
+                                                     body=body)
 
     def _get_scope_range(self):
         scope = self.pyfunction.get_scope()
@@ -121,16 +122,15 @@ class InlineMethod(_Inliner):
                 start_line = decorators[0].lineno
         start_offset = lines.get_line_start(start_line)
         end_offset = min(
-            lines.get_line_end(scope.end) + 1, len(self.pymodule.source_code)
-        )
+            lines.get_line_end(scope.end) + 1, len(self.pymodule.source_code))
         return (start_offset, end_offset)
 
     def get_changes(
-        self,
-        remove=True,
-        only_current=False,
-        resources=None,
-        task_handle=taskhandle.NullTaskHandle(),
+            self,
+            remove=True,
+            only_current=False,
+            resources=None,
+            task_handle=taskhandle.NullTaskHandle(),
     ):
         """Get the changes this refactoring makes
 
@@ -145,29 +145,29 @@ class InlineMethod(_Inliner):
             resources = [self.original]
             if remove:
                 resources.append(self.resource)
-        job_set = task_handle.create_jobset("Collecting Changes", len(resources))
+        job_set = task_handle.create_jobset("Collecting Changes",
+                                            len(resources))
         for file in resources:
             job_set.started_job(file.path)
             if file == self.resource:
                 changes.add_change(
-                    self._defining_file_changes(
-                        changes, remove=remove, only_current=only_current
-                    )
-                )
+                    self._defining_file_changes(changes,
+                                                remove=remove,
+                                                only_current=only_current))
             else:
                 aim = None
                 if only_current and self.original == file:
                     aim = self.offset
                 handle = _InlineFunctionCallsForModuleHandle(
-                    self.project, file, self.others_generator, aim
-                )
-                result = move.ModuleSkipRenamer(
-                    self.occurrence_finder, file, handle
-                ).get_changed_module()
+                    self.project, file, self.others_generator, aim)
+                result = move.ModuleSkipRenamer(self.occurrence_finder, file,
+                                                handle).get_changed_module()
                 if result is not None:
-                    result = _add_imports(self.project, result, file, self.imports)
+                    result = _add_imports(self.project, result, file,
+                                          self.imports)
                     if remove:
-                        result = _remove_from(self.project, self.pyname, result, file)
+                        result = _remove_from(self.project, self.pyname,
+                                              result, file)
                     changes.add_change(ChangeContents(file, result))
             job_set.finished_job()
         return changes
@@ -182,7 +182,8 @@ class InlineMethod(_Inliner):
                 end_line = i
             else:
                 break
-        end = min(lines.get_line_end(end_line) + 1, len(self.pymodule.source_code))
+        end = min(
+            lines.get_line_end(end_line) + 1, len(self.pymodule.source_code))
         return (start, end)
 
     def _defining_file_changes(self, changes, remove, only_current):
@@ -194,9 +195,10 @@ class InlineMethod(_Inliner):
             else:
                 # we don't want to change any of them
                 aim = len(self.resource.read()) + 100
-        handle = _InlineFunctionCallsForModuleHandle(
-            self.project, self.resource, self.normal_generator, aim_offset=aim
-        )
+        handle = _InlineFunctionCallsForModuleHandle(self.project,
+                                                     self.resource,
+                                                     self.normal_generator,
+                                                     aim_offset=aim)
         replacement = None
         if remove:
             replacement = self._get_method_replacement()
@@ -213,8 +215,8 @@ class InlineMethod(_Inliner):
     def _get_method_replacement(self):
         if self._is_the_last_method_of_a_class():
             indents = sourceutils.get_indents(
-                self.pymodule.lines, self.pyfunction.get_scope().get_start()
-            )
+                self.pymodule.lines,
+                self.pyfunction.get_scope().get_start())
             return " " * indents + "pass\n"
         return ""
 
@@ -225,10 +227,8 @@ class InlineMethod(_Inliner):
         class_start, class_end = sourceutils.get_body_region(pyclass)
         source = self.pymodule.source_code
         func_start, func_end = self._get_scope_range()
-        if (
-            source[class_start:func_start].strip() == ""
-            and source[func_end:class_end].strip() == ""
-        ):
+        if (source[class_start:func_start].strip() == ""
+                and source[func_end:class_end].strip() == ""):
             return True
         return False
 
@@ -237,6 +237,7 @@ class InlineMethod(_Inliner):
 
 
 class InlineVariable(_Inliner):
+
     def __init__(self, *args, **kwds):
         super(InlineVariable, self).__init__(*args, **kwds)
         self.pymodule = self.pyname.get_definition_location()[0]
@@ -247,16 +248,15 @@ class InlineVariable(_Inliner):
     def _check_exceptional_conditions(self):
         if len(self.pyname.assignments) != 1:
             raise rope.base.exceptions.RefactoringError(
-                "Local variable should be assigned once for inlining."
-            )
+                "Local variable should be assigned once for inlining.")
 
     def get_changes(
-        self,
-        remove=True,
-        only_current=False,
-        resources=None,
-        docs=False,
-        task_handle=taskhandle.NullTaskHandle(),
+            self,
+            remove=True,
+            only_current=False,
+            resources=None,
+            docs=False,
+            task_handle=taskhandle.NullTaskHandle(),
     ):
         if resources is None:
             if rename._is_local(self.pyname):
@@ -268,7 +268,8 @@ class InlineVariable(_Inliner):
             if remove and self.original != self.resource:
                 resources.append(self.resource)
         changes = ChangeSet("Inline variable <%s>" % self.name)
-        jobset = task_handle.create_jobset("Calculating changes", len(resources))
+        jobset = task_handle.create_jobset("Calculating changes",
+                                           len(resources))
 
         for resource in resources:
             jobset.started_job(resource.path)
@@ -278,7 +279,8 @@ class InlineVariable(_Inliner):
             else:
                 result = self._change_module(resource, remove, only_current)
                 if result is not None:
-                    result = _add_imports(self.project, result, resource, self.imports)
+                    result = _add_imports(self.project, result, resource,
+                                          self.imports)
                     changes.add_change(ChangeContents(resource, result))
             jobset.finished_job()
         return changes
@@ -300,11 +302,13 @@ class InlineVariable(_Inliner):
     def _init_imports(self):
         vardef = _getvardef(self.pymodule, self.pyname)
         self.imported, self.imports = move.moving_code_with_imports(
-            self.project, self.resource, vardef
-        )
+            self.project, self.resource, vardef)
 
     def _change_module(self, resource, remove, only_current):
-        filters = [occurrences.NoImportsFilter(), occurrences.PyNameFilter(self.pyname)]
+        filters = [
+            occurrences.NoImportsFilter(),
+            occurrences.PyNameFilter(self.pyname)
+        ]
         if only_current and resource == self.original:
 
             def check_aim(occurrence):
@@ -314,11 +318,13 @@ class InlineVariable(_Inliner):
 
             filters.insert(0, check_aim)
         finder = occurrences.Finder(self.project, self.name, filters=filters)
-        changed = rename.rename_in_module(
-            finder, self.imported, resource=resource, replace_primary=True
-        )
+        changed = rename.rename_in_module(finder,
+                                          self.imported,
+                                          resource=resource,
+                                          replace_primary=True)
         if changed and remove:
-            changed = _remove_from(self.project, self.pyname, changed, resource)
+            changed = _remove_from(self.project, self.pyname, changed,
+                                   resource)
         return changed
 
     def get_kind(self):
@@ -326,14 +332,14 @@ class InlineVariable(_Inliner):
 
 
 class InlineParameter(_Inliner):
+
     def __init__(self, *args, **kwds):
         super(InlineParameter, self).__init__(*args, **kwds)
         resource, offset = self._function_location()
         index = self.pyname.index
         self.changers = [change_signature.ArgumentDefaultInliner(index)]
         self.signature = change_signature.ChangeSignature(
-            self.project, resource, offset
-        )
+            self.project, resource, offset)
 
     def _function_location(self):
         pymodule, lineno = self.pyname.get_definition_location()
@@ -388,36 +394,36 @@ class _DefinitionGenerator(object):
     def _get_definition_params(self):
         definition_info = self.definition_info
         paramdict = dict([pair for pair in definition_info.args_with_defaults])
-        if (
-            definition_info.args_arg is not None
-            or definition_info.keywords_arg is not None
-        ):
+        if (definition_info.args_arg is not None
+                or definition_info.keywords_arg is not None):
             raise rope.base.exceptions.RefactoringError(
-                "Cannot inline functions with list and keyword arguements."
-            )
+                "Cannot inline functions with list and keyword arguements.")
         if self.pyfunction.get_kind() == "classmethod":
-            paramdict[
-                definition_info.args_with_defaults[0][0]
-            ] = self.pyfunction.parent.get_name()
+            paramdict[definition_info.args_with_defaults[0]
+                      [0]] = self.pyfunction.parent.get_name()
         return paramdict
 
     def get_function_name(self):
         return self.pyfunction.get_name()
 
-    def get_definition(self, primary, pyname, call, host_vars=[], returns=False):
+    def get_definition(self,
+                       primary,
+                       pyname,
+                       call,
+                       host_vars=[],
+                       returns=False):
         # caching already calculated definitions
-        return self._calculate_definition(primary, pyname, call, host_vars, returns)
+        return self._calculate_definition(primary, pyname, call, host_vars,
+                                          returns)
 
     def _calculate_header(self, primary, pyname, call):
         # A header is created which initializes parameters
         # to the values passed to the function.
         call_info = rope.refactor.functionutils.CallInfo.read(
-            primary, pyname, self.definition_info, call
-        )
+            primary, pyname, self.definition_info, call)
         paramdict = self.definition_params
         mapping = rope.refactor.functionutils.ArgumentMapping(
-            self.definition_info, call_info
-        )
+            self.definition_info, call_info)
         for param_name, value in mapping.param_dict.items():
             paramdict[param_name] = value
         header = ""
@@ -436,8 +442,7 @@ class _DefinitionGenerator(object):
         mod = libutils.get_string_module(self.project, source)
         name_dict = mod.get_scope().get_names()
         all_names = [
-            x
-            for x in name_dict
+            x for x in name_dict
             if not isinstance(name_dict[x], rope.base.builtins.BuiltinName)
         ]
 
@@ -446,22 +451,24 @@ class _DefinitionGenerator(object):
         if len(set(all_names).intersection(set(host_vars))) > 0:
 
             prefix = next(_DefinitionGenerator.unique_prefix)
-            guest = libutils.get_string_module(self.project, source, self.resource)
+            guest = libutils.get_string_module(self.project, source,
+                                               self.resource)
 
             to_be_inlined = [prefix + item for item in to_be_inlined]
             for item in all_names:
                 pyname = guest[item]
                 occurrence_finder = occurrences.create_finder(
-                    self.project, item, pyname
-                )
-                source = rename.rename_in_module(
-                    occurrence_finder, prefix + item, pymodule=guest
-                )
-                guest = libutils.get_string_module(self.project, source, self.resource)
+                    self.project, item, pyname)
+                source = rename.rename_in_module(occurrence_finder,
+                                                 prefix + item,
+                                                 pymodule=guest)
+                guest = libutils.get_string_module(self.project, source,
+                                                   self.resource)
 
         # parameters not reassigned inside the functions are now inlined.
         for name in to_be_inlined:
-            pymodule = libutils.get_string_module(self.project, source, self.resource)
+            pymodule = libutils.get_string_module(self.project, source,
+                                                  self.resource)
             pyname = pymodule[name]
             source = _inline_variable(self.project, pymodule, pyname, name)
 
@@ -471,20 +478,22 @@ class _DefinitionGenerator(object):
         result = []
         returned = None
         last_changed = 0
-        for match in _DefinitionGenerator._get_return_pattern().finditer(source):
+        for match in _DefinitionGenerator._get_return_pattern().finditer(
+                source):
             for key, value in match.groupdict().items():
                 if value and key == "return":
-                    result.append(source[last_changed : match.start("return")])
+                    result.append(source[last_changed:match.start("return")])
                     if returns:
-                        self._check_nothing_after_return(source, match.end("return"))
+                        self._check_nothing_after_return(
+                            source, match.end("return"))
                         beg_idx = match.end("return")
                         returned = _join_lines(
-                            source[beg_idx : len(source)].splitlines()
-                        )
+                            source[beg_idx:len(source)].splitlines())
                         last_changed = len(source)
                     else:
                         current = match.end("return")
-                        while current < len(source) and source[current] in " \t":
+                        while current < len(
+                                source) and source[current] in " \t":
                             current += 1
                         last_changed = current
                         if current == len(source) or source[current] == "\n":
@@ -497,10 +506,10 @@ class _DefinitionGenerator(object):
         lineno = lines.get_line_number(offset)
         logical_lines = codeanalyze.LogicalLineFinder(lines)
         lineno = logical_lines.logical_line_in(lineno)[1]
-        if source[lines.get_line_end(lineno) : len(source)].strip() != "":
+        if source[lines.get_line_end(lineno):len(source)].strip() != "":
             raise rope.base.exceptions.RefactoringError(
-                "Cannot inline functions with statements " + "after return statement."
-            )
+                "Cannot inline functions with statements " +
+                "after return statement.")
 
     @classmethod
     def _get_return_pattern(cls):
@@ -510,16 +519,22 @@ class _DefinitionGenerator(object):
                 return "(?P<%s>" % name + "|".join(list_) + ")"
 
             comment_pattern = named_pattern("comment", [r"#[^\n]*"])
-            string_pattern = named_pattern("string", [codeanalyze.get_string_pattern()])
+            string_pattern = named_pattern("string",
+                                           [codeanalyze.get_string_pattern()])
             return_pattern = r"\b(?P<return>return)\b"
-            cls._return_pattern = re.compile(
-                comment_pattern + "|" + string_pattern + "|" + return_pattern
-            )
+            cls._return_pattern = re.compile(comment_pattern + "|" +
+                                             string_pattern + "|" +
+                                             return_pattern)
         return cls._return_pattern
 
 
 class _InlineFunctionCallsForModuleHandle(object):
-    def __init__(self, project, resource, definition_generator, aim_offset=None):
+
+    def __init__(self,
+                 project,
+                 resource,
+                 definition_generator,
+                 aim_offset=None):
         """Inlines occurrences
 
         If `aim` is not `None` only the occurrences that intersect
@@ -534,8 +549,7 @@ class _InlineFunctionCallsForModuleHandle(object):
     def occurred_inside_skip(self, change_collector, occurrence):
         if not occurrence.is_defined():
             raise rope.base.exceptions.RefactoringError(
-                "Cannot inline functions that reference themselves"
-            )
+                "Cannot inline functions that reference themselves")
 
     def occurred_outside_skip(self, change_collector, occurrence):
         start, end = occurrence.get_primary_range()
@@ -546,20 +560,18 @@ class _InlineFunctionCallsForModuleHandle(object):
         if not occurrence.is_called():
             raise rope.base.exceptions.RefactoringError(
                 "Reference to inlining function other than function call"
-                " in <file: %s, offset: %d>" % (self.resource.path, start)
-            )
+                " in <file: %s, offset: %d>" % (self.resource.path, start))
         if self.aim is not None and (self.aim < start or self.aim > end):
             return
         end_parens = self._find_end_parens(self.source, end - 1)
         lineno = self.lines.get_line_number(start)
-        start_line, end_line = self.pymodule.logical_lines.logical_line_in(lineno)
+        start_line, end_line = self.pymodule.logical_lines.logical_line_in(
+            lineno)
         line_start = self.lines.get_line_start(start_line)
         line_end = self.lines.get_line_end(end_line)
 
-        returns = (
-            self.source[line_start:start].strip() != ""
-            or self.source[end_parens:line_end].strip() != ""
-        )
+        returns = (self.source[line_start:start].strip() != ""
+                   or self.source[end_parens:line_end].strip() != "")
         indents = sourceutils.get_indents(self.lines, start_line)
         primary, pyname = occurrence.get_primary_and_pyname()
 
@@ -575,8 +587,7 @@ class _InlineFunctionCallsForModuleHandle(object):
 
         end = min(line_end + 1, len(self.source))
         change_collector.add_change(
-            line_start, end, sourceutils.fix_indentation(definition, indents)
-        )
+            line_start, end, sourceutils.fix_indentation(definition, indents))
         if returns:
             name = returned
             if name is None:
@@ -584,7 +595,8 @@ class _InlineFunctionCallsForModuleHandle(object):
             change_collector.add_change(
                 line_end,
                 end,
-                self.source[line_start:start] + name + self.source[end_parens:end],
+                self.source[line_start:start] + name +
+                self.source[end_parens:end],
             )
 
     def _find_end_parens(self, source, offset):
@@ -610,13 +622,20 @@ class _InlineFunctionCallsForModuleHandle(object):
         return self.pymodule.lines
 
 
-def _inline_variable(
-    project, pymodule, pyname, name, remove=True, region=None, docs=False
-):
+def _inline_variable(project,
+                     pymodule,
+                     pyname,
+                     name,
+                     remove=True,
+                     region=None,
+                     docs=False):
     definition = _getvardef(pymodule, pyname)
     start, end = _assigned_lineno(pymodule, pyname)
 
-    occurrence_finder = occurrences.create_finder(project, name, pyname, docs=docs)
+    occurrence_finder = occurrences.create_finder(project,
+                                                  name,
+                                                  pyname,
+                                                  docs=docs)
     changed_source = rename.rename_in_module(
         occurrence_finder,
         definition,
@@ -629,10 +648,8 @@ def _inline_variable(
         changed_source = pymodule.source_code
     if remove:
         lines = codeanalyze.SourceLinesAdapter(changed_source)
-        source = (
-            changed_source[: lines.get_line_start(start)]
-            + changed_source[lines.get_line_end(end) + 1 :]
-        )
+        source = (changed_source[:lines.get_line_start(start)] +
+                  changed_source[lines.get_line_end(end) + 1:])
     else:
         source = changed_source
     return source
@@ -643,13 +660,12 @@ def _getvardef(pymodule, pyname):
     lines = pymodule.lines
     start, end = _assigned_lineno(pymodule, pyname)
     definition_with_assignment = _join_lines(
-        [lines.get_line(n) for n in range(start, end + 1)]
-    )
+        [lines.get_line(n) for n in range(start, end + 1)])
     if assignment.levels:
-        raise rope.base.exceptions.RefactoringError("Cannot inline tuple assignments.")
-    definition = definition_with_assignment[
-        definition_with_assignment.index("=") + 1 :
-    ].strip()
+        raise rope.base.exceptions.RefactoringError(
+            "Cannot inline tuple assignments.")
+    definition = definition_with_assignment[definition_with_assignment.
+                                            index("=") + 1:].strip()
     return definition
 
 

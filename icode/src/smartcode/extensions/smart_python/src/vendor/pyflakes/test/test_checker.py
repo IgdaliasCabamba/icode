@@ -24,14 +24,12 @@ class TypeableVisitorTests(TestCase):
         """
         Test that the typeable node types are collected
         """
-        visitor = self._run_visitor(
-            """\
+        visitor = self._run_visitor("""\
 x = 1  # assignment
 for x in range(1): pass  # for loop
 def f(): pass  # function definition
 with a as b: pass  # with statement
-"""
-        )
+""")
         self.assertEqual(visitor.typeable_lines, [1, 2, 3, 4])
         self.assertIsInstance(visitor.typeable_nodes[1], ast.Assign)
         self.assertIsInstance(visitor.typeable_nodes[2], ast.For)
@@ -43,12 +41,10 @@ with a as b: pass  # with statement
         Test the common pitfall of missing `generic_visit` in visitors by
         ensuring that nested nodes are reported
         """
-        visitor = self._run_visitor(
-            """\
+        visitor = self._run_visitor("""\
 def f():
     x = 1
-"""
-        )
+""")
         self.assertEqual(visitor.typeable_lines, [1, 2])
         self.assertIsInstance(visitor.typeable_nodes[1], ast.FunctionDef)
         self.assertIsInstance(visitor.typeable_nodes[2], ast.Assign)
@@ -58,13 +54,11 @@ def f():
         """
         Test that the PEP 492 node types are collected
         """
-        visitor = self._run_visitor(
-            """\
+        visitor = self._run_visitor("""\
 async def f():  # async def
     async for x in y:  pass  # async for
     async with a as b: pass  # async with
-"""
-        )
+""")
         self.assertEqual(visitor.typeable_lines, [1, 2, 3])
         self.assertIsInstance(visitor.typeable_nodes[1], ast.AsyncFunctionDef)
         self.assertIsInstance(visitor.typeable_nodes[2], ast.AsyncFor)
@@ -104,14 +98,14 @@ class CollectTypeCommentsTests(TestCase):
         Test that the function works for binary source
         """
         ret = self._collect(b"x = 1  # type: int")
-        self.assertSetEqual(ret, {(ast.Assign, ("# type: int",))})
+        self.assertSetEqual(ret, {(ast.Assign, ("# type: int", ))})
 
     def test_text(self):
         """
         Test that the function works for text source
         """
         ret = self._collect("x = 1  # type: int")
-        self.assertEqual(ret, {(ast.Assign, ("# type: int",))})
+        self.assertEqual(ret, {(ast.Assign, ("# type: int", ))})
 
     def test_non_type_comment_ignored(self):
         """
@@ -146,11 +140,11 @@ class CollectTypeCommentsTests(TestCase):
 
     def test_type_comment_with_extra_still_collected(self):
         ret = self._collect("x = 1  # type: int  # noqa")
-        self.assertSetEqual(ret, {(ast.Assign, ("# type: int  # noqa",))})
+        self.assertSetEqual(ret, {(ast.Assign, ("# type: int  # noqa", ))})
 
     def test_type_comment_without_whitespace(self):
         ret = self._collect("x = 1 #type:int")
-        self.assertSetEqual(ret, {(ast.Assign, ("#type:int",))})
+        self.assertSetEqual(ret, {(ast.Assign, ("#type:int", ))})
 
     def test_type_comment_starts_with_word_ignore(self):
         ret = self._collect("x = 1 # type: ignore[T]")
@@ -162,27 +156,23 @@ class CollectTypeCommentsTests(TestCase):
         typeable one wins.
         """
         ret = self._collect("def f(): x = 1  # type: int")
-        self.assertSetEqual(ret, {(ast.Assign, ("# type: int",))})
+        self.assertSetEqual(ret, {(ast.Assign, ("# type: int", ))})
 
     def test_function_def_assigned_comments(self):
         """
         Test that type comments for function arguments are all attributed to
         the function definition.
         """
-        ret = self._collect(
-            """\
+        ret = self._collect("""\
 def f(
         a,  # type: int
         b,  # type: str
 ):
     # type: (...) -> None
     pass
-"""
-        )
-        expected = {
-            (
-                ast.FunctionDef,
-                ("# type: int", "# type: str", "# type: (...) -> None"),
-            )
-        }
+""")
+        expected = {(
+            ast.FunctionDef,
+            ("# type: int", "# type: str", "# type: (...) -> None"),
+        )}
         self.assertSetEqual(ret, expected)

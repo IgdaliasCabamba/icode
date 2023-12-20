@@ -215,7 +215,8 @@ def get_following_comment_same_line(node):
             whitespace = node.children[3].get_first_leaf().prefix
         elif node.type == "funcdef":
             # actually on the next line
-            whitespace = node.children[4].get_first_leaf().get_next_leaf().prefix
+            whitespace = node.children[4].get_first_leaf().get_next_leaf(
+            ).prefix
         else:
             whitespace = node.get_last_leaf().get_next_leaf().prefix
     except AttributeError:
@@ -226,11 +227,11 @@ def get_following_comment_same_line(node):
         return None
     if "#" not in whitespace:
         return None
-    comment = whitespace[whitespace.index("#") :]
+    comment = whitespace[whitespace.index("#"):]
     if "\r" in comment:
-        comment = comment[: comment.index("\r")]
+        comment = comment[:comment.index("\r")]
     if "\n" in comment:
-        comment = comment[: comment.index("\n")]
+        comment = comment[:comment.index("\n")]
     return comment
 
 
@@ -240,7 +241,8 @@ def is_scope(node):
         # Starting with Python 3.8, async is outside of the statement.
         return node.children[1].type != "sync_comp_for"
 
-    return t in ("file_input", "classdef", "funcdef", "lambdef", "sync_comp_for")
+    return t in ("file_input", "classdef", "funcdef", "lambdef",
+                 "sync_comp_for")
 
 
 def _get_parent_scope_cache(func):
@@ -276,9 +278,8 @@ def get_parent_scope(node, include_flows=False):
                 if scope.children[index].start_pos >= node.start_pos:
                     if node.parent.type == "param" and node.parent.name == node:
                         pass
-                    elif (
-                        node.parent.type == "tfpdef" and node.parent.children[0] == node
-                    ):
+                    elif (node.parent.type == "tfpdef"
+                          and node.parent.children[0] == node):
                         pass
                     else:
                         scope = scope.parent
@@ -287,13 +288,9 @@ def get_parent_scope(node, include_flows=False):
         elif include_flows and isinstance(scope, tree.Flow):
             # The cursor might be on `if foo`, so the parent scope will not be
             # the if, but the parent of the if.
-            if not (
-                scope.type == "if_stmt"
-                and any(
-                    n.start_pos <= node.start_pos < n.end_pos
-                    for n in scope.get_test_nodes()
-                )
-            ):
+            if not (scope.type == "if_stmt"
+                    and any(n.start_pos <= node.start_pos < n.end_pos
+                            for n in scope.get_test_nodes())):
                 return scope
 
         scope = scope.parent
@@ -314,7 +311,8 @@ def cut_value_at_position(leaf, position):
     """
     Cuts of the value of the leaf at position
     """
-    lines = split_lines(leaf.value, keepends=True)[: position[0] - leaf.line + 1]
+    lines = split_lines(leaf.value,
+                        keepends=True)[:position[0] - leaf.line + 1]
     column = position[1]
     if leaf.line == position[0]:
         column -= leaf.column
@@ -344,6 +342,7 @@ def expr_is_dotted(node):
 
 
 def _function_is_x_method(method_name):
+
     def wrapper(function_node):
         """
         This is a heuristic. It will not hold ALL the times, but it will be

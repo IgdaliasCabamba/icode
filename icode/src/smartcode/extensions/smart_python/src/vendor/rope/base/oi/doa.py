@@ -41,9 +41,13 @@ except ImportError:
 class PythonFileRunner(object):
     """A class for running python project files"""
 
-    def __init__(
-        self, pycore, file_, args=None, stdin=None, stdout=None, analyze_data=None
-    ):
+    def __init__(self,
+                 pycore,
+                 file_,
+                 args=None,
+                 stdin=None,
+                 stdout=None,
+                 analyze_data=None):
         self.pycore = pycore
         self.file = file_
         self.analyze_data = analyze_data
@@ -56,12 +60,12 @@ class PythonFileRunner(object):
         """Execute the process"""
         env = dict(os.environ)
         file_path = self.file.real_path
-        path_folders = (
-            self.pycore.project.get_source_folders()
-            + self.pycore.project.get_python_path_folders()
-        )
-        env["PYTHONPATH"] = os.pathsep.join(folder.real_path for folder in path_folders)
-        runmod_path = self.pycore.project.find_module("rope.base.oi.runmod").real_path
+        path_folders = (self.pycore.project.get_source_folders() +
+                        self.pycore.project.get_python_path_folders())
+        env["PYTHONPATH"] = os.pathsep.join(folder.real_path
+                                            for folder in path_folders)
+        runmod_path = self.pycore.project.find_module(
+            "rope.base.oi.runmod").real_path
         self.receiver = None
         self._init_data_receiving()
         send_info = "-"
@@ -99,7 +103,8 @@ class PythonFileRunner(object):
             self.receiver = _SocketReceiver()
         else:
             self.receiver = _FIFOReceiver()
-        self.receiving_thread = threading.Thread(target=self._receive_information)
+        self.receiving_thread = threading.Thread(
+            target=self._receive_information)
         self.receiving_thread.setDaemon(True)
         self.receiving_thread.start()
 
@@ -141,6 +146,7 @@ class PythonFileRunner(object):
 
 
 class _MessageReceiver(object):
+
     def receive_data(self):
         pass
 
@@ -149,6 +155,7 @@ class _MessageReceiver(object):
 
 
 class _SocketReceiver(_MessageReceiver):
+
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.data_port = 3037
@@ -163,7 +170,8 @@ class _SocketReceiver(_MessageReceiver):
         self.server_socket.listen(1)
 
     def get_send_info(self):
-        return "%d:%s" % (self.data_port, base64.b64encode(self.key).decode("utf-8"))
+        return "%d:%s" % (self.data_port, base64.b64encode(
+            self.key).decode("utf-8"))
 
     def receive_data(self):
         conn, addr = self.server_socket.accept()
@@ -186,7 +194,7 @@ class _SocketReceiver(_MessageReceiver):
                 try:
                     digest_end = buf.index(b":")
                     buf_digest = base64.b64decode(buf[:digest_end])
-                    buf_data = buf[digest_end + 1 : -1]
+                    buf_data = buf[digest_end + 1:-1]
                     decoded_buf_data = base64.b64decode(buf_data)
                 except:
                     # Corrupted data; the payload cannot be trusted and just has
@@ -207,6 +215,7 @@ class _SocketReceiver(_MessageReceiver):
 
 
 class _FIFOReceiver(_MessageReceiver):
+
     def __init__(self):
         # XXX: this is insecure and might cause race conditions
         self.file_name = self._get_file_name()

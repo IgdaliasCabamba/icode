@@ -26,6 +26,7 @@ from jedi.plugins import plugin_manager
 
 
 class ParamNameWithEquals(ParamNameWrapper):
+
     def get_public_name(self):
         return self.string_name + "="
 
@@ -37,10 +38,9 @@ def _get_signature_param_names(signatures, positional_count, used_kwargs):
             kind = p.kind
             if i < positional_count and kind == Parameter.POSITIONAL_OR_KEYWORD:
                 continue
-            if (
-                kind in (Parameter.POSITIONAL_OR_KEYWORD, Parameter.KEYWORD_ONLY)
-                and p.name not in used_kwargs
-            ):
+            if (kind in (Parameter.POSITIONAL_OR_KEYWORD,
+                         Parameter.KEYWORD_ONLY)
+                    and p.name not in used_kwargs):
                 yield ParamNameWithEquals(p._name)
 
 
@@ -58,8 +58,8 @@ def _must_be_kwarg(signatures, positional_count, used_kwargs):
                 return False
 
             if i >= positional_count and kind in (
-                Parameter.POSITIONAL_OR_KEYWORD,
-                Parameter.POSITIONAL_ONLY,
+                    Parameter.POSITIONAL_OR_KEYWORD,
+                    Parameter.POSITIONAL_ONLY,
             ):
                 must_be_kwarg = False
                 break
@@ -68,9 +68,8 @@ def _must_be_kwarg(signatures, positional_count, used_kwargs):
     return must_be_kwarg
 
 
-def filter_names(
-    inference_state, completion_names, stack, like_name, fuzzy, cached_name
-):
+def filter_names(inference_state, completion_names, stack, like_name, fuzzy,
+                 cached_name):
     comp_dct = set()
     if settings.case_insensitive_completion:
         like_name = like_name.lower()
@@ -108,8 +107,7 @@ def get_user_context(module_context, position):
     Returns the scope in which the user resides. This includes flows.
     """
     leaf = module_context.tree_node.get_leaf_for_position(
-        position, include_prefixes=True
-    )
+        position, include_prefixes=True)
     return module_context.create_context(leaf)
 
 
@@ -129,6 +127,7 @@ def complete_param_names(context, function_name, decorator_nodes):
 
 
 class Completion:
+
     def __init__(
         self,
         inference_state,
@@ -145,8 +144,7 @@ class Completion:
 
         # The first step of completions is to get the name
         self._like_name = helpers.get_on_completion_name(
-            self._module_node, code_lines, position
-        )
+            self._module_node, code_lines, position)
         # The actual cursor position is not what we need to calculate
         # everything. We want the start of the name we're on.
         self._original_position = position
@@ -155,12 +153,10 @@ class Completion:
         self._fuzzy = fuzzy
 
     def complete(self):
-        leaf = self._module_node.get_leaf_for_position(
-            self._original_position, include_prefixes=True
-        )
+        leaf = self._module_node.get_leaf_for_position(self._original_position,
+                                                       include_prefixes=True)
         string, start_leaf, quote = _extract_string_while_in_string(
-            leaf, self._original_position
-        )
+            leaf, self._original_position)
 
         prefixed_completions = complete_dict(
             self._module_context,
@@ -184,12 +180,12 @@ class Completion:
                     self._code_lines,
                     self._original_position,
                     self._fuzzy,
-                )
-            )
+                ))
         if string is not None:
             if not prefixed_completions and "\n" in string:
                 # Complete only multi line strings
-                prefixed_completions = self._complete_in_string(start_leaf, string)
+                prefixed_completions = self._complete_in_string(
+                    start_leaf, string)
             return prefixed_completions
 
         cached_name, completion_names = self._complete_python(leaf)
@@ -202,21 +198,18 @@ class Completion:
                 self._like_name,
                 self._fuzzy,
                 cached_name=cached_name,
-            )
-        )
+            ))
 
         return (
             # Removing duplicates mostly to remove False/True/None duplicates.
-            _remove_duplicates(prefixed_completions, completions)
-            + sorted(
+            _remove_duplicates(prefixed_completions, completions) + sorted(
                 completions,
                 key=lambda x: (
                     x.name.startswith("__"),
                     x.name.startswith("_"),
                     x.name.lower(),
                 ),
-            )
-        )
+            ))
 
     def _complete_python(self, leaf):
         """
@@ -243,8 +236,7 @@ class Completion:
 
         try:
             self.stack = stack = helpers.get_stack_at_position(
-                grammar, self._code_lines, leaf, self._position
-            )
+                grammar, self._code_lines, leaf, self._position)
         except helpers.OnErrorLeaf as e:
             value = e.error_leaf.value
             if value == ".":
@@ -255,12 +247,12 @@ class Completion:
             # If we don't have a value, just use global completion.
             return cached_name, self._complete_global_scope()
 
-        allowed_transitions = list(stack._allowed_transition_names_and_token_types())
+        allowed_transitions = list(
+            stack._allowed_transition_names_and_token_types())
 
         if "if" in allowed_transitions:
             leaf = self._module_node.get_leaf_for_position(
-                self._position, include_prefixes=True
-            )
+                self._position, include_prefixes=True)
             previous_leaf = leaf.get_previous_leaf()
 
             indent = self._position[1]
@@ -291,17 +283,17 @@ class Completion:
                         if type_ == "if_stmt":
                             allowed_transitions += ["elif", "else"]
                         elif type_ == "try_stmt":
-                            allowed_transitions += ["except", "finally", "else"]
+                            allowed_transitions += [
+                                "except", "finally", "else"
+                            ]
                         elif type_ == "for_stmt":
                             allowed_transitions.append("else")
 
         completion_names = []
 
         kwargs_only = False
-        if any(
-            t in allowed_transitions
-            for t in (PythonTokenTypes.NAME, PythonTokenTypes.INDENT)
-        ):
+        if any(t in allowed_transitions
+               for t in (PythonTokenTypes.NAME, PythonTokenTypes.INDENT)):
             # This means that we actually have to do type inference.
 
             nonterminals = [stack_node.nonterminal for stack_node in stack]
@@ -310,19 +302,24 @@ class Completion:
             if nodes and nodes[-1] in ("as", "def", "class"):
                 # No completions for ``with x as foo`` and ``import x as foo``.
                 # Also true for defining names as a class or function.
-                return cached_name, list(self._complete_inherited(is_function=True))
+                return cached_name, list(
+                    self._complete_inherited(is_function=True))
             elif "import_stmt" in nonterminals:
-                level, names = parse_dotted_names(nodes, "import_from" in nonterminals)
+                level, names = parse_dotted_names(
+                    nodes, "import_from" in nonterminals)
 
-                only_modules = not ("import_from" in nonterminals and "import" in nodes)
+                only_modules = not ("import_from" in nonterminals
+                                    and "import" in nodes)
                 completion_names += self._get_importer_names(
                     names,
                     level,
                     only_modules=only_modules,
                 )
-            elif nonterminals[-1] in ("trailer", "dotted_name") and nodes[-1] == ".":
+            elif nonterminals[-1] in ("trailer",
+                                      "dotted_name") and nodes[-1] == ".":
                 dot = self._module_node.get_leaf_for_position(self._position)
-                cached_name, n = self._complete_trailer(dot.get_previous_leaf())
+                cached_name, n = self._complete_trailer(
+                    dot.get_previous_leaf())
                 completion_names += n
             elif self._is_parameter_completion():
                 completion_names += self._complete_params(leaf)
@@ -336,15 +333,17 @@ class Completion:
                 # 3. Decorators are very primitive and have an optional `(` with
                 #    optional arglist in them.
                 if nodes[-1] in ["(", ","] and nonterminals[-1] in (
-                    "trailer",
-                    "arglist",
-                    "decorator",
+                        "trailer",
+                        "arglist",
+                        "decorator",
                 ):
                     signatures = self._signatures_callback(*self._position)
                     if signatures:
                         call_details = signatures[0]._call_details
-                        used_kwargs = list(call_details.iter_used_keyword_arguments())
-                        positional_count = call_details.count_positional_arguments()
+                        used_kwargs = list(
+                            call_details.iter_used_keyword_arguments())
+                        positional_count = call_details.count_positional_arguments(
+                        )
 
                         completion_names += _get_signature_param_names(
                             signatures,
@@ -352,23 +351,22 @@ class Completion:
                             used_kwargs,
                         )
 
-                        kwargs_only = _must_be_kwarg(
-                            signatures, positional_count, used_kwargs
-                        )
+                        kwargs_only = _must_be_kwarg(signatures,
+                                                     positional_count,
+                                                     used_kwargs)
 
                 if not kwargs_only:
                     completion_names += self._complete_global_scope()
-                    completion_names += self._complete_inherited(is_function=False)
+                    completion_names += self._complete_inherited(
+                        is_function=False)
 
         if not kwargs_only:
-            current_line = self._code_lines[self._position[0] - 1][: self._position[1]]
+            current_line = self._code_lines[self._position[0] -
+                                            1][:self._position[1]]
             completion_names += self._complete_keywords(
                 allowed_transitions,
-                only_values=not (
-                    not current_line
-                    or current_line[-1] in " \t.;"
-                    and current_line[-3:] != "..."
-                ),
+                only_values=not (not current_line or current_line[-1]
+                                 in " \t.;" and current_line[-3:] != "..."),
             )
 
         return cached_name, completion_names
@@ -384,9 +382,8 @@ class Completion:
             # yet, so we have no `typedargslist`.
             return True
         # var args is for lambdas and typed args for normal functions
-        return (
-            tos.nonterminal in ("typedargslist", "varargslist") and tos.nodes[-1] == ","
-        )
+        return (tos.nonterminal in ("typedargslist", "varargslist")
+                and tos.nodes[-1] == ",")
 
     def _complete_params(self, leaf):
         stack_node = self.stack[-2]
@@ -408,7 +405,8 @@ class Completion:
                     decorators = node.get_decorators()
                 function_name = stack_node.nodes[1]
 
-                return complete_param_names(context, function_name.value, decorators)
+                return complete_param_names(context, function_name.value,
+                                            decorators)
         return []
 
     def _complete_keywords(self, allowed_transitions, only_values):
@@ -420,7 +418,8 @@ class Completion:
     def _complete_global_scope(self):
         context = get_user_context(self._module_context, self._position)
         debug.dbg("global completion scope: %s", context)
-        flow_scope_node = get_flow_scope_node(self._module_node, self._position)
+        flow_scope_node = get_flow_scope_node(self._module_node,
+                                              self._position)
         filters = get_global_filters(context, self._position, flow_scope_node)
         completion_names = []
         for filter in filters:
@@ -436,11 +435,12 @@ class Completion:
         # modules.
         cached_name = None
         if len(values) == 1:
-            (v,) = values
+            (v, ) = values
             if v.is_module():
                 if len(v.string_names) == 1:
                     module_name = v.string_names[0]
-                    if module_name in ("numpy", "tensorflow", "matplotlib", "pandas"):
+                    if module_name in ("numpy", "tensorflow", "matplotlib",
+                                       "pandas"):
                         cached_name = module_name
 
         return cached_name, self._complete_trailer_for_values(values)
@@ -452,16 +452,17 @@ class Completion:
 
     def _get_importer_names(self, names, level=0, only_modules=True):
         names = [n.value for n in names]
-        i = imports.Importer(self._inference_state, names, self._module_context, level)
-        return i.completion_names(self._inference_state, only_modules=only_modules)
+        i = imports.Importer(self._inference_state, names,
+                             self._module_context, level)
+        return i.completion_names(self._inference_state,
+                                  only_modules=only_modules)
 
     def _complete_inherited(self, is_function=True):
         """
         Autocomplete inherited methods when overriding in child class.
         """
-        leaf = self._module_node.get_leaf_for_position(
-            self._position, include_prefixes=True
-        )
+        leaf = self._module_node.get_leaf_for_position(self._position,
+                                                       include_prefixes=True)
         cls = tree.search_ancestor(leaf, "classdef")
         if cls is None:
             return
@@ -495,7 +496,8 @@ class Completion:
         def iter_relevant_lines(lines):
             include_next_line = False
             for l in code_lines:
-                if include_next_line or l.startswith(">>>") or l.startswith(" "):
+                if include_next_line or l.startswith(">>>") or l.startswith(
+                        " "):
                     yield re.sub(r"^( *>>> ?| +)", "", l)
                 else:
                     yield None
@@ -548,6 +550,7 @@ _string_start = re.compile(r'^\w*(\'{3}|"{3}|\'|")')
 
 
 def _extract_string_while_in_string(leaf, position):
+
     def return_part_of_leaf(leaf):
         kwargs = {}
         if leaf.line == position[0]:
@@ -556,9 +559,10 @@ def _extract_string_while_in_string(leaf, position):
         if not match:
             return None, None, None
         start = match.group(0)
-        if leaf.line == position[0] and position[1] < leaf.column + match.end():
+        if leaf.line == position[0] and position[1] < leaf.column + match.end(
+        ):
             return None, None, None
-        return cut_value_at_position(leaf, position)[match.end() :], leaf, start
+        return cut_value_at_position(leaf, position)[match.end():], leaf, start
 
     if position < leaf.start_pos:
         return None, None, None
@@ -568,24 +572,23 @@ def _extract_string_while_in_string(leaf, position):
 
     leaves = []
     while leaf is not None:
-        if leaf.type == "error_leaf" and ('"' in leaf.value or "'" in leaf.value):
+        if leaf.type == "error_leaf" and ('"' in leaf.value
+                                          or "'" in leaf.value):
             if len(leaf.value) > 1:
                 return return_part_of_leaf(leaf)
             prefix_leaf = None
             if not leaf.prefix:
                 prefix_leaf = leaf.get_previous_leaf()
-                if (
-                    prefix_leaf is None
-                    or prefix_leaf.type != "name"
-                    or not all(c in "rubf" for c in prefix_leaf.value.lower())
-                ):
+                if (prefix_leaf is None or prefix_leaf.type != "name"
+                        or not all(c in "rubf"
+                                   for c in prefix_leaf.value.lower())):
                     prefix_leaf = None
 
             return (
                 "".join(cut_value_at_position(l, position) for l in leaves),
                 prefix_leaf or leaf,
-                ("" if prefix_leaf is None else prefix_leaf.value)
-                + cut_value_at_position(leaf, position),
+                ("" if prefix_leaf is None else prefix_leaf.value) +
+                cut_value_at_position(leaf, position),
             )
         if leaf.line != position[0]:
             # Multi line strings are always simple error leaves and contain the
@@ -636,8 +639,7 @@ def _complete_getattr(user_context, instance):
     out of luck I guess :) ~dave.
     """
     names = instance.get_function_slot_names(
-        "__getattr__"
-    ) or instance.get_function_slot_names("__getattribute__")
+        "__getattr__") or instance.get_function_slot_names("__getattribute__")
     functions = ValueSet.from_sets(name.infer() for name in names)
     for func in functions:
         tree_node = func.tree_node
@@ -654,11 +656,8 @@ def _complete_getattr(user_context, instance):
                 continue
             atom = atom_expr.children[0]
             trailer = atom_expr.children[1]
-            if (
-                len(atom_expr.children) != 2
-                or atom.type != "name"
-                or atom.value != "getattr"
-            ):
+            if (len(atom_expr.children) != 2 or atom.type != "name"
+                    or atom.value != "getattr"):
                 continue
             arglist = trailer.children[1]
             if arglist.type != "arglist" or len(arglist.children) < 3:
@@ -695,11 +694,8 @@ def search_in_module(
         new_names = []
         for n in names:
             if s == n.string_name:
-                if (
-                    n.tree_name is not None
-                    and n.api_type == "module"
-                    and ignore_imports
-                ):
+                if (n.tree_name is not None and n.api_type == "module"
+                        and ignore_imports):
                     continue
                 new_names += complete_trailer(module_context, n.infer())
         debug.dbg("dot lookup on search %s from %s", new_names, names[:10])
@@ -708,12 +704,8 @@ def search_in_module(
     last_name = wanted_names[-1].lower()
     for n in names:
         string = n.string_name.lower()
-        if (
-            complete
-            and helpers.match(string, last_name, fuzzy=fuzzy)
-            or not complete
-            and string == last_name
-        ):
+        if (complete and helpers.match(string, last_name, fuzzy=fuzzy)
+                or not complete and string == last_name):
             if isinstance(n, SubModuleName):
                 names = [v.name for v in n.infer()]
             else:

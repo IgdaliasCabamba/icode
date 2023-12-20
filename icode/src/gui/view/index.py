@@ -127,7 +127,8 @@ class WelcomeActions(QFrame):
         self.layout.addWidget(self.side_left)
         self.layout.addWidget(self.side_right)
         self.layout.setAlignment(self.side_left, Qt.AlignLeft | Qt.AlignCenter)
-        self.layout.setAlignment(self.side_right, Qt.AlignRight | Qt.AlignCenter)
+        self.layout.setAlignment(self.side_right,
+                                 Qt.AlignRight | Qt.AlignCenter)
 
         self.side_left.linkActivated.connect(self.option_clicked)
 
@@ -144,6 +145,7 @@ class WelcomeActions(QFrame):
 
 
 class Welcome(QFrame):
+
     def __init__(self, parent, folders: list = []) -> None:
         super().__init__(parent)
         self.setObjectName("welcome")
@@ -162,7 +164,8 @@ class Welcome(QFrame):
         self.actions = WelcomeActions(self)
 
         self.main_link = QLabel(self)
-        self.main_link.setText("<small><a href='icode.com'>icode.io</a></small>")
+        self.main_link.setText(
+            "<small><a href='icode.com'>icode.io</a></small>")
         self.main_link.setAlignment(Qt.AlignCenter)
 
         self.show_on_start = QCheckBox("Show welcome page on startup", self)

@@ -32,13 +32,12 @@ def _stub_to_python_value_set(stub_value, ignore_compiled=False):
         was_instance = True
         arguments = None
 
-    values = _infer_from_stub(stub_module_context, qualified_names, ignore_compiled)
+    values = _infer_from_stub(stub_module_context, qualified_names,
+                              ignore_compiled)
     if was_instance:
-        values = ValueSet.from_sets(
-            c.execute_with_values() if arguments is None else c.execute(arguments)
-            for c in values
-            if c.is_class()
-        )
+        values = ValueSet.from_sets(c.execute_with_values() if arguments is
+                                    None else c.execute(arguments)
+                                    for c in values if c.is_class())
     if was_bound_method:
         # Now that the instance has been properly created, we can simply get
         # the method.
@@ -52,7 +51,8 @@ def _infer_from_stub(stub_module_context, qualified_names, ignore_compiled):
     from jedi.inference.compiled.mixed import MixedObject
 
     stub_module = stub_module_context.get_value()
-    assert isinstance(stub_module, (StubModuleValue, MixedObject)), stub_module_context
+    assert isinstance(stub_module,
+                      (StubModuleValue, MixedObject)), stub_module_context
     non_stubs = stub_module.non_stub_value_set
     if ignore_compiled:
         non_stubs = non_stubs.filter(lambda c: not c.is_compiled())
@@ -70,9 +70,8 @@ def _try_stub_to_python_names(names, prefer_stub_to_compiled=False):
             continue
 
         if name.api_type == "module":
-            values = convert_values(
-                name.infer(), ignore_compiled=prefer_stub_to_compiled
-            )
+            values = convert_values(name.infer(),
+                                    ignore_compiled=prefer_stub_to_compiled)
             if values:
                 for v in values:
                     yield v.name
@@ -81,8 +80,7 @@ def _try_stub_to_python_names(names, prefer_stub_to_compiled=False):
             v = name.get_defining_qualified_value()
             if v is not None:
                 converted = _stub_to_python_value_set(
-                    v, ignore_compiled=prefer_stub_to_compiled
-                )
+                    v, ignore_compiled=prefer_stub_to_compiled)
                 if converted:
                     converted_names = converted.goto(name.get_public_name())
                     if converted_names:
@@ -128,8 +126,7 @@ def _python_to_stub_names(names, fallback_to_python=False):
                         found_name = True
                 else:
                     for x in _python_to_stub_names(
-                        [n], fallback_to_python=fallback_to_python
-                    ):
+                        [n], fallback_to_python=fallback_to_python):
                         yield x
                         found_name = True
             if found_name:
@@ -149,35 +146,38 @@ def _python_to_stub_names(names, fallback_to_python=False):
             yield name
 
 
-def convert_names(
-    names, only_stubs=False, prefer_stubs=False, prefer_stub_to_compiled=True
-):
+def convert_names(names,
+                  only_stubs=False,
+                  prefer_stubs=False,
+                  prefer_stub_to_compiled=True):
     if only_stubs and prefer_stubs:
         raise ValueError("You cannot use both of only_stubs and prefer_stubs.")
 
     with debug.increase_indent_cm("convert names"):
         if only_stubs or prefer_stubs:
-            return _python_to_stub_names(names, fallback_to_python=prefer_stubs)
+            return _python_to_stub_names(names,
+                                         fallback_to_python=prefer_stubs)
         else:
             return _try_stub_to_python_names(
-                names, prefer_stub_to_compiled=prefer_stub_to_compiled
-            )
+                names, prefer_stub_to_compiled=prefer_stub_to_compiled)
 
 
-def convert_values(values, only_stubs=False, prefer_stubs=False, ignore_compiled=True):
+def convert_values(values,
+                   only_stubs=False,
+                   prefer_stubs=False,
+                   ignore_compiled=True):
     assert not (only_stubs and prefer_stubs)
     with debug.increase_indent_cm("convert values"):
         if only_stubs or prefer_stubs:
             return ValueSet.from_sets(
-                to_stub(value) or (ValueSet({value}) if prefer_stubs else NO_VALUES)
-                for value in values
-            )
+                to_stub(value) or (
+                    ValueSet({value}) if prefer_stubs else NO_VALUES)
+                for value in values)
         else:
             return ValueSet.from_sets(
-                _stub_to_python_value_set(stub_value, ignore_compiled=ignore_compiled)
-                or ValueSet({stub_value})
-                for stub_value in values
-            )
+                _stub_to_python_value_set(stub_value,
+                                          ignore_compiled=ignore_compiled)
+                or ValueSet({stub_value}) for stub_value in values)
 
 
 def to_stub(value):
@@ -205,9 +205,8 @@ def to_stub(value):
         stub_values = stub_values.py__getattribute__(name)
 
     if was_instance:
-        stub_values = ValueSet.from_sets(
-            c.execute_with_values() for c in stub_values if c.is_class()
-        )
+        stub_values = ValueSet.from_sets(c.execute_with_values()
+                                         for c in stub_values if c.is_class())
     if was_bound_method:
         # Now that the instance has been properly created, we can simply get
         # the method.

@@ -61,36 +61,31 @@ from parso.tree import (
 from parso.python.prefix import split_prefix
 from parso.utils import split_lines
 
-_FLOW_CONTAINERS = set(
-    [
-        "if_stmt",
-        "while_stmt",
-        "for_stmt",
-        "try_stmt",
-        "with_stmt",
-        "async_stmt",
-        "suite",
-    ]
-)
+_FLOW_CONTAINERS = set([
+    "if_stmt",
+    "while_stmt",
+    "for_stmt",
+    "try_stmt",
+    "with_stmt",
+    "async_stmt",
+    "suite",
+])
 _RETURN_STMT_CONTAINERS = set(["suite", "simple_stmt"]) | _FLOW_CONTAINERS
 
-_FUNC_CONTAINERS = (
-    set(["suite", "simple_stmt", "decorated", "async_funcdef"]) | _FLOW_CONTAINERS
-)
+_FUNC_CONTAINERS = (set(["suite", "simple_stmt", "decorated", "async_funcdef"])
+                    | _FLOW_CONTAINERS)
 
-_GET_DEFINITION_TYPES = set(
-    [
-        "expr_stmt",
-        "sync_comp_for",
-        "with_stmt",
-        "for_stmt",
-        "import_name",
-        "import_from",
-        "param",
-        "del_stmt",
-        "namedexpr_test",
-    ]
-)
+_GET_DEFINITION_TYPES = set([
+    "expr_stmt",
+    "sync_comp_for",
+    "with_stmt",
+    "for_stmt",
+    "import_name",
+    "import_from",
+    "param",
+    "del_stmt",
+    "namedexpr_test",
+])
 _IMPORTS = set(["import_name", "import_from"])
 
 
@@ -158,11 +153,9 @@ class PythonLeaf(PythonMixin, Leaf):
         # TODO it is really ugly that we have to override it. Maybe change
         #   indent error leafs somehow? No idea how, though.
         previous_leaf = self.get_previous_leaf()
-        if (
-            previous_leaf is not None
-            and previous_leaf.type == "error_leaf"
-            and previous_leaf.token_type in ("INDENT", "DEDENT", "ERROR_DEDENT")
-        ):
+        if (previous_leaf is not None and previous_leaf.type == "error_leaf"
+                and previous_leaf.token_type
+                in ("INDENT", "DEDENT", "ERROR_DEDENT")):
             previous_leaf = previous_leaf.get_previous_leaf()
 
         if previous_leaf is None:  # It's the first leaf.
@@ -298,8 +291,10 @@ class String(Literal):
         return re.match(r'\w*(?=[\'"])', self.value).group(0)
 
     def _get_payload(self):
-        match = re.search(r"""('{3}|"{3}|'|")(.*)$""", self.value, flags=re.DOTALL)
-        return match.group(2)[: -len(match.group(1))]
+        match = re.search(r"""('{3}|"{3}|'|")(.*)$""",
+                          self.value,
+                          flags=re.DOTALL)
+        return match.group(2)[:-len(match.group(1))]
 
 
 class FStringString(PythonLeaf):
@@ -333,6 +328,7 @@ class FStringEnd(PythonLeaf):
 
 
 class _StringComparisonMixin:
+
     def __eq__(self, other):
         """
         Make comparisons with strings easy.
@@ -388,6 +384,7 @@ class Scope(PythonBaseNode, DocstringMixin):
         return self._search_in_scope("import_name", "import_from")
 
     def _search_in_scope(self, *names):
+
         def scan(children):
             for element in children:
                 if element.type in names:
@@ -424,7 +421,7 @@ class Module(Scope):
     of a module.
     """
 
-    __slots__ = ("_used_names",)
+    __slots__ = ("_used_names", )
     type = "file_input"
 
     def __init__(self, children):
@@ -561,11 +558,9 @@ def _create_params(parent, argslist_list):
             if child is None or child == ",":
                 param_children = children[start:end]
                 if param_children:  # Could as well be comma and then end.
-                    if (
-                        param_children[0] == "*"
-                        and (len(param_children) == 1 or param_children[1] == ",")
-                        or param_children[0] == "/"
-                    ):
+                    if (param_children[0] == "*" and
+                        (len(param_children) == 1 or param_children[1] == ",")
+                            or param_children[0] == "/"):
                         for p in param_children:
                             p.parent = parent
                         new_children += param_children
@@ -599,7 +594,8 @@ class Function(ClassOrFunc):
         # If input parameters list already has Param objects, keep it as is;
         # otherwise, convert it to a list of Param objects.
         if not any(isinstance(child, Param) for child in parameters_children):
-            parameters.children[1:-1] = _create_params(parameters, parameters_children)
+            parameters.children[1:-1] = _create_params(parameters,
+                                                       parameters_children)
 
     def _get_param_nodes(self):
         return self.children[2].children
@@ -644,11 +640,8 @@ class Function(ClassOrFunc):
 
         def scan(children):
             for element in children:
-                if (
-                    element.type == "return_stmt"
-                    or element.type == "keyword"
-                    and element.value == "return"
-                ):
+                if (element.type == "return_stmt" or element.type == "keyword"
+                        and element.value == "return"):
                     yield element
                 if element.type in _RETURN_STMT_CONTAINERS:
                     yield from scan(element.children)
@@ -662,11 +655,8 @@ class Function(ClassOrFunc):
 
         def scan(children):
             for element in children:
-                if (
-                    element.type == "raise_stmt"
-                    or element.type == "keyword"
-                    and element.value == "raise"
-                ):
+                if (element.type == "raise_stmt" or element.type == "keyword"
+                        and element.value == "raise"):
                     yield element
                 if element.type in _RETURN_STMT_CONTAINERS:
                     yield from scan(element.children)
@@ -842,7 +832,8 @@ class WithStmt(Flow):
     def get_test_node_from_name(self, name):
         node = name.search_ancestor("with_item")
         if node is None:
-            raise ValueError("The name is not actually part of a with statement.")
+            raise ValueError(
+                "The name is not actually part of a with statement.")
         return node.children[0]
 
 
@@ -863,7 +854,7 @@ class Import(PythonBaseNode):
 
         for path in self.get_paths():
             if name in path:
-                return path[: path.index(name) + 1]
+                return path[:path.index(name) + 1]
         raise ValueError("Name should be defined in the import itself")
 
     def is_nested(self):
@@ -887,9 +878,8 @@ class ImportFrom(Import):
 
     def _aliases(self):
         """Mapping from alias to its corresponding name."""
-        return dict(
-            (alias, name) for name, alias in self._as_name_tuples() if alias is not None
-        )
+        return dict((alias, name) for name, alias in self._as_name_tuples()
+                    if alias is not None)
 
     def get_from_names(self):
         for n in self.children[1:]:
@@ -993,23 +983,18 @@ class ImportName(Import):
 
             import foo.bar
         """
-        return bool(
-            [
-                1
-                for path, alias in self._dotted_as_names()
-                if alias is None and len(path) > 1
-            ]
-        )
+        return bool([
+            1 for path, alias in self._dotted_as_names()
+            if alias is None and len(path) > 1
+        ])
 
     def _aliases(self):
         """
         :return list of Name: Returns all the alias
         """
-        return dict(
-            (alias, path[-1])
-            for path, alias in self._dotted_as_names()
-            if alias is not None
-        )
+        return dict((alias, path[-1])
+                    for path, alias in self._dotted_as_names()
+                    if alias is not None)
 
 
 class KeywordStatement(PythonBaseNode):
@@ -1074,7 +1059,8 @@ def _defined_names(current, include_setitem):
     list comprehensions.
     """
     names = []
-    if current.type in ("testlist_star_expr", "testlist_comp", "exprlist", "testlist"):
+    if current.type in ("testlist_star_expr", "testlist_comp", "exprlist",
+                        "testlist"):
         for child in current.children[::2]:
             names += _defined_names(child, include_setitem)
     elif current.type in ("atom", "star_expr"):
@@ -1109,8 +1095,8 @@ class ExprStmt(PythonBaseNode, DocstringMixin):
         if self.children[1].type == "annassign":
             names = _defined_names(self.children[0], include_setitem)
         return [
-            name
-            for i in range(0, len(self.children) - 2, 2)
+            name for i in range(0,
+                                len(self.children) - 2, 2)
             if "=" in self.children[i + 1].value
             for name in _defined_names(self.children[i], include_setitem)
         ] + names
@@ -1260,11 +1246,14 @@ class Param(PythonBaseNode):
         children = self.children
         if children[-1] == ",":
             children = children[:-1]
-        return self._get_code_for_children(children, include_prefix=include_prefix)
+        return self._get_code_for_children(children,
+                                           include_prefix=include_prefix)
 
     def __repr__(self):
-        default = "" if self.default is None else "=%s" % self.default.get_code()
-        return "<%s: %s>" % (type(self).__name__, str(self._tfpdef()) + default)
+        default = "" if self.default is None else "=%s" % self.default.get_code(
+        )
+        return "<%s: %s>" % (type(self).__name__,
+                             str(self._tfpdef()) + default)
 
 
 class SyncCompFor(PythonBaseNode):

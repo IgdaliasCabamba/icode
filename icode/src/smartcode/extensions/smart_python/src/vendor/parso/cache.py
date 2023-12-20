@@ -101,6 +101,7 @@ parser_cache: Dict[str, Any] = {}
 
 
 class _NodeCacheItem:
+
     def __init__(self, node, lines, change_time=None):
         self.node = node
         self.lines = lines
@@ -124,9 +125,10 @@ def load_module(hashed_grammar, file_io, cache_path=None):
             module_cache_item.last_used = time.time()
             return module_cache_item.node
     except KeyError:
-        return _load_from_file_system(
-            hashed_grammar, file_io.path, p_time, cache_path=cache_path
-        )
+        return _load_from_file_system(hashed_grammar,
+                                      file_io.path,
+                                      p_time,
+                                      cache_path=cache_path)
 
 
 def _load_from_file_system(hashed_grammar, path, p_time, cache_path=None):
@@ -166,9 +168,12 @@ def _set_cache_item(hashed_grammar, path, module_cache_item):
     parser_cache.setdefault(hashed_grammar, {})[path] = module_cache_item
 
 
-def try_to_save_module(
-    hashed_grammar, file_io, module, lines, pickling=True, cache_path=None
-):
+def try_to_save_module(hashed_grammar,
+                       file_io,
+                       module,
+                       lines,
+                       pickling=True,
+                       cache_path=None):
     path = file_io.path
     try:
         p_time = None if path is None else file_io.get_last_modified()
@@ -180,20 +185,24 @@ def try_to_save_module(
     _set_cache_item(hashed_grammar, path, item)
     if pickling and path is not None:
         try:
-            _save_to_file_system(hashed_grammar, path, item, cache_path=cache_path)
+            _save_to_file_system(hashed_grammar,
+                                 path,
+                                 item,
+                                 cache_path=cache_path)
         except PermissionError:
             # It's not really a big issue if the cache cannot be saved to the
             # file system. It's still in RAM in that case. However we should
             # still warn the user that this is happening.
             warnings.warn(
-                "Tried to save a file to %s, but got permission denied." % path, Warning
-            )
+                "Tried to save a file to %s, but got permission denied." %
+                path, Warning)
         else:
             _remove_cache_and_update_lock(cache_path=cache_path)
 
 
 def _save_to_file_system(hashed_grammar, path, item, cache_path=None):
-    with open(_get_hashed_path(hashed_grammar, path, cache_path=cache_path), "wb") as f:
+    with open(_get_hashed_path(hashed_grammar, path, cache_path=cache_path),
+              "wb") as f:
         pickle.dump(item, f, pickle.HIGHEST_PROTOCOL)
 
 
@@ -217,7 +226,8 @@ def clear_inactive_cache(
         if not version_path.is_dir():
             continue
         for file in os.scandir(version_path):
-            if file.stat().st_atime + _CACHED_FILE_MAXIMUM_SURVIVAL <= time.time():
+            if file.stat(
+            ).st_atime + _CACHED_FILE_MAXIMUM_SURVIVAL <= time.time():
                 try:
                     os.remove(file.path)
                 except OSError:  # silently ignore all failures
@@ -244,10 +254,8 @@ def _remove_cache_and_update_lock(cache_path=None):
         clear_lock_time = os.path.getmtime(lock_path)
     except FileNotFoundError:
         clear_lock_time = None
-    if (
-        clear_lock_time is None  # first time
-        or clear_lock_time + _CACHE_CLEAR_THRESHOLD <= time.time()
-    ):
+    if (clear_lock_time is None  # first time
+            or clear_lock_time + _CACHE_CLEAR_THRESHOLD <= time.time()):
         if not _touch(lock_path):
             # First make sure that as few as possible other cleanup jobs also
             # get started. There is still a race condition but it's probably

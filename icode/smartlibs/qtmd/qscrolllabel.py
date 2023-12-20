@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QLabel, QScrollArea
 
 
 class ScrollLabel(QScrollArea):
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setObjectName("scroll-label")

@@ -15,8 +15,7 @@ JEDI_SIGNATURES_WRAP_WIDTH = 90
 FUNCTION_REGEX = re.compile(r"(def)\s([_a-zA-Z0-9-]*)")
 CLASS_REGEX = re.compile(r"(class)\s([_a-zA-Z0-9-]*)")
 BAD_IF_COMPARATION_BOOL_REGEX = re.compile(
-    r"(if|elif)\s([_a-zA-Z0-9-.]*)\s(==|!=)\s(True|False|None)"
-)
+    r"(if|elif)\s([_a-zA-Z0-9-.]*)\s(==|!=)\s(True|False|None)")
 
 
 class Pyntellisense(QObject):
@@ -56,15 +55,15 @@ class Pyntellisense(QObject):
             row, col = self.editor.getCursorPosition()
             if row != self.last_row:
                 self.last_row = row
-                tree = python_api.get_python_node_tree(self.editor.text(), "number")
+                tree = python_api.get_python_node_tree(self.editor.text(),
+                                                       "number")
                 if not isinstance(tree, bool):
 
                     for branch in tree:
                         if branch.line_number <= row + 1:
                             name = branch.name
-                            child_branch = sorted(
-                                branch.children, key=lambda x: x.line_number
-                            )
+                            child_branch = sorted(branch.children,
+                                                  key=lambda x: x.line_number)
 
                             if child_branch:
                                 for child in child_branch:
@@ -72,30 +71,28 @@ class Pyntellisense(QObject):
                                         child_name = child.name
 
                                         if child.type == "class":
-                                            icon2 = self.editor.icons.get_icon("class")
-                                            color_child = self.colors["ClassName"]["fg"]
+                                            icon2 = self.editor.icons.get_icon(
+                                                "class")
+                                            color_child = self.colors[
+                                                "ClassName"]["fg"]
 
                                         elif child.type == "function":
                                             icon2 = self.editor.icons.get_icon(
-                                                "function"
-                                            )
+                                                "function")
                                             color_child = self.colors[
-                                                "FunctionMethodName"
-                                            ]["fg"]
+                                                "FunctionMethodName"]["fg"]
 
                                         elif child.type == "global_variable":
                                             icon2 = self.editor.icons.get_icon(
-                                                "statement"
-                                            )
+                                                "statement")
                                             color_child = color_main = self.colors[
-                                                "Default"
-                                            ]["fg"]
+                                                "Default"]["fg"]
 
                                         elif child.type == "import":
-                                            icon2 = self.editor.icons.get_icon("module")
+                                            icon2 = self.editor.icons.get_icon(
+                                                "module")
                                             color_child = color_main = self.colors[
-                                                "Default"
-                                            ]["fg"]
+                                                "Default"]["fg"]
 
                             if branch.type == "class":
                                 icon1 = self.editor.icons.get_icon("class")
@@ -103,15 +100,18 @@ class Pyntellisense(QObject):
 
                             elif branch.type == "function":
                                 icon1 = self.editor.icons.get_icon("function")
-                                color_main = self.colors["FunctionMethodName"]["fg"]
+                                color_main = self.colors["FunctionMethodName"][
+                                    "fg"]
 
                             elif branch.type == "global_variable":
                                 icon1 = self.editor.icons.get_icon("statement")
-                                color_main = color_main = self.colors["Default"]["fg"]
+                                color_main = color_main = self.colors[
+                                    "Default"]["fg"]
 
                             elif branch.type == "import":
                                 icon1 = self.editor.icons.get_icon("module")
-                                color_main = color_main = self.colors["Default"]["fg"]
+                                color_main = color_main = self.colors[
+                                    "Default"]["fg"]
 
                 if name.startswith("_"):
                     color_main = "gray"
@@ -119,24 +119,20 @@ class Pyntellisense(QObject):
                 if child_name.startswith("_"):
                     color_child = "gray"
 
-                self.on_update_header.emit(
-                    {
-                        "text": " " + name,
-                        "widget": "code-first",
-                        "type": color_main,
-                        "icon": icon1,
-                        "last": False,
-                    }
-                )
-                self.on_update_header.emit(
-                    {
-                        "text": " " + child_name,
-                        "widget": "code-second",
-                        "type": color_child,
-                        "icon": icon2,
-                        "last": True,
-                    }
-                )
+                self.on_update_header.emit({
+                    "text": " " + name,
+                    "widget": "code-first",
+                    "type": color_main,
+                    "icon": icon1,
+                    "last": False,
+                })
+                self.on_update_header.emit({
+                    "text": " " + child_name,
+                    "widget": "code-second",
+                    "type": color_child,
+                    "icon": icon2,
+                    "last": True,
+                })
 
     def build_help_string(self, jedi_help):
         if jedi_help.get_type_hint() is None:
@@ -144,8 +140,7 @@ class Pyntellisense(QObject):
         ihelp_string = f"<h4 style = 'color:{self.colors['Keyword']['fg']}'>{jedi_help.get_type_hint()}</h4><ul>"
         if jedi_help.full_name is not None:
             ihelp_string += (
-                f"<li>Full name: <strong>{jedi_help.full_name}</strong></li>"
-            )
+                f"<li>Full name: <strong>{jedi_help.full_name}</strong></li>")
 
         if jedi_help.module_name is not None:
             ihelp_string += f"<li style = 'color:{self.colors['FunctionMethodName']['fg']}'>From: <strong>{jedi_help.module_name}</strong></li>"
@@ -154,12 +149,15 @@ class Pyntellisense(QObject):
         if jedi_help.description != "":
             ihelp_string += f"<hr><span><h4>Description:</h4><p style = 'color:{self.colors['TripleSingleQuotedFString']['fg']}'>{jedi_help.description}</p></span>"
 
-        if len(jedi_help.docstring()) > 2 and jedi_help.docstring() not in {"", " "}:
+        if len(jedi_help.docstring()) > 2 and jedi_help.docstring() not in {
+                "", " "
+        }:
 
             wrapper = textwrap.TextWrapper(width=JEDI_TEXT_WRAP_WIDTH)
             dedented_text = textwrap.dedent(text=jedi_help.docstring())
             original = wrapper.fill(text=dedented_text)
-            shortened = textwrap.shorten(text=original, width=JEDI_HELP_SHORTEN_WIDTH)
+            shortened = textwrap.shorten(text=original,
+                                         width=JEDI_HELP_SHORTEN_WIDTH)
             shortened_wrapped = wrapper.fill(text=shortened)
 
             ihelp_string += f"<hr><span><h4>Doc:</h4><p style = 'color:{self.colors['TripleSingleQuotedFString']['fg']}'>{shortened_wrapped}</p></span>"
@@ -258,9 +256,10 @@ class PyntellisenseEdition(QObject):
 
         try:
             root = ast.parse(code)
-            names = sorted(
-                {node.id for node in ast.walk(root) if isinstance(node, ast.Name)}
-            )
+            names = sorted({
+                node.id
+                for node in ast.walk(root) if isinstance(node, ast.Name)
+            })
             regex = "([_a-zA-Z0-9-]*\\(.\\)*)"
             for x in re.findall(regex, code):
                 for i in re.findall("([_a-zA-Z0-9-]*)(\\(.*)", x):
@@ -285,27 +284,22 @@ class PyntellisenseEdition(QObject):
                 self.on_clear_indicator_range.emit(0, 0, -1, -1, 1, True)
 
             code = self.editor.text()
-            errors = jedi.Script(
-                code=code, path=None, environment=self._env
-            ).get_syntax_errors()
+            errors = jedi.Script(code=code, path=None,
+                                 environment=self._env).get_syntax_errors()
             if len(errors) > 0:
-                self.on_update_header.emit(
-                    {
-                        "text": str(len(errors)),
-                        "widget": "info-errors",
-                        "type": "red",
-                        "last": True,
-                    }
-                )
+                self.on_update_header.emit({
+                    "text": str(len(errors)),
+                    "widget": "info-errors",
+                    "type": "red",
+                    "last": True,
+                })
             else:
-                self.on_update_header.emit(
-                    {
-                        "text": "0",
-                        "widget": "info-errors",
-                        "type": "green",
-                        "last": True,
-                    }
-                )
+                self.on_update_header.emit({
+                    "text": "0",
+                    "widget": "info-errors",
+                    "type": "green",
+                    "last": True,
+                })
 
             for error in errors:
                 self.on_add_indicator_range.emit(
@@ -343,9 +337,10 @@ class PyntellisenseEdition(QObject):
             if ans:
                 self.on_annotation_request.emit(row, ans, 1, "on_text_changed")
 
-    def extract_name(
-        self, query: str, compiled_regex: object, group_number: int = 1
-    ) -> str:
+    def extract_name(self,
+                     query: str,
+                     compiled_regex: object,
+                     group_number: int = 1) -> str:
         string = ""
 
         regexp = compiled_regex
@@ -408,11 +403,11 @@ class PyntellisenseEdition(QObject):
             if function_name.lower() != function_name:
                 return [
                     QsciStyledText(
-                        "PEP-8 recommendation: Use a lowercase word or words!\n", 1
-                    ),
+                        "PEP-8 recommendation: Use a lowercase word or words!\n",
+                        1),
                     QsciStyledText(
-                        "Separate words by underscores to improve readability.\n", 1
-                    ),
+                        "Separate words by underscores to improve readability.\n",
+                        1),
                     QsciStyledText("SUGGESTION: ", 7),
                     QsciStyledText(function_name.lower(), 9),
                 ]
@@ -420,8 +415,8 @@ class PyntellisenseEdition(QObject):
             elif function_name in builtin_functions:
                 return [
                     QsciStyledText(
-                        f"WARNING: {function_name} it's an integrated function!\n", 1
-                    ),
+                        f"WARNING: {function_name} it's an integrated function!\n",
+                        1),
                     QsciStyledText("This could cause future errors.\n", 1),
                     QsciStyledText("SUGGESTION: ", 7),
                     QsciStyledText(f"{function_name.lower()}_", 9),
@@ -431,7 +426,8 @@ class PyntellisenseEdition(QObject):
 
     def analyze_conditions(self, material: str) -> str:
         material = material.lstrip()
-        condition = self.extract_name(material, BAD_IF_COMPARATION_BOOL_REGEX, -1)
+        condition = self.extract_name(material, BAD_IF_COMPARATION_BOOL_REGEX,
+                                      -1)
         if len(condition) > 3:
             if condition[3] == "True" or condition[3] == "False":
                 return QsciStyledText(
@@ -471,10 +467,10 @@ class PyntellisenseCompletions(QObject):
         server = langserver.icenter.get_server_by_name(self.server_name)
         if server is not None:
             self.urls = dict()
-            self.urls["complete"] = f"http://{server.host}:{server.port}/complete"
             self.urls[
-                "complete-search"
-            ] = f"http://{server.host}:{server.port}/complete_search"
+                "complete"] = f"http://{server.host}:{server.port}/complete"
+            self.urls[
+                "complete-search"] = f"http://{server.host}:{server.port}/complete_search"
             self.__status = True
 
     @property
@@ -535,11 +531,9 @@ class PyntellisenseCompletions(QObject):
                     if lexer_api != self._lexer_api and lexer_api is not None:
                         self._lexer_api = lexer_api
                         self._lexer_api.apiPreparationStarted.connect(
-                            lambda: self.runing(True)
-                        )
+                            lambda: self.runing(True))
                         self._lexer_api.apiPreparationFinished.connect(
-                            lambda: self.runing(False)
-                        )
+                            lambda: self.runing(False))
 
                     if not col:  # or row == self.last_row:
                         return
@@ -561,8 +555,8 @@ class PyntellisenseCompletions(QObject):
                     }
 
                     complete_response = requests.get(
-                        self.urls["complete"], data=json.dumps(complete_request_data)
-                    )
+                        self.urls["complete"],
+                        data=json.dumps(complete_request_data))
                     complete_help_response = requests.get(
                         self.urls["complete-search"],
                         data=json.dumps(complete_help_request_data),
@@ -575,7 +569,8 @@ class PyntellisenseCompletions(QObject):
                             ref = self.get_ref(completion["type"])
                             value = f'{completion["name_with_symbols"]}{ref}'
 
-                            if self.is_builtin(builtin_functions, completion["name"]):
+                            if self.is_builtin(builtin_functions,
+                                               completion["name"]):
                                 value = f'{completion["name"]}{ref}{builtin_functions[completion["name"]]}'
 
                             if value not in self.completions:
@@ -587,32 +582,32 @@ class PyntellisenseCompletions(QObject):
 
                     if complete_help_response.status_code == 200:
                         complete_helpers = complete_help_response.json()
-                        suggestions = self.get_help(complete_helpers["response"])
+                        suggestions = self.get_help(
+                            complete_helpers["response"])
 
                     if completions:
-                        self.on_load_completions.emit(self._lexer_api, completions)
+                        self.on_load_completions.emit(self._lexer_api,
+                                                      completions)
 
                     if suggestions:
                         self.on_show_help.emit(self.editor, row, suggestions)
 
                     if row != self.last_row:
                         root = ast.parse(source_code)
-                        statements = sorted(
-                            {
-                                node.id
-                                for node in ast.walk(root)
-                                if isinstance(node, ast.Name)
-                            }
-                        )
+                        statements = sorted({
+                            node.id
+                            for node in ast.walk(root)
+                            if isinstance(node, ast.Name)
+                        })
                         for var in self._statements:
                             if var not in statements:
                                 self._statements.remove(var)
-                                dead_statement.append(var + self.get_ref("statement"))
+                                dead_statement.append(
+                                    var + self.get_ref("statement"))
 
                     if dead_statement:
                         self.on_remove_dead_completion.emit(
-                            self._lexer_api, dead_statement
-                        )
+                            self._lexer_api, dead_statement)
 
                     self.last_row = row
                 except Exception as e:

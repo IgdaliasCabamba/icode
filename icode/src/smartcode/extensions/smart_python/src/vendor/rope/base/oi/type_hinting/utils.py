@@ -52,7 +52,8 @@ def get_class_with_attr_name(pyname):
     pyobject = holding_scope.pyobject
     if isinstance(pyobject, PyClass):
         pyclass = pyobject
-    elif isinstance(pyobject, PyFunction) and isinstance(pyobject.parent, PyClass):
+    elif isinstance(pyobject, PyFunction) and isinstance(
+            pyobject.parent, PyClass):
         pyclass = pyobject.parent
     else:
         return
@@ -87,9 +88,8 @@ def resolve_type(type_name, pyobject):
     logging.debug("Looking for %s", type_name)
     if "." not in type_name:
         try:
-            ret_type = (
-                pyobject.get_module().get_scope().get_name(type_name).get_object()
-            )
+            ret_type = (pyobject.get_module().get_scope().get_name(
+                type_name).get_object())
         except AttributeNotFoundError:
             logging.exception("Cannot resolve type %s", type_name)
     else:
@@ -101,17 +101,14 @@ def resolve_type(type_name, pyobject):
         except AttributeNotFoundError:
             if mod_name in deprecated_aliases:
                 try:
-                    logging.debug(
-                        "Looking for %s in %s", attr_name, deprecated_aliases[mod_name]
-                    )
+                    logging.debug("Looking for %s in %s", attr_name,
+                                  deprecated_aliases[mod_name])
                     mod = mod_finder._find_module(
-                        deprecated_aliases[mod_name]
-                    ).get_object()
+                        deprecated_aliases[mod_name]).get_object()
                     ret_type = mod.get_attribute(attr_name).get_object()
                 except AttributeNotFoundError:
-                    logging.exception(
-                        "Cannot resolve type %s in %s", attr_name, dir(mod)
-                    )
+                    logging.exception("Cannot resolve type %s in %s",
+                                      attr_name, dir(mod))
     logging.debug("ret_type = %s", ret_type)
     return ret_type
 
@@ -125,21 +122,17 @@ class ParametrizeType(object):
         "builtins.dict": "rope.base.builtins.get_dict",
         "_collections_abc.Iterable": "rope.base.builtins.get_iterator",
         "_collections_abc.Iterator": "rope.base.builtins.get_iterator",
-        "collections.abc.Iterable": "rope.base.builtins.get_iterator",  # Python3.3
-        "collections.abc.Iterator": "rope.base.builtins.get_iterator",  # Python3.3
+        "collections.abc.Iterable":
+        "rope.base.builtins.get_iterator",  # Python3.3
+        "collections.abc.Iterator":
+        "rope.base.builtins.get_iterator",  # Python3.3
     }
     if pycompat.PY2:
-        _supported_mapping = dict(
-            (
-                (
-                    k.replace("builtins.", "__builtin__.").replace(
-                        "_collections_abc.", "_abcoll."
-                    ),
-                    v,
-                )
-                for k, v in _supported_mapping.items()
-            )
-        )
+        _supported_mapping = dict(((
+            k.replace("builtins.",
+                      "__builtin__.").replace("_collections_abc.", "_abcoll."),
+            v,
+        ) for k, v in _supported_mapping.items()))
 
     def __call__(self, pyobject, *args, **kwargs):
         """

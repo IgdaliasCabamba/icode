@@ -65,9 +65,9 @@ Visit https://pycqa.github.io/isort/ for complete information about how to use i
 
 
 class SortAttempt:
-    def __init__(
-        self, incorrectly_sorted: bool, skipped: bool, supported_encoding: bool
-    ) -> None:
+
+    def __init__(self, incorrectly_sorted: bool, skipped: bool,
+                 supported_encoding: bool) -> None:
         self.incorrectly_sorted = incorrectly_sorted
         self.skipped = skipped
         self.supported_encoding = supported_encoding
@@ -87,8 +87,7 @@ def sort_imports(
         if check:
             try:
                 incorrectly_sorted = not api.check_file(
-                    file_name, config=config, **kwargs
-                )
+                    file_name, config=config, **kwargs)
             except FileSkipped:
                 skipped = True
             return SortAttempt(incorrectly_sorted, skipped, True)
@@ -119,9 +118,9 @@ def sort_imports(
         raise
 
 
-def _print_hard_fail(
-    config: Config, offending_file: Optional[str] = None, message: Optional[str] = None
-) -> None:
+def _print_hard_fail(config: Config,
+                     offending_file: Optional[str] = None,
+                     message: Optional[str] = None) -> None:
     """Fail on unrecoverable exception with custom message."""
     message = message or (
         f"Unrecoverable exception thrown when parsing {offending_file or ''}!"
@@ -146,7 +145,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         " "
         "If you've used isort 4 but are new to isort 5, see the upgrading guide: "
         "https://pycqa.github.io/isort/docs/upgrade_guides/5.0.0.html",
-        add_help=False,  # prevent help option from appearing in "optional arguments" group
+        add_help=
+        False,  # prevent help option from appearing in "optional arguments" group
     )
 
     general_group = parser.add_argument_group("general options")
@@ -182,7 +182,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--verbose",
         action="store_true",
         dest="verbose",
-        help="Shows verbose output, such as when files are skipped or when a check is successful.",
+        help=
+        "Shows verbose output, such as when files are skipped or when a check is successful.",
     )
     general_group.add_argument(
         "--only-modified",
@@ -195,7 +196,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--dedup-headings",
         dest="dedup_headings",
         action="store_true",
-        help="Tells isort to only show an identical custom import heading comment once, even if"
+        help=
+        "Tells isort to only show an identical custom import heading comment once, even if"
         " there are multiple sections with the comment set.",
     )
     general_group.add_argument(
@@ -224,20 +226,23 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--show-config",
         dest="show_config",
         action="store_true",
-        help="See isort's determined config, as well as sources of config options.",
+        help=
+        "See isort's determined config, as well as sources of config options.",
     )
     general_group.add_argument(
         "--show-files",
         dest="show_files",
         action="store_true",
-        help="See the files isort will be run against with the current config options.",
+        help=
+        "See the files isort will be run against with the current config options.",
     )
     general_group.add_argument(
         "--df",
         "--diff",
         dest="show_diff",
         action="store_true",
-        help="Prints a diff of all the changes isort would make to a file, instead of "
+        help=
+        "Prints a diff of all the changes isort would make to a file, instead of "
         "changing it in place",
     )
     general_group.add_argument(
@@ -246,7 +251,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--check",
         action="store_true",
         dest="check",
-        help="Checks the file for unsorted / unformatted imports and prints them to the "
+        help=
+        "Checks the file for unsorted / unformatted imports and prints them to the "
         "command line without modifying the file. Returns 0 when nothing would change and "
         "returns 1 when the file would be reformatted.",
     )
@@ -255,7 +261,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--ignore-whitespace",
         action="store_true",
         dest="ignore_whitespace",
-        help="Tells isort to ignore whitespace differences when --check-only is being used.",
+        help=
+        "Tells isort to ignore whitespace differences when --check-only is being used.",
     )
     general_group.add_argument(
         "--sp",
@@ -263,14 +270,16 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--settings-file",
         "--settings",
         dest="settings_path",
-        help="Explicitly set the settings path or file instead of auto determining "
+        help=
+        "Explicitly set the settings path or file instead of auto determining "
         "based on file location.",
     )
     general_group.add_argument(
         "--cr",
         "--config-root",
         dest="config_root",
-        help="Explicitly set the config root for resolving all configs. When used "
+        help=
+        "Explicitly set the config root for resolving all configs. When used "
         "with the --resolve-all-configs flag, isort will look at all sub-folders "
         "in this config root to resolve config files and sort files based on the "
         "closest available config(if any)",
@@ -294,7 +303,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--magic-placement",
         dest="old_finders",
         action="store_true",
-        help="Use the old deprecated finder logic that relies on environment introspection magic.",
+        help=
+        "Use the old deprecated finder logic that relies on environment introspection magic.",
     )
     general_group.add_argument(
         "-j",
@@ -310,7 +320,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--atomic",
         dest="atomic",
         action="store_true",
-        help="Ensures the output doesn't save if the resulting file contains syntax errors.",
+        help=
+        "Ensures the output doesn't save if the resulting file contains syntax errors.",
     )
     general_group.add_argument(
         "--interactive",
@@ -338,7 +349,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--filter-files",
         dest="filter_files",
         action="store_true",
-        help="Tells isort to filter files even when they are explicitly passed in as "
+        help=
+        "Tells isort to filter files even when they are explicitly passed in as "
         "part of the CLI command.",
     )
     target_group.add_argument(
@@ -353,7 +365,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
     target_group.add_argument(
         "--extend-skip",
-        help="Extends --skip to add additional files that isort should skip over. "
+        help=
+        "Extends --skip to add additional files that isort should skip over. "
         "If you want to skip multiple "
         "files you should specify twice: --skip file1 --skip file2. Values can be "
         "file names, directory names or file paths. To skip all files in a nested path "
@@ -370,7 +383,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
     target_group.add_argument(
         "--extend-skip-glob",
-        help="Additional files that isort should skip over (extending --skip-glob).",
+        help=
+        "Additional files that isort should skip over (extending --skip-glob).",
         dest="extend_skip_glob",
         action="append",
     )
@@ -379,7 +393,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--skip-gitignore",
         action="store_true",
         dest="skip_gitignore",
-        help="Treat project as a git repository and ignore files listed in .gitignore."
+        help=
+        "Treat project as a git repository and ignore files listed in .gitignore."
         "\nNOTE: This requires git to be installed and accessible from the same shell as isort.",
     )
     target_group.add_argument(
@@ -400,7 +415,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--dont-follow-links",
         dest="dont_follow_links",
         action="store_true",
-        help="Tells isort not to follow symlinks that are encountered when running recursively.",
+        help=
+        "Tells isort not to follow symlinks that are encountered when running recursively.",
     )
     target_group.add_argument(
         "--filename",
@@ -411,7 +427,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--allow-root",
         action="store_true",
         default=False,
-        help="Tells isort not to treat / specially, allowing it to be run against the root dir.",
+        help=
+        "Tells isort not to treat / specially, allowing it to be run against the root dir.",
     )
 
     output_group.add_argument(
@@ -448,7 +465,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--float-to-top",
         dest="float_to_top",
         action="store_true",
-        help="Causes all non-indented imports to float to the top of the file having its imports "
+        help=
+        "Causes all non-indented imports to float to the top of the file having its imports "
         "sorted (immediately below the top of file comment).\n"
         "This can be an excellent shortcut for collecting imports every once in a while "
         "when you place them in the middle of a file to avoid context switching.\n\n"
@@ -459,7 +477,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--dont-float-to-top",
         dest="dont_float_to_top",
         action="store_true",
-        help="Forces --float-to-top setting off. See --float-to-top for more information.",
+        help=
+        "Forces --float-to-top setting off. See --float-to-top for more information.",
     )
     output_group.add_argument(
         "--ca",
@@ -481,7 +500,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--balanced",
         dest="balanced_wrapping",
         action="store_true",
-        help="Balances wrapping to produce the most consistent line length possible",
+        help=
+        "Balances wrapping to produce the most consistent line length possible",
     )
     output_group.add_argument(
         "--ff",
@@ -498,7 +518,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         const=2,
         type=int,
         dest="force_grid_wrap",
-        help="Force number of from imports (defaults to 2 when passed as CLI flag without value) "
+        help=
+        "Force number of from imports (defaults to 2 when passed as CLI flag without value) "
         "to be grid wrapped regardless of line "
         "length. If 0 is passed in (the global default) only line length is considered.",
     )
@@ -509,15 +530,18 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         dest="indent",
         type=str,
     )
-    output_group.add_argument(
-        "--lbi", "--lines-before-imports", dest="lines_before_imports", type=int
-    )
-    output_group.add_argument(
-        "--lai", "--lines-after-imports", dest="lines_after_imports", type=int
-    )
-    output_group.add_argument(
-        "--lbt", "--lines-between-types", dest="lines_between_types", type=int
-    )
+    output_group.add_argument("--lbi",
+                              "--lines-before-imports",
+                              dest="lines_before_imports",
+                              type=int)
+    output_group.add_argument("--lai",
+                              "--lines-after-imports",
+                              dest="lines_after_imports",
+                              type=int)
+    output_group.add_argument("--lbt",
+                              "--lines-between-types",
+                              dest="lines_between_types",
+                              type=int)
     output_group.add_argument(
         "--le",
         "--line-ending",
@@ -535,7 +559,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     output_group.add_argument(
         "--lss",
         "--length-sort-straight",
-        help="Sort straight imports by their string length. Similar to `length_sort` "
+        help=
+        "Sort straight imports by their string length. Similar to `length_sort` "
         "but applies only to straight imports and doesn't affect from imports.",
         dest="length_sort_straight",
         action="store_true",
@@ -544,10 +569,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "-m",
         "--multi-line",
         dest="multi_line_output",
-        choices=list(WrapModes.__members__.keys())
-        + [str(mode.value) for mode in WrapModes.__members__.values()],
+        choices=list(WrapModes.__members__.keys()) +
+        [str(mode.value) for mode in WrapModes.__members__.values()],
         type=str,
-        help="Multi line output (0-grid, 1-vertical, 2-hanging, 3-vert-hanging, 4-vert-grid, "
+        help=
+        "Multi line output (0-grid, 1-vertical, 2-hanging, 3-vert-hanging, 4-vert-grid, "
         "5-vert-grid-grouped, 6-deprecated-alias-for-5, 7-noqa, "
         "8-vertical-hanging-indent-bracket, 9-vertical-prefix-from-module-import, "
         "10-hanging-indent-with-parentheses).",
@@ -572,7 +598,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--order-by-type",
         dest="order_by_type",
         action="store_true",
-        help="Order imports by type, which is determined by case, in addition to alphabetically.\n"
+        help=
+        "Order imports by type, which is determined by case, in addition to alphabetically.\n"
         "\n**NOTE**: type here refers to the implied type from the import name capitalization.\n"
         ' isort does not do type introspection for the imports. These "types" are simply: '
         "CONSTANT_VARIABLE, CamelCaseClass, variable_or_function. If your project follows PEP8"
@@ -585,7 +612,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--dont-order-by-type",
         dest="dont_order_by_type",
         action="store_true",
-        help="Don't order imports by type, which is determined by case, in addition to "
+        help=
+        "Don't order imports by type, which is determined by case, in addition to "
         "alphabetically.\n\n"
         "**NOTE**: type here refers to the implied type from the import name capitalization.\n"
         ' isort does not do type introspection for the imports. These "types" are simply: '
@@ -609,7 +637,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     output_group.add_argument(
         "--sort-order",
         dest="sort_order",
-        help="Specify sorting function. Can be built in (natural[default] = force numbers "
+        help=
+        "Specify sorting function. Can be built in (natural[default] = force numbers "
         "to be sequential, native = Python's built-in sorted function) or an installable plugin.",
     )
     inline_args_group.add_argument(
@@ -631,14 +660,16 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--trailing-comma",
         dest="include_trailing_comma",
         action="store_true",
-        help="Includes a trailing comma on multi line imports that include parentheses.",
+        help=
+        "Includes a trailing comma on multi line imports that include parentheses.",
     )
     output_group.add_argument(
         "--up",
         "--use-parentheses",
         dest="use_parentheses",
         action="store_true",
-        help="Use parentheses for line continuation on length limit instead of slashes."
+        help=
+        "Use parentheses for line continuation on length limit instead of slashes."
         " **NOTE**: This is separate from wrap modes, and only affects how individual lines that "
         " are too long get continued, not sections of multiple imports.",
     )
@@ -647,7 +678,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "-w",
         "--line-length",
         "--line-width",
-        help="The max length of an import line (used for wrapping long imports).",
+        help=
+        "The max length of an import line (used for wrapping long imports).",
         dest="line_length",
         type=int,
     )
@@ -656,7 +688,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--wrap-length",
         dest="wrap_length",
         type=int,
-        help="Specifies how long lines that are wrapped should be, if not set line_length is used."
+        help=
+        "Specifies how long lines that are wrapped should be, if not set line_length is used."
         "\nNOTE: wrap_length must be LOWER than or equal to line_length.",
     )
     output_group.add_argument(
@@ -669,35 +702,38 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--remove-redundant-aliases",
         dest="remove_redundant_aliases",
         action="store_true",
-        help=(
-            "Tells isort to remove redundant aliases from imports, such as `import os as os`."
-            " This defaults to `False` simply because some projects use these seemingly useless "
-            " aliases to signify intent and change behaviour."
-        ),
+        help=
+        ("Tells isort to remove redundant aliases from imports, such as `import os as os`."
+         " This defaults to `False` simply because some projects use these seemingly useless "
+         " aliases to signify intent and change behaviour."),
     )
     output_group.add_argument(
         "--honor-noqa",
         dest="honor_noqa",
         action="store_true",
-        help="Tells isort to honor noqa comments to enforce skipping those comments.",
+        help=
+        "Tells isort to honor noqa comments to enforce skipping those comments.",
     )
     output_group.add_argument(
         "--treat-comment-as-code",
         dest="treat_comments_as_code",
         action="append",
-        help="Tells isort to treat the specified single line comment(s) as if they are code.",
+        help=
+        "Tells isort to treat the specified single line comment(s) as if they are code.",
     )
     output_group.add_argument(
         "--treat-all-comment-as-code",
         dest="treat_all_comments_as_code",
         action="store_true",
-        help="Tells isort to treat all single line comments as if they are code.",
+        help=
+        "Tells isort to treat all single line comments as if they are code.",
     )
     output_group.add_argument(
         "--formatter",
         dest="formatter",
         type=str,
-        help="Specifies the name of a formatting plugin to use when producing output.",
+        help=
+        "Specifies the name of a formatting plugin to use when producing output.",
     )
     output_group.add_argument(
         "--color",
@@ -708,11 +744,13 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     output_group.add_argument(
         "--ext-format",
         dest="ext_format",
-        help="Tells isort to format the given files according to an extensions formatting rules.",
+        help=
+        "Tells isort to format the given files according to an extensions formatting rules.",
     )
     output_group.add_argument(
         "--star-first",
-        help="Forces star imports above others to avoid overriding directly imported variables.",
+        help=
+        "Forces star imports above others to avoid overriding directly imported variables.",
         dest="star_first",
         action="store_true",
     )
@@ -721,14 +759,16 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--sd",
         "--section-default",
         dest="default_section",
-        help="Sets the default section for import options: " + str(sections.DEFAULT),
+        help="Sets the default section for import options: " +
+        str(sections.DEFAULT),
     )
     section_group.add_argument(
         "--only-sections",
         "--os",
         dest="only_sections",
         action="store_true",
-        help="Causes imports to be sorted based on their sections like STDLIB, THIRDPARTY, etc. "
+        help=
+        "Causes imports to be sorted based on their sections like STDLIB, THIRDPARTY, etc. "
         "Within sections, the imports are ordered by their import style and the imports with "
         "the same style maintain their relative positions.",
     )
@@ -751,7 +791,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--force-sort-within-sections",
         action="store_true",
         dest="force_sort_within_sections",
-        help="Don't sort straight-style imports (like import sys) before from-style imports "
+        help=
+        "Don't sort straight-style imports (like import sys) before from-style imports "
         "(like from itertools import groupby). Instead, sort the imports by module, "
         "independent of import style.",
     )
@@ -760,7 +801,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--honor-case-in-force-sorted-sections",
         action="store_true",
         dest="honor_case_in_force_sorted_sections",
-        help="Honor `--case-sensitive` when `--force-sort-within-sections` is being used. "
+        help=
+        "Honor `--case-sensitive` when `--force-sort-within-sections` is being used. "
         "Without this option set, `--order-by-type` decides module name ordering too.",
     )
     section_group.add_argument(
@@ -768,7 +810,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--sort-relative-in-force-sorted-sections",
         action="store_true",
         dest="sort_relative_in_force_sorted_sections",
-        help="When using `--force-sort-within-sections`, sort relative imports the same "
+        help=
+        "When using `--force-sort-within-sections`, sort relative imports the same "
         "way as they are sorted when not using that setting.",
     )
     section_group.add_argument(
@@ -790,7 +833,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--csi",
         dest="combine_straight_imports",
         action="store_true",
-        help="Combines all the bare straight imports of the same section in a single line. "
+        help=
+        "Combines all the bare straight imports of the same section in a single line. "
         "Won't work with sections which have 'as' imports",
     )
     section_group.add_argument(
@@ -814,20 +858,23 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--builtin",
         dest="known_standard_library",
         action="append",
-        help="Force isort to recognize a module as part of Python's standard library.",
+        help=
+        "Force isort to recognize a module as part of Python's standard library.",
     )
     section_group.add_argument(
         "--extra-builtin",
         dest="extra_standard_library",
         action="append",
-        help="Extra modules to be included in the list of ones in Python's standard library.",
+        help=
+        "Extra modules to be included in the list of ones in Python's standard library.",
     )
     section_group.add_argument(
         "-f",
         "--future",
         dest="known_future_library",
         action="append",
-        help="Force isort to recognize a module as part of Python's internal future compatibility "
+        help=
+        "Force isort to recognize a module as part of Python's internal future compatibility "
         "libraries. WARNING: this overrides the behavior of __future__ handling and therefore"
         " can result in code that can't execute. If you're looking to add dependencies such "
         "as six, a better option is to create another section below --future using custom "
@@ -839,14 +886,16 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--thirdparty",
         dest="known_third_party",
         action="append",
-        help="Force isort to recognize a module as being part of a third party library.",
+        help=
+        "Force isort to recognize a module as being part of a third party library.",
     )
     section_group.add_argument(
         "-p",
         "--project",
         dest="known_first_party",
         action="append",
-        help="Force isort to recognize a module as being part of the current python project.",
+        help=
+        "Force isort to recognize a module as being part of the current python project.",
     )
     section_group.add_argument(
         "--known-local-folder",
@@ -858,20 +907,23 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     section_group.add_argument(
         "--virtual-env",
         dest="virtual_env",
-        help="Virtual environment to use for determining whether a package is third-party",
+        help=
+        "Virtual environment to use for determining whether a package is third-party",
     )
     section_group.add_argument(
         "--conda-env",
         dest="conda_env",
-        help="Conda environment to use for determining whether a package is third-party",
+        help=
+        "Conda environment to use for determining whether a package is third-party",
     )
     section_group.add_argument(
         "--py",
         "--python-version",
         action="store",
         dest="py_version",
-        choices=tuple(VALID_PY_TARGETS) + ("auto",),
-        help="Tells isort to set the known standard library based on the specified Python "
+        choices=tuple(VALID_PY_TARGETS) + ("auto", ),
+        help=
+        "Tells isort to set the known standard library based on the specified Python "
         "version. Default is to assume any Python 3 version could be the target, and use a union "
         "of all stdlib modules across versions. If auto is specified, the version of the "
         "interpreter used to run isort "
@@ -936,7 +988,8 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> Dict[str, Any]:
 
     parser = _build_arg_parser()
     arguments = {
-        key: value for key, value in vars(parser.parse_args(argv)).items() if value
+        key: value
+        for key, value in vars(parser.parse_args(argv)).items() if value
     }
     if remapped_deprecated_args:
         arguments["remapped_deprecated_args"] = remapped_deprecated_args
@@ -972,16 +1025,15 @@ def _preconvert(item: Any) -> Union[str, List[Any]]:
         return str(item)
     if callable(item) and hasattr(item, "__name__"):
         return str(item.__name__)
-    raise TypeError("Unserializable object {} of type {}".format(item, type(item)))
+    raise TypeError("Unserializable object {} of type {}".format(
+        item, type(item)))
 
 
-def identify_imports_main(
-    argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = None
-) -> None:
+def identify_imports_main(argv: Optional[Sequence[str]] = None,
+                          stdin: Optional[TextIOWrapper] = None) -> None:
     parser = argparse.ArgumentParser(
         description="Get all import definitions from a given file."
-        "Use `-` as the first argument to represent stdin."
-    )
+        "Use `-` as the first argument to represent stdin.")
     parser.add_argument(
         "files",
         nargs="+",
@@ -999,7 +1051,8 @@ def identify_imports_main(
         "--follow-links",
         action="store_true",
         default=False,
-        help="Tells isort to follow symlinks that are encountered when running recursively.",
+        help=
+        "Tells isort to follow symlinks that are encountered when running recursively.",
     )
 
     uniqueness = parser.add_mutually_exclusive_group()
@@ -1015,7 +1068,8 @@ def identify_imports_main(
         action="store_const",
         const=api.ImportKey.PACKAGE,
         default=False,
-        help="If true, isort will only identify the unique top level modules imported.",
+        help=
+        "If true, isort will only identify the unique top level modules imported.",
     )
     uniqueness.add_argument(
         "--modules",
@@ -1031,7 +1085,8 @@ def identify_imports_main(
         action="store_const",
         const=api.ImportKey.ATTRIBUTE,
         default=False,
-        help="If true, isort will only identify the unique attributes imported.",
+        help=
+        "If true, isort will only identify the unique attributes imported.",
     )
 
     arguments = parser.parse_args(argv)
@@ -1063,9 +1118,8 @@ def identify_imports_main(
             print(str(identified_import))
 
 
-def main(
-    argv: Optional[Sequence[str]] = None, stdin: Optional[TextIOWrapper] = None
-) -> None:
+def main(argv: Optional[Sequence[str]] = None,
+         stdin: Optional[TextIOWrapper] = None) -> None:
     arguments = parse_args(argv)
     if arguments.get("show_version"):
         print(ASCII_ART)
@@ -1078,10 +1132,13 @@ def main(
 
     if "settings_path" in arguments:
         if os.path.isfile(arguments["settings_path"]):
-            arguments["settings_file"] = os.path.abspath(arguments["settings_path"])
-            arguments["settings_path"] = os.path.dirname(arguments["settings_file"])
+            arguments["settings_file"] = os.path.abspath(
+                arguments["settings_path"])
+            arguments["settings_path"] = os.path.dirname(
+                arguments["settings_file"])
         else:
-            arguments["settings_path"] = os.path.abspath(arguments["settings_path"])
+            arguments["settings_path"] = os.path.abspath(
+                arguments["settings_path"])
 
     if "virtual_env" in arguments:
         venv = arguments["virtual_env"]
@@ -1093,14 +1150,16 @@ def main(
     if not file_names and not show_config:
         print(QUICK_GUIDE)
         if arguments:
-            sys.exit("Error: arguments passed in without any paths or content.")
+            sys.exit(
+                "Error: arguments passed in without any paths or content.")
         return
     if "settings_path" not in arguments:
         arguments["settings_path"] = (
-            os.path.abspath(file_names[0] if file_names else ".") or os.getcwd()
-        )
+            os.path.abspath(file_names[0] if file_names else ".")
+            or os.getcwd())
         if not os.path.isdir(arguments["settings_path"]):
-            arguments["settings_path"] = os.path.dirname(arguments["settings_path"])
+            arguments["settings_path"] = os.path.dirname(
+                arguments["settings_path"])
 
     config_dict = arguments.copy()
     ask_to_apply = config_dict.pop("ask_to_apply", False)
@@ -1109,7 +1168,8 @@ def main(
     show_diff = config_dict.pop("show_diff", False)
     write_to_stdout = config_dict.pop("write_to_stdout", False)
     deprecated_flags = config_dict.pop("deprecated_flags", False)
-    remapped_deprecated_args = config_dict.pop("remapped_deprecated_args", False)
+    remapped_deprecated_args = config_dict.pop("remapped_deprecated_args",
+                                               False)
     stream_filename = config_dict.pop("filename", None)
     ext_format = config_dict.pop("ext_format", None)
     allow_root = config_dict.pop("allow_root", None)
@@ -1124,16 +1184,17 @@ def main(
 
     if "src_paths" in config_dict:
         config_dict["src_paths"] = {
-            Path(src_path).resolve() for src_path in config_dict.get("src_paths", ())
+            Path(src_path).resolve()
+            for src_path in config_dict.get("src_paths", ())
         }
 
     config = Config(**config_dict)
     if show_config:
         print(
-            json.dumps(
-                config.__dict__, indent=4, separators=(",", ": "), default=_preconvert
-            )
-        )
+            json.dumps(config.__dict__,
+                       indent=4,
+                       separators=(",", ": "),
+                       default=_preconvert))
         return
     if file_names == ["-"]:
         file_path = Path(stream_filename) if stream_filename else None
@@ -1180,7 +1241,8 @@ def main(
                 error=config.format_error,
                 success=config.format_success,
             )
-            printer.error("Filename override is intended only for stream (-) sorting.")
+            printer.error(
+                "Filename override is intended only for stream (-) sorting.")
             sys.exit(1)
         skipped: List[str] = []
         broken: List[str] = []
@@ -1208,9 +1270,8 @@ def main(
         if jobs:
             import multiprocessing
 
-            executor = multiprocessing.Pool(
-                jobs if jobs > 0 else multiprocessing.cpu_count()
-            )
+            executor = multiprocessing.Pool(jobs if jobs >
+                                            0 else multiprocessing.cpu_count())
             attempt_iterator = executor.imap(
                 functools.partial(
                     sort_imports,
@@ -1235,9 +1296,7 @@ def main(
                     write_to_stdout=write_to_stdout,
                     extension=ext_format,
                     config_trie=config_trie,
-                )
-                for file_name in file_names
-            )
+                ) for file_name in file_names)
 
         # If any files passed in are missing considered as error, should be removed
         is_no_attempt = True
@@ -1265,15 +1324,16 @@ def main(
                     print(
                         f"{was_skipped} was skipped as it's listed in 'skip' setting, "
                         "matches a glob in 'skip_glob' setting, or is in a .gitignore file with "
-                        "--skip-gitignore enabled."
-                    )
+                        "--skip-gitignore enabled.")
             print(f"Skipped {num_skipped} files")
 
         num_broken += len(broken)
         if num_broken and not config.quiet:
             if config.verbose:
                 for was_broken in broken:
-                    warn(f"{was_broken} was broken path, make sure it exists correctly")
+                    warn(
+                        f"{was_broken} was broken path, make sure it exists correctly"
+                    )
             print(f"Broken {num_broken} paths")
 
         if num_broken > 0 and is_no_attempt:
@@ -1285,17 +1345,13 @@ def main(
         if remapped_deprecated_args:
             warn(
                 "W0502: The following deprecated single dash CLI flags were used and translated: "
-                f"{', '.join(remapped_deprecated_args)}!"
-            )
+                f"{', '.join(remapped_deprecated_args)}!")
         if deprecated_flags:
             warn(
                 "W0501: The following deprecated CLI flags were used and ignored: "
-                f"{', '.join(deprecated_flags)}!"
-            )
-        warn(
-            "W0500: Please see the 5.0.0 Upgrade guide: "
-            "https://pycqa.github.io/isort/docs/upgrade_guides/5.0.0.html"
-        )
+                f"{', '.join(deprecated_flags)}!")
+        warn("W0500: Please see the 5.0.0 Upgrade guide: "
+             "https://pycqa.github.io/isort/docs/upgrade_guides/5.0.0.html")
 
     if wrong_sorted_files:
         sys.exit(1)

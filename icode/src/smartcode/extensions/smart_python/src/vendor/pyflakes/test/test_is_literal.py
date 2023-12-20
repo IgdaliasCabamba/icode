@@ -3,6 +3,7 @@ from pyflakes.test.harness import TestCase
 
 
 class Test(TestCase):
+
     def test_is_str(self):
         self.flakes(
             """
@@ -44,22 +45,18 @@ class Test(TestCase):
         )
 
     def test_is_true(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = True
         if x is True:
             pass
-        """
-        )
+        """)
 
     def test_is_false(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = False
         if x is False:
             pass
-        """
-        )
+        """)
 
     def test_is_not_str(self):
         self.flakes(
@@ -102,22 +99,18 @@ class Test(TestCase):
         )
 
     def test_is_not_true(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = True
         if x is not True:
             pass
-        """
-        )
+        """)
 
     def test_is_not_false(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = False
         if x is not False:
             pass
-        """
-        )
+        """)
 
     def test_left_is_str(self):
         self.flakes(
@@ -160,22 +153,18 @@ class Test(TestCase):
         )
 
     def test_left_is_true(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = True
         if True is x:
             pass
-        """
-        )
+        """)
 
     def test_left_is_false(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = False
         if False is x:
             pass
-        """
-        )
+        """)
 
     def test_left_is_not_str(self):
         self.flakes(
@@ -218,31 +207,25 @@ class Test(TestCase):
         )
 
     def test_left_is_not_true(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = True
         if True is not x:
             pass
-        """
-        )
+        """)
 
     def test_left_is_not_false(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = False
         if False is not x:
             pass
-        """
-        )
+        """)
 
     def test_chained_operators_is_true(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = 5
         if x is True < 4:
             pass
-        """
-        )
+        """)
 
     def test_chained_operators_is_str(self):
         self.flakes(
@@ -255,13 +238,11 @@ class Test(TestCase):
         )
 
     def test_chained_operators_is_true_end(self):
-        self.flakes(
-            """
+        self.flakes("""
         x = 5
         if 4 < x is True:
             pass
-        """
-        )
+        """)
 
     def test_chained_operators_is_str_end(self):
         self.flakes(
@@ -295,10 +276,8 @@ class Test(TestCase):
 
     def test_is_tuple_containing_variables_ok(self):
         # a bit nonsensical, but does not trigger a SyntaxWarning
-        self.flakes(
-            """\
+        self.flakes("""\
             x = 5
             if x is (x,):
                 pass
-        """
-        )
+        """)

@@ -6,6 +6,7 @@ from .utils import consts
 
 
 class Splitter(QSplitter):
+
     def __init__(self, **kwargs):
         super(Splitter, self).__init__(**kwargs)
 
@@ -127,7 +128,8 @@ class ISplitter(QFrame, CategoryMixin):
                 current_widget.setFocus()
 
         self.index += 1
-        self.add_splited_widget(self.index, current_widget, direction, new_widget)
+        self.add_splited_widget(self.index, current_widget, direction,
+                                new_widget)
         self.update_size()
 
     def add_splited_widget(self, id, ref, direction, new_widget):
@@ -142,9 +144,12 @@ class ISplitter(QFrame, CategoryMixin):
                 if ref == item["ref"]:
                     ref_id = item["id"]
 
-        self.splited_widgets.append(
-            {"id": id, "ref": ref_id, "direction": direction, "widget": new_widget}
-        )
+        self.splited_widgets.append({
+            "id": id,
+            "ref": ref_id,
+            "direction": direction,
+            "widget": new_widget
+        })
 
     def update_size(self) -> None:
         x = []

@@ -17,9 +17,8 @@ def get_output(command: List[str]) -> str:
     :param str command: the command to run
     :returns: the stdout output of the command
     """
-    result = subprocess.run(
-        command, stdout=subprocess.PIPE, check=True
-    )  # nosec - trusted input
+    result = subprocess.run(command, stdout=subprocess.PIPE,
+                            check=True)  # nosec - trusted input
     return result.stdout.decode()
 
 
@@ -86,9 +85,9 @@ def git_hook(
             staged_contents = get_output(staged_cmd)
 
             try:
-                if not api.check_code_string(
-                    staged_contents, file_path=Path(filename), config=config
-                ):
+                if not api.check_code_string(staged_contents,
+                                             file_path=Path(filename),
+                                             config=config):
                     errors += 1
                     if modify:
                         api.sort_file(filename, config=config)

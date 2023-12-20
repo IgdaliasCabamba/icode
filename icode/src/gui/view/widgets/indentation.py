@@ -95,13 +95,11 @@ class SpaceMode(QFrame):
             elif action == 2:
                 print("TODO")
             elif action == 3:
-                new_text = getfn.get_space_to_tab(
-                    text=editor.text(), space_count=ident_size
-                )
+                new_text = getfn.get_space_to_tab(text=editor.text(),
+                                                  space_count=ident_size)
             elif action == 4:
-                new_text = getfn.get_tab_to_space(
-                    text=editor.text(), space_count=ident_size
-                )
+                new_text = getfn.get_tab_to_space(text=editor.text(),
+                                                  space_count=ident_size)
 
             if isinstance(new_text, str):
                 editor.set_text(new_text)
@@ -119,9 +117,8 @@ class SpaceMode(QFrame):
                 height += self.space_modes.sizeHintForRow(i)
 
         self.space_modes.setFixedHeight(height + 10)
-        self.setFixedHeight(
-            self.input_edit.size().height() + self.space_modes.size().height() + 20
-        )
+        self.setFixedHeight(self.input_edit.size().height() +
+                            self.space_modes.size().height() + 20)
 
     def set_spaces(self, data=False):
         if data:

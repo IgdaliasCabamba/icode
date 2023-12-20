@@ -35,12 +35,14 @@ class StubModuleValue(ModuleValue):
 
     def _get_stub_filters(self, origin_scope):
         return [
-            StubFilter(parent_context=self.as_context(), origin_scope=origin_scope)
+            StubFilter(parent_context=self.as_context(),
+                       origin_scope=origin_scope)
         ] + list(self.iter_star_filters())
 
     def get_filters(self, origin_scope=None):
         filters = super().get_filters(origin_scope)
-        next(filters, None)  # Ignore the first filter and replace it with our own
+        next(filters,
+             None)  # Ignore the first filter and replace it with our own
         stub_filters = self._get_stub_filters(origin_scope=origin_scope)
         yield from stub_filters
         yield from filters
@@ -50,6 +52,7 @@ class StubModuleValue(ModuleValue):
 
 
 class StubModuleContext(ModuleContext):
+
     def get_filters(self, until_position=None, origin_scope=None):
         # Make sure to ignore the position, because positions are not relevant
         # for stubs.
@@ -57,6 +60,7 @@ class StubModuleContext(ModuleContext):
 
 
 class TypingModuleWrapper(StubModuleValue):
+
     def get_filters(self, *args, **kwargs):
         filters = super().get_filters(*args, **kwargs)
         f = next(filters, None)
@@ -69,6 +73,7 @@ class TypingModuleWrapper(StubModuleValue):
 
 
 class TypingModuleContext(ModuleContext):
+
     def get_filters(self, *args, **kwargs):
         filters = super().get_filters(*args, **kwargs)
         yield TypingModuleFilterWrapper(next(filters, None))

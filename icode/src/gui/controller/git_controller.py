@@ -3,17 +3,21 @@ from PyQt5.QtWidgets import QFileDialog
 import pygit2 as pygit
 import settings
 
+
 class GitController(QObject):
+
     def __init__(self, application_core, view):
         super().__init__()
         self.application_core = application_core
         self.view = view
         self.repository = None
 
-        self.view.repository_menu.init_repository.triggered.connect(self.init_repository)
-        self.view.repository_menu.clone_repository.triggered.connect(self.clone_repository)
+        self.view.repository_menu.init_repository.triggered.connect(
+            self.init_repository)
+        self.view.repository_menu.clone_repository.triggered.connect(
+            self.clone_repository)
         self.view.repository_menu.add_all.triggered.connect(self.add_all)
-        
+
         self.view.btn_reload.clicked.connect(self.reload)
         self.view.btn_clone_repository.clicked.connect(self.clone_repository)
         self.view.input_commit_log.textChanged.connect(self.find_commit)
@@ -22,9 +26,9 @@ class GitController(QObject):
     def open_repository(self, repo_path=None):
         if repo_path is None:
             home_dir = settings.ipwd()
-            path = QFileDialog.getExistingDirectory(
-                None, "Open Folder", home_dir, QFileDialog.ShowDirsOnly
-            )
+            path = QFileDialog.getExistingDirectory(None, "Open Folder",
+                                                    home_dir,
+                                                    QFileDialog.ShowDirsOnly)
 
             if path == "":
                 return None
@@ -62,10 +66,10 @@ class GitController(QObject):
             self.view.commit_tree.search_commit(self.repository, text)
         else:
             self.view.set_page(0)
-    
+
     def do_commit(self):
         print(self.view.input_commit_log.text())
-    
+
     def load_repository(self, repository: object) -> None:
         self.view.set_page(0)
         try:

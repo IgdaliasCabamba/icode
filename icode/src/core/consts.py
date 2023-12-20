@@ -59,4 +59,9 @@ class APRIL:
     CUSTOM = 999
 
 
-ORIENTATIONS = {0: Qt.Vertical, 1: Qt.Vertical, 2: Qt.Horizontal, 3: Qt.Horizontal}
+ORIENTATIONS = {
+    0: Qt.Vertical,
+    1: Qt.Vertical,
+    2: Qt.Horizontal,
+    3: Qt.Horizontal
+}

@@ -75,12 +75,10 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         self.DefaultNodeVisit(node)
         prev_child = None
         for child in node.children:
-            if (
-                prev_child
-                and isinstance(prev_child, pytree.Leaf)
-                and prev_child.value == ","
-            ):
-                _SetSplitPenalty(child, style.Get("SPLIT_PENALTY_IMPORT_NAMES"))
+            if (prev_child and isinstance(prev_child, pytree.Leaf)
+                    and prev_child.value == ","):
+                _SetSplitPenalty(child,
+                                 style.Get("SPLIT_PENALTY_IMPORT_NAMES"))
             prev_child = child
 
     def Visit_classdef(self, node):  # pylint: disable=invalid-name
@@ -115,7 +113,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         _SetUnbreakable(node.children[colon_idx])
         self.DefaultNodeVisit(node)
         if arrow_idx > 0:
-            _SetSplitPenalty(pytree_utils.LastLeafNode(node.children[arrow_idx - 1]), 0)
+            _SetSplitPenalty(
+                pytree_utils.LastLeafNode(node.children[arrow_idx - 1]), 0)
             _SetUnbreakable(node.children[arrow_idx])
             _SetStronglyConnected(node.children[arrow_idx + 1])
 
@@ -126,7 +125,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         if not allow_multiline_lambdas:
             for child in node.children:
                 if pytree_utils.NodeName(child) == "COMMENT":
-                    if re.search(r"pylint:.*disable=.*\bg-long-lambda", child.value):
+                    if re.search(r"pylint:.*disable=.*\bg-long-lambda",
+                                 child.value):
                         allow_multiline_lambdas = True
                         break
 
@@ -141,9 +141,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
 
         # Can't break before the opening paren of a parameter list.
         _SetUnbreakable(node.children[0])
-        if not (
-            style.Get("INDENT_CLOSING_BRACKETS") or style.Get("DEDENT_CLOSING_BRACKETS")
-        ):
+        if not (style.Get("INDENT_CLOSING_BRACKETS")
+                or style.Get("DEDENT_CLOSING_BRACKETS")):
             _SetStronglyConnected(node.children[-1])
 
     def Visit_arglist(self, node):  # pylint: disable=invalid-name
@@ -173,11 +172,11 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
             child = node.children[index]
             if isinstance(child, pytree.Leaf) and child.value == "=":
                 _SetSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index]), NAMED_ASSIGN
-                )
+                    pytree_utils.FirstLeafNode(node.children[index]),
+                    NAMED_ASSIGN)
                 _SetSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index + 1]), NAMED_ASSIGN
-                )
+                    pytree_utils.FirstLeafNode(node.children[index + 1]),
+                    NAMED_ASSIGN)
 
     def Visit_tname(self, node):  # pylint: disable=invalid-name
         # tname ::= NAME [':' test]
@@ -187,11 +186,11 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
             child = node.children[index]
             if isinstance(child, pytree.Leaf) and child.value == ":":
                 _SetSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index]), NAMED_ASSIGN
-                )
+                    pytree_utils.FirstLeafNode(node.children[index]),
+                    NAMED_ASSIGN)
                 _SetSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index + 1]), NAMED_ASSIGN
-                )
+                    pytree_utils.FirstLeafNode(node.children[index + 1]),
+                    NAMED_ASSIGN)
 
     def Visit_dotted_name(self, node):  # pylint: disable=invalid-name
         # dotted_name ::= NAME ('.' NAME)*
@@ -217,11 +216,11 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         if node.children[0].value == ".":
             before = style.Get("SPLIT_BEFORE_DOT")
             _SetSplitPenalty(
-                node.children[0], VERY_STRONGLY_CONNECTED if before else DOTTED_NAME
-            )
+                node.children[0],
+                VERY_STRONGLY_CONNECTED if before else DOTTED_NAME)
             _SetSplitPenalty(
-                node.children[1], DOTTED_NAME if before else VERY_STRONGLY_CONNECTED
-            )
+                node.children[1],
+                DOTTED_NAME if before else VERY_STRONGLY_CONNECTED)
         elif len(node.children) == 2:
             # Don't split an empty argument list if at all possible.
             _SetSplitPenalty(node.children[1], VERY_STRONGLY_CONNECTED)
@@ -230,42 +229,37 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
             if name in {"argument", "comparison"}:
                 # Don't split an argument list with one element if at all possible.
                 _SetStronglyConnected(node.children[1])
-                if (
-                    len(node.children[1].children) > 1
-                    and pytree_utils.NodeName(node.children[1].children[1])
-                    == "comp_for"
-                ):
+                if (len(node.children[1].children) > 1
+                        and pytree_utils.NodeName(
+                            node.children[1].children[1]) == "comp_for"):
                     # Don't penalize splitting before a comp_for expression.
-                    _SetSplitPenalty(pytree_utils.FirstLeafNode(node.children[1]), 0)
+                    _SetSplitPenalty(
+                        pytree_utils.FirstLeafNode(node.children[1]), 0)
                 else:
                     _SetSplitPenalty(
                         pytree_utils.FirstLeafNode(node.children[1]),
                         ONE_ELEMENT_ARGUMENT,
                     )
-            elif (
-                pytree_utils.NodeName(node.children[0]) == "LSQB"
-                and len(node.children[1].children) > 2
-                and (name.endswith("_test") or name.endswith("_expr"))
-            ):
+            elif (pytree_utils.NodeName(node.children[0]) == "LSQB"
+                  and len(node.children[1].children) > 2
+                  and (name.endswith("_test") or name.endswith("_expr"))):
                 _SetStronglyConnected(node.children[1].children[0])
                 _SetStronglyConnected(node.children[1].children[2])
 
                 # Still allow splitting around the operator.
                 split_before = (
                     name.endswith("_test")
-                    and style.Get("SPLIT_BEFORE_LOGICAL_OPERATOR")
-                ) or (
-                    name.endswith("_expr")
-                    and style.Get("SPLIT_BEFORE_BITWISE_OPERATOR")
-                )
+                    and style.Get("SPLIT_BEFORE_LOGICAL_OPERATOR")) or (
+                        name.endswith("_expr")
+                        and style.Get("SPLIT_BEFORE_BITWISE_OPERATOR"))
                 if split_before:
                     _SetSplitPenalty(
-                        pytree_utils.LastLeafNode(node.children[1].children[1]), 0
-                    )
+                        pytree_utils.LastLeafNode(
+                            node.children[1].children[1]), 0)
                 else:
                     _SetSplitPenalty(
-                        pytree_utils.FirstLeafNode(node.children[1].children[2]), 0
-                    )
+                        pytree_utils.FirstLeafNode(
+                            node.children[1].children[2]), 0)
 
                 # Don't split the ending bracket of a subscript list.
                 _RecAnnotate(
@@ -274,19 +268,19 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
                     VERY_STRONGLY_CONNECTED,
                 )
             elif name not in {
-                "arglist",
-                "argument",
-                "term",
-                "or_test",
-                "and_test",
-                "comparison",
-                "atom",
-                "power",
+                    "arglist",
+                    "argument",
+                    "term",
+                    "or_test",
+                    "and_test",
+                    "comparison",
+                    "atom",
+                    "power",
             }:
                 # Don't split an argument list with one element if at all possible.
                 subtypes = pytree_utils.GetNodeAnnotation(
-                    pytree_utils.FirstLeafNode(node), pytree_utils.Annotation.SUBTYPE
-                )
+                    pytree_utils.FirstLeafNode(node),
+                    pytree_utils.Annotation.SUBTYPE)
                 if subtypes and format_token.Subtype.SUBSCRIPT_BRACKET in subtypes:
                     _IncreasePenalty(node, SUBSCRIPT)
 
@@ -307,10 +301,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
 
         # When atom is followed by a trailer, we can not break between them.
         # E.g. arr[idx] - no break allowed between 'arr' and '['.
-        if (
-            len(node.children) > 1
-            and pytree_utils.NodeName(node.children[1]) == "trailer"
-        ):
+        if (len(node.children) > 1
+                and pytree_utils.NodeName(node.children[1]) == "trailer"):
             # children[1] itself is a whole trailer: we don't want to
             # mark all of it as unbreakable, only its first token: (, [ or .
             first = pytree_utils.FirstLeafNode(node.children[1])
@@ -351,28 +343,24 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
             if trailer.children[0].value in "([":
                 if len(trailer.children) > 2:
                     subtypes = pytree_utils.GetNodeAnnotation(
-                        trailer.children[0], pytree_utils.Annotation.SUBTYPE
-                    )
+                        trailer.children[0], pytree_utils.Annotation.SUBTYPE)
                     if subtypes and format_token.Subtype.SUBSCRIPT_BRACKET in subtypes:
                         _SetStronglyConnected(
-                            pytree_utils.FirstLeafNode(trailer.children[1])
-                        )
+                            pytree_utils.FirstLeafNode(trailer.children[1]))
 
                     last_child_node = pytree_utils.LastLeafNode(trailer)
                     if last_child_node.value.strip().startswith("#"):
                         last_child_node = last_child_node.prev_sibling
-                    if not (
-                        style.Get("INDENT_CLOSING_BRACKETS")
-                        or style.Get("DEDENT_CLOSING_BRACKETS")
-                    ):
-                        last = pytree_utils.LastLeafNode(last_child_node.prev_sibling)
+                    if not (style.Get("INDENT_CLOSING_BRACKETS")
+                            or style.Get("DEDENT_CLOSING_BRACKETS")):
+                        last = pytree_utils.LastLeafNode(
+                            last_child_node.prev_sibling)
                         if last.value != ",":
                             if last_child_node.value == "]":
                                 _SetUnbreakable(last_child_node)
                             else:
-                                _SetSplitPenalty(
-                                    last_child_node, VERY_STRONGLY_CONNECTED
-                                )
+                                _SetSplitPenalty(last_child_node,
+                                                 VERY_STRONGLY_CONNECTED)
                 else:
                     # If the trailer's children are '()', then make it a strongly
                     # connected region.  It's sometimes necessary, though undesirable, to
@@ -406,7 +394,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
 
     def Visit_comp_if(self, node):  # pylint: disable=invalid-name
         # comp_if ::= 'if' old_test [comp_iter]
-        _SetSplitPenalty(node.children[0], style.Get("SPLIT_PENALTY_BEFORE_IF_EXPR"))
+        _SetSplitPenalty(node.children[0],
+                         style.Get("SPLIT_PENALTY_BEFORE_IF_EXPR"))
         _SetStronglyConnected(*node.children[1:])
         self.DefaultNodeVisit(node)
 
@@ -427,12 +416,11 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         while index + 1 < len(node.children):
             if style.Get("SPLIT_BEFORE_LOGICAL_OPERATOR"):
                 _DecrementSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index]), OR_TEST
-                )
+                    pytree_utils.FirstLeafNode(node.children[index]), OR_TEST)
             else:
                 _DecrementSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index + 1]), OR_TEST
-                )
+                    pytree_utils.FirstLeafNode(node.children[index + 1]),
+                    OR_TEST)
             index += 2
 
     def Visit_and_test(self, node):  # pylint: disable=invalid-name
@@ -443,12 +431,11 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         while index + 1 < len(node.children):
             if style.Get("SPLIT_BEFORE_LOGICAL_OPERATOR"):
                 _DecrementSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index]), AND_TEST
-                )
+                    pytree_utils.FirstLeafNode(node.children[index]), AND_TEST)
             else:
                 _DecrementSplitPenalty(
-                    pytree_utils.FirstLeafNode(node.children[index + 1]), AND_TEST
-                )
+                    pytree_utils.FirstLeafNode(node.children[index + 1]),
+                    AND_TEST)
             index += 2
 
     def Visit_not_test(self, node):  # pylint: disable=invalid-name
@@ -461,9 +448,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         self.DefaultNodeVisit(node)
         if len(node.children) == 3 and _StronglyConnectedCompOp(node):
             _IncreasePenalty(node.children[1], VERY_STRONGLY_CONNECTED)
-            _SetSplitPenalty(
-                pytree_utils.FirstLeafNode(node.children[2]), STRONGLY_CONNECTED
-            )
+            _SetSplitPenalty(pytree_utils.FirstLeafNode(node.children[2]),
+                             STRONGLY_CONNECTED)
         else:
             _IncreasePenalty(node, COMPARISON)
 
@@ -521,15 +507,15 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
         #           '[' [listmaker] ']' |
         #           '{' [dictsetmaker] '}')
         self.DefaultNodeVisit(node)
-        if node.children[0].value == "(" and not hasattr(node.children[0], "is_pseudo"):
+        if node.children[0].value == "(" and not hasattr(
+                node.children[0], "is_pseudo"):
             if node.children[-1].value == ")":
                 if pytree_utils.NodeName(node.parent) == "if_stmt":
                     _SetSplitPenalty(node.children[-1], STRONGLY_CONNECTED)
                 else:
                     if len(node.children) > 2:
                         _SetSplitPenalty(
-                            pytree_utils.FirstLeafNode(node.children[1]), EXPR
-                        )
+                            pytree_utils.FirstLeafNode(node.children[1]), EXPR)
                     _SetSplitPenalty(node.children[-1], ATOM)
         elif node.children[0].value in "[{" and len(node.children) == 2:
             # Keep empty containers together if we can.
@@ -544,7 +530,8 @@ class _SplitPenaltyAssigner(pytree_visitor.PyTreeVisitor):
                 prev_was_comma = True
             else:
                 if prev_was_comma:
-                    _SetSplitPenalty(pytree_utils.FirstLeafNode(child), TOGETHER)
+                    _SetSplitPenalty(pytree_utils.FirstLeafNode(child),
+                                     TOGETHER)
                 prev_was_comma = False
 
 
@@ -556,7 +543,8 @@ def _SetUnbreakable(node):
 def _SetStronglyConnected(*nodes):
     """Set a STRONGLY_CONNECTED penalty annotation for the given nodes."""
     for node in nodes:
-        _RecAnnotate(node, pytree_utils.Annotation.SPLIT_PENALTY, STRONGLY_CONNECTED)
+        _RecAnnotate(node, pytree_utils.Annotation.SPLIT_PENALTY,
+                     STRONGLY_CONNECTED)
 
 
 def _SetExpressionPenalty(node, penalty):
@@ -570,8 +558,7 @@ def _SetExpressionPenalty(node, penalty):
             if node.value in {"(", "for", "if"}:
                 return
             penalty_annotation = pytree_utils.GetNodeAnnotation(
-                node, pytree_utils.Annotation.SPLIT_PENALTY, default=0
-            )
+                node, pytree_utils.Annotation.SPLIT_PENALTY, default=0)
             if penalty_annotation < penalty:
                 _SetSplitPenalty(node, penalty)
         else:
@@ -586,7 +573,8 @@ def _SetBitwiseOperandPenalty(node, op):
         child = node.children[index]
         if isinstance(child, pytree.Leaf) and child.value == op:
             if style.Get("SPLIT_BEFORE_BITWISE_OPERATOR"):
-                _SetSplitPenalty(child, style.Get("SPLIT_PENALTY_BITWISE_OPERATOR"))
+                _SetSplitPenalty(child,
+                                 style.Get("SPLIT_PENALTY_BITWISE_OPERATOR"))
             else:
                 _SetSplitPenalty(
                     pytree_utils.FirstLeafNode(node.children[index + 1]),
@@ -599,7 +587,8 @@ def _SetExpressionOperandPenalty(node, ops):
         child = node.children[index]
         if pytree_utils.NodeName(child) in ops:
             if style.Get("SPLIT_BEFORE_ARITHMETIC_OPERATOR"):
-                _SetSplitPenalty(child, style.Get("SPLIT_PENALTY_ARITHMETIC_OPERATOR"))
+                _SetSplitPenalty(
+                    child, style.Get("SPLIT_PENALTY_ARITHMETIC_OPERATOR"))
             else:
                 _SetSplitPenalty(
                     pytree_utils.FirstLeafNode(node.children[index + 1]),
@@ -618,8 +607,7 @@ def _IncreasePenalty(node, amt):
             if node.value in {"(", "for"}:
                 return
             penalty = pytree_utils.GetNodeAnnotation(
-                node, pytree_utils.Annotation.SPLIT_PENALTY, default=0
-            )
+                node, pytree_utils.Annotation.SPLIT_PENALTY, default=0)
             _SetSplitPenalty(node, penalty + amt)
         else:
             for child in node.children:
@@ -642,38 +630,35 @@ def _RecAnnotate(tree, annotate_name, annotate_value):
     for child in tree.children:
         _RecAnnotate(child, annotate_name, annotate_value)
     if isinstance(tree, pytree.Leaf):
-        cur_annotate = pytree_utils.GetNodeAnnotation(tree, annotate_name, default=0)
+        cur_annotate = pytree_utils.GetNodeAnnotation(tree,
+                                                      annotate_name,
+                                                      default=0)
         if cur_annotate < annotate_value:
             pytree_utils.SetNodeAnnotation(tree, annotate_name, annotate_value)
 
 
 def _StronglyConnectedCompOp(op):
-    if (
-        len(op.children[1].children) == 2
-        and pytree_utils.NodeName(op.children[1]) == "comp_op"
-    ):
-        if (
-            pytree_utils.FirstLeafNode(op.children[1]).value == "not"
-            and pytree_utils.LastLeafNode(op.children[1]).value == "in"
-        ):
+    if (len(op.children[1].children) == 2
+            and pytree_utils.NodeName(op.children[1]) == "comp_op"):
+        if (pytree_utils.FirstLeafNode(op.children[1]).value == "not"
+                and pytree_utils.LastLeafNode(op.children[1]).value == "in"):
             return True
-        if (
-            pytree_utils.FirstLeafNode(op.children[1]).value == "is"
-            and pytree_utils.LastLeafNode(op.children[1]).value == "not"
-        ):
+        if (pytree_utils.FirstLeafNode(op.children[1]).value == "is"
+                and pytree_utils.LastLeafNode(op.children[1]).value == "not"):
             return True
-    if isinstance(op.children[1], pytree.Leaf) and op.children[1].value in {"==", "in"}:
+    if isinstance(op.children[1],
+                  pytree.Leaf) and op.children[1].value in {"==", "in"}:
         return True
     return False
 
 
 def _DecrementSplitPenalty(node, amt):
     penalty = pytree_utils.GetNodeAnnotation(
-        node, pytree_utils.Annotation.SPLIT_PENALTY, default=amt
-    )
+        node, pytree_utils.Annotation.SPLIT_PENALTY, default=amt)
     penalty = penalty - amt if amt < penalty else 0
     _SetSplitPenalty(node, penalty)
 
 
 def _SetSplitPenalty(node, penalty):
-    pytree_utils.SetNodeAnnotation(node, pytree_utils.Annotation.SPLIT_PENALTY, penalty)
+    pytree_utils.SetNodeAnnotation(node, pytree_utils.Annotation.SPLIT_PENALTY,
+                                   penalty)

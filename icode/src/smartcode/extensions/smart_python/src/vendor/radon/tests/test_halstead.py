@@ -7,7 +7,6 @@ from radon.visitors import HalsteadVisitor
 
 dedent = lambda code: textwrap.dedent(code).strip()
 
-
 SIMPLE_BLOCKS = [
     (
         """
@@ -86,9 +85,8 @@ SIMPLE_BLOCKS = [
 ]
 
 if sys.version_info[:2] >= (3, 5):
-    SIMPLE_BLOCKS.append(
-        (
-            """
+    SIMPLE_BLOCKS.append((
+        """
         a = 2
         b = 3
         a *= b
@@ -97,9 +95,8 @@ if sys.version_info[:2] >= (3, 5):
             b = 2
             b += 4
         """,
-            (2, 4, 2, 4),
-        ),
-    )
+        (2, 4, 2, 4),
+    ), )
 
 
 @pytest.mark.parametrize("code,expected", SIMPLE_BLOCKS)

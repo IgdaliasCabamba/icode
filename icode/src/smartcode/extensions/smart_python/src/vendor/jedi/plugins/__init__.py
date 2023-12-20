@@ -2,6 +2,7 @@ from functools import wraps
 
 
 class _PluginManager:
+
     def __init__(self):
         self._registered_plugins = []
         self._cached_base_callbacks = {}
@@ -15,7 +16,9 @@ class _PluginManager:
         self._build_functions()
 
     def decorate(self, name=None):
+
         def decorator(callback):
+
             @wraps(callback)
             def wrapper(*args, **kwargs):
                 return built_functions[public_name](*args, **kwargs)

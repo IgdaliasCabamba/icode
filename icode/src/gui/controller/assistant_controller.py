@@ -23,17 +23,13 @@ class AssistantController(QObject):
 
         self.view.input.returnPressed.connect(self.search_answer)
         self.view.options.less_answers.triggered.connect(
-            lambda: self.configure_ans_count(1)
-        )
+            lambda: self.configure_ans_count(1))
         self.view.options.two_answers.triggered.connect(
-            lambda: self.configure_ans_count(2)
-        )
+            lambda: self.configure_ans_count(2))
         self.view.options.normal_answers.triggered.connect(
-            lambda: self.configure_ans_count(3)
-        )
+            lambda: self.configure_ans_count(3))
         self.view.options.all_answers.triggered.connect(
-            lambda: self.configure_ans_count(20)
-        )
+            lambda: self.configure_ans_count(20))
 
     def run(self):
         self.view.input.setEnabled(True)
@@ -57,9 +53,8 @@ class AssistantController(QObject):
                 if isinstance(ans, dict):
                     if "answer" in ans.keys():
                         if ans["answer"] is not None:
-                            self.view.add_message(
-                                ans["answer"], "April \uf860", 0, "code"
-                            )
+                            self.view.add_message(ans["answer"],
+                                                  "April \uf860", 0, "code")
         elif type == -1:
             self.view.add_message(res, "April \uf860", 0, "text")
 

@@ -13,6 +13,7 @@ from rope.base import pynames, pyobjects, arguments, utils
 
 
 class BuiltinModule(pyobjects.AbstractModule):
+
     def __init__(self, name, pycore=None, initial={}):
         super(BuiltinModule, self).__init__()
         self.name = name
@@ -55,6 +56,7 @@ class BuiltinModule(pyobjects.AbstractModule):
 
 
 class _BuiltinElement(object):
+
     def __init__(self, builtin, parent=None):
         self.builtin = builtin
         self._parent = parent
@@ -75,6 +77,7 @@ class _BuiltinElement(object):
 
 
 class BuiltinClass(_BuiltinElement, pyobjects.AbstractClass):
+
     def __init__(self, builtin, attributes, parent=None):
         _BuiltinElement.__init__(self, builtin, parent)
         pyobjects.AbstractClass.__init__(self)
@@ -91,9 +94,13 @@ class BuiltinClass(_BuiltinElement, pyobjects.AbstractClass):
 
 
 class BuiltinFunction(_BuiltinElement, pyobjects.AbstractFunction):
-    def __init__(
-        self, returned=None, function=None, builtin=None, argnames=[], parent=None
-    ):
+
+    def __init__(self,
+                 returned=None,
+                 function=None,
+                 builtin=None,
+                 argnames=[],
+                 parent=None):
         _BuiltinElement.__init__(self, builtin, parent)
         pyobjects.AbstractFunction.__init__(self)
         self.argnames = argnames
@@ -111,6 +118,7 @@ class BuiltinFunction(_BuiltinElement, pyobjects.AbstractFunction):
 
 
 class BuiltinUnknown(_BuiltinElement, pyobjects.PyObject):
+
     def __init__(self, builtin):
         super(BuiltinUnknown, self).__init__(pyobjects.get_unknown())
         self.builtin = builtin
@@ -147,6 +155,7 @@ def _object_attributes(obj, parent):
 
 
 def _create_builtin_type_getter(cls):
+
     def _get_builtin(*args):
         if not hasattr(cls, "_generated"):
             cls._generated = {}
@@ -167,6 +176,7 @@ def _create_builtin_getter(cls):
 
 
 class _CallContext(object):
+
     def __init__(self, argnames, args):
         self.argnames = argnames
         self.args = args
@@ -230,6 +240,7 @@ class _CallContext(object):
 
 
 class _AttributeCollector(object):
+
     def __init__(self, type):
         self.attributes = {}
         self.type = type
@@ -256,14 +267,14 @@ class _AttributeCollector(object):
                 argnames=argnames,
                 builtin=builtin,
                 parent=parent,
-            )
-        )
+            ))
 
     def __setitem__(self, name, value):
         self.attributes[name] = value
 
 
 class List(BuiltinClass):
+
     def __init__(self, holding=None):
         self.holding = holding
         collector = _AttributeCollector(list)
@@ -272,9 +283,10 @@ class List(BuiltinClass):
         collector("__new__", function=self._new_list, parent=self)
 
         # Adding methods
-        collector(
-            "append", function=self._list_add, argnames=["self", "value"], parent=self
-        )
+        collector("append",
+                  function=self._list_add,
+                  argnames=["self", "value"],
+                  parent=self)
         collector(
             "__setitem__",
             function=self._list_add,
@@ -325,11 +337,8 @@ class List(BuiltinClass):
     def _list_get(self, context):
         if self.holding is not None:
             args = context.get_arguments(["self", "key"])
-            if (
-                len(args) > 1
-                and args[1] is not None
-                and args[1].get_type() == builtins["slice"].get_object()
-            ):
+            if (len(args) > 1 and args[1] is not None
+                    and args[1].get_type() == builtins["slice"].get_object()):
                 return get_list(self.holding)
             return self.holding
         return context.get_per_name()
@@ -346,6 +355,7 @@ get_list_type = _create_builtin_type_getter(List)
 
 
 class Dict(BuiltinClass):
+
     def __init__(self, keys=None, values=None):
         self.keys = keys
         self.values = values
@@ -365,11 +375,13 @@ class Dict(BuiltinClass):
         super(Dict, self).__init__(dict, collector.attributes)
 
     def _new_dict(self, args):
+
         def do_create(holding=None):
             if holding is None:
                 return get_dict()
             type = holding.get_type()
-            if isinstance(type, Tuple) and len(type.get_holding_objects()) == 2:
+            if isinstance(type, Tuple) and len(
+                    type.get_holding_objects()) == 2:
                 return get_dict(*type.get_holding_objects())
 
         return _create_builtin(args, do_create)
@@ -426,9 +438,8 @@ class Dict(BuiltinClass):
         new_dict = context.get_pynames(["self", "d"])[1]
         if new_dict and isinstance(new_dict.get_object().get_type(), Dict):
             args = arguments.ObjectArguments([new_dict])
-            items = (
-                new_dict.get_object()["popitem"].get_object().get_returned_object(args)
-            )
+            items = (new_dict.get_object()
+                     ["popitem"].get_object().get_returned_object(args))
             context.save_per_name(items)
         else:
             holding = _infer_sequence_for_pyname(new_dict)
@@ -441,16 +452,17 @@ get_dict_type = _create_builtin_type_getter(Dict)
 
 
 class Tuple(BuiltinClass):
+
     def __init__(self, *objects):
         self.objects = objects
         first = None
         if objects:
             first = objects[0]
         attributes = {
-            "__getitem__": BuiltinName(
-                BuiltinFunction(first)
-            ),  # TODO: add slice support
-            "__getslice__": BuiltinName(BuiltinFunction(pyobjects.PyObject(self))),
+            "__getitem__":
+            BuiltinName(BuiltinFunction(first)),  # TODO: add slice support
+            "__getslice__":
+            BuiltinName(BuiltinFunction(pyobjects.PyObject(self))),
             "__new__": BuiltinName(BuiltinFunction(function=self._new_tuple)),
             "__iter__": BuiltinName(BuiltinFunction(get_iterator(first))),
         }
@@ -468,6 +480,7 @@ get_tuple_type = _create_builtin_type_getter(Tuple)
 
 
 class Set(BuiltinClass):
+
     def __init__(self, holding=None):
         self.holding = holding
         collector = _AttributeCollector(set)
@@ -485,7 +498,9 @@ class Set(BuiltinClass):
         collector("add", function=self._set_add, parent=self)
         collector("update", function=self._self_set, parent=self)
         collector("update", function=self._self_set, parent=self)
-        collector("symmetric_difference_update", function=self._self_set, parent=self)
+        collector("symmetric_difference_update",
+                  function=self._self_set,
+                  parent=self)
         collector("difference_update", function=self._self_set, parent=self)
 
         collector("pop", function=self._set_get, parent=self)
@@ -527,6 +542,7 @@ get_set_type = _create_builtin_type_getter(Set)
 
 
 class Str(BuiltinClass):
+
     def __init__(self):
         self_object = pyobjects.PyObject(self)
         collector = _AttributeCollector(str)
@@ -576,6 +592,7 @@ get_str_type = _create_builtin_type_getter(Str)
 
 
 class BuiltinName(pynames.PyName):
+
     def __init__(self, pyobject):
         self.pyobject = pyobject
 
@@ -587,6 +604,7 @@ class BuiltinName(pynames.PyName):
 
 
 class Iterator(pyobjects.AbstractClass):
+
     def __init__(self, holding=None):
         super(Iterator, self).__init__()
         self.holding = holding
@@ -606,12 +624,14 @@ get_iterator = _create_builtin_getter(Iterator)
 
 
 class Generator(pyobjects.AbstractClass):
+
     def __init__(self, holding=None):
         super(Generator, self).__init__()
         self.holding = holding
         self.attributes = {
             "next": BuiltinName(BuiltinFunction(self.holding)),
-            "__iter__": BuiltinName(BuiltinFunction(get_iterator(self.holding))),
+            "__iter__":
+            BuiltinName(BuiltinFunction(get_iterator(self.holding))),
             "close": BuiltinName(BuiltinFunction()),
             "send": BuiltinName(BuiltinFunction()),
             "throw": BuiltinName(BuiltinFunction()),
@@ -628,6 +648,7 @@ get_generator = _create_builtin_getter(Generator)
 
 
 class File(BuiltinClass):
+
     def __init__(self, filename=None, mode="r", *args):
         self.filename = filename
         self.mode = mode
@@ -639,23 +660,24 @@ class File(BuiltinClass):
         def add(name, returned=None, function=None):
             builtin = getattr(io.TextIOBase, name, None)
             attributes[name] = BuiltinName(
-                BuiltinFunction(returned=returned, function=function, builtin=builtin)
-            )
+                BuiltinFunction(returned=returned,
+                                function=function,
+                                builtin=builtin))
 
         add("__iter__", get_iterator(str_object))
         add("__enter__", returned=pyobjects.PyObject(self))
         for method in ["next", "read", "readline", "readlines"]:
             add(method, str_list)
         for method in [
-            "close",
-            "flush",
-            "lineno",
-            "isatty",
-            "seek",
-            "tell",
-            "truncate",
-            "write",
-            "writelines",
+                "close",
+                "flush",
+                "lineno",
+                "isatty",
+                "seek",
+                "tell",
+                "truncate",
+                "write",
+                "writelines",
         ]:
             add(method)
         super(File, self).__init__(open, attributes)
@@ -666,6 +688,7 @@ get_file_type = _create_builtin_type_getter(File)
 
 
 class Property(BuiltinClass):
+
     def __init__(self, fget=None, fset=None, fdel=None, fdoc=None):
         self._fget = fget
         self._fdoc = fdoc
@@ -673,7 +696,8 @@ class Property(BuiltinClass):
             "fget": BuiltinName(BuiltinFunction()),
             "fset": BuiltinName(pynames.UnboundName()),
             "fdel": BuiltinName(pynames.UnboundName()),
-            "__new__": BuiltinName(BuiltinFunction(function=_property_function)),
+            "__new__":
+            BuiltinName(BuiltinFunction(function=_property_function)),
         }
         super(Property, self).__init__(property, attributes)
 
@@ -688,6 +712,7 @@ def _property_function(args):
 
 
 class Lambda(pyobjects.AbstractFunction):
+
     def __init__(self, node, scope):
         super(Lambda, self).__init__()
         self.node = node
@@ -721,14 +746,15 @@ class Lambda(pyobjects.AbstractFunction):
 
     def get_param_names(self, special_args=True):
         result = [
-            pycompat.get_ast_arg_arg(node)
-            for node in self.arguments.args
+            pycompat.get_ast_arg_arg(node) for node in self.arguments.args
             if isinstance(node, pycompat.ast_arg_type)
         ]
         if self.arguments.vararg:
-            result.append("*" + pycompat.get_ast_arg_arg(self.arguments.vararg))
+            result.append("*" +
+                          pycompat.get_ast_arg_arg(self.arguments.vararg))
         if self.arguments.kwarg:
-            result.append("**" + pycompat.get_ast_arg_arg(self.arguments.kwarg))
+            result.append("**" +
+                          pycompat.get_ast_arg_arg(self.arguments.kwarg))
         return result
 
     @property
@@ -737,11 +763,13 @@ class Lambda(pyobjects.AbstractFunction):
 
 
 class BuiltinObject(BuiltinClass):
+
     def __init__(self):
         super(BuiltinObject, self).__init__(object, {})
 
 
 class BuiltinType(BuiltinClass):
+
     def __init__(self):
         super(BuiltinType, self).__init__(type, {})
 
@@ -840,33 +868,47 @@ def _input_function(args):
 
 
 _initial_builtins = {
-    "list": BuiltinName(get_list_type()),
-    "dict": BuiltinName(get_dict_type()),
-    "tuple": BuiltinName(get_tuple_type()),
-    "set": BuiltinName(get_set_type()),
-    "str": BuiltinName(get_str_type()),
-    "file": BuiltinName(get_file_type()),
-    "open": BuiltinName(BuiltinFunction(function=_open_function, builtin=open)),
-    "unicode": BuiltinName(get_str_type()),
-    "range": BuiltinName(BuiltinFunction(function=_range_function, builtin=range)),
-    "reversed": BuiltinName(
-        BuiltinFunction(function=_reversed_function, builtin=reversed)
-    ),
-    "sorted": BuiltinName(BuiltinFunction(function=_sorted_function, builtin=sorted)),
-    "super": BuiltinName(BuiltinFunction(function=_super_function, builtin=super)),
-    "property": BuiltinName(
-        BuiltinFunction(function=_property_function, builtin=property)
-    ),
-    "zip": BuiltinName(BuiltinFunction(function=_zip_function, builtin=zip)),
-    "enumerate": BuiltinName(
-        BuiltinFunction(function=_enumerate_function, builtin=enumerate)
-    ),
-    "object": BuiltinName(BuiltinObject()),
-    "type": BuiltinName(BuiltinType()),
-    "iter": BuiltinName(BuiltinFunction(function=_iter_function, builtin=iter)),
-    "raw_input": BuiltinName(
-        BuiltinFunction(function=_input_function, builtin=raw_input)
-    ),
+    "list":
+    BuiltinName(get_list_type()),
+    "dict":
+    BuiltinName(get_dict_type()),
+    "tuple":
+    BuiltinName(get_tuple_type()),
+    "set":
+    BuiltinName(get_set_type()),
+    "str":
+    BuiltinName(get_str_type()),
+    "file":
+    BuiltinName(get_file_type()),
+    "open":
+    BuiltinName(BuiltinFunction(function=_open_function, builtin=open)),
+    "unicode":
+    BuiltinName(get_str_type()),
+    "range":
+    BuiltinName(BuiltinFunction(function=_range_function, builtin=range)),
+    "reversed":
+    BuiltinName(BuiltinFunction(function=_reversed_function,
+                                builtin=reversed)),
+    "sorted":
+    BuiltinName(BuiltinFunction(function=_sorted_function, builtin=sorted)),
+    "super":
+    BuiltinName(BuiltinFunction(function=_super_function, builtin=super)),
+    "property":
+    BuiltinName(BuiltinFunction(function=_property_function,
+                                builtin=property)),
+    "zip":
+    BuiltinName(BuiltinFunction(function=_zip_function, builtin=zip)),
+    "enumerate":
+    BuiltinName(
+        BuiltinFunction(function=_enumerate_function, builtin=enumerate)),
+    "object":
+    BuiltinName(BuiltinObject()),
+    "type":
+    BuiltinName(BuiltinType()),
+    "iter":
+    BuiltinName(BuiltinFunction(function=_iter_function, builtin=iter)),
+    "raw_input":
+    BuiltinName(BuiltinFunction(function=_input_function, builtin=raw_input)),
 }
 
 builtins = BuiltinModule(pycompat.builtins.__name__, initial=_initial_builtins)

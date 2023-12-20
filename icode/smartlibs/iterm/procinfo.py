@@ -5,11 +5,14 @@ import re
 
 
 class ProcessInfo(object):
+
     def __init__(self):
         self.update()
 
     def update(self):
-        processes = [int(entry) for entry in os.listdir("/proc") if entry.isdigit()]
+        processes = [
+            int(entry) for entry in os.listdir("/proc") if entry.isdigit()
+        ]
         parent = {}
         children = {}
         commands = {}

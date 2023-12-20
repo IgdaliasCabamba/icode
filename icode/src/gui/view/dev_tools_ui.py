@@ -18,6 +18,7 @@ from core.code_api import icode_api
 
 
 class NotesUi(QFrame):
+
     def __init__(self, parent):
         super().__init__()
         self.setObjectName("ilabs-notes")
@@ -32,12 +33,12 @@ class NotesUi(QFrame):
         self.text_editor = QTextEdit(self)
         self.text_editor.setAcceptRichText(True)
         self.text_editor.setPlaceholderText(
-            "Make your notes here, they are automatically saved"
-        )
+            "Make your notes here, they are automatically saved")
         self.layout.addWidget(self.text_editor)
 
 
 class TodosUi(QFrame):
+
     def __init__(self, parent):
         super().__init__()
         self.setObjectName("ilabs-notes")
@@ -88,9 +89,11 @@ class TodosUi(QFrame):
             color_text = QColor(icode_api.get_lexers_frontend()["Todo"]["fg"])
             title = f"{get_unicon('nf', 'fa-tasks')} {text}"
 
-        item = IListWidgetItem(
-            None, title, tooltip, {"line": line, "note": tooltip, "label": type}
-        )
+        item = IListWidgetItem(None, title, tooltip, {
+            "line": line,
+            "note": tooltip,
+            "label": type
+        })
         item.setForeground(color_text)
 
         self.display.addItem(item)

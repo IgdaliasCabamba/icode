@@ -56,6 +56,7 @@ class SplitButton(QToolButton):
 
 
 class EditorMenu(QMenu):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setTitle("Icode Notebook")
@@ -81,6 +82,7 @@ class EditorMenu(QMenu):
 
 
 class MainTabCorner(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setObjectName("tab-corner-widget-editor")
@@ -105,6 +107,7 @@ class MainTabCorner(QFrame):
 
 
 class GenericTabCorner(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent = parent
@@ -130,7 +133,8 @@ class GenericTabCorner(QFrame):
             continue
 
     def change_to(self, name: object) -> None:
-        self.set_visiblity([widget for widget in self.widget_dict.keys()], False)
+        self.set_visiblity([widget for widget in self.widget_dict.keys()],
+                           False)
         if name in self.widget_dict.keys():
             self.set_visiblity([name], True)
 
@@ -144,6 +148,7 @@ class GenericTabCorner(QFrame):
 
 
 class BottomTabCorner(GenericTabCorner):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent = parent

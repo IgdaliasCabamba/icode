@@ -67,7 +67,8 @@ class AbstractNameDefinition:
 
     def __repr__(self):
         if self.start_pos is None:
-            return "<%s: string_name=%s>" % (self.__class__.__name__, self.string_name)
+            return "<%s: string_name=%s>" % (self.__class__.__name__,
+                                             self.string_name)
         return "<%s: string_name=%s start_pos=%s>" % (
             self.__class__.__name__,
             self.string_name,
@@ -111,24 +112,26 @@ class AbstractArbitraryName(AbstractNameDefinition):
 
 
 class AbstractTreeName(AbstractNameDefinition):
+
     def __init__(self, parent_context, tree_name):
         self.parent_context = parent_context
         self.tree_name = tree_name
 
     def get_qualified_names(self, include_module_names=False):
-        import_node = search_ancestor(self.tree_name, "import_name", "import_from")
+        import_node = search_ancestor(self.tree_name, "import_name",
+                                      "import_from")
         # For import nodes we cannot just have names, because it's very unclear
         # how they would look like. For now we just ignore them in most cases.
         # In case of level == 1, it works always, because it's like a submodule
         # lookup.
         if import_node is not None and not (
-            import_node.level == 1 and self.get_root_context().get_value().is_package()
-        ):
+                import_node.level == 1
+                and self.get_root_context().get_value().is_package()):
             # TODO improve the situation for when level is present.
             if include_module_names and not import_node.level:
                 return tuple(
-                    n.value for n in import_node.get_path_for_name(self.tree_name)
-                )
+                    n.value
+                    for n in import_node.get_path_for_name(self.tree_name))
             else:
                 return None
 
@@ -138,7 +141,7 @@ class AbstractTreeName(AbstractNameDefinition):
         parent_names = self.parent_context.get_qualified_names()
         if parent_names is None:
             return None
-        return parent_names + (self.tree_name.value,)
+        return parent_names + (self.tree_name.value, )
 
     def get_defining_qualified_value(self):
         if self.is_import():
@@ -175,11 +178,8 @@ class AbstractTreeName(AbstractNameDefinition):
 
         par = name.parent
         node_type = par.type
-        if (
-            node_type == "argument"
-            and par.children[1] == "="
-            and par.children[0] == name
-        ):
+        if (node_type == "argument" and par.children[1] == "="
+                and par.children[0] == name):
             # Named param goto.
             trailer = par.parent
             if trailer.type == "arglist":
@@ -208,9 +208,10 @@ class AbstractTreeName(AbstractNameDefinition):
             index = par.children.index(name)
             if index > 0:
                 new_dotted = deep_ast_copy(par)
-                new_dotted.children[index - 1 :] = []
+                new_dotted.children[index - 1:] = []
                 values = context.infer_node(new_dotted)
-                return unite(value.goto(name, name_context=context) for value in values)
+                return unite(
+                    value.goto(name, name_context=context) for value in values)
 
         if node_type == "trailer" and par.children[0] == ".":
             values = infer_call_of_leaf(context, name, cut_own_trailer=True)
@@ -235,6 +236,7 @@ class AbstractTreeName(AbstractNameDefinition):
 
 
 class ValueNameMixin:
+
     def infer(self):
         return ValueSet([self._value])
 
@@ -268,6 +270,7 @@ class ValueNameMixin:
 
 
 class ValueName(ValueNameMixin, AbstractTreeName):
+
     def __init__(self, value, tree_name):
         super().__init__(value.parent_context, tree_name)
         self._value = value
@@ -289,9 +292,8 @@ class TreeNameDefinition(AbstractTreeName):
         # Refactor this, should probably be here.
         from jedi.inference.syntax_tree import tree_name_to_values
 
-        return tree_name_to_values(
-            self.parent_context.inference_state, self.parent_context, self.tree_name
-        )
+        return tree_name_to_values(self.parent_context.inference_state,
+                                   self.parent_context, self.tree_name)
 
     @property
     def api_type(self):
@@ -321,10 +323,10 @@ class TreeNameDefinition(AbstractTreeName):
         compare = self.tree_name
         while node is not None:
             if node.type in (
-                "testlist",
-                "testlist_comp",
-                "testlist_star_expr",
-                "exprlist",
+                    "testlist",
+                    "testlist_comp",
+                    "testlist_star_expr",
+                    "exprlist",
             ):
                 for i, child in enumerate(node.children):
                     if child == compare:
@@ -364,11 +366,13 @@ class TreeNameDefinition(AbstractTreeName):
                 return _merge_name_docs(names)
 
         if api_type == "statement" and self.tree_name.is_definition():
-            return find_statement_documentation(self.tree_name.get_definition())
+            return find_statement_documentation(
+                self.tree_name.get_definition())
         return ""
 
 
 class _ParamMixin:
+
     def maybe_positional_argument(self, include_star=True):
         options = [Parameter.POSITIONAL_ONLY, Parameter.POSITIONAL_OR_KEYWORD]
         if include_star:
@@ -450,6 +454,7 @@ class BaseTreeParamName(ParamNameInterface, AbstractTreeName):
 
 
 class _ActualTreeParamName(BaseTreeParamName):
+
     def __init__(self, function_value, tree_name):
         super().__init__(function_value.get_default_param_context(), tree_name)
         self.function_value = function_value
@@ -464,9 +469,9 @@ class _ActualTreeParamName(BaseTreeParamName):
     def infer_annotation(self, execute_annotation=True, ignore_stars=False):
         from jedi.inference.gradual.annotation import infer_param
 
-        values = infer_param(
-            self.function_value, self._get_param_node(), ignore_stars=ignore_stars
-        )
+        values = infer_param(self.function_value,
+                             self._get_param_node(),
+                             ignore_stars=ignore_stars)
         if execute_annotation:
             values = values.execute_annotation()
         return values
@@ -514,11 +519,13 @@ class _ActualTreeParamName(BaseTreeParamName):
         if values:
             return values
 
-        doc_params = docstrings.infer_param(self.function_value, self._get_param_node())
+        doc_params = docstrings.infer_param(self.function_value,
+                                            self._get_param_node())
         return doc_params
 
 
 class AnonymousParamName(_ActualTreeParamName):
+
     @plugin_manager.decorate(name="goto_anonymous_param")
     def goto(self):
         return super().goto()
@@ -531,7 +538,8 @@ class AnonymousParamName(_ActualTreeParamName):
         from jedi.inference.dynamic_params import dynamic_param_lookup
 
         param = self._get_param_node()
-        values = dynamic_param_lookup(self.function_value, param.position_index)
+        values = dynamic_param_lookup(self.function_value,
+                                      param.position_index)
         if values:
             return values
 
@@ -551,6 +559,7 @@ class AnonymousParamName(_ActualTreeParamName):
 
 
 class ParamName(_ActualTreeParamName):
+
     def __init__(self, function_value, tree_name, arguments):
         super().__init__(function_value, tree_name)
         self.arguments = arguments
@@ -565,11 +574,13 @@ class ParamName(_ActualTreeParamName):
     def get_executed_param_name(self):
         from jedi.inference.param import get_executed_param_names
 
-        params_names = get_executed_param_names(self.function_value, self.arguments)
+        params_names = get_executed_param_names(self.function_value,
+                                                self.arguments)
         return params_names[self._get_param_node().position_index]
 
 
 class ParamNameWrapper(_ParamMixin):
+
     def __init__(self, param_name):
         self._wrapped_param_name = param_name
 
@@ -595,8 +606,8 @@ class ImportName(AbstractNameDefinition):
                 module_names = self._from_module_context.string_names
                 if module_names is None:
                     return module_names
-                return module_names + (self.string_name,)
-            return (self.string_name,)
+                return module_names + (self.string_name, )
+            return (self.string_name, )
         return ()
 
     @property
@@ -614,9 +625,9 @@ class ImportName(AbstractNameDefinition):
         from jedi.inference.imports import Importer
 
         m = self._from_module_context
-        return Importer(
-            m.inference_state, [self.string_name], m, level=self._level
-        ).follow()
+        return Importer(m.inference_state, [self.string_name],
+                        m,
+                        level=self._level).follow()
 
     def goto(self):
         return [m.name for m in self.infer()]
@@ -634,6 +645,7 @@ class SubModuleName(ImportName):
 
 
 class NameWrapper:
+
     def __init__(self, wrapped_name):
         self._wrapped_name = wrapped_name
 
@@ -645,6 +657,7 @@ class NameWrapper:
 
 
 class StubNameMixin:
+
     def py__doc__(self):
         from jedi.inference.gradual.conversion import convert_names
 
@@ -652,10 +665,8 @@ class StubNameMixin:
         # that have an equals in them, because they typically make something
         # else public. See e.g. stubs for `requests`.
         names = [self]
-        if (
-            self.api_type == "statement"
-            and "=" in self.tree_name.get_definition().children
-        ):
+        if (self.api_type == "statement"
+                and "=" in self.tree_name.get_definition().children):
             names = [v.name for v in self.infer()]
 
         names = convert_names(names, prefer_stub_to_compiled=False)
@@ -669,12 +680,11 @@ class StubNameMixin:
 
 # From here on down we make looking up the sys.version_info fast.
 class StubName(StubNameMixin, TreeNameDefinition):
+
     def infer(self):
         inferred = super().infer()
-        if (
-            self.string_name == "version_info"
-            and self.get_root_context().py__name__() == "sys"
-        ):
+        if (self.string_name == "version_info"
+                and self.get_root_context().py__name__() == "sys"):
             from jedi.inference.gradual.stub_value import VersionInfo
 
             return ValueSet(VersionInfo(c) for c in inferred)

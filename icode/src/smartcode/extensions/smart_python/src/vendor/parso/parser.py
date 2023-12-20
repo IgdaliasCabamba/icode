@@ -5,7 +5,6 @@
 # Copyright David Halter and Contributors
 # Modifications are dual-licensed: MIT and PSF.
 # 99% of the code is different from pgen2, now.
-
 """
 The ``Parser`` tries to convert the available Python code in an easy to read
 format, something like an abstract syntax tree. The classes who represent this
@@ -51,7 +50,8 @@ class InternalParseError(Exception):
     def __init__(self, msg, type_, value, start_pos):
         Exception.__init__(
             self,
-            "%s: type=%r, value=%r, start_pos=%r" % (msg, type_.name, value, start_pos),
+            "%s: type=%r, value=%r, start_pos=%r" %
+            (msg, type_.name, value, start_pos),
         )
         self.msg = msg
         self.type = type
@@ -60,7 +60,9 @@ class InternalParseError(Exception):
 
 
 class Stack(list):
+
     def _allowed_transition_names_and_token_types(self):
+
         def iterate():
             # An API just for Jedi.
             for stack_node in reversed(self):
@@ -77,6 +79,7 @@ class Stack(list):
 
 
 class StackNode:
+
     def __init__(self, dfa):
         self.dfa = dfa
         self.nodes = []
@@ -119,15 +122,17 @@ class BaseParser:
     leaf_map: Dict[str, Type[tree.Leaf]] = {}
     default_leaf = tree.Leaf
 
-    def __init__(
-        self, pgen_grammar, start_nonterminal="file_input", error_recovery=False
-    ):
+    def __init__(self,
+                 pgen_grammar,
+                 start_nonterminal="file_input",
+                 error_recovery=False):
         self._pgen_grammar = pgen_grammar
         self._start_nonterminal = start_nonterminal
         self._error_recovery = error_recovery
 
     def parse(self, tokens):
-        first_dfa = self._pgen_grammar.nonterminal_to_dfas[self._start_nonterminal][0]
+        first_dfa = self._pgen_grammar.nonterminal_to_dfas[
+            self._start_nonterminal][0]
         self.stack = Stack([StackNode(first_dfa)])
 
         for token in tokens:
@@ -139,9 +144,8 @@ class BaseParser:
                 # We never broke out -- EOF is too soon -- Unfinished statement.
                 # However, the error recovery might have added the token again, if
                 # the stack is empty, we're fine.
-                raise InternalParseError(
-                    "incomplete input", token.type, token.string, token.start_pos
-                )
+                raise InternalParseError("incomplete input", token.type,
+                                         token.string, token.start_pos)
 
             if len(self.stack) > 1:
                 self._pop()
@@ -191,7 +195,8 @@ class BaseParser:
                     self.error_recovery(token)
                     return
             except IndexError:
-                raise InternalParseError("too much input", type_, value, start_pos)
+                raise InternalParseError("too much input", type_, value,
+                                         start_pos)
 
         stack[-1].dfa = plan.next_dfa
 

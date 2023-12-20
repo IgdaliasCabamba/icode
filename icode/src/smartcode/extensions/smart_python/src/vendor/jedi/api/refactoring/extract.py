@@ -8,15 +8,11 @@ from jedi.api.refactoring import Refactoring, EXPRESSION_PARTS
 from jedi.common import indent_block
 from jedi.parser_utils import function_is_classmethod, function_is_staticmethod
 
-
 _DEFINITION_SCOPES = ("suite", "file_input")
 _VARIABLE_EXCTRACTABLE = (
-    EXPRESSION_PARTS
-    + (
-        "atom testlist_star_expr testlist test lambdef lambdef_nocond "
-        "keyword name number string fstring"
-    ).split()
-)
+    EXPRESSION_PARTS +
+    ("atom testlist_star_expr testlist test lambdef lambdef_nocond "
+     "keyword name number string fstring").split())
 
 
 def extract_variable(inference_state, path, module_node, name, pos, until_pos):
@@ -78,7 +74,8 @@ def _find_nodes(module_node, pos, until_pos):
             start_node = start_node.parent
 
         # Find the end
-        end_leaf = module_node.get_leaf_for_position(until_pos, include_prefixes=True)
+        end_leaf = module_node.get_leaf_for_position(until_pos,
+                                                     include_prefixes=True)
         if end_leaf.start_pos > until_pos:
             end_leaf = end_leaf.get_previous_leaf()
             if end_leaf is None:
@@ -130,9 +127,8 @@ def _replace(
         else:
             p = remaining_prefix + _get_indentation(nodes[0])
         replacement_dct[nodes[0]] = p + expression_replacement
-        replacement_dct[insert_before_leaf] = (
-            extracted_prefix + insert_before_leaf.value
-        )
+        replacement_dct[insert_before_leaf] = (extracted_prefix +
+                                               insert_before_leaf.value)
 
     for node in nodes[1:]:
         replacement_dct[node] = ""
@@ -140,17 +136,15 @@ def _replace(
 
 
 def _expression_nodes_to_string(nodes):
-    return "".join(n.get_code(include_prefix=i != 0) for i, n in enumerate(nodes))
+    return "".join(
+        n.get_code(include_prefix=i != 0) for i, n in enumerate(nodes))
 
 
 def _suite_nodes_to_string(nodes, pos):
     n = nodes[0]
     prefix, part_of_code = _split_prefix_at(n.get_first_leaf(), pos[0] - 1)
-    code = (
-        part_of_code
-        + n.get_code(include_prefix=False)
-        + "".join(n.get_code() for n in nodes[1:])
-    )
+    code = (part_of_code + n.get_code(include_prefix=False) +
+            "".join(n.get_code() for n in nodes[1:]))
     return prefix, code
 
 
@@ -162,7 +156,8 @@ def _split_prefix_at(leaf, until_line):
     # second means the second returned part
     second_line_count = leaf.start_pos[0] - until_line
     lines = split_lines(leaf.prefix, keepends=True)
-    return "".join(lines[:-second_line_count]), "".join(lines[-second_line_count:])
+    return "".join(lines[:-second_line_count]), "".join(
+        lines[-second_line_count:])
 
 
 def _get_indentation(node):
@@ -208,23 +203,23 @@ def _remove_unwanted_expression_nodes(parent_node, pos, until_pos):
                     else:
                         break
                 break
-        nodes = nodes[start_index : end_index + 1]
+        nodes = nodes[start_index:end_index + 1]
         if not is_suite_part:
-            nodes[0:1] = _remove_unwanted_expression_nodes(nodes[0], pos, until_pos)
-            nodes[-1:] = _remove_unwanted_expression_nodes(nodes[-1], pos, until_pos)
+            nodes[0:1] = _remove_unwanted_expression_nodes(
+                nodes[0], pos, until_pos)
+            nodes[-1:] = _remove_unwanted_expression_nodes(
+                nodes[-1], pos, until_pos)
         return nodes
     return [parent_node]
 
 
 def _is_not_extractable_syntax(node):
-    return (
-        node.type == "operator"
-        or node.type == "keyword"
-        and node.value not in ("None", "True", "False")
-    )
+    return (node.type == "operator" or node.type == "keyword"
+            and node.value not in ("None", "True", "False"))
 
 
-def extract_function(inference_state, path, module_context, name, pos, until_pos):
+def extract_function(inference_state, path, module_context, name, pos,
+                     until_pos):
     nodes = _find_nodes(module_context.tree_node, pos, until_pos)
     assert len(nodes)
 
@@ -232,8 +227,7 @@ def extract_function(inference_state, path, module_context, name, pos, until_pos
     context = module_context.create_context(nodes[0])
     is_bound_method = context.is_bound_method()
     params, return_variables = list(
-        _find_inputs_and_outputs(module_context, context, nodes)
-    )
+        _find_inputs_and_outputs(module_context, context, nodes))
 
     # Find variables
     # Is a class method / method
@@ -252,16 +246,11 @@ def extract_function(inference_state, path, module_context, name, pos, until_pos
             # Find the actually used variables (of the defined ones). If none are
             # used (e.g. if the range covers the whole function), return the last
             # defined variable.
-            return_variables = (
-                list(
-                    _find_needed_output_variables(
-                        context, nodes[0].parent, nodes[-1].end_pos, return_variables
-                    )
-                )
-                or [return_variables[-1]]
-                if return_variables
-                else []
-            )
+            return_variables = (list(
+                _find_needed_output_variables(
+                    context, nodes[0].parent, nodes[-1].end_pos,
+                    return_variables)) or [return_variables[-1]]
+                                if return_variables else [])
 
         remaining_prefix, code_block = _suite_nodes_to_string(nodes, pos)
         after_leaf = nodes[-1].get_next_leaf()
@@ -274,7 +263,8 @@ def extract_function(inference_state, path, module_context, name, pos, until_pos
             code_block += "return " + output_var_str + "\n"
 
     # Check if we have to raise RefactoringError
-    _check_for_non_extractables(nodes[:-1] if has_ending_return_stmt else nodes)
+    _check_for_non_extractables(
+        nodes[:-1] if has_ending_return_stmt else nodes)
 
     decorator = ""
     self_param = None
@@ -309,9 +299,8 @@ def extract_function(inference_state, path, module_context, name, pos, until_pos
         else:
             replacement = output_var_str + " = " + function_call + "\n"
 
-    replacement_dct = _replace(
-        nodes, replacement, function_code, pos, insert_before_leaf, remaining_prefix
-    )
+    replacement_dct = _replace(nodes, replacement, function_code, pos,
+                               insert_before_leaf, remaining_prefix)
     if not is_expression:
         replacement_dct[after_leaf] = second + after_leaf.value
     file_to_node_changes = {path: replacement_dct}
@@ -357,8 +346,7 @@ def _find_inputs_and_outputs(module_context, context, nodes):
             if name.value not in inputs:
                 name_definitions = context.goto(name, name.start_pos)
                 if not name_definitions or _is_name_input(
-                    module_context, name_definitions, first, last
-                ):
+                        module_context, name_definitions, first, last):
                     inputs.append(name.value)
 
     # Check if outputs are really needed:
@@ -390,7 +378,8 @@ def _get_code_insertion_node(node, is_bound_method):
     return node
 
 
-def _find_needed_output_variables(context, search_node, at_least_pos, return_variables):
+def _find_needed_output_variables(context, search_node, at_least_pos,
+                                  return_variables):
     """
     Searches everything after at_least_pos in a node and checks if any of the
     return_variables are used in there and returns those.

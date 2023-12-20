@@ -1,7 +1,0 @@
-#!/usr/bin/bash
-source ~/SmartCode/smartenv/bin/activate
-cd ~/SmartCode/build/builder
-python setup.py build
-cd build/exe.linux-x86_64-3.8
-./app
-cd ~/SmartCode

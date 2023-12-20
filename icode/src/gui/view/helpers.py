@@ -14,6 +14,7 @@ from .menus import IndentSizeMenu
 
 
 class ToolBar(QToolBar):
+
     def __init__(self, parent) -> None:
         super().__init__(parent=parent)
         self.setObjectName("tool-bar")
@@ -28,7 +29,8 @@ class ToolBar(QToolBar):
         self.icons = getfn.get_smartcode_icons("toolbar")
 
         self.spacing = QWidget(self)
-        self.spacing.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.spacing.setSizePolicy(QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
 
         self.explorer = QAction(self.icons.get_icon("explorer"), "", self)
         self.explorer.setCheckable(True)
@@ -82,6 +84,7 @@ class ToolBar(QToolBar):
 
 
 class StatusBar(QStatusBar):
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -111,7 +114,8 @@ class StatusBar(QStatusBar):
         self.indentation = QPushButton(self.indentation_box)
         self.indentation_size = QPushButton(self.indentation_box)
         self.indentation_size.setMenu(self.indent_size_menu)
-        self.indentation_size.clicked.connect(lambda: self.indentation_size.showMenu())
+        self.indentation_size.clicked.connect(
+            lambda: self.indentation_size.showMenu())
         self.indentation_box.set_widget_primary(self.indentation)
         self.indentation_box.set_widget_secondary(self.indentation_size)
 

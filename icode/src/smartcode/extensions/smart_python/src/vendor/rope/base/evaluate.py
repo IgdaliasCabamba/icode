@@ -6,7 +6,6 @@ import rope.base.pyobjects
 from rope.base import ast, astutils, exceptions, pyobjects, arguments, worder
 from rope.base.utils import pycompat
 
-
 BadIdentifierError = exceptions.BadIdentifierError
 
 
@@ -44,38 +43,34 @@ def eval_str2(holding_scope, name):
         # parenthesizing for handling cases like 'a_var.\nattr'
         node = ast.parse("(%s)" % name)
     except SyntaxError:
-        raise BadIdentifierError("Not a resolvable python identifier selected.")
+        raise BadIdentifierError(
+            "Not a resolvable python identifier selected.")
     return eval_node2(holding_scope, node)
 
 
 class ScopeNameFinder(object):
+
     def __init__(self, pymodule):
         self.module_scope = pymodule.get_scope()
         self.lines = pymodule.lines
         self.worder = worder.Worder(pymodule.source_code, True)
 
     def _is_defined_in_class_body(self, holding_scope, offset, lineno):
-        if (
-            lineno == holding_scope.get_start()
-            and holding_scope.parent is not None
-            and holding_scope.parent.get_kind() == "Class"
-            and self.worder.is_a_class_or_function_name_in_header(offset)
-        ):
+        if (lineno == holding_scope.get_start()
+                and holding_scope.parent is not None
+                and holding_scope.parent.get_kind() == "Class"
+                and self.worder.is_a_class_or_function_name_in_header(offset)):
             return True
-        if (
-            lineno != holding_scope.get_start()
-            and holding_scope.get_kind() == "Class"
-            and self.worder.is_name_assigned_in_class_body(offset)
-        ):
+        if (lineno != holding_scope.get_start()
+                and holding_scope.get_kind() == "Class"
+                and self.worder.is_name_assigned_in_class_body(offset)):
             return True
         return False
 
     def _is_function_name_in_function_header(self, scope, offset, lineno):
-        if (
-            scope.get_start() <= lineno <= scope.get_body_start()
-            and scope.get_kind() == "Function"
-            and self.worder.is_a_class_or_function_name_in_header(offset)
-        ):
+        if (scope.get_start() <= lineno <= scope.get_body_start()
+                and scope.get_kind() == "Function"
+                and self.worder.is_a_class_or_function_name_in_header(offset)):
             return True
         return False
 
@@ -90,7 +85,8 @@ class ScopeNameFinder(object):
             keyword_name = self.worder.get_word_at(offset)
             pyobject = self.get_enclosing_function(offset)
             if isinstance(pyobject, pyobjects.PyFunction):
-                return (None, pyobject.get_parameters().get(keyword_name, None))
+                return (None,
+                        pyobject.get_parameters().get(keyword_name, None))
         # class body
         if self._is_defined_in_class_body(holding_scope, offset, lineno):
             class_scope = holding_scope
@@ -102,13 +98,14 @@ class ScopeNameFinder(object):
             except rope.base.exceptions.AttributeNotFoundError:
                 return (None, None)
         # function header
-        if self._is_function_name_in_function_header(holding_scope, offset, lineno):
+        if self._is_function_name_in_function_header(holding_scope, offset,
+                                                     lineno):
             name = self.worder.get_primary_at(offset).strip()
             return (None, holding_scope.parent[name])
         # module in a from statement or an imported name that is aliased
         if self.worder.is_from_statement_module(
-            offset
-        ) or self.worder.is_import_statement_aliased_module(offset):
+                offset) or self.worder.is_import_statement_aliased_module(
+                    offset):
             module = self.worder.get_primary_at(offset)
             module_pyname = self._find_module(module)
             return (None, module_pyname)
@@ -128,9 +125,8 @@ class ScopeNameFinder(object):
             pyobject = function_pyname.get_object()
             if isinstance(pyobject, pyobjects.AbstractFunction):
                 return pyobject
-            elif (
-                isinstance(pyobject, pyobjects.AbstractClass) and "__init__" in pyobject
-            ):
+            elif (isinstance(pyobject, pyobjects.AbstractClass)
+                  and "__init__" in pyobject):
                 return pyobject["__init__"].get_object()
             elif "__call__" in pyobject:
                 return pyobject["__call__"].get_object()
@@ -140,12 +136,12 @@ class ScopeNameFinder(object):
         dots = 0
         while module_name[dots] == ".":
             dots += 1
-        return rope.base.pynames.ImportedModule(
-            self.module_scope.pyobject, module_name[dots:], dots
-        )
+        return rope.base.pynames.ImportedModule(self.module_scope.pyobject,
+                                                module_name[dots:], dots)
 
 
 class StatementEvaluator(object):
+
     def __init__(self, scope):
         self.scope = scope
         self.result = None
@@ -171,7 +167,8 @@ class StatementEvaluator(object):
             return
 
         def _get_returned(pyobject):
-            args = arguments.create_arguments(primary, pyobject, node, self.scope)
+            args = arguments.create_arguments(primary, pyobject, node,
+                                              self.scope)
             return pyobject.get_returned_object(args)
 
         if isinstance(pyobject, rope.base.pyobjects.AbstractClass):
@@ -191,13 +188,11 @@ class StatementEvaluator(object):
             pyfunction = pyobject["__call__"].get_object()
         if pyfunction is not None:
             self.result = rope.base.pynames.UnboundName(
-                pyobject=_get_returned(pyfunction)
-            )
+                pyobject=_get_returned(pyfunction))
 
     def _Str(self, node):
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.get_str()
-        )
+            pyobject=rope.base.builtins.get_str())
 
     def _Num(self, node):
         type_name = type(node.n).__name__
@@ -213,12 +208,12 @@ class StatementEvaluator(object):
 
     def _get_builtin_name(self, type_name):
         pytype = rope.base.builtins.builtins[type_name].get_object()
-        return rope.base.pynames.UnboundName(rope.base.pyobjects.PyObject(pytype))
+        return rope.base.pynames.UnboundName(
+            rope.base.pyobjects.PyObject(pytype))
 
     def _BinOp(self, node):
         self.result = rope.base.pynames.UnboundName(
-            self._get_object_for_node(node.left)
-        )
+            self._get_object_for_node(node.left))
 
     def _BoolOp(self, node):
         pyobject = self._get_object_for_node(node.values[0])
@@ -231,8 +226,7 @@ class StatementEvaluator(object):
 
     def _UnaryOp(self, node):
         self.result = rope.base.pynames.UnboundName(
-            self._get_object_for_node(node.operand)
-        )
+            self._get_object_for_node(node.operand))
 
     def _Compare(self, node):
         self.result = self._get_builtin_name("bool")
@@ -242,35 +236,31 @@ class StatementEvaluator(object):
         values = None
         if node.keys and node.keys[0]:
             keys, values = next(
-                iter(filter(itemgetter(0), zip(node.keys, node.values))), (None, None)
-            )
+                iter(filter(itemgetter(0), zip(node.keys, node.values))),
+                (None, None))
             if keys:
                 keys = self._get_object_for_node(keys)
             if values:
                 values = self._get_object_for_node(values)
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.get_dict(keys, values)
-        )
+            pyobject=rope.base.builtins.get_dict(keys, values))
 
     def _List(self, node):
         holding = None
         if node.elts:
             holding = self._get_object_for_node(node.elts[0])
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.get_list(holding)
-        )
+            pyobject=rope.base.builtins.get_list(holding))
 
     def _ListComp(self, node):
         pyobject = self._what_does_comprehension_hold(node)
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.get_list(pyobject)
-        )
+            pyobject=rope.base.builtins.get_list(pyobject))
 
     def _GeneratorExp(self, node):
         pyobject = self._what_does_comprehension_hold(node)
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.get_iterator(pyobject)
-        )
+            pyobject=rope.base.builtins.get_iterator(pyobject))
 
     def _what_does_comprehension_hold(self, node):
         scope = self._make_comprehension_scope(node)
@@ -282,9 +272,8 @@ class StatementEvaluator(object):
         module = scope.pyobject.get_module()
         names = {}
         for comp in node.generators:
-            new_names = _get_evaluated_names(
-                comp.target, comp.iter, module, ".__iter__().next()", node.lineno
-            )
+            new_names = _get_evaluated_names(comp.target, comp.iter, module,
+                                             ".__iter__().next()", node.lineno)
             names.update(new_names)
         return rope.base.pyscopes.TemporaryScope(scope.pycore, scope, names)
 
@@ -297,8 +286,7 @@ class StatementEvaluator(object):
         else:
             objects.append(self._get_object_for_node(node.elts[0]))
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.get_tuple(*objects)
-        )
+            pyobject=rope.base.builtins.get_tuple(*objects))
 
     def _get_object_for_node(self, stmt):
         pyname = eval_node(self.scope, stmt)
@@ -333,26 +321,26 @@ class StatementEvaluator(object):
             return
         if function_name in pyobject:
             called = pyobject[function_name].get_object()
-            if not called or not isinstance(called, pyobjects.AbstractFunction):
+            if not called or not isinstance(called,
+                                            pyobjects.AbstractFunction):
                 return
             args = [node]
             if other_args:
                 args += other_args
             arguments_ = arguments.Arguments(args, self.scope)
             self.result = rope.base.pynames.UnboundName(
-                pyobject=called.get_returned_object(arguments_)
-            )
+                pyobject=called.get_returned_object(arguments_))
 
     def _Lambda(self, node):
         self.result = rope.base.pynames.UnboundName(
-            pyobject=rope.base.builtins.Lambda(node, self.scope)
-        )
+            pyobject=rope.base.builtins.Lambda(node, self.scope))
 
 
 def _get_evaluated_names(targets, assigned, module, evaluation, lineno):
     result = {}
     for name, levels in astutils.get_name_levels(targets):
-        assignment = rope.base.pynames.AssignmentValue(assigned, levels, evaluation)
+        assignment = rope.base.pynames.AssignmentValue(assigned, levels,
+                                                       evaluation)
         # XXX: this module should not access `rope.base.pynamesdef`!
         pyname = rope.base.pynamesdef.AssignedName(lineno, module)
         pyname.assignments.append(assignment)

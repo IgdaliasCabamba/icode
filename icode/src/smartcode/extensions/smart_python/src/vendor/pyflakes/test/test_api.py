@@ -19,7 +19,7 @@ from pyflakes.api import (
 )
 from pyflakes.test.harness import TestCase, skipIf
 
-if sys.version_info < (3,):
+if sys.version_info < (3, ):
     from cStringIO import StringIO
 else:
     from io import StringIO
@@ -63,7 +63,6 @@ class Node(object):
 
 
 class SysStreamCapturing(object):
-
     """
     Context manager capturing sys.stdin, sys.stdout and sys.stderr.
 
@@ -185,9 +184,8 @@ class TestIterSourceCode(TestCase):
         os.mkdir(os.path.join(self.tempdir, "bar"))
         bpath = self.makeEmptyFile("bar", "b.py")
         cpath = self.makeEmptyFile("c.py")
-        self.assertEqual(
-            sorted(iterSourceCode([self.tempdir])), sorted([apath, bpath, cpath])
-        )
+        self.assertEqual(sorted(iterSourceCode([self.tempdir])),
+                         sorted([apath, bpath, cpath]))
 
     def test_shebang(self):
         """
@@ -242,19 +240,17 @@ class TestIterSourceCode(TestCase):
 
         self.assertEqual(
             sorted(iterSourceCode([self.tempdir])),
-            sorted(
-                [
-                    python,
-                    python2,
-                    python3,
-                    pythonw,
-                    python3args,
-                    python2u,
-                    python3d,
-                    python38m,
-                    python27,
-                ]
-            ),
+            sorted([
+                python,
+                python2,
+                python3,
+                pythonw,
+                python3args,
+                python2u,
+                python3d,
+                python38m,
+                python27,
+            ]),
         )
 
     def test_multipleDirectories(self):
@@ -268,9 +264,8 @@ class TestIterSourceCode(TestCase):
         apath = self.makeEmptyFile("foo", "a.py")
         os.mkdir(barpath)
         bpath = self.makeEmptyFile("bar", "b.py")
-        self.assertEqual(
-            sorted(iterSourceCode([foopath, barpath])), sorted([apath, bpath])
-        )
+        self.assertEqual(sorted(iterSourceCode([foopath, barpath])),
+                         sorted([apath, bpath]))
 
     def test_explicitFiles(self):
         """
@@ -303,7 +298,9 @@ class TestReporter(TestCase):
             "bad line of source",
         )
         self.assertEqual(
-            ("foo.py:3:8: a problem\n" "bad line of source\n" "       ^\n"),
+            ("foo.py:3:8: a problem\n"
+             "bad line of source\n"
+             "       ^\n"),
             err.getvalue(),
         )
 
@@ -314,10 +311,10 @@ class TestReporter(TestCase):
         """
         err = StringIO()
         reporter = Reporter(None, err)
-        reporter.syntaxError("foo.py", "a problem", 3, None, "bad line of source")
-        self.assertEqual(
-            ("foo.py:3: a problem\n" "bad line of source\n"), err.getvalue()
-        )
+        reporter.syntaxError("foo.py", "a problem", 3, None,
+                             "bad line of source")
+        self.assertEqual(("foo.py:3: a problem\n"
+                          "bad line of source\n"), err.getvalue())
 
     def test_multiLineSyntaxError(self):
         """
@@ -331,18 +328,12 @@ class TestReporter(TestCase):
             "more bad lines of source",
         ]
         reporter = Reporter(None, err)
-        reporter.syntaxError(
-            "foo.py", "a problem", 3, len(lines[0]) + 7, "\n".join(lines)
-        )
+        reporter.syntaxError("foo.py", "a problem", 3,
+                             len(lines[0]) + 7, "\n".join(lines))
         column = 25 if sys.version_info >= (3, 8) else 7
         self.assertEqual(
-            (
-                "foo.py:3:%d: a problem\n" % column
-                + lines[-1]
-                + "\n"
-                + " " * (column - 1)
-                + "^\n"
-            ),
+            ("foo.py:3:%d: a problem\n" % column + lines[-1] + "\n" + " " *
+             (column - 1) + "^\n"),
             err.getvalue(),
         )
 
@@ -364,7 +355,7 @@ class TestReporter(TestCase):
         reporter = Reporter(out, None)
         message = UnusedImport("foo.py", Node(42), "bar")
         reporter.flake(message)
-        self.assertEqual(out.getvalue(), "%s\n" % (message,))
+        self.assertEqual(out.getvalue(), "%s\n" % (message, ))
 
 
 class CheckTests(TestCase):
@@ -396,7 +387,8 @@ class CheckTests(TestCase):
         """
         err = StringIO()
         count = withStderrTo(err, checkPath, path)
-        self.assertEqual((count, err.getvalue()), (len(errorList), "".join(errorList)))
+        self.assertEqual((count, err.getvalue()),
+                         (len(errorList), "".join(errorList)))
 
     def getErrors(self, path):
         """
@@ -433,8 +425,8 @@ class CheckTests(TestCase):
         count, errors = self.getErrors("extremo")
         self.assertEqual(count, 1)
         self.assertEqual(
-            errors, [("unexpectedError", "extremo", "No such file or directory")]
-        )
+            errors,
+            [("unexpectedError", "extremo", "No such file or directory")])
 
     def test_multilineSyntaxError(self):
         """
@@ -490,8 +482,7 @@ def baz():
 %s:8:%d: %s
     '''quux'''
 %s^
-"""
-                    % (sourcePath, column, message, " " * (column - 1))
+""" % (sourcePath, column, message, " " * (column - 1))
                 ],
             )
 
@@ -517,8 +508,7 @@ def baz():
 
             spaces = " " * (column - 1)
             expected = "{}:1:{}: {}\ndef foo(\n{}^\n".format(
-                sourcePath, column, msg, spaces
-            )
+                sourcePath, column, msg, spaces)
 
             self.assertHasErrors(sourcePath, [expected])
 
@@ -538,8 +528,7 @@ def baz():
 %s:2:%s: invalid syntax
 \tfoo =
 %s
-"""
-                    % (sourcePath, column, last_line)
+""" % (sourcePath, column, last_line)
                 ],
             )
 
@@ -575,8 +564,7 @@ def foo(bar=baz, bax):
                     """\
 %s:1:%s non-default argument follows default argument
 def foo(bar=baz, bax):
-%s"""
-                    % (sourcePath, columnstr, last_line)
+%s""" % (sourcePath, columnstr, last_line)
                 ],
             )
 
@@ -615,8 +603,7 @@ foo(bar=baz, bax)
                     """\
 %s:1:%s %s
 foo(bar=baz, bax)
-%s"""
-                    % (sourcePath, columnstr, message, last_line)
+%s""" % (sourcePath, columnstr, message, last_line)
                 ],
             )
 
@@ -627,8 +614,9 @@ foo(bar=baz, bax)
         ver = sys.version_info
         # ValueError: invalid \x escape
         with self.makeTempFile(r"foo = '\xyz'") as sourcePath:
-            if ver < (3,):
-                decoding_error = "%s: problem decoding source\n" % (sourcePath,)
+            if ver < (3, ):
+                decoding_error = "%s: problem decoding source\n" % (
+                    sourcePath, )
             else:
                 position_end = 1
                 if PYPY:
@@ -666,14 +654,14 @@ foo = '\\xyz'
         error.
         """
         if os.getuid() == 0:
-            self.skipTest("root user can access all files regardless of " "permissions")
+            self.skipTest("root user can access all files regardless of "
+                          "permissions")
         with self.makeTempFile("") as sourcePath:
             os.chmod(sourcePath, 0)
             count, errors = self.getErrors(sourcePath)
             self.assertEqual(count, 1)
             self.assertEqual(
-                errors, [("unexpectedError", sourcePath, "Permission denied")]
-            )
+                errors, [("unexpectedError", sourcePath, "Permission denied")])
 
     def test_pyflakesWarning(self):
         """
@@ -684,21 +672,18 @@ foo = '\\xyz'
             count, errors = self.getErrors(sourcePath)
             self.assertEqual(count, 1)
             self.assertEqual(
-                errors, [("flake", str(UnusedImport(sourcePath, Node(1), "foo")))]
-            )
+                errors,
+                [("flake", str(UnusedImport(sourcePath, Node(1), "foo")))])
 
     def test_encodedFileUTF8(self):
         """
         If source file declares the correct encoding, no error is reported.
         """
         SNOWMAN = unichr(0x2603)
-        source = (
-            """\
+        source = ("""\
 # coding: utf-8
 x = "%s"
-"""
-            % SNOWMAN
-        ).encode("utf-8")
+""" % SNOWMAN).encode("utf-8")
         with self.makeTempFile(source) as sourcePath:
             self.assertHasErrors(sourcePath, [])
 
@@ -715,19 +700,14 @@ x = "%s"
         reported on stderr.
         """
         SNOWMAN = unichr(0x2603)
-        source = (
-            """\
+        source = ("""\
 # coding: ascii
 x = "%s"
-"""
-            % SNOWMAN
-        ).encode("utf-8")
+""" % SNOWMAN).encode("utf-8")
         with self.makeTempFile(source) as sourcePath:
-            if PYPY and sys.version_info < (3,):
-                message = (
-                    "'ascii' codec can't decode byte 0xe2 "
-                    "in position 21: ordinal not in range(128)"
-                )
+            if PYPY and sys.version_info < (3, ):
+                message = ("'ascii' codec can't decode byte 0xe2 "
+                           "in position 21: ordinal not in range(128)")
                 result = """\
 %s:0:0: %s
 x = "\xe2\x98\x83"
@@ -738,7 +718,7 @@ x = "\xe2\x98\x83"
 
             else:
                 message = "problem decoding source"
-                result = "%s: problem decoding source\n" % (sourcePath,)
+                result = "%s: problem decoding source\n" % (sourcePath, )
 
             self.assertHasErrors(sourcePath, [result])
 
@@ -748,17 +728,13 @@ x = "\xe2\x98\x83"
         reported on stderr.
         """
         SNOWMAN = unichr(0x2603)
-        source = (
-            """\
+        source = ("""\
 # coding: ascii
 x = "%s"
-"""
-            % SNOWMAN
-        ).encode("utf-16")
+""" % SNOWMAN).encode("utf-16")
         with self.makeTempFile(source) as sourcePath:
             self.assertHasErrors(
-                sourcePath, ["%s: problem decoding source\n" % (sourcePath,)]
-            )
+                sourcePath, ["%s: problem decoding source\n" % (sourcePath, )])
 
     def test_checkRecursive(self):
         """
@@ -780,12 +756,10 @@ x = "%s"
             self.assertEqual(warnings, 2)
             self.assertEqual(
                 sorted(log),
-                sorted(
-                    [
-                        ("flake", str(UnusedImport(file1, Node(1), "baz"))),
-                        ("flake", str(UnusedImport(file2, Node(1), "contraband"))),
-                    ]
-                ),
+                sorted([
+                    ("flake", str(UnusedImport(file1, Node(1), "baz"))),
+                    ("flake", str(UnusedImport(file2, Node(1), "contraband"))),
+                ]),
             )
         finally:
             shutil.rmtree(tempdir)
@@ -835,12 +809,13 @@ class IntegrationTests(TestCase):
             )
             (stdout, stderr) = p.communicate(stdin.encode("ascii"))
         else:
-            p = subprocess.Popen(
-                command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
+            p = subprocess.Popen(command,
+                                 env=env,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE)
             (stdout, stderr) = p.communicate()
         rv = p.wait()
-        if sys.version_info >= (3,):
+        if sys.version_info >= (3, ):
             stdout = stdout.decode("utf-8")
             stderr = stderr.decode("utf-8")
         return (stdout, stderr, rv)
@@ -872,7 +847,8 @@ class IntegrationTests(TestCase):
         printed to stderr.
         """
         d = self.runPyflakes([self.tempfilepath])
-        error_msg = "%s: No such file or directory%s" % (self.tempfilepath, os.linesep)
+        error_msg = "%s: No such file or directory%s" % (self.tempfilepath,
+                                                         os.linesep)
         self.assertEqual(d, ("", error_msg, 1))
 
     def test_errors_syntax(self):
@@ -885,8 +861,8 @@ class IntegrationTests(TestCase):
             fd.write("import".encode("ascii"))
         d = self.runPyflakes([self.tempfilepath])
         error_msg = "{0}:1:{2}: invalid syntax{1}import{1}     {3}^{1}".format(
-            self.tempfilepath, os.linesep, 6 if PYPY else 7, "" if PYPY else " "
-        )
+            self.tempfilepath, os.linesep, 6 if PYPY else 7,
+            "" if PYPY else " ")
         self.assertEqual(d, ("", error_msg, 1))
 
     def test_readFromStdin(self):

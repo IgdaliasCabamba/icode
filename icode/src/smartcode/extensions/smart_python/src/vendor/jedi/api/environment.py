@@ -34,9 +34,11 @@ class InvalidPythonEnvironment(Exception):
 
 
 class _BaseEnvironment:
+
     @memoize_method
     def get_grammar(self):
-        version_string = "%s.%s" % (self.version_info.major, self.version_info.minor)
+        version_string = "%s.%s" % (self.version_info.major,
+                                    self.version_info.minor)
         return parso.load_grammar(version=version_string)
 
     @property
@@ -76,15 +78,13 @@ class Environment(_BaseEnvironment):
             return self._subprocess
 
         try:
-            self._subprocess = CompiledSubprocess(
-                self._start_executable, env_vars=self._env_vars
-            )
+            self._subprocess = CompiledSubprocess(self._start_executable,
+                                                  env_vars=self._env_vars)
             info = self._subprocess._send(None, _get_info)
         except Exception as exc:
             raise InvalidPythonEnvironment(
-                "Could not get version information for %r: %r"
-                % (self._start_executable, exc)
-            )
+                "Could not get version information for %r: %r" %
+                (self._start_executable, exc))
 
         # Since it could change and might not be the same(?) as the one given,
         # set it here.
@@ -108,7 +108,8 @@ class Environment(_BaseEnvironment):
         return "<%s: %s in %s>" % (self.__class__.__name__, version, self.path)
 
     def get_inference_state_subprocess(self, inference_state):
-        return InferenceStateSubprocess(inference_state, self._get_subprocess())
+        return InferenceStateSubprocess(inference_state,
+                                        self._get_subprocess())
 
     @memoize_method
     def get_sys_path(self):
@@ -127,6 +128,7 @@ class Environment(_BaseEnvironment):
 
 
 class _SameEnvironmentMixin:
+
     def __init__(self):
         self._start_executable = self.executable = sys.executable
         self.path = sys.prefix
@@ -139,6 +141,7 @@ class SameEnvironment(_SameEnvironmentMixin, Environment):
 
 
 class InterpreterEnvironment(_SameEnvironmentMixin, _BaseEnvironment):
+
     def get_inference_state_subprocess(self, inference_state):
         return InferenceStateSameProcess(inference_state)
 
@@ -355,7 +358,8 @@ def get_system_environment(version, *, env_vars=None):
                 return Environment(exe, env_vars=env_vars)
             except InvalidPythonEnvironment:
                 pass
-    raise InvalidPythonEnvironment("Cannot find executable python%s." % version)
+    raise InvalidPythonEnvironment("Cannot find executable python%s." %
+                                   version)
 
 
 def create_environment(path, *, safe=True, env_vars=None):
@@ -369,7 +373,8 @@ def create_environment(path, *, safe=True, env_vars=None):
     if os.path.isfile(path):
         _assert_safe(path, safe)
         return Environment(path, env_vars=env_vars)
-    return Environment(_get_executable_path(path, safe=safe), env_vars=env_vars)
+    return Environment(_get_executable_path(path, safe=safe),
+                       env_vars=env_vars)
 
 
 def _get_executable_path(path, safe=True):
@@ -414,7 +419,8 @@ def _get_executables_from_windows_registry(version):
 
 def _assert_safe(executable_path, safe):
     if safe and not _is_safe(executable_path):
-        raise InvalidPythonEnvironment("The python binary is potentially unsafe.")
+        raise InvalidPythonEnvironment(
+            "The python binary is potentially unsafe.")
 
 
 def _is_safe(executable_path):

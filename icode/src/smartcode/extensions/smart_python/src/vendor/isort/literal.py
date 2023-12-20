@@ -17,7 +17,8 @@ class ISortPrettyPrinter(PrettyPrinter):
         super().__init__(width=config.line_length, compact=True)
 
 
-type_mapping: Dict[str, Tuple[type, Callable[[Any, ISortPrettyPrinter], str]]] = {}
+type_mapping: Dict[str, Tuple[type, Callable[[Any, ISortPrettyPrinter],
+                                             str]]] = {}
 
 
 def assignments(code: str) -> str:
@@ -30,15 +31,14 @@ def assignments(code: str) -> str:
         variable_name, value = line.split(" = ", 1)
         values[variable_name] = value
 
-    return "".join(
-        f"{variable_name} = {values[variable_name]}"
-        for variable_name in sorted(values.keys())
-    )
+    return "".join(f"{variable_name} = {values[variable_name]}"
+                   for variable_name in sorted(values.keys()))
 
 
-def assignment(
-    code: str, sort_type: str, extension: str, config: Config = DEFAULT_CONFIG
-) -> str:
+def assignment(code: str,
+               sort_type: str,
+               extension: str,
+               config: Config = DEFAULT_CONFIG) -> str:
     """Sorts the literal present within the provided code against the provided sort type,
     returning the sorted representation of the source code.
     """
@@ -47,8 +47,7 @@ def assignment(
     if sort_type not in type_mapping:
         raise ValueError(
             "Trying to sort using an undefined sort_type. "
-            f"Defined sort types are {', '.join(type_mapping.keys())}."
-        )
+            f"Defined sort types are {', '.join(type_mapping.keys())}.")
 
     variable_name, literal = code.split(" = ")
     variable_name = variable_name.lstrip()
@@ -64,19 +63,18 @@ def assignment(
     printer = ISortPrettyPrinter(config)
     sorted_value_code = f"{variable_name} = {sort_function(value, printer)}"
     if config.formatting_function:
-        sorted_value_code = config.formatting_function(
-            sorted_value_code, extension, config
-        ).rstrip()
+        sorted_value_code = config.formatting_function(sorted_value_code,
+                                                       extension,
+                                                       config).rstrip()
 
-    sorted_value_code += code[len(code.rstrip()) :]
+    sorted_value_code += code[len(code.rstrip()):]
     return sorted_value_code
 
 
 def register_type(
     name: str, kind: type
-) -> Callable[
-    [Callable[[Any, ISortPrettyPrinter], str]], Callable[[Any, ISortPrettyPrinter], str]
-]:
+) -> Callable[[Callable[[Any, ISortPrettyPrinter], str]], Callable[
+    [Any, ISortPrettyPrinter], str]]:
     """Registers a new literal sort type."""
 
     def wrap(
@@ -90,7 +88,8 @@ def register_type(
 
 @register_type("dict", dict)
 def _dict(value: Dict[Any, Any], printer: ISortPrettyPrinter) -> str:
-    return printer.pformat(dict(sorted(value.items(), key=lambda item: item[1])))  # type: ignore
+    return printer.pformat(
+        dict(sorted(value.items(), key=lambda item: item[1])))  # type: ignore
 
 
 @register_type("list", list)

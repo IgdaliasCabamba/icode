@@ -63,8 +63,8 @@ def _internal_check_array_additions(context, sequence):
 
     def find_additions(context, arglist, add_name):
         params = list(
-            arguments.TreeArguments(context.inference_state, context, arglist).unpack()
-        )
+            arguments.TreeArguments(context.inference_state, context,
+                                    arglist).unpack())
         result = set()
         if add_name in ["insert"]:
             params = params[1:]
@@ -82,18 +82,21 @@ def _internal_check_array_additions(context, sequence):
     )
 
     is_list = sequence.name.string_name == "list"
-    search_names = ["append", "extend", "insert"] if is_list else ["add", "update"]
+    search_names = ["append", "extend", "insert"
+                    ] if is_list else ["add", "update"]
 
     added_types = set()
     for add_name in search_names:
         try:
-            possible_names = module_context.tree_node.get_used_names()[add_name]
+            possible_names = module_context.tree_node.get_used_names(
+            )[add_name]
         except KeyError:
             continue
         else:
             for name in possible_names:
                 value_node = context.tree_node
-                if not (value_node.start_pos < name.start_pos < value_node.end_pos):
+                if not (value_node.start_pos < name.start_pos <
+                        value_node.end_pos):
                     continue
                 trailer = name.parent
                 power = trailer.parent
@@ -103,27 +106,24 @@ def _internal_check_array_additions(context, sequence):
                 except IndexError:
                     continue
                 else:
-                    if (
-                        execution_trailer.type != "trailer"
-                        or execution_trailer.children[0] != "("
-                        or execution_trailer.children[1] == ")"
-                    ):
+                    if (execution_trailer.type != "trailer"
+                            or execution_trailer.children[0] != "("
+                            or execution_trailer.children[1] == ")"):
                         continue
 
                 random_context = context.create_context(name)
 
-                with recursion.execution_allowed(
-                    context.inference_state, power
-                ) as allowed:
+                with recursion.execution_allowed(context.inference_state,
+                                                 power) as allowed:
                     if allowed:
-                        found = infer_call_of_leaf(
-                            random_context, name, cut_own_trailer=True
-                        )
+                        found = infer_call_of_leaf(random_context,
+                                                   name,
+                                                   cut_own_trailer=True)
                         if sequence in found:
                             # The arrays match. Now add the results
                             added_types |= find_additions(
-                                random_context, execution_trailer.children[1], add_name
-                            )
+                                random_context, execution_trailer.children[1],
+                                add_name)
 
     # reset settings
     settings.dynamic_params_for_other_modules = temp_param_add
@@ -155,9 +155,9 @@ class _DynamicArrayAdditions(HelperValueMixin):
         self._arguments = arguments
 
     def py__class__(self):
-        (tuple_,) = self._instance.inference_state.builtins_module.py__getattribute__(
-            "tuple"
-        )
+        (tuple_,
+         ) = self._instance.inference_state.builtins_module.py__getattribute__(
+             "tuple")
         return tuple_
 
     def py__iter__(self, contextualized_node=None):
@@ -173,8 +173,7 @@ class _DynamicArrayAdditions(HelperValueMixin):
 
         if isinstance(arguments, TreeArguments):
             additions = _internal_check_array_additions(
-                arguments.context, self._instance
-            )
+                arguments.context, self._instance)
             yield from additions
 
     def iterate(self, contextualized_node=None, is_async=False):
@@ -182,33 +181,39 @@ class _DynamicArrayAdditions(HelperValueMixin):
 
 
 class _Modification(ValueWrapper):
+
     def __init__(self, wrapped_value, assigned_values, contextualized_key):
         super().__init__(wrapped_value)
         self._assigned_values = assigned_values
         self._contextualized_key = contextualized_key
 
     def py__getitem__(self, *args, **kwargs):
-        return (
-            self._wrapped_value.py__getitem__(*args, **kwargs) | self._assigned_values
-        )
+        return (self._wrapped_value.py__getitem__(*args, **kwargs)
+                | self._assigned_values)
 
     def py__simple_getitem__(self, index):
-        actual = [v.get_safe_value(_sentinel) for v in self._contextualized_key.infer()]
+        actual = [
+            v.get_safe_value(_sentinel)
+            for v in self._contextualized_key.infer()
+        ]
         if index in actual:
             return self._assigned_values
         return self._wrapped_value.py__simple_getitem__(index)
 
 
 class DictModification(_Modification):
+
     def py__iter__(self, contextualized_node=None):
         yield from self._wrapped_value.py__iter__(contextualized_node)
         yield self._contextualized_key
 
     def get_key_values(self):
-        return self._wrapped_value.get_key_values() | self._contextualized_key.infer()
+        return self._wrapped_value.get_key_values(
+        ) | self._contextualized_key.infer()
 
 
 class ListModification(_Modification):
+
     def py__iter__(self, contextualized_node=None):
         yield from self._wrapped_value.py__iter__(contextualized_node)
         yield LazyKnownValues(self._assigned_values)

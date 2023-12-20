@@ -50,7 +50,7 @@ def check(codeString, filename, reporter=None):
                 lines = codeString.splitlines()
                 if len(lines) >= lineno:
                     text = lines[lineno - 1]
-                    if sys.version_info >= (3,) and isinstance(text, bytes):
+                    if sys.version_info >= (3, ) and isinstance(text, bytes):
                         try:
                             text = text.decode("ascii")
                         except UnicodeDecodeError:
@@ -203,9 +203,11 @@ def main(prog=None, args=None):
     _exitOnSignal("SIGPIPE", 1)
 
     parser = argparse.ArgumentParser(
-        prog=prog, description="Check Python source files for errors"
-    )
-    parser.add_argument("-V", "--version", action="version", version=_get_version())
+        prog=prog, description="Check Python source files for errors")
+    parser.add_argument("-V",
+                        "--version",
+                        action="version",
+                        version=_get_version())
     parser.add_argument(
         "path",
         nargs="*",

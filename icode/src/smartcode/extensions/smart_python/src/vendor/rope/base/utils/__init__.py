@@ -42,6 +42,7 @@ def ignore_exception(exception_class):
     """A decorator that ignores `exception_class` exceptions"""
 
     def _decorator(func):
+
         def newfunc(*args, **kwds):
             try:
                 return func(*args, **kwds)
@@ -80,6 +81,7 @@ def cached(size):
 
 
 class _Cached(object):
+
     def __init__(self, func, count):
         self.func = func
         self.cache = []
@@ -139,7 +141,6 @@ def guess_def_lineno(module, node):
     if sys.version_info >= (3, 8) or not hasattr(node, "body"):
         return node.lineno
 
-    possible_def_line = (
-        node.body[0].lineno if is_inline_body() else node.body[0].lineno - 1
-    )
+    possible_def_line = (node.body[0].lineno
+                         if is_inline_body() else node.body[0].lineno - 1)
     return module.logical_lines.logical_line_in(possible_def_line)[0]

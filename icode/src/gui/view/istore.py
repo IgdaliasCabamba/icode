@@ -11,6 +11,7 @@ from smartlibs.qtmd import InputHistory
 
 
 class Installed(QListWidget):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.init_ui()
@@ -21,6 +22,7 @@ class Installed(QListWidget):
 
 
 class Recommended(QListWidget):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.init_ui()
@@ -31,6 +33,7 @@ class Recommended(QListWidget):
 
 
 class ExtensionsUi(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent = parent

@@ -36,6 +36,7 @@ from jedi.plugins import plugin_manager
 
 
 class ModuleCache:
+
     def __init__(self):
         self._name_cache = {}
 
@@ -53,20 +54,18 @@ class ModuleCache:
 def infer_import(context, tree_name):
     module_context = context.get_root_context()
     from_import_name, import_path, level, values = _prepare_infer_import(
-        module_context, tree_name
-    )
+        module_context, tree_name)
     if values:
 
         if from_import_name is not None:
-            values = values.py__getattribute__(
-                from_import_name, name_context=context, analysis_errors=False
-            )
+            values = values.py__getattribute__(from_import_name,
+                                               name_context=context,
+                                               analysis_errors=False)
 
             if not values:
-                path = import_path + (from_import_name,)
-                importer = Importer(
-                    context.inference_state, path, module_context, level
-                )
+                path = import_path + (from_import_name, )
+                importer = Importer(context.inference_state, path,
+                                    module_context, level)
                 values = importer.follow()
     debug.dbg("after import: %s", values)
     return values
@@ -76,24 +75,23 @@ def infer_import(context, tree_name):
 def goto_import(context, tree_name):
     module_context = context.get_root_context()
     from_import_name, import_path, level, values = _prepare_infer_import(
-        module_context, tree_name
-    )
+        module_context, tree_name)
     if not values:
         return []
 
     if from_import_name is not None:
-        names = unite(
-            [
-                c.goto(from_import_name, name_context=context, analysis_errors=False)
-                for c in values
-            ]
-        )
+        names = unite([
+            c.goto(from_import_name,
+                   name_context=context,
+                   analysis_errors=False) for c in values
+        ])
         # Avoid recursion on the same names.
         if names and not any(n.tree_name is tree_name for n in names):
             return names
 
-        path = import_path + (from_import_name,)
-        importer = Importer(context.inference_state, path, module_context, level)
+        path = import_path + (from_import_name, )
+        importer = Importer(context.inference_state, path, module_context,
+                            level)
         values = importer.follow()
     return set(s.name for s in values)
 
@@ -121,7 +119,8 @@ def _prepare_infer_import(module_context, tree_name):
         import_node.level,
     )
 
-    return from_import_name, tuple(import_path), import_node.level, importer.follow()
+    return from_import_name, tuple(
+        import_path), import_node.level, importer.follow()
 
 
 def _add_error(value, name, message):
@@ -159,6 +158,7 @@ def _level_to_base_import_path(project_path, directory, level):
 
 
 class Importer:
+
     def __init__(self, inference_state, import_path, module_context, level=0):
         """
         An implementation similar to ``__import__``. Use `follow`
@@ -194,7 +194,7 @@ class Importer:
                 # Here we basically rewrite the level to 0.
                 base = tuple(base)
                 if level > 1:
-                    base = base[: -level + 1]
+                    base = base[:-level + 1]
                 import_path = base + tuple(import_path)
             else:
                 path = module_context.py__file__()
@@ -226,7 +226,8 @@ class Importer:
                         _add_error(
                             module_context,
                             import_path[0],
-                            message="Attempted relative import beyond top-level package.",
+                            message=
+                            "Attempted relative import beyond top-level package.",
                         )
                 else:
                     import_path = base_import_path + import_path
@@ -235,10 +236,8 @@ class Importer:
     @property
     def _str_import_path(self):
         """Returns the import path as pure strings instead of `Name`."""
-        return tuple(
-            name.value if isinstance(name, tree.Name) else name
-            for name in self.import_path
-        )
+        return tuple(name.value if isinstance(name, tree.Name) else name
+                     for name in self.import_path)
 
     def _sys_path_with_modifications(self, is_completion):
         if self._fixed_sys_path is not None:
@@ -248,12 +247,12 @@ class Importer:
             # For import completions we don't want to see init paths, but for
             # inference we want to show the user as much as possible.
             # See GH #1446.
-            self._inference_state.get_sys_path(add_init_paths=not is_completion)
-            + [
-                str(p)
-                for p in sys_path.check_sys_path_modifications(self._module_context)
-            ]
-        )
+            self._inference_state.get_sys_path(add_init_paths=not is_completion
+                                               ) +
+            [
+                str(p) for p in sys_path.check_sys_path_modifications(
+                    self._module_context)
+            ])
 
     def follow(self):
         if not self.import_path:
@@ -284,7 +283,7 @@ class Importer:
                 # project path to an ancestor of project path.
                 from jedi.inference.value.namespace import ImplicitNamespaceValue
 
-                import_path = (os.path.basename(self._fixed_sys_path[0]),)
+                import_path = (os.path.basename(self._fixed_sys_path[0]), )
                 ns = ImplicitNamespaceValue(
                     self._inference_state,
                     string_names=import_path,
@@ -296,18 +295,19 @@ class Importer:
             return NO_VALUES
 
         # Check caches first
-        from_cache = self._inference_state.stub_module_cache.get(self._str_import_path)
+        from_cache = self._inference_state.stub_module_cache.get(
+            self._str_import_path)
         if from_cache is not None:
             return ValueSet({from_cache})
-        from_cache = self._inference_state.module_cache.get(self._str_import_path)
+        from_cache = self._inference_state.module_cache.get(
+            self._str_import_path)
         if from_cache is not None:
             return from_cache
 
         sys_path = self._sys_path_with_modifications(is_completion=False)
 
-        return import_module_by_names(
-            self._inference_state, self.import_path, sys_path, self._module_context
-        )
+        return import_module_by_names(self._inference_state, self.import_path,
+                                      sys_path, self._module_context)
 
     def _get_module_names(self, search_path=None, in_module=None):
         """
@@ -325,8 +325,7 @@ class Importer:
                 sys_path,
                 module_cls=ImportName if in_module is None else SubModuleName,
                 add_builtin_modules=search_path is None and in_module is None,
-            )
-        )
+            ))
 
     def completion_names(self, inference_state, only_modules=False):
         """
@@ -344,10 +343,11 @@ class Importer:
                 for mod in self._get_module_names():
                     modname = mod.string_name
                     if modname.startswith("flask_"):
-                        extname = modname[len("flask_") :]
+                        extname = modname[len("flask_"):]
                         names.append(ImportName(self._module_context, extname))
                 # Now the old style: ``flaskext.foo``
-                for dir in self._sys_path_with_modifications(is_completion=True):
+                for dir in self._sys_path_with_modifications(
+                        is_completion=True):
                     flaskext = os.path.join(dir, "flaskext")
                     if os.path.isdir(flaskext):
                         names += self._get_module_names([flaskext])
@@ -378,29 +378,27 @@ class Importer:
         return names
 
 
-def import_module_by_names(
-    inference_state, import_names, sys_path=None, module_context=None, prefer_stubs=True
-):
+def import_module_by_names(inference_state,
+                           import_names,
+                           sys_path=None,
+                           module_context=None,
+                           prefer_stubs=True):
     if sys_path is None:
         sys_path = inference_state.get_sys_path()
 
-    str_import_names = tuple(
-        i.value if isinstance(i, tree.Name) else i for i in import_names
-    )
+    str_import_names = tuple(i.value if isinstance(i, tree.Name) else i
+                             for i in import_names)
     value_set = [None]
     for i, name in enumerate(import_names):
-        value_set = ValueSet.from_sets(
-            [
-                import_module(
-                    inference_state,
-                    str_import_names[: i + 1],
-                    parent_module_value,
-                    sys_path,
-                    prefer_stubs=prefer_stubs,
-                )
-                for parent_module_value in value_set
-            ]
-        )
+        value_set = ValueSet.from_sets([
+            import_module(
+                inference_state,
+                str_import_names[:i + 1],
+                parent_module_value,
+                sys_path,
+                prefer_stubs=prefer_stubs,
+            ) for parent_module_value in value_set
+        ])
         if not value_set:
             message = "No module named " + ".".join(str_import_names)
             if module_context is not None:
@@ -413,7 +411,8 @@ def import_module_by_names(
 
 @plugin_manager.decorate()
 @import_module_decorator
-def import_module(inference_state, import_names, parent_module_value, sys_path):
+def import_module(inference_state, import_names, parent_module_value,
+                  sys_path):
     """
     This method is very similar to importlib's `_gcd_import`.
     """
@@ -480,11 +479,15 @@ def import_module(inference_state, import_names, parent_module_value, sys_path):
     if parent_module_value is None:
         debug.dbg("global search_module %s: %s", import_names[-1], module)
     else:
-        debug.dbg("search_module %s in paths %s: %s", module_name, paths, module)
+        debug.dbg("search_module %s in paths %s: %s", module_name, paths,
+                  module)
     return ValueSet([module])
 
 
-def _load_python_module(inference_state, file_io, import_names=None, is_package=False):
+def _load_python_module(inference_state,
+                        file_io,
+                        import_names=None,
+                        is_package=False):
     module_node = inference_state.parse(
         file_io=file_io,
         cache=True,
@@ -499,7 +502,8 @@ def _load_python_module(inference_state, file_io, import_names=None, is_package=
         module_node,
         file_io=file_io,
         string_names=import_names,
-        code_lines=get_cached_code_lines(inference_state.grammar, file_io.path),
+        code_lines=get_cached_code_lines(inference_state.grammar,
+                                         file_io.path),
         is_package=is_package,
     )
 
@@ -514,9 +518,9 @@ def _load_builtin_module(inference_state, import_names=None, sys_path=None):
 
     dotted_name = ".".join(import_names)
     assert dotted_name is not None
-    module = compiled.load_module(
-        inference_state, dotted_name=dotted_name, sys_path=sys_path
-    )
+    module = compiled.load_module(inference_state,
+                                  dotted_name=dotted_name,
+                                  sys_path=sys_path)
     if module is None:
         # The file might raise an ImportError e.g. and therefore not be
         # importable.
@@ -524,7 +528,10 @@ def _load_builtin_module(inference_state, import_names=None, sys_path=None):
     return module
 
 
-def load_module_from_path(inference_state, file_io, import_names=None, is_package=None):
+def load_module_from_path(inference_state,
+                          file_io,
+                          import_names=None,
+                          is_package=None):
     """
     This should pretty much only be used for get_modules_containing_name. It's
     here to ensure that a random path is still properly loaded into the Jedi
@@ -533,7 +540,8 @@ def load_module_from_path(inference_state, file_io, import_names=None, is_packag
     path = Path(file_io.path)
     if import_names is None:
         e_sys_path = inference_state.get_sys_path()
-        import_names, is_package = sys_path.transform_path_to_dotted(e_sys_path, path)
+        import_names, is_package = sys_path.transform_path_to_dotted(
+            e_sys_path, path)
     else:
         assert isinstance(is_package, bool)
 
@@ -548,9 +556,10 @@ def load_module_from_path(inference_state, file_io, import_names=None, is_packag
             python_file_io = folder_io.get_file_io(import_names[-1] + ".py")
 
         try:
-            v = load_module_from_path(
-                inference_state, python_file_io, import_names, is_package=is_package
-            )
+            v = load_module_from_path(inference_state,
+                                      python_file_io,
+                                      import_names,
+                                      is_package=is_package)
             values = ValueSet([v])
         except FileNotFoundError:
             values = NO_VALUES
@@ -576,11 +585,11 @@ def load_module_from_path(inference_state, file_io, import_names=None, is_packag
 
 def load_namespace_from_path(inference_state, folder_io):
     import_names, is_package = sys_path.transform_path_to_dotted(
-        inference_state.get_sys_path(), Path(folder_io.path)
-    )
+        inference_state.get_sys_path(), Path(folder_io.path))
     from jedi.inference.value.namespace import ImplicitNamespaceValue
 
-    return ImplicitNamespaceValue(inference_state, import_names, [folder_io.path])
+    return ImplicitNamespaceValue(inference_state, import_names,
+                                  [folder_io.path])
 
 
 def follow_error_node_imports_if_possible(context, name):
@@ -607,9 +616,8 @@ def follow_error_node_imports_if_possible(context, name):
                 is_import_from=is_import_from,
                 until_node=name,
             )
-            return Importer(
-                context.inference_state, names, context.get_root_context(), level
-            ).follow()
+            return Importer(context.inference_state, names,
+                            context.get_root_context(), level).follow()
     return None
 
 
@@ -626,8 +634,10 @@ def iter_module_names(
     """
     # add builtin module names
     if add_builtin_modules:
-        for name in inference_state.compiled_subprocess.get_builtin_module_names():
+        for name in inference_state.compiled_subprocess.get_builtin_module_names(
+        ):
             yield module_cls(module_context, name)
 
-    for name in inference_state.compiled_subprocess.iter_module_names(search_path):
+    for name in inference_state.compiled_subprocess.iter_module_names(
+            search_path):
         yield module_cls(module_context, name)

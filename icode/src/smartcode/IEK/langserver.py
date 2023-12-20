@@ -31,10 +31,12 @@ def can_connect_to(host: str, port: int) -> bool:
 
 
 class ICenter:
+
     def __init__(self):
         self.__data = {"servers": []}
         self.__used_ports = []
-        self.reactor_thread = threading.Thread(target=self.__run_reactor, daemon=False)
+        self.reactor_thread = threading.Thread(target=self.__run_reactor,
+                                               daemon=False)
         self.reactor_thread.start()
 
     def __run_reactor(self):
@@ -62,10 +64,8 @@ class ICenter:
 
         if port is None or not can_connect_to(host, port):
             for possible_port in range(9000, 65535):
-                if (
-                    can_connect_to(host, possible_port)
-                    and port not in self.__used_ports
-                ):
+                if (can_connect_to(host, possible_port)
+                        and port not in self.__used_ports):
                     port = possible_port
                     self.__used_ports.append(port)
                     # print("Tryning to connect to: ", port)
@@ -129,10 +129,13 @@ class ICenter:
             self.__register(host, mode, name, port, service)
             waitress.serve(call, host=host, port=port)
 
-    def run_new_server(
-        self, call: object, args: dict = {}, daemon: bool = False
-    ) -> object:
-        thread = threading.Thread(target=self.serve, args=(call, args), daemon=daemon)
+    def run_new_server(self,
+                       call: object,
+                       args: dict = {},
+                       daemon: bool = False) -> object:
+        thread = threading.Thread(target=self.serve,
+                                  args=(call, args),
+                                  daemon=daemon)
         thread.start()
         return thread
 

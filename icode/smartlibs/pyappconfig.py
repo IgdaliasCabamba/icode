@@ -3,6 +3,7 @@ from typing import Union
 
 
 class Settings:
+
     def __init__(self, file: str):
         self.self.filename = file
 

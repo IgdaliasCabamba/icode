@@ -26,7 +26,7 @@ class UnusedImport(Message):
 
     def __init__(self, filename, loc, name):
         Message.__init__(self, filename, loc)
-        self.message_args = (name,)
+        self.message_args = (name, )
 
 
 class RedefinedWhileUnused(Message):
@@ -58,7 +58,7 @@ class ImportStarNotPermitted(Message):
 
     def __init__(self, filename, loc, modname):
         Message.__init__(self, filename, loc)
-        self.message_args = (modname,)
+        self.message_args = (modname, )
 
 
 class ImportStarUsed(Message):
@@ -66,7 +66,7 @@ class ImportStarUsed(Message):
 
     def __init__(self, filename, loc, modname):
         Message.__init__(self, filename, loc)
-        self.message_args = (modname,)
+        self.message_args = (modname, )
 
 
 class ImportStarUsage(Message):
@@ -82,7 +82,7 @@ class UndefinedName(Message):
 
     def __init__(self, filename, loc, name):
         Message.__init__(self, filename, loc)
-        self.message_args = (name,)
+        self.message_args = (name, )
 
 
 class DoctestSyntaxError(Message):
@@ -100,7 +100,7 @@ class UndefinedExport(Message):
 
     def __init__(self, filename, loc, name):
         Message.__init__(self, filename, loc)
-        self.message_args = (name,)
+        self.message_args = (name, )
 
 
 class UndefinedLocal(Message):
@@ -124,7 +124,7 @@ class DuplicateArgument(Message):
 
     def __init__(self, filename, loc, name):
         Message.__init__(self, filename, loc)
-        self.message_args = (name,)
+        self.message_args = (name, )
 
 
 class MultiValueRepeatedKeyLiteral(Message):
@@ -132,7 +132,7 @@ class MultiValueRepeatedKeyLiteral(Message):
 
     def __init__(self, filename, loc, key):
         Message.__init__(self, filename, loc)
-        self.message_args = (key,)
+        self.message_args = (key, )
 
 
 class MultiValueRepeatedKeyVariable(Message):
@@ -140,7 +140,7 @@ class MultiValueRepeatedKeyVariable(Message):
 
     def __init__(self, filename, loc, key):
         Message.__init__(self, filename, loc)
-        self.message_args = (key,)
+        self.message_args = (key, )
 
 
 class LateFutureImport(Message):
@@ -158,7 +158,7 @@ class FutureFeatureNotDefined(Message):
 
     def __init__(self, filename, loc, name):
         Message.__init__(self, filename, loc)
-        self.message_args = (name,)
+        self.message_args = (name, )
 
 
 class UnusedVariable(Message):
@@ -171,7 +171,7 @@ class UnusedVariable(Message):
 
     def __init__(self, filename, loc, names):
         Message.__init__(self, filename, loc)
-        self.message_args = (names,)
+        self.message_args = (names, )
 
 
 class ReturnWithArgsInsideGenerator(Message):
@@ -269,7 +269,7 @@ class ForwardAnnotationSyntaxError(Message):
 
     def __init__(self, filename, loc, annotation):
         Message.__init__(self, filename, loc)
-        self.message_args = (annotation,)
+        self.message_args = (annotation, )
 
 
 class CommentAnnotationSyntaxError(Message):
@@ -277,7 +277,7 @@ class CommentAnnotationSyntaxError(Message):
 
     def __init__(self, filename, loc, annotation):
         Message.__init__(self, filename, loc)
-        self.message_args = (annotation,)
+        self.message_args = (annotation, )
 
 
 class RaiseNotImplemented(Message):
@@ -301,7 +301,7 @@ class StringDotFormatExtraPositionalArguments(Message):
 
     def __init__(self, filename, loc, extra_positions):
         Message.__init__(self, filename, loc)
-        self.message_args = (extra_positions,)
+        self.message_args = (extra_positions, )
 
 
 class StringDotFormatExtraNamedArguments(Message):
@@ -309,7 +309,7 @@ class StringDotFormatExtraNamedArguments(Message):
 
     def __init__(self, filename, loc, extra_keywords):
         Message.__init__(self, filename, loc)
-        self.message_args = (extra_keywords,)
+        self.message_args = (extra_keywords, )
 
 
 class StringDotFormatMissingArgument(Message):
@@ -317,7 +317,7 @@ class StringDotFormatMissingArgument(Message):
 
     def __init__(self, filename, loc, missing_arguments):
         Message.__init__(self, filename, loc)
-        self.message_args = (missing_arguments,)
+        self.message_args = (missing_arguments, )
 
 
 class StringDotFormatMixingAutomatic(Message):
@@ -329,7 +329,7 @@ class StringDotFormatInvalidFormat(Message):
 
     def __init__(self, filename, loc, error):
         Message.__init__(self, filename, loc)
-        self.message_args = (error,)
+        self.message_args = (error, )
 
 
 class PercentFormatInvalidFormat(Message):
@@ -337,7 +337,7 @@ class PercentFormatInvalidFormat(Message):
 
     def __init__(self, filename, loc, error):
         Message.__init__(self, filename, loc)
-        self.message_args = (error,)
+        self.message_args = (error, )
 
 
 class PercentFormatMixedPositionalAndNamed(Message):
@@ -349,7 +349,7 @@ class PercentFormatUnsupportedFormatCharacter(Message):
 
     def __init__(self, filename, loc, c):
         Message.__init__(self, filename, loc)
-        self.message_args = (c,)
+        self.message_args = (c, )
 
 
 class PercentFormatPositionalCountMismatch(Message):
@@ -365,7 +365,7 @@ class PercentFormatExtraNamedArguments(Message):
 
     def __init__(self, filename, loc, extra_keywords):
         Message.__init__(self, filename, loc)
-        self.message_args = (extra_keywords,)
+        self.message_args = (extra_keywords, )
 
 
 class PercentFormatMissingArgument(Message):
@@ -373,7 +373,7 @@ class PercentFormatMissingArgument(Message):
 
     def __init__(self, filename, loc, missing_arguments):
         Message.__init__(self, filename, loc)
-        self.message_args = (missing_arguments,)
+        self.message_args = (missing_arguments, )
 
 
 class PercentFormatExpectedMapping(Message):

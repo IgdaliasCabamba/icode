@@ -7,7 +7,9 @@ from functions import getfn
 
 windows_style = settings.get_window_style()
 
+
 class Styler(QObject):
+
     def __init__(self, application_core, ui, qt_app):
         self.application_core = application_core
         self.ui = ui
@@ -15,7 +17,7 @@ class Styler(QObject):
         self.fonts = []
         self._configure_qt()
         self.application_core.on_style_changed.connect(self.beautify)
-    
+
     def _configure_qt(self):
         self.qt_app.setWindowIcon(getfn.get_app_icon())
         self.qt_app.setEffectEnabled(Qt.UI_AnimateMenu, True)
@@ -38,7 +40,7 @@ class Styler(QObject):
         self.fonts = get_fonts_from_resources()
         for font in self.fonts:
             add_application_font(font)
-    
+
     def apply_base_theme(self):
         self.qt_app.setStyle(settings.get_qt_theme())
 
@@ -67,16 +69,18 @@ class Styler(QObject):
         dark_palette.setColor(QPalette.LinkVisited, QColor(80, 80, 80))
 
         # disabled
-        dark_palette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(127, 127, 127))
-        dark_palette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
-        dark_palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(127, 127, 127))
-        dark_palette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(80, 80, 80))
-        dark_palette.setColor(
-            QPalette.Disabled, QPalette.HighlightedText, QColor(127, 127, 127)
-        )
+        dark_palette.setColor(QPalette.Disabled, QPalette.WindowText,
+                              QColor(127, 127, 127))
+        dark_palette.setColor(QPalette.Disabled, QPalette.Text,
+                              QColor(127, 127, 127))
+        dark_palette.setColor(QPalette.Disabled, QPalette.ButtonText,
+                              QColor(127, 127, 127))
+        dark_palette.setColor(QPalette.Disabled, QPalette.Highlight,
+                              QColor(80, 80, 80))
+        dark_palette.setColor(QPalette.Disabled, QPalette.HighlightedText,
+                              QColor(127, 127, 127))
 
         self.qt_app.setPalette(dark_palette)
-
 
     def light(self):
 
@@ -103,12 +107,15 @@ class Styler(QObject):
         light_palette.setColor(QPalette.LinkVisited, QColor(222, 222, 222))
 
         # disabled
-        light_palette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(115, 115, 115))
-        light_palette.setColor(QPalette.Disabled, QPalette.Text, QColor(115, 115, 115))
-        light_palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(115, 115, 115))
-        light_palette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(190, 190, 190))
-        light_palette.setColor(
-            QPalette.Disabled, QPalette.HighlightedText, QColor(115, 115, 115)
-        )
+        light_palette.setColor(QPalette.Disabled, QPalette.WindowText,
+                               QColor(115, 115, 115))
+        light_palette.setColor(QPalette.Disabled, QPalette.Text,
+                               QColor(115, 115, 115))
+        light_palette.setColor(QPalette.Disabled, QPalette.ButtonText,
+                               QColor(115, 115, 115))
+        light_palette.setColor(QPalette.Disabled, QPalette.Highlight,
+                               QColor(190, 190, 190))
+        light_palette.setColor(QPalette.Disabled, QPalette.HighlightedText,
+                               QColor(115, 115, 115))
 
         self.qt_app.setPalette(light_palette)

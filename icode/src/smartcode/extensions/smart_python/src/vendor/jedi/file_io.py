@@ -4,6 +4,7 @@ from parso import file_io
 
 
 class AbstractFolderIO:
+
     def __init__(self, path):
         self.path = path
 
@@ -24,6 +25,7 @@ class AbstractFolderIO:
 
 
 class FolderIO(AbstractFolderIO):
+
     def get_base_name(self):
         return os.path.basename(self.path)
 
@@ -39,7 +41,9 @@ class FolderIO(AbstractFolderIO):
     def walk(self):
         for root, dirs, files in os.walk(self.path):
             root_folder_io = FolderIO(root)
-            original_folder_ios = [FolderIO(os.path.join(root, d)) for d in dirs]
+            original_folder_ios = [
+                FolderIO(os.path.join(root, d)) for d in dirs
+            ]
             modified_folder_ios = list(original_folder_ios)
             yield (
                 root_folder_io,
@@ -58,6 +62,7 @@ class FolderIO(AbstractFolderIO):
 
 
 class FileIOFolderMixin:
+
     def get_parent_folder(self):
         return FolderIO(os.path.dirname(self.path))
 

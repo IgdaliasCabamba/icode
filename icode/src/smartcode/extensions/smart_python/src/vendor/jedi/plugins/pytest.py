@@ -16,13 +16,12 @@ _PYTEST_FIXTURE_MODULES = [
 
 
 def execute(callback):
+
     def wrapper(value, arguments):
         # This might not be necessary anymore in pytest 4/5, definitely needed
         # for pytest 3.
-        if (
-            value.py__name__() == "fixture"
-            and value.parent_context.py__name__() == "_pytest.fixtures"
-        ):
+        if (value.py__name__() == "fixture"
+                and value.parent_context.py__name__() == "_pytest.fixtures"):
             return NO_VALUES
 
         return callback(value, arguments)
@@ -31,6 +30,7 @@ def execute(callback):
 
 
 def infer_anonymous_param(func):
+
     def get_returns(value):
         if value.tree_node.annotation is not None:
             return value.execute_with_values()
@@ -46,8 +46,7 @@ def infer_anonymous_param(func):
 
     def wrapper(param_name):
         is_pytest_param, param_name_is_function_name = _is_a_pytest_param_and_inherited(
-            param_name
-        )
+            param_name)
         if is_pytest_param:
             module = param_name.get_root_context()
             fixtures = _goto_pytest_fixture(
@@ -59,20 +58,18 @@ def infer_anonymous_param(func):
             )
             if fixtures:
                 return ValueSet.from_sets(
-                    get_returns(value)
-                    for fixture in fixtures
-                    for value in fixture.infer()
-                )
+                    get_returns(value) for fixture in fixtures
+                    for value in fixture.infer())
         return func(param_name)
 
     return wrapper
 
 
 def goto_anonymous_param(func):
+
     def wrapper(param_name):
         is_pytest_param, param_name_is_function_name = _is_a_pytest_param_and_inherited(
-            param_name
-        )
+            param_name)
         if is_pytest_param:
             names = _goto_pytest_fixture(
                 param_name.get_root_context(),
@@ -87,6 +84,7 @@ def goto_anonymous_param(func):
 
 
 def complete_param_names(func):
+
     def wrapper(context, func_name, decorator_nodes):
         module_context = context.get_root_context()
         if _is_pytest_func(func_name, decorator_nodes):
@@ -102,8 +100,7 @@ def complete_param_names(func):
 
 def _goto_pytest_fixture(module_context, name, skip_own_module):
     for module_context in _iter_pytest_modules(
-        module_context, skip_own_module=skip_own_module
-    ):
+            module_context, skip_own_module=skip_own_module):
         names = FixtureFilter(module_context).get(name)
         if names:
             return names
@@ -127,9 +124,8 @@ def _is_a_pytest_param_and_inherited(param_name):
 
 
 def _is_pytest_func(func_name, decorator_nodes):
-    return func_name.startswith("test") or any(
-        "fixture" in n.get_code() for n in decorator_nodes
-    )
+    return func_name.startswith("test") or any("fixture" in n.get_code()
+                                               for n in decorator_nodes)
 
 
 @inference_state_method_cache()
@@ -145,25 +141,29 @@ def _iter_pytest_modules(module_context, skip_own_module=False):
             file_io = folder.get_file_io("conftest.py")
             if Path(file_io.path) != module_context.py__file__():
                 try:
-                    m = load_module_from_path(module_context.inference_state, file_io)
+                    m = load_module_from_path(module_context.inference_state,
+                                              file_io)
                     yield m.as_context()
                 except FileNotFoundError:
                     pass
             folder = folder.get_parent_folder()
 
     for names in _PYTEST_FIXTURE_MODULES:
-        for module_value in module_context.inference_state.import_module(names):
+        for module_value in module_context.inference_state.import_module(
+                names):
             yield module_value.as_context()
 
 
 class FixtureFilter(ParserTreeFilter):
+
     def _filter(self, names):
         for name in super()._filter(names):
             funcdef = name.parent
             if funcdef.type == "funcdef":
                 # Class fixtures are not supported
                 decorated = funcdef.parent
-                if decorated.type == "decorated" and self._is_fixture(decorated):
+                if decorated.type == "decorated" and self._is_fixture(
+                        decorated):
                     yield name
 
     def _is_fixture(self, decorated):
@@ -172,10 +172,11 @@ class FixtureFilter(ParserTreeFilter):
             # A heuristic, this makes it faster.
             if "fixture" in dotted_name.get_code():
                 for value in self.parent_context.infer_node(dotted_name):
-                    if value.name.get_qualified_names(include_module_names=True) == (
-                        "_pytest",
-                        "fixtures",
-                        "fixture",
-                    ):
+                    if value.name.get_qualified_names(
+                            include_module_names=True) == (
+                                "_pytest",
+                                "fixtures",
+                                "fixture",
+                            ):
                         return True
         return False

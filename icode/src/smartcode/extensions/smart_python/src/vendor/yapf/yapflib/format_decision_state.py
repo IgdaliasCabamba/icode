@@ -91,41 +91,36 @@ class FormatDecisionState(object):
         new.first_indent = self.first_indent
         new.stack = [state.Clone() for state in self.stack]
         new.comp_stack = [state.Clone() for state in self.comp_stack]
-        new.param_list_stack = [state.Clone() for state in self.param_list_stack]
+        new.param_list_stack = [
+            state.Clone() for state in self.param_list_stack
+        ]
         return new
 
     def __eq__(self, other):
         # Note: 'first_indent' is implicit in the stack. Also, we ignore 'previous',
         # because it shouldn't have a bearing on this comparison. (I.e., it will
         # report equal if 'next_token' does.)
-        return (
-            self.next_token == other.next_token
-            and self.column == other.column
-            and self.paren_level == other.paren_level
-            and self.line.depth == other.line.depth
-            and self.lowest_level_on_line == other.lowest_level_on_line
-            and (
-                self.ignore_stack_for_comparison
-                or other.ignore_stack_for_comparison
-                or self.stack == other.stack
-                and self.comp_stack == other.comp_stack
-                and self.param_list_stack == other.param_list_stack
-            )
-        )
+        return (self.next_token == other.next_token
+                and self.column == other.column
+                and self.paren_level == other.paren_level
+                and self.line.depth == other.line.depth
+                and self.lowest_level_on_line == other.lowest_level_on_line
+                and (self.ignore_stack_for_comparison
+                     or other.ignore_stack_for_comparison or self.stack
+                     == other.stack and self.comp_stack == other.comp_stack
+                     and self.param_list_stack == other.param_list_stack))
 
     def __ne__(self, other):
         return not self == other
 
     def __hash__(self):
-        return hash(
-            (
-                self.next_token,
-                self.column,
-                self.paren_level,
-                self.line.depth,
-                self.lowest_level_on_line,
-            )
-        )
+        return hash((
+            self.next_token,
+            self.column,
+            self.paren_level,
+            self.line.depth,
+            self.lowest_level_on_line,
+        ))
 
     def __repr__(self):
         return "column::%d, next_token::%s, paren_level::%d, stack::[\n\t%s" % (
@@ -150,21 +145,17 @@ class FormatDecisionState(object):
         if current.is_pseudo_paren:
             return False
 
-        if (
-            not must_split
-            and format_token.Subtype.DICTIONARY_KEY_PART in current.subtypes
-            and format_token.Subtype.DICTIONARY_KEY not in current.subtypes
-            and not style.Get("ALLOW_MULTILINE_DICTIONARY_KEYS")
-        ):
+        if (not must_split and format_token.Subtype.DICTIONARY_KEY_PART
+                in current.subtypes
+                and format_token.Subtype.DICTIONARY_KEY not in current.subtypes
+                and not style.Get("ALLOW_MULTILINE_DICTIONARY_KEYS")):
             # In some situations, a dictionary may be multiline, but pylint doesn't
             # like it. So don't allow it unless forced to.
             return False
 
-        if (
-            not must_split
-            and format_token.Subtype.DICTIONARY_VALUE in current.subtypes
-            and not style.Get("ALLOW_SPLIT_BEFORE_DICT_VALUE")
-        ):
+        if (not must_split
+                and format_token.Subtype.DICTIONARY_VALUE in current.subtypes
+                and not style.Get("ALLOW_SPLIT_BEFORE_DICT_VALUE")):
             return False
 
         if previous and previous.value == "(" and current.value == ")":
@@ -199,13 +190,12 @@ class FormatDecisionState(object):
         if not previous:
             return False
 
-        if style.Get("SPLIT_ALL_COMMA_SEPARATED_VALUES") and previous.value == ",":
+        if style.Get(
+                "SPLIT_ALL_COMMA_SEPARATED_VALUES") and previous.value == ",":
             return True
 
-        if (
-            style.Get("SPLIT_ALL_TOP_LEVEL_COMMA_SEPARATED_VALUES")
-            and previous.value == ","
-        ):
+        if (style.Get("SPLIT_ALL_TOP_LEVEL_COMMA_SEPARATED_VALUES")
+                and previous.value == ","):
             # Avoid breaking in a container that fits in the current line if possible
             opening = _GetOpeningBracket(current)
 
@@ -225,38 +215,29 @@ class FormatDecisionState(object):
                 return not self._ContainerFitsOnStartLine(opening)
 
         if self.stack[-1].split_before_closing_bracket and (
-            current.value in "}]"
-            and style.Get("SPLIT_BEFORE_CLOSING_BRACKET")
-            or current.value in "}])"
-            and style.Get("INDENT_CLOSING_BRACKETS")
-        ):
+                current.value in "}]"
+                and style.Get("SPLIT_BEFORE_CLOSING_BRACKET") or current.value
+                in "}])" and style.Get("INDENT_CLOSING_BRACKETS")):
             # Split before the closing bracket if we can.
             if format_token.Subtype.SUBSCRIPT_BRACKET not in current.subtypes:
                 return current.node_split_penalty != split_penalty.UNBREAKABLE
 
-        if (
-            current.value == ")"
-            and previous.value == ","
-            and not _IsSingleElementTuple(current.matching_bracket)
-        ):
+        if (current.value == ")" and previous.value == ","
+                and not _IsSingleElementTuple(current.matching_bracket)):
             return True
 
         # Prevent splitting before the first argument in compound statements
         # with the exception of function declarations.
-        if (
-            style.Get("SPLIT_BEFORE_FIRST_ARGUMENT")
-            and _IsCompoundStatement(self.line.first)
-            and not _IsFunctionDef(self.line.first)
-        ):
+        if (style.Get("SPLIT_BEFORE_FIRST_ARGUMENT")
+                and _IsCompoundStatement(self.line.first)
+                and not _IsFunctionDef(self.line.first)):
             return False
 
         ###########################################################################
         # List Splitting
-        if (
-            style.Get("DEDENT_CLOSING_BRACKETS")
-            or style.Get("INDENT_CLOSING_BRACKETS")
-            or style.Get("SPLIT_BEFORE_FIRST_ARGUMENT")
-        ):
+        if (style.Get("DEDENT_CLOSING_BRACKETS")
+                or style.Get("INDENT_CLOSING_BRACKETS")
+                or style.Get("SPLIT_BEFORE_FIRST_ARGUMENT")):
             bracket = current if current.ClosesScope() else previous
             if format_token.Subtype.SUBSCRIPT_BRACKET not in bracket.subtypes:
                 if bracket.OpensScope():
@@ -266,8 +247,8 @@ class FormatDecisionState(object):
                             return False
 
                     if not _IsLastScopeInLine(
-                        bracket
-                    ) or unwrapped_line.IsSurroundedByBrackets(bracket):
+                            bracket) or unwrapped_line.IsSurroundedByBrackets(
+                                bracket):
                         last_token = bracket.matching_bracket
                     else:
                         last_token = _LastTokenInLine(bracket.matching_bracket)
@@ -278,14 +259,14 @@ class FormatDecisionState(object):
                         self.stack[-1].split_before_closing_bracket = True
                         return True
 
-                elif (
-                    style.Get("DEDENT_CLOSING_BRACKETS")
-                    or style.Get("INDENT_CLOSING_BRACKETS")
-                ) and current.ClosesScope():
+                elif (style.Get("DEDENT_CLOSING_BRACKETS")
+                      or style.Get("INDENT_CLOSING_BRACKETS")
+                      ) and current.ClosesScope():
                     # Split before and dedent the closing bracket.
                     return self.stack[-1].split_before_closing_bracket
 
-        if style.Get("SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN") and current.is_name:
+        if style.Get("SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN"
+                     ) and current.is_name:
             # An expression that's surrounded by parens gets split after the opening
             # parenthesis.
             def SurroundedByParens(token):
@@ -301,18 +282,11 @@ class FormatDecisionState(object):
                         token = token.next_token
                 return False
 
-            if (
-                previous.value == "("
-                and not previous.is_pseudo_paren
-                and not unwrapped_line.IsSurroundedByBrackets(previous)
-            ):
+            if (previous.value == "(" and not previous.is_pseudo_paren
+                    and not unwrapped_line.IsSurroundedByBrackets(previous)):
                 pptoken = previous.previous_token
-                if (
-                    pptoken
-                    and not pptoken.is_name
-                    and not pptoken.is_keyword
-                    and SurroundedByParens(current)
-                ):
+                if (pptoken and not pptoken.is_name and not pptoken.is_keyword
+                        and SurroundedByParens(current)):
                     return True
 
         if (current.is_name or current.is_string) and previous.value == ",":
@@ -344,56 +318,41 @@ class FormatDecisionState(object):
                 open_bracket = unwrapped_line.IsSurroundedByBrackets(current)
                 if open_bracket:
                     if open_bracket.value in "[{":
-                        if not self._FitsOnLine(
-                            open_bracket, open_bracket.matching_bracket
-                        ):
+                        if not self._FitsOnLine(open_bracket,
+                                                open_bracket.matching_bracket):
                             return True
                     elif tok.value == "(":
                         if not self._FitsOnLine(current, tok.matching_bracket):
                             return True
 
-        if (
-            current.OpensScope()
-            and previous.value == ","
-            and format_token.Subtype.DICTIONARY_KEY not in current.next_token.subtypes
-        ):
+        if (current.OpensScope() and previous.value == ","
+                and format_token.Subtype.DICTIONARY_KEY
+                not in current.next_token.subtypes):
             # If we have a list of tuples, then we can get a similar look as above. If
             # the full list cannot fit on the line, then we want a split.
             open_bracket = unwrapped_line.IsSurroundedByBrackets(current)
-            if (
-                open_bracket
-                and open_bracket.value in "[{"
-                and format_token.Subtype.SUBSCRIPT_BRACKET not in open_bracket.subtypes
-            ):
+            if (open_bracket and open_bracket.value in "[{"
+                    and format_token.Subtype.SUBSCRIPT_BRACKET
+                    not in open_bracket.subtypes):
                 if not self._FitsOnLine(current, current.matching_bracket):
                     return True
 
         ###########################################################################
         # Dict/Set Splitting
-        if (
-            style.Get("EACH_DICT_ENTRY_ON_SEPARATE_LINE")
-            and format_token.Subtype.DICTIONARY_KEY in current.subtypes
-            and not current.is_comment
-        ):
+        if (style.Get("EACH_DICT_ENTRY_ON_SEPARATE_LINE")
+                and format_token.Subtype.DICTIONARY_KEY in current.subtypes
+                and not current.is_comment):
             # Place each dictionary entry onto its own line.
             if previous.value == "{" and previous.previous_token:
                 opening = _GetOpeningBracket(previous.previous_token)
-                if (
-                    opening
-                    and opening.value == "("
-                    and opening.previous_token
-                    and opening.previous_token.is_name
-                ):
+                if (opening and opening.value == "(" and opening.previous_token
+                        and opening.previous_token.is_name):
                     # This is a dictionary that's an argument to a function.
-                    if (
-                        self._FitsOnLine(previous, previous.matching_bracket)
-                        and previous.matching_bracket.next_token
-                        and (
-                            not opening.matching_bracket.next_token
-                            or opening.matching_bracket.next_token.value != "."
-                        )
-                        and _ScopeHasNoCommas(previous)
-                    ):
+                    if (self._FitsOnLine(previous, previous.matching_bracket)
+                            and previous.matching_bracket.next_token and
+                        (not opening.matching_bracket.next_token
+                         or opening.matching_bracket.next_token.value != ".")
+                            and _ScopeHasNoCommas(previous)):
                         # Don't split before the key if:
                         #   - The dictionary fits on a line, and
                         #   - The function call isn't part of a builder-style call and
@@ -401,18 +360,14 @@ class FormatDecisionState(object):
                         return False
             return True
 
-        if (
-            style.Get("SPLIT_BEFORE_DICT_SET_GENERATOR")
-            and format_token.Subtype.DICT_SET_GENERATOR in current.subtypes
-        ):
+        if (style.Get("SPLIT_BEFORE_DICT_SET_GENERATOR") and
+                format_token.Subtype.DICT_SET_GENERATOR in current.subtypes):
             # Split before a dict/set generator.
             return True
 
         if format_token.Subtype.DICTIONARY_VALUE in current.subtypes or (
-            previous.is_pseudo_paren
-            and previous.value == "("
-            and not current.is_comment
-        ):
+                previous.is_pseudo_paren and previous.value == "("
+                and not current.is_comment):
             # Split before the dictionary value if we can't fit every dictionary
             # entry on its own line.
             if not current.OpensScope():
@@ -423,26 +378,19 @@ class FormatDecisionState(object):
         if previous.value == "{":
             # Split if the dict/set cannot fit on one line and ends in a comma.
             closing = previous.matching_bracket
-            if (
-                not self._FitsOnLine(previous, closing)
-                and closing.previous_token.value == ","
-            ):
+            if (not self._FitsOnLine(previous, closing)
+                    and closing.previous_token.value == ","):
                 self.stack[-1].split_before_closing_bracket = True
                 return True
 
         ###########################################################################
         # Argument List Splitting
-        if (
-            style.Get("SPLIT_BEFORE_NAMED_ASSIGNS")
-            and not current.is_comment
-            and format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN_ARG_LIST
-            in current.subtypes
-        ):
-            if (
-                previous.value not in {"=", ":", "*", "**"}
-                and current.value not in ":=,)"
-                and not _IsFunctionDefinition(previous)
-            ):
+        if (style.Get("SPLIT_BEFORE_NAMED_ASSIGNS") and not current.is_comment
+                and format_token.Subtype.DEFAULT_OR_NAMED_ASSIGN_ARG_LIST
+                in current.subtypes):
+            if (previous.value not in {"=", ":", "*", "**"}
+                    and current.value not in ":=,)"
+                    and not _IsFunctionDefinition(previous)):
                 # If we're going to split the lines because of named arguments, then we
                 # want to split after the opening bracket as well. But not when this is
                 # part of a function definition.
@@ -454,7 +402,7 @@ class FormatDecisionState(object):
                     #      b=1,
                     #      c=2)
                     if self._FitsOnLine(
-                        previous, previous.matching_bracket
+                            previous, previous.matching_bracket
                     ) and unwrapped_line.IsSurroundedByBrackets(previous):
                         # An argument to a function is a function call with named
                         # assigns.
@@ -462,7 +410,7 @@ class FormatDecisionState(object):
 
                     # Don't split if not required
                     if not style.Get(
-                        "SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN"
+                            "SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN"
                     ) and not style.Get("SPLIT_BEFORE_FIRST_ARGUMENT"):
                         return False
 
@@ -473,11 +421,8 @@ class FormatDecisionState(object):
                 if opening:
                     return not self._ContainerFitsOnStartLine(opening)
 
-        if (
-            current.value not in "{)"
-            and previous.value == "("
-            and self._ArgumentListHasDictionaryEntry(current)
-        ):
+        if (current.value not in "{)" and previous.value == "("
+                and self._ArgumentListHasDictionaryEntry(current)):
             return True
 
         if style.Get("SPLIT_ARGUMENTS_WHEN_COMMA_TERMINATED"):
@@ -489,39 +434,33 @@ class FormatDecisionState(object):
                     if opening.matching_bracket.previous_token.value == ",":
                         return True
 
-        if (current.is_name or current.value in {"*", "**"}) and previous.value == ",":
+        if (current.is_name
+                or current.value in {"*", "**"}) and previous.value == ",":
             # If we have a function call within an argument list and it won't fit on
             # the remaining line, but it will fit on a line by itself, then go ahead
             # and split before the call.
             opening = _GetOpeningBracket(current)
-            if (
-                opening
-                and opening.value == "("
-                and opening.previous_token
-                and (
-                    opening.previous_token.is_name
-                    or opening.previous_token.value in {"*", "**"}
-                )
-            ):
+            if (opening and opening.value == "(" and opening.previous_token
+                    and (opening.previous_token.is_name
+                         or opening.previous_token.value in {"*", "**"})):
                 is_func_call = False
                 opening = current
                 while opening:
                     if opening.value == "(":
                         is_func_call = True
                         break
-                    if (
-                        not (opening.is_name or opening.value in {"*", "**"})
-                        and opening.value != "."
-                    ):
+                    if (not (opening.is_name or opening.value in {"*", "**"})
+                            and opening.value != "."):
                         break
                     opening = opening.next_token
 
                 if is_func_call:
-                    if not self._FitsOnLine(current, opening.matching_bracket) or (
-                        opening.matching_bracket.next_token
-                        and opening.matching_bracket.next_token.value != ","
-                        and not opening.matching_bracket.next_token.ClosesScope()
-                    ):
+                    if not self._FitsOnLine(
+                            current, opening.matching_bracket) or (
+                                opening.matching_bracket.next_token
+                                and opening.matching_bracket.next_token.value
+                                != "," and not opening.matching_bracket.
+                                next_token.ClosesScope()):
                         return True
 
         pprevious = previous.previous_token
@@ -536,26 +475,19 @@ class FormatDecisionState(object):
         #         KEY_2: 'value two',
         #     },
         #                   default=False)
-        if (
-            current.value == "{"
-            and previous.value == "("
-            and pprevious
-            and pprevious.is_name
-        ):
+        if (current.value == "{" and previous.value == "(" and pprevious
+                and pprevious.is_name):
             dict_end = current.matching_bracket
             next_token = dict_end.next_token
-            if next_token.value == "," and not self._FitsOnLine(current, dict_end):
+            if next_token.value == "," and not self._FitsOnLine(
+                    current, dict_end):
                 return True
 
-        if (
-            current.is_name
-            and pprevious
-            and pprevious.is_name
-            and previous.value == "("
-        ):
+        if (current.is_name and pprevious and pprevious.is_name
+                and previous.value == "("):
 
             if not self._FitsOnLine(
-                previous, previous.matching_bracket
+                    previous, previous.matching_bracket
             ) and _IsFunctionCallWithArguments(current):
                 # There is a function call, with more than 1 argument, where the first
                 # argument is itself a function call with arguments that does not fit
@@ -569,48 +501,39 @@ class FormatDecisionState(object):
                 #
                 # Instead, enforce a split before that argument to keep things looking
                 # good.
-                if style.Get(
-                    "SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN"
-                ) or style.Get("SPLIT_BEFORE_FIRST_ARGUMENT"):
+                if style.Get("SPLIT_BEFORE_EXPRESSION_AFTER_OPENING_PAREN"
+                             ) or style.Get("SPLIT_BEFORE_FIRST_ARGUMENT"):
                     return True
 
                 opening = _GetOpeningBracket(current)
-                if (
-                    opening
-                    and opening.value == "("
-                    and opening.previous_token
-                    and (
-                        opening.previous_token.is_name
-                        or opening.previous_token.value in {"*", "**"}
-                    )
-                ):
+                if (opening and opening.value == "(" and opening.previous_token
+                        and (opening.previous_token.is_name
+                             or opening.previous_token.value in {"*", "**"})):
                     is_func_call = False
                     opening = current
                     while opening:
                         if opening.value == "(":
                             is_func_call = True
                             break
-                        if (
-                            not (opening.is_name or opening.value in {"*", "**"})
-                            and opening.value != "."
-                        ):
+                        if (not (opening.is_name
+                                 or opening.value in {"*", "**"})
+                                and opening.value != "."):
                             break
                         opening = opening.next_token
 
                     if is_func_call:
-                        if not self._FitsOnLine(current, opening.matching_bracket) or (
-                            opening.matching_bracket.next_token
-                            and opening.matching_bracket.next_token.value != ","
-                            and not opening.matching_bracket.next_token.ClosesScope()
-                        ):
+                        if not self._FitsOnLine(
+                                current, opening.matching_bracket) or (
+                                    opening.matching_bracket.next_token and
+                                    opening.matching_bracket.next_token.value
+                                    != "," and not opening.matching_bracket.
+                                    next_token.ClosesScope()):
                             return True
 
-        if (
-            previous.OpensScope()
-            and not current.OpensScope()
-            and not current.is_comment
-            and format_token.Subtype.SUBSCRIPT_BRACKET not in previous.subtypes
-        ):
+        if (previous.OpensScope() and not current.OpensScope()
+                and not current.is_comment
+                and format_token.Subtype.SUBSCRIPT_BRACKET
+                not in previous.subtypes):
             if pprevious and not pprevious.is_keyword and not pprevious.is_name:
                 # We want to split if there's a comment in the container.
                 token = current
@@ -629,18 +552,19 @@ class FormatDecisionState(object):
                     if len(previous.container_elements) == 1:
                         return False
 
-                    elements = previous.container_elements + [previous.matching_bracket]
+                    elements = previous.container_elements + [
+                        previous.matching_bracket
+                    ]
                     i = 1
                     while i < len(elements):
-                        if not elements[i - 1].OpensScope() and not self._FitsOnLine(
-                            elements[i - 1], elements[i]
-                        ):
+                        if not elements[
+                                i - 1].OpensScope() and not self._FitsOnLine(
+                                    elements[i - 1], elements[i]):
                             return True
                         i += 1
 
                     if (self.column_limit - self.column) / float(
-                        self.column_limit
-                    ) < 0.3:
+                            self.column_limit) < 0.3:
                         # Try not to squish all of the arguments off to the right.
                         return True
             else:
@@ -654,18 +578,14 @@ class FormatDecisionState(object):
         # These checks rely upon the original formatting. This is in order to
         # attempt to keep hand-written code in the same condition as it was before.
         # However, this may cause the formatter to fail to be idempotent.
-        if (
-            style.Get("SPLIT_BEFORE_BITWISE_OPERATOR")
-            and current.value in "&|"
-            and previous.lineno < current.lineno
-        ):
+        if (style.Get("SPLIT_BEFORE_BITWISE_OPERATOR")
+                and current.value in "&|"
+                and previous.lineno < current.lineno):
             # Retain the split before a bitwise operator.
             return True
 
-        if (
-            current.is_comment
-            and previous.lineno < current.lineno - current.value.count("\n")
-        ):
+        if (current.is_comment and previous.lineno
+                < current.lineno - current.value.count("\n")):
             # If a comment comes in the middle of an unwrapped line (like an if
             # conditional with comments interspersed), then we want to split if the
             # original comments were on a separate line.
@@ -734,9 +654,8 @@ class FormatDecisionState(object):
                     self.stack[-1].closing_scope_indent += 1
                 self.stack[-1].indent = self.column + spaces
             else:
-                self.stack[-1].closing_scope_indent = self.stack[-1].indent - style.Get(
-                    "CONTINUATION_INDENT_WIDTH"
-                )
+                self.stack[-1].closing_scope_indent = self.stack[
+                    -1].indent - style.Get("CONTINUATION_INDENT_WIDTH")
 
         self.column += spaces
 
@@ -764,23 +683,21 @@ class FormatDecisionState(object):
             spaces = self.column
             if spaces:
                 spaces -= indent_level * style.Get("INDENT_WIDTH")
-            current.AddWhitespacePrefix(
-                newlines_before=1, spaces=spaces, indent_level=indent_level
-            )
+            current.AddWhitespacePrefix(newlines_before=1,
+                                        spaces=spaces,
+                                        indent_level=indent_level)
 
         if not current.is_comment:
             self.stack[-1].last_space = self.column
         self.lowest_level_on_line = self.paren_level
 
-        if previous.OpensScope() or (
-            previous.is_comment
-            and previous.previous_token is not None
-            and previous.previous_token.OpensScope()
-        ):
-            dedent = (style.Get("CONTINUATION_INDENT_WIDTH"), 0)[
-                style.Get("INDENT_CLOSING_BRACKETS")
-            ]
-            self.stack[-1].closing_scope_indent = max(0, self.stack[-1].indent - dedent)
+        if previous.OpensScope() or (previous.is_comment
+                                     and previous.previous_token is not None
+                                     and previous.previous_token.OpensScope()):
+            dedent = (style.Get("CONTINUATION_INDENT_WIDTH"),
+                      0)[style.Get("INDENT_CLOSING_BRACKETS")]
+            self.stack[-1].closing_scope_indent = max(
+                0, self.stack[-1].indent - dedent)
             self.stack[-1].split_before_closing_bracket = True
 
         # Calculate the split penalty.
@@ -799,9 +716,8 @@ class FormatDecisionState(object):
         if current.value not in {"if", "for"}:
             last = self.stack[-1]
             last.num_line_splits += 1
-            penalty += (
-                style.Get("SPLIT_PENALTY_FOR_ADDED_LINE_SPLIT") * last.num_line_splits
-            )
+            penalty += (style.Get("SPLIT_PENALTY_FOR_ADDED_LINE_SPLIT") *
+                        last.num_line_splits)
 
         if current.OpensScope() and previous.OpensScope():
             # Prefer to keep opening brackets coalesced (unless it's at the beginning
@@ -824,15 +740,18 @@ class FormatDecisionState(object):
         """
         current = self.next_token
         if not current.OpensScope() and not current.ClosesScope():
-            self.lowest_level_on_line = min(self.lowest_level_on_line, self.paren_level)
+            self.lowest_level_on_line = min(self.lowest_level_on_line,
+                                            self.paren_level)
 
         # If we encounter an opening bracket, we add a level to our stack to prepare
         # for the subsequent tokens.
         if current.OpensScope():
             last = self.stack[-1]
-            new_indent = style.Get("CONTINUATION_INDENT_WIDTH") + last.last_space
+            new_indent = style.Get(
+                "CONTINUATION_INDENT_WIDTH") + last.last_space
 
-            self.stack.append(_ParenState(new_indent, self.stack[-1].last_space))
+            self.stack.append(
+                _ParenState(new_indent, self.stack[-1].last_space))
             self.paren_level += 1
 
         # If we encounter a closing bracket, we can remove a level from our
@@ -856,14 +775,12 @@ class FormatDecisionState(object):
 
         # Calculate the penalty for overflowing the column limit.
         penalty = 0
-        if (
-            not current.is_pylint_comment
-            and not current.is_pytype_comment
-            and not current.is_copybara_comment
-            and self.column > self.column_limit
-        ):
+        if (not current.is_pylint_comment and not current.is_pytype_comment
+                and not current.is_copybara_comment
+                and self.column > self.column_limit):
             excess_characters = self.column - self.column_limit
-            penalty += style.Get("SPLIT_PENALTY_EXCESS_CHARACTER") * excess_characters
+            penalty += style.Get(
+                "SPLIT_PENALTY_EXCESS_CHARACTER") * excess_characters
 
         if is_multiline_string:
             # If this is a multiline string, the column is actually the
@@ -900,10 +817,8 @@ class FormatDecisionState(object):
             if newline:
                 top_of_stack.has_interior_split = True
 
-        if (
-            format_token.Subtype.COMP_EXPR in current.subtypes
-            and format_token.Subtype.COMP_EXPR not in previous.subtypes
-        ):
+        if (format_token.Subtype.COMP_EXPR in current.subtypes
+                and format_token.Subtype.COMP_EXPR not in previous.subtypes):
             self.comp_stack.append(object_state.ComprehensionState(current))
             return penalty
 
@@ -917,38 +832,28 @@ class FormatDecisionState(object):
                 #   -->   for b in bar   <--
                 #         if a.zut + b.zut
                 #     ]
-                if (
-                    style.Get("SPLIT_COMPLEX_COMPREHENSION")
-                    and top_of_stack.has_split_at_for != newline
-                    and (
-                        top_of_stack.has_split_at_for
-                        or not top_of_stack.HasTrivialExpr()
-                    )
-                ):
+                if (style.Get("SPLIT_COMPLEX_COMPREHENSION")
+                        and top_of_stack.has_split_at_for != newline
+                        and (top_of_stack.has_split_at_for
+                             or not top_of_stack.HasTrivialExpr())):
                     penalty += split_penalty.UNBREAKABLE
             else:
                 top_of_stack.for_token = current
                 top_of_stack.has_split_at_for = newline
 
                 # Try to keep trivial expressions on the same line as the comp_for.
-                if (
-                    style.Get("SPLIT_COMPLEX_COMPREHENSION")
-                    and newline
-                    and top_of_stack.HasTrivialExpr()
-                ):
+                if (style.Get("SPLIT_COMPLEX_COMPREHENSION") and newline
+                        and top_of_stack.HasTrivialExpr()):
                     penalty += split_penalty.CONNECTED
 
-        if (
-            format_token.Subtype.COMP_IF in current.subtypes
-            and format_token.Subtype.COMP_IF not in previous.subtypes
-        ):
+        if (format_token.Subtype.COMP_IF in current.subtypes
+                and format_token.Subtype.COMP_IF not in previous.subtypes):
             # Penalize breaking at comp_if when it doesn't match the newline structure
             # in the rest of the comprehension.
-            if (
-                style.Get("SPLIT_COMPLEX_COMPREHENSION")
-                and top_of_stack.has_split_at_for != newline
-                and (top_of_stack.has_split_at_for or not top_of_stack.HasTrivialExpr())
-            ):
+            if (style.Get("SPLIT_COMPLEX_COMPREHENSION")
+                    and top_of_stack.has_split_at_for != newline
+                    and (top_of_stack.has_split_at_for
+                         or not top_of_stack.HasTrivialExpr())):
                 penalty += split_penalty.UNBREAKABLE
 
         return penalty
@@ -965,8 +870,8 @@ class FormatDecisionState(object):
         if _IsFunctionDefinition(previous):
             first_param_column = previous.total_length + self.stack[-2].indent
             self.param_list_stack.append(
-                object_state.ParameterListState(previous, newline, first_param_column)
-            )
+                object_state.ParameterListState(previous, newline,
+                                                first_param_column))
 
     def _CalculateParameterListState(self, newline):
         """Makes required changes to parameter list state.
@@ -990,7 +895,8 @@ class FormatDecisionState(object):
                     last_param = param_list.parameters[-1].first_token
                     last_token = _LastTokenInLine(previous.matching_bracket)
                     total_length = last_token.total_length
-                    total_length -= last_param.total_length - len(last_param.value)
+                    total_length -= last_param.total_length - len(
+                        last_param.value)
                     if total_length + self.column > self.column_limit:
                         # If we need to split before the trailing code of a function
                         # definition with return types, then also split before the opening
@@ -1025,11 +931,8 @@ class FormatDecisionState(object):
                 elif param_list.LastParamFitsOnLine(self.column):
                     penalty += split_penalty.STRONGLY_CONNECTED
 
-            if (
-                not newline
-                and param_list.has_typed_return
-                and param_list.has_split_before_first_param
-            ):
+            if (not newline and param_list.has_typed_return
+                    and param_list.has_split_before_first_param):
                 # Prefer splitting before the closing bracket if there's a return type
                 # and we've already split before the first parameter.
                 penalty += split_penalty.STRONGLY_CONNECTED
@@ -1041,19 +944,16 @@ class FormatDecisionState(object):
 
         if newline:
             if self._FitsOnLine(
-                param_list.parameters[0].first_token,
-                _LastTokenInLine(param_list.closing_bracket),
+                    param_list.parameters[0].first_token,
+                    _LastTokenInLine(param_list.closing_bracket),
             ):
                 penalty += split_penalty.STRONGLY_CONNECTED
 
-        if (
-            not newline
-            and style.Get("SPLIT_BEFORE_NAMED_ASSIGNS")
-            and param_list.has_default_values
-            and current != param_list.parameters[0].first_token
-            and current != param_list.closing_bracket
-            and format_token.Subtype.PARAMETER_START in current.subtypes
-        ):
+        if (not newline and style.Get("SPLIT_BEFORE_NAMED_ASSIGNS")
+                and param_list.has_default_values
+                and current != param_list.parameters[0].first_token
+                and current != param_list.closing_bracket
+                and format_token.Subtype.PARAMETER_START in current.subtypes):
             # If we want to split before parameters when there are named assigns,
             # then add a penalty for not splitting.
             penalty += split_penalty.STRONGLY_CONNECTED
@@ -1065,12 +965,12 @@ class FormatDecisionState(object):
             return column
         align_style = style.Get("CONTINUATION_ALIGN_STYLE")
         if align_style == "FIXED":
-            return (self.line.depth * style.Get("INDENT_WIDTH")) + style.Get(
-                "CONTINUATION_INDENT_WIDTH"
-            )
+            return (self.line.depth * style.Get("INDENT_WIDTH")
+                    ) + style.Get("CONTINUATION_INDENT_WIDTH")
         if align_style == "VALIGN-RIGHT":
             indent_width = style.Get("INDENT_WIDTH")
-            return indent_width * int((column + indent_width - 1) / indent_width)
+            return indent_width * int(
+                (column + indent_width - 1) / indent_width)
         return column
 
     def _GetNewlineColumn(self):
@@ -1087,66 +987,49 @@ class FormatDecisionState(object):
             return current.spaces_required_before
 
         cont_aligned_indent = self._IndentWithContinuationAlignStyle(
-            top_of_stack.indent
-        )
+            top_of_stack.indent)
 
         if current.OpensScope():
             return cont_aligned_indent if self.paren_level else self.first_indent
 
         if current.ClosesScope():
             if previous.OpensScope() or (
-                previous.is_comment
-                and previous.previous_token is not None
-                and previous.previous_token.OpensScope()
-            ):
+                    previous.is_comment and previous.previous_token is not None
+                    and previous.previous_token.OpensScope()):
                 return max(
-                    0, top_of_stack.indent - style.Get("CONTINUATION_INDENT_WIDTH")
-                )
+                    0, top_of_stack.indent -
+                    style.Get("CONTINUATION_INDENT_WIDTH"))
             return top_of_stack.closing_scope_indent
 
-        if (
-            previous
-            and previous.is_string
-            and current.is_string
-            and format_token.Subtype.DICTIONARY_VALUE in current.subtypes
-        ):
+        if (previous and previous.is_string and current.is_string
+                and format_token.Subtype.DICTIONARY_VALUE in current.subtypes):
             return previous.column
 
         if style.Get("INDENT_DICTIONARY_VALUE"):
-            if previous and (previous.value == ":" or previous.is_pseudo_paren):
+            if previous and (previous.value == ":"
+                             or previous.is_pseudo_paren):
                 if format_token.Subtype.DICTIONARY_VALUE in current.subtypes:
                     return top_of_stack.indent
 
-        if (
-            not self.param_list_stack
-            and _IsCompoundStatement(self.line.first)
-            and (
-                not (
-                    style.Get("DEDENT_CLOSING_BRACKETS")
-                    or style.Get("INDENT_CLOSING_BRACKETS")
-                )
-                or style.Get("SPLIT_BEFORE_FIRST_ARGUMENT")
-            )
-        ):
+        if (not self.param_list_stack and _IsCompoundStatement(self.line.first)
+                and (not (style.Get("DEDENT_CLOSING_BRACKETS")
+                          or style.Get("INDENT_CLOSING_BRACKETS"))
+                     or style.Get("SPLIT_BEFORE_FIRST_ARGUMENT"))):
             token_indent = len(
-                self.line.first.whitespace_prefix.split("\n")[-1]
-            ) + style.Get("INDENT_WIDTH")
+                self.line.first.whitespace_prefix.split("\n")[-1]) + style.Get(
+                    "INDENT_WIDTH")
             if token_indent == top_of_stack.indent:
                 return token_indent + style.Get("CONTINUATION_INDENT_WIDTH")
 
-        if (
-            self.param_list_stack
-            and not self.param_list_stack[-1].SplitBeforeClosingBracket(
-                top_of_stack.indent
-            )
-            and top_of_stack.indent
-            == ((self.line.depth + 1) * style.Get("INDENT_WIDTH"))
-        ):
+        if (self.param_list_stack
+                and not self.param_list_stack[-1].SplitBeforeClosingBracket(
+                    top_of_stack.indent) and top_of_stack.indent
+                == ((self.line.depth + 1) * style.Get("INDENT_WIDTH"))):
             if format_token.Subtype.PARAMETER_START in current.subtypes or (
-                previous.is_comment
-                and format_token.Subtype.PARAMETER_START in previous.subtypes
-            ):
-                return top_of_stack.indent + style.Get("CONTINUATION_INDENT_WIDTH")
+                    previous.is_comment and
+                    format_token.Subtype.PARAMETER_START in previous.subtypes):
+                return top_of_stack.indent + style.Get(
+                    "CONTINUATION_INDENT_WIDTH")
 
         return cont_aligned_indent
 
@@ -1207,11 +1090,11 @@ class FormatDecisionState(object):
                         return False
                 entry_start = current
             if current.OpensScope():
-                if (
-                    current.value == "{"
-                    or (current.is_pseudo_paren and current.next_token.value == "{")
-                    and format_token.Subtype.DICTIONARY_VALUE in current.subtypes
-                ) or ImplicitStringConcatenation(current):
+                if (current.value == "{" or
+                    (current.is_pseudo_paren and current.next_token.value
+                     == "{") and format_token.Subtype.DICTIONARY_VALUE
+                        in current.subtypes
+                    ) or ImplicitStringConcatenation(current):
                     # A dictionary entry that cannot fit on a single line shouldn't matter
                     # to this calculation. If it can't fit on a single line, then the
                     # opening should be on the same line as the key and the rest on
@@ -1261,16 +1144,12 @@ class FormatDecisionState(object):
         Returns:
           True if the container fits on the start line.
         """
-        return (
-            opening.matching_bracket.total_length
-            - opening.total_length
-            + self.stack[-1].indent
-        ) <= self.column_limit
+        return (opening.matching_bracket.total_length - opening.total_length +
+                self.stack[-1].indent) <= self.column_limit
 
 
 _COMPOUND_STMTS = frozenset(
-    {"for", "while", "if", "elif", "with", "except", "def", "class"}
-)
+    {"for", "while", "if", "elif", "with", "except", "def", "class"})
 
 
 def _IsCompoundStatement(token):
@@ -1328,9 +1207,8 @@ def _LastTokenInLine(current):
 
 def _IsFunctionDefinition(current):
     prev = current.previous_token
-    return (
-        current.value == "(" and prev and format_token.Subtype.FUNC_DEF in prev.subtypes
-    )
+    return (current.value == "(" and prev
+            and format_token.Subtype.FUNC_DEF in prev.subtypes)
 
 
 def _IsLastScopeInLine(current):
@@ -1419,12 +1297,10 @@ class _ParenState(object):
         return not self == other
 
     def __hash__(self, *args, **kwargs):
-        return hash(
-            (
-                self.indent,
-                self.last_space,
-                self.closing_scope_indent,
-                self.split_before_closing_bracket,
-                self.num_line_splits,
-            )
-        )
+        return hash((
+            self.indent,
+            self.last_space,
+            self.closing_scope_indent,
+            self.split_before_closing_bracket,
+            self.num_line_splits,
+        ))

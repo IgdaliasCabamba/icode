@@ -132,6 +132,7 @@ class Worder(object):
 
 
 class _RealFinder(object):
+
     def __init__(self, code, raw):
         self.code = code
         self.raw = raw
@@ -156,7 +157,9 @@ class _RealFinder(object):
 
     def get_word_at(self, offset):
         offset = self._get_fixed_offset(offset)
-        return self.raw[self._find_word_start(offset) : self._find_word_end(offset) + 1]
+        return self.raw[self._find_word_start(offset
+                                              ):self._find_word_end(offset) +
+                        1]
 
     def _get_fixed_offset(self, offset):
         if offset >= len(self.code):
@@ -212,11 +215,12 @@ class _RealFinder(object):
         while offset > 0 and self.code[offset] in ")]":
             last_atom = self._find_parens_start(offset)
             offset = self._find_last_non_space_char(last_atom - 1)
-        if offset >= 0 and (self.code[offset] in "\"'})]" or self._is_id_char(offset)):
+        if offset >= 0 and (self.code[offset] in "\"'})]"
+                            or self._is_id_char(offset)):
             atom_start = self._find_atom_start(offset)
-            if not keyword.iskeyword(self.code[atom_start : offset + 1]) or (
-                offset + 1 < len(self.code) and self._is_id_char(offset + 1)
-            ):
+            if not keyword.iskeyword(self.code[atom_start:offset + 1]) or (
+                    offset + 1 < len(self.code)
+                    and self._is_id_char(offset + 1)):
                 return atom_start
         return last_atom
 
@@ -235,7 +239,7 @@ class _RealFinder(object):
             # Check if relative import
             # XXX: Looks like a hack...
             prev_word_end = self._find_last_non_space_char(prev - 1)
-            if self.code[prev_word_end - 3 : prev_word_end + 1] == "from":
+            if self.code[prev_word_end - 3:prev_word_end + 1] == "from":
                 offset = prev
                 break
 
@@ -275,12 +279,14 @@ class _RealFinder(object):
                 return (self.raw[real_start:end], "", offset)
             last_dot_position = word_start
             if self.code[word_start] != ".":
-                last_dot_position = self._find_last_non_space_char(word_start - 1)
-            last_char_position = self._find_last_non_space_char(last_dot_position - 1)
+                last_dot_position = self._find_last_non_space_char(word_start -
+                                                                   1)
+            last_char_position = self._find_last_non_space_char(
+                last_dot_position - 1)
             if self.code[word_start].isspace():
                 word_start = offset
             return (
-                self.raw[real_start : last_char_position + 1],
+                self.raw[real_start:last_char_position + 1],
                 self.raw[word_start:offset],
                 word_start,
             )
@@ -324,11 +330,8 @@ class _RealFinder(object):
     def is_a_function_being_called(self, offset):
         word_end = self._find_word_end(offset) + 1
         next_char = self._find_first_non_space_char(word_end)
-        return (
-            next_char < len(self.code)
-            and self.code[next_char] == "("
-            and not self.is_a_class_or_function_name_in_header(offset)
-        )
+        return (next_char < len(self.code) and self.code[next_char] == "("
+                and not self.is_a_class_or_function_name_in_header(offset))
 
     def _find_import_end(self, start):
         return self._get_line_end(start)
@@ -339,10 +342,8 @@ class _RealFinder(object):
         except ValueError:
             return False
         line_start = self._get_line_start(last_import)
-        return (
-            self._find_import_end(last_import + 7) >= offset
-            and self._find_word_start(line_start) == last_import
-        )
+        return (self._find_import_end(last_import + 7) >= offset
+                and self._find_word_start(line_start) == last_import)
 
     def is_from_statement(self, offset):
         try:
@@ -372,10 +373,8 @@ class _RealFinder(object):
         except ValueError:
             return False
         # Check if the offset is within the imported names
-        if (
-            imported_names - 1 > offset
-            or self._find_import_end(imported_names) < offset
-        ):
+        if (imported_names - 1 > offset
+                or self._find_import_end(imported_names) < offset):
             return False
         try:
             end = self._find_import_main_part_end(offset)
@@ -383,7 +382,7 @@ class _RealFinder(object):
                 return False
             as_end = min(self._find_word_end(end + 1), len(self.code))
             as_start = self._find_word_start(as_end)
-            return self.code[as_start : as_end + 1] == "as"
+            return self.code[as_start:as_end + 1] == "as"
         except ValueError:
             return False
 
@@ -427,7 +426,7 @@ class _RealFinder(object):
             end = self._find_word_end(offset)
             as_end = min(self._find_word_end(end + 1), len(self.code))
             as_start = self._find_word_start(as_end)
-            return self.code[as_start : as_end + 1] == "as"
+            return self.code[as_start:as_end + 1] == "as"
         except ValueError:
             return False
 
@@ -437,7 +436,7 @@ class _RealFinder(object):
             as_ = self._find_word_end(end + 1)
             alias = self._find_word_end(as_ + 1)
             start = self._find_word_start(alias)
-            return self.raw[start : alias + 1]
+            return self.raw[start:alias + 1]
         except ValueError:
             pass
 
@@ -446,7 +445,7 @@ class _RealFinder(object):
         if word_end + 1 == len(self.code):
             return False
         next_char = self._find_first_non_space_char(word_end + 1)
-        equals = self.code[next_char : next_char + 2]
+        equals = self.code[next_char:next_char + 2]
         if equals == "==" or not equals.startswith("="):
             return False
         word_start = self._find_word_start(offset)
@@ -480,9 +479,9 @@ class _RealFinder(object):
         # XXX: does not handle tuple assignments
         word_end = self._find_word_end(offset)
         next_char = self._find_first_non_space_char(word_end + 1)
-        single = self.code[next_char : next_char + 1]
-        double = self.code[next_char : next_char + 2]
-        triple = self.code[next_char : next_char + 3]
+        single = self.code[next_char:next_char + 1]
+        double = self.code[next_char:next_char + 2]
+        triple = self.code[next_char:next_char + 3]
         if double not in ("==", "<=", ">=", "!="):
             for op in [single, double, triple]:
                 if op.endswith("="):
@@ -521,17 +520,16 @@ class _RealFinder(object):
         while current > first:
             primary_start = current
             current = self._find_primary_start(current)
-            while current != first and (
-                self.code[current] not in "=," or self.code[current - 1] in "=!<>"
-            ):
+            while current != first and (self.code[current] not in "=,"
+                                        or self.code[current - 1] in "=!<>"):
                 current = self._find_last_non_space_char(current - 1)
-            primary = self.raw[current + 1 : primary_start + 1].strip()
+            primary = self.raw[current + 1:primary_start + 1].strip()
             if self.code[current] == "=":
                 primary_start = current - 1
                 current -= 1
                 while current != first and self.code[current] not in ",":
                     current = self._find_last_non_space_char(current - 1)
-                param_name = self.raw[current + 1 : primary_start + 1].strip()
+                param_name = self.raw[current + 1:primary_start + 1].strip()
                 keywords.append((param_name, primary))
             else:
                 args.append(primary)
@@ -561,12 +559,13 @@ class _RealFinder(object):
             return False
         parens_start = self.find_parens_start_from_inside(offset)
         # XXX: only handling (x, y) = value
-        return offset < equals_offset and self.code[start:parens_start].strip() == ""
+        return offset < equals_offset and self.code[start:parens_start].strip(
+        ) == ""
 
     def get_function_and_args_in_header(self, offset):
         offset = self.find_function_offset(offset)
         lparens, rparens = self.get_word_parens_range(offset)
-        return self.raw[offset : rparens + 1]
+        return self.raw[offset:rparens + 1]
 
     def find_function_offset(self, offset, definition="def "):
         while True:
@@ -579,5 +578,7 @@ class _RealFinder(object):
 
     def get_lambda_and_args(self, offset):
         offset = self.find_function_offset(offset, definition="lambda ")
-        lparens, rparens = self.get_word_parens_range(offset, opening=" ", closing=":")
-        return self.raw[offset : rparens + 1]
+        lparens, rparens = self.get_word_parens_range(offset,
+                                                      opening=" ",
+                                                      closing=":")
+        return self.raw[offset:rparens + 1]

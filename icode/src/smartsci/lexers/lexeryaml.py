@@ -3,6 +3,7 @@ from .utils import *
 
 
 class YAMLLexer(QsciLexerYAML, ILexer):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent

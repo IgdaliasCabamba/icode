@@ -5,6 +5,7 @@ import tokenize
 
 
 class ChangeCollector(object):
+
     def __init__(self, text):
         self.text = text
         self.changes = []
@@ -56,7 +57,7 @@ class SourceLinesAdapter(object):
         self.starts.append(len(self.code) + 1)
 
     def get_line(self, lineno):
-        return self.code[self.starts[lineno - 1] : self.starts[lineno] - 1]
+        return self.code[self.starts[lineno - 1]:self.starts[lineno] - 1]
 
     def length(self):
         return len(self.starts) - 1
@@ -72,6 +73,7 @@ class SourceLinesAdapter(object):
 
 
 class ArrayLinesAdapter(object):
+
     def __init__(self, lines):
         self.lines = lines
 
@@ -83,6 +85,7 @@ class ArrayLinesAdapter(object):
 
 
 class LinesToReadline(object):
+
     def __init__(self, lines, start):
         self.lines = lines
         self.current = start
@@ -98,6 +101,7 @@ class LinesToReadline(object):
 
 
 class _CustomGenerator(object):
+
     def __init__(self, lines):
         self.lines = lines
         self.in_string = ""
@@ -116,10 +120,8 @@ class _CustomGenerator(object):
                 while True:
                     line = self.lines.get_line(i)
                     self._analyze_line(line)
-                    if (
-                        not (self.continuation or self.open_count or self.in_string)
-                        or i == size
-                    ):
+                    if (not (self.continuation or self.open_count
+                             or self.in_string) or i == size):
                         break
                     i += 1
                 result.append((start, i))
@@ -140,9 +142,9 @@ class _CustomGenerator(object):
             if token in ["'''", '"""', "'", '"']:
                 if not self.in_string:
                     self.in_string = token
-                elif self.in_string == token or (
-                    self.in_string in ['"', "'"] and token == 3 * self.in_string
-                ):
+                elif self.in_string == token or (self.in_string in ['"', "'"]
+                                                 and token
+                                                 == 3 * self.in_string):
                     self.in_string = ""
             if self.in_string:
                 continue
@@ -163,6 +165,7 @@ def custom_generator(lines):
 
 
 class LogicalLineFinder(object):
+
     def __init__(self, lines):
         self.lines = lines
 
@@ -246,6 +249,7 @@ def tokenizer_generator(lines):
 
 
 class CachingLogicalLineFinder(object):
+
     def __init__(self, lines, generate=custom_generator):
         self.lines = lines
         self._generate = generate
@@ -299,10 +303,8 @@ def get_block_start(lines, lineno, maximum_indents=80):
     pattern = get_block_start_patterns()
     for i in range(lineno, 0, -1):
         match = pattern.search(lines.get_line(i))
-        if (
-            match is not None
-            and count_line_indents(lines.get_line(i)) <= maximum_indents
-        ):
+        if (match is not None
+                and count_line_indents(lines.get_line(i)) <= maximum_indents):
             striped = match.string.lstrip()
             # Maybe we're in a list comprehension or generator expression
             if i > 1 and striped.startswith("if") or striped.startswith("for"):
@@ -331,10 +333,8 @@ _block_start_pattern = None
 def get_block_start_patterns():
     global _block_start_pattern
     if not _block_start_pattern:
-        pattern = (
-            "^\\s*(((def|class|if|elif|except|for|while|with)\\s)|"
-            "((try|else|finally|except)\\s*:))"
-        )
+        pattern = ("^\\s*(((def|class|if|elif|except|for|while|with)\\s)|"
+                   "((try|else|finally|except)\\s*:))")
         _block_start_pattern = re.compile(pattern, re.M)
     return _block_start_pattern
 
@@ -360,14 +360,12 @@ def get_string_pattern_with_prefix(prefix, prefix_group_name=None):
         pattern = "%s(%s)"
     return pattern % (
         prefix,
-        "|".join(
-            [
-                longstr,
-                longstr.replace('"', "'"),
-                shortstr,
-                shortstr.replace('"', "'"),
-            ]
-        ),
+        "|".join([
+            longstr,
+            longstr.replace('"', "'"),
+            shortstr,
+            shortstr.replace('"', "'"),
+        ]),
     )
 
 

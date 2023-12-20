@@ -6,23 +6,24 @@ from rope.refactor import sourceutils, occurrences, rename
 
 
 class MethodObject(object):
+
     def __init__(self, project, resource, offset):
         self.project = project
         this_pymodule = self.project.get_pymodule(resource)
         pyname = evaluate.eval_location(this_pymodule, offset)
-        if pyname is None or not isinstance(pyname.get_object(), pyobjects.PyFunction):
+        if pyname is None or not isinstance(pyname.get_object(),
+                                            pyobjects.PyFunction):
             raise exceptions.RefactoringError(
                 "Replace method with method object refactoring should be "
-                "performed on a function."
-            )
+                "performed on a function.")
         self.pyfunction = pyname.get_object()
         self.pymodule = self.pyfunction.get_module()
         self.resource = self.pymodule.get_resource()
 
     def get_new_class(self, name):
         body = sourceutils.fix_indentation(
-            self._get_body(), sourceutils.get_indent(self.project) * 2
-        )
+            self._get_body(),
+            sourceutils.get_indent(self.project) * 2)
         return "class %s(object):\n\n%s%sdef __call__(self):\n%s" % (
             name,
             self._get_init(),
@@ -41,21 +42,21 @@ class MethodObject(object):
         collector = codeanalyze.ChangeCollector(self.pymodule.source_code)
         start, end = sourceutils.get_body_region(self.pyfunction)
         indents = sourceutils.get_indents(
-            self.pymodule.lines, self.pyfunction.get_scope().get_start()
-        ) + sourceutils.get_indent(self.project)
+            self.pymodule.lines,
+            self.pyfunction.get_scope().get_start()) + sourceutils.get_indent(
+                self.project)
         new_contents = " " * indents + "return %s(%s)()\n" % (
             classname,
             ", ".join(self._get_parameter_names()),
         )
         collector.add_change(start, end, new_contents)
         insertion = self._get_class_insertion_point()
-        collector.add_change(
-            insertion, insertion, "\n\n" + self.get_new_class(classname)
-        )
-        changes = change.ChangeSet("Replace method with method object refactoring")
+        collector.add_change(insertion, insertion,
+                             "\n\n" + self.get_new_class(classname))
+        changes = change.ChangeSet(
+            "Replace method with method object refactoring")
         changes.add_change(
-            change.ChangeContents(self.resource, collector.get_changed())
-        )
+            change.ChangeContents(self.resource, collector.get_changed()))
         return changes
 
     def _get_class_insertion_point(self):
@@ -69,11 +70,14 @@ class MethodObject(object):
         body = sourceutils.get_body(self.pyfunction)
         for param in self._get_parameter_names():
             body = param + " = None\n" + body
-            pymod = libutils.get_string_module(self.project, body, self.resource)
+            pymod = libutils.get_string_module(self.project, body,
+                                               self.resource)
             pyname = pymod[param]
             finder = occurrences.create_finder(self.project, param, pyname)
-            result = rename.rename_in_module(finder, "self." + param, pymodule=pymod)
-            body = result[result.index("\n") + 1 :]
+            result = rename.rename_in_module(finder,
+                                             "self." + param,
+                                             pymodule=pymod)
+            body = result[result.index("\n") + 1:]
         return body
 
     def _get_init(self):

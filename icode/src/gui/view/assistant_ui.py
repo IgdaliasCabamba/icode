@@ -19,6 +19,7 @@ from core.april.april_brain import AprilRender
 
 
 class AssistantMenu(QMenu):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent
@@ -56,6 +57,7 @@ class AssistantMenu(QMenu):
 
 
 class AssistantUi(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setObjectName("april-ui")
@@ -77,9 +79,9 @@ class AssistantUi(QFrame):
         self.vbox = QVBoxLayout(self.widget)
         self.widget.setLayout(self.vbox)
 
-        self.hello_msg = CardApril(
-            self, self.template.readme, "April " + get_unicon("nf", "mdi-message"), 0
-        )
+        self.hello_msg = CardApril(self, self.template.readme,
+                                   "April " + get_unicon("nf", "mdi-message"),
+                                   0)
         self.hello_msg.set_read_only(True)
 
         self.vbox.addWidget(self.hello_msg)

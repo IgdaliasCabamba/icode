@@ -7,6 +7,7 @@ from rope.refactor.importutils import importinfo
 
 
 class ModuleImports(object):
+
     def __init__(self, project, pymodule, import_filter=None):
         self.project = project
         self.pymodule = pymodule
@@ -62,20 +63,18 @@ class ModuleImports(object):
     def remove_unused_imports(self):
         can_select = _OneTimeSelector(
             self._get_unbound_names(self.pymodule)
-            | self._get_all_star_list(self.pymodule)
-        )
-        visitor = actions.RemovingVisitor(
-            self.project, self._current_folder(), can_select
-        )
+            | self._get_all_star_list(self.pymodule))
+        visitor = actions.RemovingVisitor(self.project, self._current_folder(),
+                                          can_select)
         for import_statement in self.imports:
             import_statement.accept(visitor)
 
     def get_used_imports(self, defined_pyobject):
         result = []
-        can_select = _OneTimeSelector(self._get_unbound_names(defined_pyobject))
-        visitor = actions.FilteringVisitor(
-            self.project, self._current_folder(), can_select
-        )
+        can_select = _OneTimeSelector(
+            self._get_unbound_names(defined_pyobject))
+        visitor = actions.FilteringVisitor(self.project,
+                                           self._current_folder(), can_select)
         for import_statement in self.imports:
             new_import = import_statement.accept(visitor)
             if new_import is not None and not new_import.is_empty():
@@ -83,7 +82,8 @@ class ModuleImports(object):
         return result
 
     def get_changed_source(self):
-        if not self.project.prefs.get("pull_imports_to_top") and not self.sorted:
+        if not self.project.prefs.get(
+                "pull_imports_to_top") and not self.sorted:
             return "".join(self._rewrite_imports(self.imports))
 
         # Make sure we forward a removed import's preceding blank
@@ -94,7 +94,9 @@ class ModuleImports(object):
                 stmt.blank_lines = max(prev_stmt.blank_lines, stmt.blank_lines)
             prev_stmt = stmt
         # The new list of imports.
-        imports = [stmt for stmt in self.imports if not stmt.import_info.is_empty()]
+        imports = [
+            stmt for stmt in self.imports if not stmt.import_info.is_empty()
+        ]
 
         after_removing = self._remove_imports(self.imports)
         first_non_blank = self._first_non_blank_line(after_removing, 0)
@@ -112,7 +114,8 @@ class ModuleImports(object):
             result.append("\n" * self.separating_lines)
 
         # Writing the body
-        first_after_imports = self._first_non_blank_line(after_removing, first_import)
+        first_after_imports = self._first_non_blank_line(
+            after_removing, first_import)
         result.extend(after_removing[first_after_imports:])
         return "".join(result)
 
@@ -137,10 +140,9 @@ class ModuleImports(object):
             start, end = stmt.get_old_location()
             blank_lines = 0
             if start != first_import_line:
-                blank_lines = _count_blank_lines(
-                    lines.__getitem__, start - 2, last_index - 1, -1
-                )
-            after_removing.extend(lines[last_index : start - 1 - blank_lines])
+                blank_lines = _count_blank_lines(lines.__getitem__, start - 2,
+                                                 last_index - 1, -1)
+            after_removing.extend(lines[last_index:start - 1 - blank_lines])
             last_index = end - 1
         after_removing.extend(lines[last_index:])
         return after_removing
@@ -151,7 +153,7 @@ class ModuleImports(object):
         last_index = 0
         for stmt in imports:
             start, end = stmt.get_old_location()
-            after_rewriting.extend(lines[last_index : start - 1])
+            after_rewriting.extend(lines[last_index:start - 1])
             if not stmt.import_info.is_empty():
                 after_rewriting.append(stmt.get_import_statement() + "\n")
             last_index = end - 1
@@ -159,7 +161,8 @@ class ModuleImports(object):
         return after_rewriting
 
     def _first_non_blank_line(self, lines, lineno):
-        return lineno + _count_blank_lines(lines.__getitem__, lineno, len(lines))
+        return lineno + _count_blank_lines(lines.__getitem__, lineno,
+                                           len(lines))
 
     def add_import(self, import_info):
         visitor = actions.AddingVisitor(self.project, [import_info])
@@ -170,10 +173,10 @@ class ModuleImports(object):
             lineno = self._get_new_import_lineno()
             blanks = self._get_new_import_blanks()
             self.imports.append(
-                importinfo.ImportStatement(
-                    import_info, lineno, lineno, blank_lines=blanks
-                )
-            )
+                importinfo.ImportStatement(import_info,
+                                           lineno,
+                                           lineno,
+                                           blank_lines=blanks))
 
     def _get_new_import_blanks(self):
         return 0
@@ -184,24 +187,24 @@ class ModuleImports(object):
         return 1
 
     def filter_names(self, can_select):
-        visitor = actions.RemovingVisitor(
-            self.project, self._current_folder(), can_select
-        )
+        visitor = actions.RemovingVisitor(self.project, self._current_folder(),
+                                          can_select)
         for import_statement in self.imports:
             import_statement.accept(visitor)
 
     def expand_stars(self):
         can_select = _OneTimeSelector(self._get_unbound_names(self.pymodule))
-        visitor = actions.ExpandStarsVisitor(
-            self.project, self._current_folder(), can_select
-        )
+        visitor = actions.ExpandStarsVisitor(self.project,
+                                             self._current_folder(),
+                                             can_select)
         for import_statement in self.imports:
             import_statement.accept(visitor)
 
     def remove_duplicates(self):
         added_imports = []
         for import_stmt in self.imports:
-            visitor = actions.AddingVisitor(self.project, [import_stmt.import_info])
+            visitor = actions.AddingVisitor(self.project,
+                                            [import_stmt.import_info])
             for added_import in added_imports:
                 if added_import.accept(visitor):
                     import_stmt.empty_import()
@@ -218,26 +221,25 @@ class ModuleImports(object):
                 for name_and_alias in import_info.names_and_aliases:
                     if hasattr(import_info, "module_name"):
                         new_import = importinfo.FromImport(
-                            import_info.module_name, import_info.level, [name_and_alias]
-                        )
+                            import_info.module_name, import_info.level,
+                            [name_and_alias])
                     else:
                         new_import = importinfo.NormalImport([name_and_alias])
                     self.add_import(new_import)
                 import_stmt.empty_import()
 
     def get_relative_to_absolute_list(self):
-        visitor = actions.RelativeToAbsoluteVisitor(
-            self.project, self._current_folder()
-        )
+        visitor = actions.RelativeToAbsoluteVisitor(self.project,
+                                                    self._current_folder())
         for import_stmt in self.imports:
             if not import_stmt.readonly:
                 import_stmt.accept(visitor)
         return visitor.to_be_absolute
 
     def get_self_import_fix_and_rename_list(self):
-        visitor = actions.SelfImportVisitor(
-            self.project, self._current_folder(), self.pymodule.get_resource()
-        )
+        visitor = actions.SelfImportVisitor(self.project,
+                                            self._current_folder(),
+                                            self.pymodule.get_resource())
         for import_stmt in self.imports:
             if not import_stmt.readonly:
                 import_stmt.accept(visitor)
@@ -275,18 +277,15 @@ class ModuleImports(object):
             lineno = 1
         if len(nodes) > lineno:
             if isinstance(nodes[lineno], ast.Import) or isinstance(
-                nodes[lineno], ast.ImportFrom
-            ):
+                    nodes[lineno], ast.ImportFrom):
                 return nodes[lineno].lineno
-            lineno = self.pymodule.logical_lines.logical_line_in(nodes[lineno].lineno)[
-                0
-            ]
+            lineno = self.pymodule.logical_lines.logical_line_in(
+                nodes[lineno].lineno)[0]
         else:
             lineno = self.pymodule.lines.length()
 
-        return lineno - _count_blank_lines(
-            self.pymodule.lines.get_line, lineno - 1, 1, -1
-        )
+        return lineno - _count_blank_lines(self.pymodule.lines.get_line,
+                                           lineno - 1, 1, -1)
 
     def _get_import_name(self, import_stmt):
         import_info = import_stmt.import_info
@@ -321,9 +320,8 @@ class ModuleImports(object):
         return index
 
     def handle_long_imports(self, maxdots, maxlength):
-        visitor = actions.LongImportVisitor(
-            self._current_folder(), self.project, maxdots, maxlength
-        )
+        visitor = actions.LongImportVisitor(self._current_folder(),
+                                            self.project, maxdots, maxlength)
         for import_statement in self.imports:
             if not import_statement.readonly:
                 import_statement.accept(visitor)
@@ -333,9 +331,8 @@ class ModuleImports(object):
 
     def remove_pyname(self, pyname):
         """Removes pyname when imported in ``from mod import x``"""
-        visitor = actions.RemovePyNameVisitor(
-            self.project, self.pymodule, pyname, self._current_folder()
-        )
+        visitor = actions.RemovePyNameVisitor(self.project, self.pymodule,
+                                              pyname, self._current_folder())
         for import_stmt in self.imports:
             import_stmt.accept(visitor)
 
@@ -351,6 +348,7 @@ def _count_blank_lines(get_line, start, end, step=1):
 
 
 class _OneTimeSelector(object):
+
     def __init__(self, names):
         self.names = names
         self.selected_names = set()
@@ -365,7 +363,7 @@ class _OneTimeSelector(object):
     def _get_dotted_tokens(self, imported_primary):
         tokens = imported_primary.split(".")
         for i in range(len(tokens)):
-            yield ".".join(tokens[: i + 1])
+            yield ".".join(tokens[:i + 1])
 
     def _can_name_be_added(self, imported_primary):
         for name in self._get_dotted_tokens(imported_primary):
@@ -375,16 +373,14 @@ class _OneTimeSelector(object):
 
 
 class _UnboundNameFinder(object):
+
     def __init__(self, pyobject):
         self.pyobject = pyobject
 
     def _visit_child_scope(self, node):
         pyobject = (
-            self.pyobject.get_module()
-            .get_scope()
-            .get_inner_scope_for_line(node.lineno)
-            .pyobject
-        )
+            self.pyobject.get_module().get_scope().get_inner_scope_for_line(
+                node.lineno).pyobject)
         visitor = _LocalUnboundNameFinder(pyobject, self)
         for child in ast.get_child_nodes(node):
             ast.walk(child, visitor)
@@ -396,7 +392,8 @@ class _UnboundNameFinder(object):
         self._visit_child_scope(node)
 
     def _Name(self, node):
-        if self._get_root()._is_node_interesting(node) and not self.is_bound(node.id):
+        if self._get_root()._is_node_interesting(node) and not self.is_bound(
+                node.id):
             self.add_unbound(node.id)
 
     def _Attribute(self, node):
@@ -407,9 +404,8 @@ class _UnboundNameFinder(object):
         if isinstance(node, ast.Name):
             result.append(node.id)
             primary = ".".join(reversed(result))
-            if self._get_root()._is_node_interesting(node) and not self.is_bound(
-                primary
-            ):
+            if self._get_root()._is_node_interesting(
+                    node) and not self.is_bound(primary):
                 self.add_unbound(primary)
         else:
             ast.walk(node, self)
@@ -425,12 +421,14 @@ class _UnboundNameFinder(object):
 
 
 class _GlobalUnboundNameFinder(_UnboundNameFinder):
+
     def __init__(self, pymodule, wanted_pyobject):
         super(_GlobalUnboundNameFinder, self).__init__(pymodule)
         self.unbound = set()
         self.names = set()
         for name, pyname in pymodule._get_structural_attributes().items():
-            if not isinstance(pyname, (pynames.ImportedName, pynames.ImportedModule)):
+            if not isinstance(pyname,
+                              (pynames.ImportedName, pynames.ImportedModule)):
                 self.names.add(name)
         wanted_scope = wanted_pyobject.get_scope()
         self.start = wanted_scope.get_start()
@@ -446,13 +444,14 @@ class _GlobalUnboundNameFinder(_UnboundNameFinder):
     def add_unbound(self, name):
         names = name.split(".")
         for i in range(len(names)):
-            self.unbound.add(".".join(names[: i + 1]))
+            self.unbound.add(".".join(names[:i + 1]))
 
     def _is_node_interesting(self, node):
         return self.start <= node.lineno < self.end
 
 
 class _LocalUnboundNameFinder(_UnboundNameFinder):
+
     def __init__(self, pyobject, parent):
         super(_LocalUnboundNameFinder, self).__init__(pyobject)
         self.parent = parent
@@ -475,6 +474,7 @@ class _LocalUnboundNameFinder(_UnboundNameFinder):
 
 
 class _GlobalImportFinder(object):
+
     def __init__(self, pymodule):
         self.current_folder = None
         if pymodule.get_resource():
@@ -499,7 +499,8 @@ class _GlobalImportFinder(object):
         return _count_blank_lines(self.lines.get_line, lineno - 1, 0, -1)
 
     def _count_empty_lines_after(self, lineno):
-        return _count_blank_lines(self.lines.get_line, lineno + 1, self.lines.length())
+        return _count_blank_lines(self.lines.get_line, lineno + 1,
+                                  self.lines.length())
 
     def get_separating_line_count(self):
         if not self.imports:
@@ -529,8 +530,7 @@ class _GlobalImportFinder(object):
                 end_line,
                 self._get_text(start_line, end_line),
                 blank_lines=self._count_empty_lines_before(start_line),
-            )
-        )
+            ))
 
     def _get_names(self, alias_names):
         result = []

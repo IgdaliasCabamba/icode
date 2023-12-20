@@ -10,7 +10,8 @@ class Editor(EditorBase):
     on_cursor_pos_chnaged = pyqtSignal(int, int)
     on_lines_changed = pyqtSignal(int)
     on_selected = pyqtSignal(int, int, int, int)
-    on_highlight_sel_request = pyqtSignal(int, int, int, int, bool, str, int, str)
+    on_highlight_sel_request = pyqtSignal(int, int, int, int, bool, str, int,
+                                          str)
     on_highlight_match_request = pyqtSignal(int, int, bool, str, int, str)
     on_focused = pyqtSignal(object, object)
     on_resized = pyqtSignal(object)
@@ -88,7 +89,8 @@ class Editor(EditorBase):
         self.coeditor.on_change_lexer.connect(self.set_lexer)
         self.coeditor.on_highlight_selection.connect(self.add_indicator_range)
         self.coeditor.on_highlight_text.connect(self.add_indicator_range)
-        self.coeditor.on_clear_indicator_range.connect(self.clear_indicator_range)
+        self.coeditor.on_clear_indicator_range.connect(
+            self.clear_indicator_range)
         self.coeditor.on_remove_annotations.connect(self.remove_annotations)
         self.on_key_pressed.connect(self.key_press_event)
 
@@ -104,9 +106,8 @@ class Editor(EditorBase):
             self._ide_mode = False
             self.setAutoCompletionSource(QsciScintilla.AcsDocument)
 
-    def add_development_environment_component(
-        self, component: object, run: callable
-    ) -> None:
+    def add_development_environment_component(self, component: object,
+                                              run: callable) -> None:
         self.development_environment_components.append(component)
         component.moveToThread(self.development_environment_thread)
         if self.development_environment_thread.isRunning():
@@ -126,9 +127,8 @@ class Editor(EditorBase):
             self.update_lines()
             self.define_lexer()
         except FileNotFoundError as e:
-            self.info_image = self.add_image(
-                self.icons.get_path("no-data"), (20, 5), (500, 500)
-            )
+            self.info_image = self.add_image(self.icons.get_path("no-data"),
+                                             (20, 5), (500, 500))
             self.set_mode(0)
             message = "File does not exist try to recreate pressing Ctrl+S"
             self.insertAt(message, 0, 0)
@@ -141,15 +141,15 @@ class Editor(EditorBase):
         self.update_status_bar()
         self.update_document()
 
-    def _margin_left_clicked(self, margin_nr: int, line_nr: int, state: object) -> None:
+    def _margin_left_clicked(self, margin_nr: int, line_nr: int,
+                             state: object) -> None:
         if self.markersAtLine(line_nr) == 0:
             self.debugger.add_break_point(line_nr)
         else:
             self.debugger.remove_break_point(line_nr)
 
-    def _margin_right_clicked(
-        self, margin_nr: int, line_nr: int, state: object
-    ) -> None:
+    def _margin_right_clicked(self, margin_nr: int, line_nr: int,
+                              state: object) -> None:
         pass
 
     def mouse_stoped(self, pos: int, x: int, y: int) -> None:
@@ -181,14 +181,14 @@ class Editor(EditorBase):
 
     def add_cursors(self, point: object, last_row: int, last_col: int) -> None:
 
-        pos = self.SendScintilla(
-            QsciScintillaBase.SCI_POSITIONFROMPOINTCLOSE, point.x(), point.y()
-        )
+        pos = self.SendScintilla(QsciScintillaBase.SCI_POSITIONFROMPOINTCLOSE,
+                                 point.x(), point.y())
 
         if len(self.all_cursors_pos) > 1:
             for cur_pos in self.all_cursors_pos:
                 offset = self.positionFromLineIndex(cur_pos[0], cur_pos[1])
-                self.SendScintilla(QsciScintilla.SCI_ADDSELECTION, offset, offset)
+                self.SendScintilla(QsciScintilla.SCI_ADDSELECTION, offset,
+                                   offset)
 
         else:
             offset = self.positionFromLineIndex(last_row, last_col)
@@ -205,15 +205,14 @@ class Editor(EditorBase):
             for annotation in annotations:  # BUG: ValueError: list.remove(x): x not in list
                 if annotation["note"] in self.annotations_data[type]:
                     self.annotations_data[type].remove(annotation["note"])
-                    self.clearAnnotations(annotation["line"])        
+                    self.clearAnnotations(annotation["line"])
         except Exception as e:
             print(e)
 
     def clear_annotations_by_type(self, type: str) -> None:
         if type in self.annotations_data.keys():
-            self.on_clear_annotation.emit(
-                self.annotations_data[type], self.lines(), type
-            )
+            self.on_clear_annotation.emit(self.annotations_data[type],
+                                          self.lines(), type)
 
     def clear_annotations_by_line(self, type: str, line: object) -> None:
         try:
@@ -246,7 +245,8 @@ class Editor(EditorBase):
             self.hide_white_spaces()
 
     def display_tooltip(self, data: dict) -> None:
-        QToolTip.showText(self.mapToGlobal(data["pos"]), data["text"], self.viewport())
+        QToolTip.showText(self.mapToGlobal(data["pos"]), data["text"],
+                          self.viewport())
 
     def display_annotation(
         self,
@@ -262,8 +262,7 @@ class Editor(EditorBase):
         annotation = SmartAnnotation(self._notes, note, row)
 
         if isinstance(annotation.annotation, list) or isinstance(
-            annotation.annotation, QsciStyledText
-        ):
+                annotation.annotation, QsciStyledText):
             self.annotate(row, annotation.annotation)
         else:
             self.annotate(row, annotation.annotation, type)
@@ -311,17 +310,15 @@ class Editor(EditorBase):
         else:
             icon = getfn.get_qicon(getfn.get_icon_from_ext(self.file_path))
 
-        self.idocument.set_data(
-            {
-                "lexer_name": self.lexer_name,
-                "name": name,
-                "lexer": self._lexer,
-                "tooltip": tooltip,
-                "icon": icon,
-                "file": self.file_path,
-                "file_name": name,
-            }
-        )
+        self.idocument.set_data({
+            "lexer_name": self.lexer_name,
+            "name": name,
+            "lexer": self._lexer,
+            "tooltip": tooltip,
+            "icon": icon,
+            "file": self.file_path,
+            "file_name": name,
+        })
 
     def clone_this_editor(self, editor: object) -> None:
         self.setLexer(editor.lexer())
@@ -368,8 +365,7 @@ class Editor(EditorBase):
 
         if string in self.pre_complete_keys or key in range(65, 90):
             self.on_intellisense.emit(
-                self, string
-            )  # it make icode more fast and responsive
+                self, string)  # it make icode more fast and responsive
 
         if key in {32, 16777220}:
             self.on_word_added.emit()

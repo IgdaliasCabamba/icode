@@ -11,24 +11,23 @@ from rope.base import utils
 
 
 class TypeHintingFactory(interfaces.ITypeHintingFactory):
+
     @utils.saveit
     def make_param_provider(self):
         providers = [
+            docstrings.ParamProvider(docstrings.DocstringParamParser(),
+                                     self.make_resolver()),
             docstrings.ParamProvider(
-                docstrings.DocstringParamParser(), self.make_resolver()
-            ),
-            docstrings.ParamProvider(
-                numpydocstrings.NumPyDocstringParamParser(), self.make_resolver()
-            ),
+                numpydocstrings.NumPyDocstringParamParser(),
+                self.make_resolver()),
         ]
         return inheritance.ParamProvider(composite.ParamProvider(*providers))
 
     @utils.saveit
     def make_return_provider(self):
         providers = [
-            docstrings.ReturnProvider(
-                docstrings.DocstringReturnParser(), self.make_resolver()
-            ),
+            docstrings.ReturnProvider(docstrings.DocstringReturnParser(),
+                                      self.make_resolver()),
         ]
         return inheritance.ReturnProvider(composite.ReturnProvider(*providers))
 
@@ -36,14 +35,14 @@ class TypeHintingFactory(interfaces.ITypeHintingFactory):
     def make_assignment_provider(self):
         providers = [
             pep0484_type_comments.AssignmentProvider(self.make_resolver()),
+            docstrings.AssignmentProvider(docstrings.DocstringParamParser(),
+                                          self.make_resolver()),
             docstrings.AssignmentProvider(
-                docstrings.DocstringParamParser(), self.make_resolver()
-            ),
-            docstrings.AssignmentProvider(
-                numpydocstrings.NumPyDocstringParamParser(), self.make_resolver()
-            ),
+                numpydocstrings.NumPyDocstringParamParser(),
+                self.make_resolver()),
         ]
-        return inheritance.AssignmentProvider(composite.AssignmentProvider(*providers))
+        return inheritance.AssignmentProvider(
+            composite.AssignmentProvider(*providers))
 
     @utils.saveit
     def make_resolver(self):
@@ -60,6 +59,7 @@ default_type_hinting_factory = TypeHintingFactory()
 
 
 class TypeHintingFactoryAccessor(object):
+
     def __call__(self, project):
         """
         :type project: rope.base.project.Project

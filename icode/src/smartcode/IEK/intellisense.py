@@ -3,6 +3,7 @@ import sip
 
 
 class Worker(QObject):
+
     def __init__(self, parent):
         super().__init__()
         self.parent = parent

@@ -2,6 +2,7 @@ from rope.base import exceptions
 
 
 class TaskHandle(object):
+
     def __init__(self, name="Task", interrupts=True):
         """Construct a TaskHandle
 
@@ -53,6 +54,7 @@ class TaskHandle(object):
 
 
 class JobSet(object):
+
     def __init__(self, handle, name, count):
         self.handle = handle
         self.name = name
@@ -88,6 +90,7 @@ class JobSet(object):
 
 
 class NullTaskHandle(object):
+
     def __init__(self):
         pass
 
@@ -108,6 +111,7 @@ class NullTaskHandle(object):
 
 
 class NullJobSet(object):
+
     def started_job(self, name):
         pass
 

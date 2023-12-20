@@ -31,6 +31,7 @@ class Var(QObject):
 
 
 class RString(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -52,6 +53,7 @@ class RString(Var):
 
 
 class RInt(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -73,6 +75,7 @@ class RInt(Var):
 
 
 class RDict(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -92,6 +95,7 @@ class RDict(Var):
 
 
 class RList(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -111,6 +115,7 @@ class RList(Var):
 
 
 class RSet(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -130,6 +135,7 @@ class RSet(Var):
 
 
 class RBool(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -149,6 +155,7 @@ class RBool(Var):
 
 
 class RFloat(Var):
+
     def __init__(self, value, reactions=[]):
         super().__init__(reactions=reactions)
         self.__init(value)
@@ -168,6 +175,7 @@ class RFloat(Var):
 
 
 class RConst:
+
     def __init__(self, value):
         self.__value = value
 

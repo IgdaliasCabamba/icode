@@ -29,9 +29,10 @@ def complete_dict(module_context, code_lines, leaf, position, string, fuzzy):
 
     cut_end_quote = ""
     if string:
-        cut_end_quote = get_quote_ending(
-            string, code_lines, position, invert_result=True
-        )
+        cut_end_quote = get_quote_ending(string,
+                                         code_lines,
+                                         position,
+                                         invert_result=True)
 
     if bracket_leaf == "[":
         if string is None and leaf is not bracket_leaf:
@@ -48,20 +49,17 @@ def complete_dict(module_context, code_lines, leaf, position, string, fuzzy):
                     "" if string is None else string,
                     cut_end_quote,
                     fuzzy=fuzzy,
-                )
-            )
+                ))
     return []
 
 
-def _completions_for_dicts(
-    inference_state, dicts, literal_string, cut_end_quote, fuzzy
-):
+def _completions_for_dicts(inference_state, dicts, literal_string,
+                           cut_end_quote, fuzzy):
     for dict_key in sorted(_get_python_keys(dicts), key=lambda x: repr(x)):
         dict_key_str = _create_repr_string(literal_string, dict_key)
         if dict_key_str.startswith(literal_string):
-            name = StringName(
-                inference_state, dict_key_str[: -len(cut_end_quote) or None]
-            )
+            name = StringName(inference_state,
+                              dict_key_str[:-len(cut_end_quote) or None])
             yield Completion(
                 inference_state,
                 name,
@@ -101,7 +99,7 @@ def _get_string_prefix_and_quote(string):
 
 
 def _matches_quote_at_position(code_lines, quote, position):
-    string = code_lines[position[0] - 1][position[1] : position[1] + len(quote)]
+    string = code_lines[position[0] - 1][position[1]:position[1] + len(quote)]
     return string == quote
 
 
@@ -111,6 +109,7 @@ def get_quote_ending(string, code_lines, position, invert_result=False):
         return ""
 
     # Add a quote only if it's not already there.
-    if _matches_quote_at_position(code_lines, quote, position) != invert_result:
+    if _matches_quote_at_position(code_lines, quote,
+                                  position) != invert_result:
         return ""
     return quote

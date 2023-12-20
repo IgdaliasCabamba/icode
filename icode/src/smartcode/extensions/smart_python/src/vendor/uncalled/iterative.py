@@ -4,6 +4,7 @@ from collections import namedtuple
 import ast
 
 from . import whitelist
+
 is_framework = whitelist.get_matcher()
 
 # TODO: import as alias, not use
@@ -18,8 +19,9 @@ class Kind:
 
 Namespace = namedtuple('Namespace', ['kind', 'name', 'lineno'])
 
-    
+
 class Collector(ast.NodeVisitor):
+
     def __init__(self):
         self.definitions = []  # list(xpath)
         self.references = []  # list(xpath)
@@ -39,7 +41,7 @@ class Collector(ast.NodeVisitor):
     def enter_definition(self, kind, name, lineno):
         if self.xpath[-1].kind is Kind.CLASS:
             name = '.' + name
-        self.xpath += (Namespace(kind, name, lineno),)
+        self.xpath += (Namespace(kind, name, lineno), )
         self.definitions.append(self.xpath)
         yield
         self.xpath = self.xpath[:-1]
@@ -51,11 +53,14 @@ class Collector(ast.NodeVisitor):
         if isinstance(attr.ctx, ast.Store):
             if isinstance(value, ast.Name) and value.id == 'self':
                 namespace = Namespace(Kind.NAME, '.' + name, lineno)
-                self.definitions.append(self.xpath[:-1] + (namespace,))
+                self.definitions.append(self.xpath[:-1] + (namespace, ))
                 self.visit(value)
         else:
-            self.references.append(self.xpath + (Namespace(Kind.NAME, name, lineno),))
-            self.references.append(self.xpath + (Namespace(Kind.NAME, '.' + name, lineno),))
+            self.references.append(self.xpath +
+                                   (Namespace(Kind.NAME, name, lineno), ))
+            self.references.append(self.xpath +
+                                   (Namespace(Kind.NAME, '.' +
+                                              name, lineno), ))
             self.visit(value)
 
     def visit_Name(self, name: ast.Name):
@@ -66,20 +71,22 @@ class Collector(ast.NodeVisitor):
         else:
             if self.xpath[-1].kind is Kind.CLASS:
                 id = '.' + id
-            self.references.append(self.xpath + (Namespace(Kind.NAME, id, name.lineno),))
+            self.references.append(self.xpath +
+                                   (Namespace(Kind.NAME, id, name.lineno), ))
 
     # ImportFrom(identifier? module, alias* names, int? level)
     def visit_ImportFrom(self, imp: ast.ImportFrom):
         # TODO: handle aliases
         for alias in imp.names:
-            self.references.append((Namespace(Kind.MODULE, imp.module + '.py', imp.lineno),
-                                    Namespace(Kind.NAME, alias.name, imp.lineno)))
+            self.references.append(
+                (Namespace(Kind.MODULE, imp.module + '.py', imp.lineno),
+                 Namespace(Kind.NAME, alias.name, imp.lineno)))
 
 
 def collect(filenames):
     c = Collector()
     for module, filename in parse_modules(filenames):
-        c.xpath = (Namespace(Kind.MODULE, filename, 0),)
+        c.xpath = (Namespace(Kind.MODULE, filename, 0), )
         c.visit(module)
     return c.references, c.definitions
 
@@ -87,23 +94,29 @@ def collect(filenames):
 def find_unused(all_references, all_definitions_paths):
     references = set()
     while True:
-        new_references = {xpath[-1].name for xpath in all_references
-                          if is_reachable(xpath[:-1], references)}
+        new_references = {
+            xpath[-1].name
+            for xpath in all_references
+            if is_reachable(xpath[:-1], references)
+        }
         if new_references <= references:
             break
         references.update(new_references)
-        all_references = [xpath for xpath in all_references
-                          if xpath[-1].name not in references]
-    return {xpath for xpath in all_definitions_paths
-            if not is_reachable(xpath, references)}
+        all_references = [
+            xpath for xpath in all_references
+            if xpath[-1].name not in references
+        ]
+    return {
+        xpath
+        for xpath in all_definitions_paths
+        if not is_reachable(xpath, references)
+    }
 
 
 def is_reachable(xpath, references):
     for (kind, name, _) in xpath:
-        if (kind is not Kind.CLASS
-            and kind is not Kind.MODULE
-                and name not in references
-                and not is_framework(name)):
+        if (kind is not Kind.CLASS and kind is not Kind.MODULE
+                and name not in references and not is_framework(name)):
             return False
     return True
 
@@ -127,7 +140,7 @@ def username_xpath(xpath):
         return 'function', x2.name
     if k2 == Kind.CLASS:
         return 'class', x2.name
-    assert False, str(x2) 
+    assert False, str(x2)
 
 
 def parse_modules(filenames):
@@ -150,8 +163,10 @@ def print_unused(names):
         if xpath[-1].kind is Kind.NAME and not whitelist.Flags.track_variables:
             continue
         kind, fullname = username_xpath(xpath)
-        print("{module.name}:{xpath.lineno}: Unused {kind} '{fullname}'".format(
-            module=xpath[0], xpath=xpath[-1], kind=kind, fullname=fullname))
+        print(
+            "{module.name}:{xpath.lineno}: Unused {kind} '{fullname}'".format(
+                module=xpath[0], xpath=xpath[-1], kind=kind,
+                fullname=fullname))
 
 
 def run(files):

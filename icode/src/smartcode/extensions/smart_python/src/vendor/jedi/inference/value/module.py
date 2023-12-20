@@ -35,12 +35,13 @@ class _ModuleAttributeName(AbstractNameDefinition):
         if self._string_value is not None:
             s = self._string_value
             return ValueSet(
-                [create_simple_object(self.parent_context.inference_state, s)]
-            )
-        return compiled.get_string_value_set(self.parent_context.inference_state)
+                [create_simple_object(self.parent_context.inference_state, s)])
+        return compiled.get_string_value_set(
+            self.parent_context.inference_state)
 
 
 class SubModuleDictMixin:
+
     @inference_state_method_cache()
     def sub_modules_dict(self):
         """
@@ -50,8 +51,7 @@ class SubModuleDictMixin:
         names = {}
         if self.is_package():
             mods = self.inference_state.compiled_subprocess.iter_module_names(
-                self.py__path__()
-            )
+                self.py__path__())
             for name in mods:
                 # It's obviously a relative import to the current module.
                 names[name] = SubModuleName(self.as_context(), name)
@@ -66,9 +66,8 @@ class ModuleMixin(SubModuleDictMixin):
 
     def get_filters(self, origin_scope=None):
         yield MergedFilter(
-            ParserTreeFilter(
-                parent_context=self.as_context(), origin_scope=origin_scope
-            ),
+            ParserTreeFilter(parent_context=self.as_context(),
+                             origin_scope=origin_scope),
             GlobalNameFilter(self.as_context(), self.tree_node),
         )
         yield DictFilter(self.sub_modules_dict())
@@ -76,7 +75,8 @@ class ModuleMixin(SubModuleDictMixin):
         yield from self.iter_star_filters()
 
     def py__class__(self):
-        (c,) = values_from_qualified_names(self.inference_state, "types", "ModuleType")
+        (c, ) = values_from_qualified_names(self.inference_state, "types",
+                                            "ModuleType")
         return c
 
     def is_module(self):
@@ -151,7 +151,9 @@ class ModuleValue(ModuleMixin, TreeValue):
         string_names=None,
         is_package=False,
     ):
-        super().__init__(inference_state, parent_context=None, tree_node=module_node)
+        super().__init__(inference_state,
+                         parent_context=None,
+                         tree_node=module_node)
         self.file_io = file_io
         if file_io is None:
             self._path: Optional[Path] = None

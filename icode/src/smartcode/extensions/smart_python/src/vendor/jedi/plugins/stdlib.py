@@ -50,7 +50,6 @@ from jedi.inference.filters import (
 )
 from jedi.inference.signature import AbstractSignature, SignatureWrapper
 
-
 # Copied from Python 3.6's stdlib.
 _NAMEDTUPLE_CLASS_TEMPLATE = """\
 _property = property
@@ -117,7 +116,9 @@ _NAMEDTUPLE_FIELD_TEMPLATE = """\
 
 
 def execute(callback):
+
     def wrapper(value, arguments):
+
         def call():
             return callback(value, arguments=arguments)
 
@@ -173,13 +174,12 @@ def argument_clinic(
     """
 
     def f(func):
+
         def wrapper(value, arguments, callback):
             try:
                 args = tuple(
-                    iterate_argument_clinic(
-                        value.inference_state, arguments, clinic_string
-                    )
-                )
+                    iterate_argument_clinic(value.inference_state, arguments,
+                                            clinic_string))
             except ParamIssue:
                 return NO_VALUES
 
@@ -208,13 +208,15 @@ def argument_clinic(
 def builtins_next(iterators, defaults, inference_state):
     # TODO theoretically we have to check here if something is an iterator.
     # That is probably done by checking if it's not a class.
-    return defaults | iterators.py__getattribute__("__next__").execute_with_values()
+    return defaults | iterators.py__getattribute__(
+        "__next__").execute_with_values()
 
 
 @argument_clinic("iterator[, default], /")
 def builtins_iter(iterators_or_callables, defaults):
     # TODO implement this if it's a callable.
-    return iterators_or_callables.py__getattribute__("__iter__").execute_with_values()
+    return iterators_or_callables.py__getattribute__(
+        "__iter__").execute_with_values()
 
 
 @argument_clinic("object, name[, default], /")
@@ -278,6 +280,7 @@ def builtins_super(types, objects, context):
 
 
 class ReversedObject(AttributeOverwrite):
+
     def __init__(self, reversed_obj, iter_list):
         super().__init__(reversed_obj)
         self._iter_list = iter_list
@@ -287,7 +290,8 @@ class ReversedObject(AttributeOverwrite):
 
     @publish_method("__next__")
     def _next(self, arguments):
-        return ValueSet.from_sets(lazy_value.infer() for lazy_value in self._iter_list)
+        return ValueSet.from_sets(lazy_value.infer()
+                                  for lazy_value in self._iter_list)
 
 
 @argument_clinic("sequence, /", want_value=True, want_arguments=True)
@@ -305,13 +309,14 @@ def builtins_reversed(sequences, value, arguments):
     # necessary, because `reversed` is a function and autocompletion
     # would fail in certain cases like `reversed(x).__iter__` if we
     # just returned the result directly.
-    (seq,) = value.inference_state.typing_module.py__getattribute__(
-        "Iterator"
-    ).execute_with_values()
+    (seq, ) = value.inference_state.typing_module.py__getattribute__(
+        "Iterator").execute_with_values()
     return ValueSet([ReversedObject(seq, list(reversed(ordered)))])
 
 
-@argument_clinic("value, type, /", want_arguments=True, want_inference_state=True)
+@argument_clinic("value, type, /",
+                 want_arguments=True,
+                 want_inference_state=True)
 def builtins_isinstance(objects, types, arguments, inference_state):
     bool_results = set()
     for o in objects:
@@ -330,34 +335,29 @@ def builtins_isinstance(objects, types, arguments, inference_state):
         for cls_or_tup in types:
             if cls_or_tup.is_class():
                 bool_results.add(cls_or_tup in mro)
-            elif (
-                cls_or_tup.name.string_name == "tuple"
-                and cls_or_tup.get_root_context().is_builtins_module()
-            ):
+            elif (cls_or_tup.name.string_name == "tuple"
+                  and cls_or_tup.get_root_context().is_builtins_module()):
                 # Check for tuples.
                 classes = ValueSet.from_sets(
-                    lazy_value.infer() for lazy_value in cls_or_tup.iterate()
-                )
+                    lazy_value.infer() for lazy_value in cls_or_tup.iterate())
                 bool_results.add(any(cls in mro for cls in classes))
             else:
                 _, lazy_value = list(arguments.unpack())[1]
                 if isinstance(lazy_value, LazyTreeValue):
                     node = lazy_value.data
-                    message = (
-                        "TypeError: isinstance() arg 2 must be a "
-                        "class, type, or tuple of classes and types, "
-                        "not %s." % cls_or_tup
-                    )
-                    analysis.add(
-                        lazy_value.context, "type-error-isinstance", node, message
-                    )
+                    message = ("TypeError: isinstance() arg 2 must be a "
+                               "class, type, or tuple of classes and types, "
+                               "not %s." % cls_or_tup)
+                    analysis.add(lazy_value.context, "type-error-isinstance",
+                                 node, message)
 
     return ValueSet(
-        compiled.builtin_from_name(inference_state, str(b)) for b in bool_results
-    )
+        compiled.builtin_from_name(inference_state, str(b))
+        for b in bool_results)
 
 
 class StaticMethodObject(ValueWrapper):
+
     def py__get__(self, instance, class_value):
         return ValueSet([self._wrapped_value])
 
@@ -368,33 +368,38 @@ def builtins_staticmethod(functions):
 
 
 class ClassMethodObject(ValueWrapper):
+
     def __init__(self, class_method_obj, function):
         super().__init__(class_method_obj)
         self._function = function
 
     def py__get__(self, instance, class_value):
-        return ValueSet(
-            [
-                ClassMethodGet(__get__, class_value, self._function)
-                for __get__ in self._wrapped_value.py__getattribute__("__get__")
-            ]
-        )
+        return ValueSet([
+            ClassMethodGet(__get__, class_value, self._function)
+            for __get__ in self._wrapped_value.py__getattribute__("__get__")
+        ])
 
 
 class ClassMethodGet(ValueWrapper):
+
     def __init__(self, get_method, klass, function):
         super().__init__(get_method)
         self._class = klass
         self._function = function
 
     def get_signatures(self):
-        return [sig.bind(self._function) for sig in self._function.get_signatures()]
+        return [
+            sig.bind(self._function)
+            for sig in self._function.get_signatures()
+        ]
 
     def py__call__(self, arguments):
-        return self._function.execute(ClassMethodArguments(self._class, arguments))
+        return self._function.execute(
+            ClassMethodArguments(self._class, arguments))
 
 
 class ClassMethodArguments(TreeArgumentsWrapper):
+
     def __init__(self, klass, arguments):
         super().__init__(arguments)
         self._class = klass
@@ -410,8 +415,7 @@ def builtins_classmethod(functions, value, arguments):
     return ValueSet(
         ClassMethodObject(class_method_object, function)
         for class_method_object in value.py__call__(arguments=arguments)
-        for function in functions
-    )
+        for function in functions)
 
 
 class PropertyObject(AttributeOverwrite, ValueWrapper):
@@ -437,9 +441,7 @@ class PropertyObject(AttributeOverwrite, ValueWrapper):
 def builtins_property(functions, callback):
     return ValueSet(
         PropertyObject(property_value, function)
-        for property_value in callback()
-        for function in functions
-    )
+        for property_value in callback() for function in functions)
 
 
 def collections_namedtuple(value, arguments, callback):
@@ -470,8 +472,7 @@ def collections_namedtuple(value, arguments, callback):
         fields = string.replace(",", " ").split()
     elif isinstance(_fields, iterable.Sequence):
         fields = [
-            get_str_or_none(v)
-            for lazy_value in _fields.py__iter__()
+            get_str_or_none(v) for lazy_value in _fields.py__iter__()
             for v in lazy_value.infer()
         ]
         fields = [f for f in fields if f is not None]
@@ -487,8 +488,7 @@ def collections_namedtuple(value, arguments, callback):
         repr_fmt="",
         field_defs="\n".join(
             _NAMEDTUPLE_FIELD_TEMPLATE.format(index=index, name=name)
-            for index, name in enumerate(fields)
-        ),
+            for index, name in enumerate(fields)),
     )
 
     # Parse source code
@@ -500,10 +500,12 @@ def collections_namedtuple(value, arguments, callback):
         code_lines=parso.split_lines(code, keepends=True),
     ).as_context()
 
-    return ValueSet([ClassValue(inference_state, parent_context, generated_class)])
+    return ValueSet(
+        [ClassValue(inference_state, parent_context, generated_class)])
 
 
 class PartialObject(ValueWrapper):
+
     def __init__(self, actual_value, arguments, instance=None):
         super().__init__(actual_value)
         self._arguments = arguments
@@ -512,7 +514,8 @@ class PartialObject(ValueWrapper):
     def _get_functions(self, unpacked_arguments):
         key, lazy_value = next(unpacked_arguments, (None, None))
         if key is not None or lazy_value is None:
-            debug.warning("Partial should have a proper function %s", self._arguments)
+            debug.warning("Partial should have a proper function %s",
+                          self._arguments)
             return None
         return lazy_value.infer()
 
@@ -531,7 +534,10 @@ class PartialObject(ValueWrapper):
                 arg_count += 1
             else:
                 keys.add(key)
-        return [PartialSignature(s, arg_count, keys) for s in funcs.get_signatures()]
+        return [
+            PartialSignature(s, arg_count, keys)
+            for s in funcs.get_signatures()
+        ]
 
     def py__call__(self, arguments):
         funcs = self._get_functions(self._arguments.unpack())
@@ -539,8 +545,7 @@ class PartialObject(ValueWrapper):
             return NO_VALUES
 
         return funcs.execute(
-            MergedPartialArguments(self._arguments, arguments, self._instance)
-        )
+            MergedPartialArguments(self._arguments, arguments, self._instance))
 
     def py__doc__(self):
         """
@@ -560,24 +565,29 @@ class PartialObject(ValueWrapper):
 
 
 class PartialMethodObject(PartialObject):
+
     def py__get__(self, instance, class_value):
         if instance is None:
             return ValueSet([self])
-        return ValueSet([PartialObject(self._wrapped_value, self._arguments, instance)])
+        return ValueSet(
+            [PartialObject(self._wrapped_value, self._arguments, instance)])
 
 
 class PartialSignature(SignatureWrapper):
+
     def __init__(self, wrapped_signature, skipped_arg_count, skipped_arg_set):
         super().__init__(wrapped_signature)
         self._skipped_arg_count = skipped_arg_count
         self._skipped_arg_set = skipped_arg_set
 
     def get_param_names(self, resolve_stars=False):
-        names = self._wrapped_signature.get_param_names()[self._skipped_arg_count :]
+        names = self._wrapped_signature.get_param_names()[self.
+                                                          _skipped_arg_count:]
         return [n for n in names if n.string_name not in self._skipped_arg_set]
 
 
 class MergedPartialArguments(AbstractArguments):
+
     def __init__(self, partial_arguments, call_arguments, instance=None):
         self._partial_arguments = partial_arguments
         self._call_arguments = call_arguments
@@ -598,15 +608,14 @@ class MergedPartialArguments(AbstractArguments):
 
 def functools_partial(value, arguments, callback):
     return ValueSet(
-        PartialObject(instance, arguments) for instance in value.py__call__(arguments)
-    )
+        PartialObject(instance, arguments)
+        for instance in value.py__call__(arguments))
 
 
 def functools_partialmethod(value, arguments, callback):
     return ValueSet(
         PartialMethodObject(instance, arguments)
-        for instance in value.py__call__(arguments)
-    )
+        for instance in value.py__call__(arguments))
 
 
 @argument_clinic("first, /")
@@ -616,11 +625,8 @@ def _return_first_param(firsts):
 
 @argument_clinic("seq")
 def _random_choice(sequences):
-    return ValueSet.from_sets(
-        lazy_value.infer()
-        for sequence in sequences
-        for lazy_value in sequence.py__iter__()
-    )
+    return ValueSet.from_sets(lazy_value.infer() for sequence in sequences
+                              for lazy_value in sequence.py__iter__())
 
 
 def _dataclass(value, arguments, callback):
@@ -633,6 +639,7 @@ def _dataclass(value, arguments, callback):
 
 
 class DataclassWrapper(ValueWrapper, ClassMixin):
+
     def get_signatures(self):
         param_names = []
         for cls in reversed(list(self.py__mro__())):
@@ -641,7 +648,8 @@ class DataclassWrapper(ValueWrapper, ClassMixin):
                 # .values ordering is not guaranteed, at least not in
                 # Python < 3.6, when dicts where not ordered, which is an
                 # implementation detail anyway.
-                for name in sorted(filter_.values(), key=lambda name: name.start_pos):
+                for name in sorted(filter_.values(),
+                                   key=lambda name: name.start_pos):
                     d = name.tree_name.get_definition()
                     annassign = d.children[1]
                     if d.type == "expr_stmt" and annassign.type == "annassign":
@@ -655,12 +663,12 @@ class DataclassWrapper(ValueWrapper, ClassMixin):
                                 tree_name=name.tree_name,
                                 annotation_node=annassign.children[1],
                                 default_node=default,
-                            )
-                        )
+                            ))
         return [DataclassSignature(cls, param_names)]
 
 
 class DataclassSignature(AbstractSignature):
+
     def __init__(self, value, param_names):
         super().__init__(value)
         self._param_names = param_names
@@ -670,7 +678,9 @@ class DataclassSignature(AbstractSignature):
 
 
 class DataclassParamName(BaseTreeParamName):
-    def __init__(self, parent_context, tree_name, annotation_node, default_node):
+
+    def __init__(self, parent_context, tree_name, annotation_node,
+                 default_node):
         super().__init__(parent_context, tree_name)
         self.annotation_node = annotation_node
         self.default_node = default_node
@@ -686,6 +696,7 @@ class DataclassParamName(BaseTreeParamName):
 
 
 class ItemGetterCallable(ValueWrapper):
+
     def __init__(self, instance, args_value_set):
         super().__init__(instance)
         self._args_value_set = args_value_set
@@ -697,21 +708,20 @@ class ItemGetterCallable(ValueWrapper):
             lazy_values = list(args_value.py__iter__())
             if len(lazy_values) == 1:
                 # TODO we need to add the contextualized value.
-                value_set |= item_value_set.get_item(lazy_values[0].infer(), None)
+                value_set |= item_value_set.get_item(lazy_values[0].infer(),
+                                                     None)
             else:
-                value_set |= ValueSet(
-                    [
-                        iterable.FakeList(
-                            self._wrapped_value.inference_state,
-                            [
-                                LazyKnownValues(
-                                    item_value_set.get_item(lazy_value.infer(), None)
-                                )
-                                for lazy_value in lazy_values
-                            ],
-                        )
-                    ]
-                )
+                value_set |= ValueSet([
+                    iterable.FakeList(
+                        self._wrapped_value.inference_state,
+                        [
+                            LazyKnownValues(
+                                item_value_set.get_item(
+                                    lazy_value.infer(), None))
+                            for lazy_value in lazy_values
+                        ],
+                    )
+                ])
         return value_set
 
 
@@ -730,6 +740,7 @@ class WrapsCallable(ValueWrapper):
 
 
 class Wrapped(ValueWrapper, FunctionMixin):
+
     def __init__(self, func, original_function):
         super().__init__(func)
         self._original_function = original_function
@@ -744,23 +755,24 @@ class Wrapped(ValueWrapper, FunctionMixin):
 
 @argument_clinic("*args, /", want_value=True, want_arguments=True)
 def _operator_itemgetter(args_value_set, value, arguments):
-    return ValueSet(
-        [
-            ItemGetterCallable(instance, args_value_set)
-            for instance in value.py__call__(arguments)
-        ]
-    )
+    return ValueSet([
+        ItemGetterCallable(instance, args_value_set)
+        for instance in value.py__call__(arguments)
+    ])
 
 
 def _create_string_input_function(func):
+
     @argument_clinic("string, /", want_value=True, want_arguments=True)
     def wrapper(strings, value, arguments):
+
         def iterate():
             for value in strings:
                 s = get_str_or_none(value)
                 if s is not None:
                     s = func(s)
-                    yield compiled.create_simple_object(value.inference_state, s)
+                    yield compiled.create_simple_object(
+                        value.inference_state, s)
 
         values = ValueSet(iterate())
         if values:
@@ -774,7 +786,7 @@ def _create_string_input_function(func):
 def _os_path_join(args_set, callback):
     if len(args_set) == 1:
         string = ""
-        (sequence,) = args_set
+        (sequence, ) = args_set
         is_first = True
         for lazy_value in sequence.py__iter__():
             string_values = lazy_value.infer()
@@ -788,9 +800,9 @@ def _os_path_join(args_set, callback):
             string += s
             is_first = False
         else:
-            return ValueSet(
-                [compiled.create_simple_object(sequence.inference_state, string)]
-            )
+            return ValueSet([
+                compiled.create_simple_object(sequence.inference_state, string)
+            ])
     return callback()
 
 
@@ -860,20 +872,17 @@ _implemented = {
 
 
 def get_metaclass_filters(func):
+
     def wrapper(cls, metaclasses, is_instance):
         for metaclass in metaclasses:
-            if (
-                metaclass.py__name__() == "EnumMeta"
-                and metaclass.get_root_context().py__name__() == "enum"
-            ):
+            if (metaclass.py__name__() == "EnumMeta"
+                    and metaclass.get_root_context().py__name__() == "enum"):
                 filter_ = ParserTreeFilter(parent_context=cls.as_context())
                 return [
-                    DictFilter(
-                        {
-                            name.string_name: EnumInstance(cls, name).name
-                            for name in filter_.values()
-                        }
-                    )
+                    DictFilter({
+                        name.string_name: EnumInstance(cls, name).name
+                        for name in filter_.values()
+                    })
                 ]
         return func(cls, metaclasses, is_instance)
 
@@ -881,6 +890,7 @@ def get_metaclass_filters(func):
 
 
 class EnumInstance(LazyValueWrapper):
+
     def __init__(self, cls, name):
         self.inference_state = cls.inference_state
         self._cls = cls  # Corresponds to super().__self__
@@ -893,41 +903,37 @@ class EnumInstance(LazyValueWrapper):
 
     def _get_wrapped_value(self):
         n = self._name.string_name
-        if n.startswith("__") and n.endswith("__") or self._name.api_type == "function":
+        if n.startswith("__") and n.endswith(
+                "__") or self._name.api_type == "function":
             inferred = self._name.infer()
             if inferred:
                 return next(iter(inferred))
-            (o,) = self.inference_state.builtins_module.py__getattribute__("object")
+            (o, ) = self.inference_state.builtins_module.py__getattribute__(
+                "object")
             return o
 
-        (value,) = self._cls.execute_with_values()
+        (value, ) = self._cls.execute_with_values()
         return value
 
     def get_filters(self, origin_scope=None):
         yield DictFilter(
             dict(
                 name=compiled.create_simple_object(
-                    self.inference_state, self._name.string_name
-                ).name,
+                    self.inference_state, self._name.string_name).name,
                 value=self._name,
-            )
-        )
+            ))
         for f in self._get_wrapped_value().get_filters():
             yield f
 
 
 def tree_name_to_values(func):
+
     def wrapper(inference_state, context, tree_name):
-        if (
-            tree_name.value == "sep"
-            and context.is_module()
-            and context.py__name__() == "os.path"
-        ):
-            return ValueSet(
-                {
-                    compiled.create_simple_object(inference_state, os.path.sep),
-                }
-            )
+        if (tree_name.value == "sep" and context.is_module()
+                and context.py__name__() == "os.path"):
+            return ValueSet({
+                compiled.create_simple_object(inference_state, os.path.sep),
+            })
         return func(inference_state, context, tree_name)
 
     return wrapper

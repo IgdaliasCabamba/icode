@@ -73,7 +73,8 @@ class Harvester(object):
 
     def _iter_filenames(self):
         """A wrapper around :func:`~radon.cli.tools.iter_filenames`."""
-        return iter_filenames(self.paths, self.config.exclude, self.config.ignore)
+        return iter_filenames(self.paths, self.config.exclude,
+                              self.config.ignore)
 
     def gobble(self, fobj):
         """Subclasses must implement this method to define behavior.
@@ -94,10 +95,10 @@ class Harvester(object):
                 try:
                     if name.endswith(".ipynb"):
                         if SUPPORTS_IPYNB and self.config.include_ipynb:
-                            nb = nbformat.read(fobj, as_version=nbformat.NO_CONVERT)
+                            nb = nbformat.read(fobj,
+                                               as_version=nbformat.NO_CONVERT)
                             cells = [
-                                cell.source
-                                for cell in nb.cells
+                                cell.source for cell in nb.cells
                                 if cell.cell_type == "code"
                             ]
                             # Whole document
@@ -113,7 +114,8 @@ class Harvester(object):
                                 for source in cells:
                                     yield (
                                         "{0}:[{1}]".format(name, cellid),
-                                        self.gobble(StringIO(strip_ipython(source))),
+                                        self.gobble(
+                                            StringIO(strip_ipython(source))),
                                     )
                                     cellid += 1
                     else:
@@ -184,8 +186,7 @@ class CCHarvester(Harvester):
                 result[key] = data
                 continue
             values = [
-                v
-                for v in map(cc_to_dict, data)
+                v for v in map(cc_to_dict, data)
                 if self.config.min <= v["rank"] <= self.config.max
             ]
             if values:
@@ -216,7 +217,7 @@ class CCHarvester(Harvester):
         analyzed = 0
         for name, blocks in self.results:
             if "error" in blocks:
-                yield name, (blocks["error"],), {"error": True}
+                yield name, (blocks["error"], ), {"error": True}
                 continue
             res, cc, n = cc_to_terminal(
                 blocks,
@@ -236,7 +237,7 @@ class CCHarvester(Harvester):
             ranked_cc = cc_rank(cc)
             yield (
                 "\n{0} blocks (classes, functions, methods) analyzed.",
-                (analyzed,),
+                (analyzed, ),
                 {},
             )
             yield (
@@ -272,7 +273,7 @@ class RawHarvester(Harvester):
         sum_metrics = collections.defaultdict(int)
         for path, mod in self.results:
             if "error" in mod:
-                yield path, (mod["error"],), {"error": True}
+                yield path, (mod["error"], ), {"error": True}
                 continue
             yield path, (), {}
             for header in self.headers:
@@ -284,18 +285,24 @@ class RawHarvester(Harvester):
             yield "- Comment Stats", (), {"indent": 1}
             yield (
                 "(C % L): {0:.0%}",
-                (comments / (float(loc) or 1),),
-                {"indent": 2},
+                (comments / (float(loc) or 1), ),
+                {
+                    "indent": 2
+                },
             )
             yield (
                 "(C % S): {0:.0%}",
-                (comments / (float(mod["sloc"]) or 1),),
-                {"indent": 2},
+                (comments / (float(mod["sloc"]) or 1), ),
+                {
+                    "indent": 2
+                },
             )
             yield (
                 "(C + M % L): {0:.0%}",
-                ((comments + mod["multi"]) / (float(loc) or 1),),
-                {"indent": 2},
+                ((comments + mod["multi"]) / (float(loc) or 1), ),
+                {
+                    "indent": 2
+                },
             )
 
         if self.config.summary:
@@ -308,18 +315,25 @@ class RawHarvester(Harvester):
             yield "- Comment Stats", (), {"indent": 1}
             yield (
                 "(C % L): {0:.0%}",
-                (comments / (_get("LOC", 1) or 1),),
-                {"indent": 2},
+                (comments / (_get("LOC", 1) or 1), ),
+                {
+                    "indent": 2
+                },
             )
             yield (
                 "(C % S): {0:.0%}",
-                (comments / (_get("SLOC", 1) or 1),),
-                {"indent": 2},
+                (comments / (_get("SLOC", 1) or 1), ),
+                {
+                    "indent": 2
+                },
             )
             yield (
                 "(C + M % L): {0:.0%}",
-                (float(_get("Comments", 0) + _get("Multi")) / (_get("LOC", 1) or 1),),
-                {"indent": 2},
+                (float(_get("Comments", 0) + _get("Multi")) /
+                 (_get("LOC", 1) or 1), ),
+                {
+                    "indent": 2
+                },
             )
 
 
@@ -336,7 +350,8 @@ class MIHarvester(Harvester):
     def filtered_results(self):
         """Filter results with respect with their rank."""
         for key, value in self.results:
-            if "error" in value or self.config.min <= value["rank"] <= self.config.max:
+            if "error" in value or self.config.min <= value[
+                    "rank"] <= self.config.max:
                 yield (key, value)
 
     def _sort(self, results):
@@ -356,7 +371,7 @@ class MIHarvester(Harvester):
         """Yield lines to be printed to a terminal."""
         for name, mi in self._sort(self.filtered_results):
             if "error" in mi:
-                yield name, (mi["error"],), {"error": True}
+                yield name, (mi["error"], ), {"error": True}
                 continue
             rank = mi["rank"]
             color = MI_RANKS[rank]
@@ -416,13 +431,17 @@ def hal_report_to_terminal(report, base_indent=0):
     yield "h2: {}".format(report.h2), (), {"indent": 1 + base_indent}
     yield "N1: {}".format(report.N1), (), {"indent": 1 + base_indent}
     yield "N2: {}".format(report.N2), (), {"indent": 1 + base_indent}
-    yield "vocabulary: {}".format(report.vocabulary), (), {"indent": 1 + base_indent}
+    yield "vocabulary: {}".format(report.vocabulary), (), {
+        "indent": 1 + base_indent
+    }
     yield "length: {}".format(report.length), (), {"indent": 1 + base_indent}
     yield "calculated_length: {}".format(report.calculated_length), (), {
         "indent": 1 + base_indent
     }
     yield "volume: {}".format(report.volume), (), {"indent": 1 + base_indent}
-    yield "difficulty: {}".format(report.difficulty), (), {"indent": 1 + base_indent}
+    yield "difficulty: {}".format(report.difficulty), (), {
+        "indent": 1 + base_indent
+    }
     yield "effort: {}".format(report.effort), (), {"indent": 1 + base_indent}
     yield "time: {}".format(report.time), (), {"indent": 1 + base_indent}
     yield "bugs: {}".format(report.bugs), (), {"indent": 1 + base_indent}

@@ -91,7 +91,10 @@ class TabBrowser(QFrame):
                     tab["icon"],
                     tab["title"],
                     tab["tooltip"],
-                    {"object": tab["widget"], "index": tab["index"]},
+                    {
+                        "object": tab["widget"],
+                        "index": tab["index"]
+                    },
                 )
                 self.tab_list.addItem(row)
         self.update_size()

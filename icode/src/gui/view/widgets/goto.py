@@ -51,12 +51,11 @@ class GotoLine(QFrame):
     def display_cursor_info(self):
         if self.api.current_editor is not None:
             n_lines = self.api.current_editor.lines()
-            current_line, current_char = self.api.current_editor.getCursorPosition()
-            self.info.setText(
-                f"""
-            <small>Current Line: {current_line}, Character{current_char}. Type a line between 1 and {n_lines} to navigate to</small>
-            """
+            current_line, current_char = self.api.current_editor.getCursorPosition(
             )
+            self.info.setText(f"""
+            <small>Current Line: {current_line}, Character{current_char}. Type a line between 1 and {n_lines} to navigate to</small>
+            """)
 
     def goto_anywhere(self, text):
         if text.startswith(":") and len(text) > 1:

@@ -8,6 +8,7 @@ from rope.base.codeanalyze import ArrayLinesAdapter, LogicalLineFinder
 
 
 class FixSyntax(object):
+
     def __init__(self, project, code, resource, maxfixes=1):
         self.project = project
         self.code = code
@@ -22,15 +23,14 @@ class FixSyntax(object):
         tries = 0
         while True:
             try:
-                if (
-                    tries == 0
-                    and self.resource is not None
-                    and self.resource.read() == code
-                ):
-                    return self.project.get_pymodule(self.resource, force_errors=True)
-                return libutils.get_string_module(
-                    self.project, code, resource=self.resource, force_errors=True
-                )
+                if (tries == 0 and self.resource is not None
+                        and self.resource.read() == code):
+                    return self.project.get_pymodule(self.resource,
+                                                     force_errors=True)
+                return libutils.get_string_module(self.project,
+                                                  code,
+                                                  resource=self.resource,
+                                                  force_errors=True)
             except exceptions.ModuleSyntaxError as e:
                 if msg is None:
                     msg = "%s:%s %s" % (e.filename, e.lineno, e.message_)
@@ -40,8 +40,8 @@ class FixSyntax(object):
                     code = "\n".join(self.commenter.lines)
                 else:
                     raise exceptions.ModuleSyntaxError(
-                        e.filename, e.lineno, "Failed to fix error: {0}".format(msg)
-                    )
+                        e.filename, e.lineno,
+                        "Failed to fix error: {0}".format(msg))
 
     @property
     @utils.saveit
@@ -65,7 +65,7 @@ class FixSyntax(object):
             newoffset = self.commenter.transfered_offset(offset)
             return rope.base.evaluate.eval_location(pymodule, newoffset)
 
-        if new_code.startswith(self.code[: offset + 1]):
+        if new_code.startswith(self.code[:offset + 1]):
             return new_pyname()
         result = old_pyname()
         if result is None:
@@ -74,6 +74,7 @@ class FixSyntax(object):
 
 
 class _Commenter(object):
+
     def __init__(self, code):
         self.code = code
         self.lines = self.code.split("\n")
@@ -128,12 +129,8 @@ class _Commenter(object):
         block_start = lineno
         last_indents = indents
         while block_start > 0:
-            block_start = (
-                rope.base.codeanalyze.get_block_start(
-                    ArrayLinesAdapter(self.lines), block_start
-                )
-                - 1
-            )
+            block_start = (rope.base.codeanalyze.get_block_start(
+                ArrayLinesAdapter(self.lines), block_start) - 1)
             if self.lines[block_start].strip().startswith("try:"):
                 indents = _get_line_indents(self.lines[block_start])
                 if indents > last_indents:
@@ -141,11 +138,9 @@ class _Commenter(object):
                 last_indents = indents
                 block_end = self._find_matching_deindent(block_start)
                 line = self.lines[block_end].strip()
-                if not (
-                    line.startswith("finally:")
-                    or line.startswith("except ")
-                    or line.startswith("except:")
-                ):
+                if not (line.startswith("finally:")
+                        or line.startswith("except ")
+                        or line.startswith("except:")):
                     self._insert(block_end, " " * indents + "finally:")
                     self._insert(block_end + 1, " " * indents + "    pass")
 

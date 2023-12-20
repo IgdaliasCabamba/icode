@@ -13,6 +13,7 @@ from . import iconsts
 
 
 class MiniMap(QsciScintilla):
+
     def __init__(self, editor, parent) -> None:
         super().__init__(parent)
         self.editor = editor
@@ -47,9 +48,8 @@ class MiniMap(QsciScintilla):
         self.setIndicatorHoverForegroundColor(QColor("#5387e0"), 4)
 
         for i in range(1, 5):
-            self.SendScintilla(
-                QsciScintilla.SCI_MARKERDEFINE, i, QsciScintilla.SC_MARK_EMPTY
-            )
+            self.SendScintilla(QsciScintilla.SCI_MARKERDEFINE, i,
+                               QsciScintilla.SC_MARK_EMPTY)
         self.SendScintilla(QsciScintilla.SCI_SETMARGINWIDTHN, 1, 0)
 
         self.setMouseTracking(True)
@@ -83,9 +83,8 @@ class MiniMap(QsciScintilla):
         self.slider.change_transparency(iconsts.MINIMAP_SLIDER_OPACITY_MIN)
 
     def line_from_position(self, point):
-        position = self.SendScintilla(
-            QsciScintilla.SCI_POSITIONFROMPOINT, point.x(), point.y()
-        )
+        position = self.SendScintilla(QsciScintilla.SCI_POSITIONFROMPOINT,
+                                      point.x(), point.y())
         return self.SendScintilla(QsciScintilla.SCI_LINEFROMPOSITION, position)
 
     def scroll_area(self, pos_parent, line_area):
@@ -94,25 +93,25 @@ class MiniMap(QsciScintilla):
 
     def scroll_map(self):
         first_visible_line = self.editor.SendScintilla(
-            QsciScintilla.SCI_GETFIRSTVISIBLELINE
-        )
+            QsciScintilla.SCI_GETFIRSTVISIBLELINE)
 
-        num_doc_lines = self.editor.SendScintilla(QsciScintilla.SCI_GETLINECOUNT)
+        num_doc_lines = self.editor.SendScintilla(
+            QsciScintilla.SCI_GETLINECOUNT)
 
         num_visible_lines = self.editor.SendScintilla(
-            QsciScintilla.SCI_DOCLINEFROMVISIBLE, num_doc_lines
-        )
+            QsciScintilla.SCI_DOCLINEFROMVISIBLE, num_doc_lines)
 
-        lines_on_screen = self.editor.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+        lines_on_screen = self.editor.SendScintilla(
+            QsciScintilla.SCI_LINESONSCREEN)
 
         if num_visible_lines > lines_on_screen:
             last_top_visible_line = num_visible_lines - lines_on_screen
 
             num_map_visible_lines = self.SendScintilla(
-                QsciScintilla.SCI_DOCLINEFROMVISIBLE, num_doc_lines
-            )
+                QsciScintilla.SCI_DOCLINEFROMVISIBLE, num_doc_lines)
 
-            lines_on_screenm = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+            lines_on_screenm = self.SendScintilla(
+                QsciScintilla.SCI_LINESONSCREEN)
 
             last_top_visible_linem = num_map_visible_lines - lines_on_screenm
 
@@ -123,9 +122,9 @@ class MiniMap(QsciScintilla):
             self.verticalScrollBar().setValue(first_visible_linem)
 
             higher_pos = self.editor.SendScintilla(
-                QsciScintilla.SCI_POSITIONFROMPOINT, 0, 0
-            )
-            y = self.SendScintilla(QsciScintilla.SCI_POINTYFROMPOSITION, 0, higher_pos)
+                QsciScintilla.SCI_POSITIONFROMPOINT, 0, 0)
+            y = self.SendScintilla(QsciScintilla.SCI_POINTYFROMPOSITION, 0,
+                                   higher_pos)
 
             self.slider.move(0, y)
 
@@ -157,6 +156,7 @@ class MiniMap(QsciScintilla):
 
 
 class MiniMapBox(QFrame):
+
     def __init__(self, editor, parent) -> None:
         super().__init__(parent)
         self.setObjectName("minimap")
@@ -178,14 +178,14 @@ class MiniMapBox(QFrame):
         self.setFixedWidth(iconsts.MINIMAP_BOX_FIXED_WIDTH)
         self.drop_shadow = QGraphicsDropShadowEffect(self)
         self.drop_shadow.setBlurRadius(iconsts.MINIMAP_BOX_SHADOW_BLURRADIUS)
-        self.drop_shadow.setOffset(
-            iconsts.MINIMAP_BOX_SHADOW_Y_OFFSET, iconsts.MINIMAP_BOX_SHADOW_X_OFFSET
-        )
+        self.drop_shadow.setOffset(iconsts.MINIMAP_BOX_SHADOW_Y_OFFSET,
+                                   iconsts.MINIMAP_BOX_SHADOW_X_OFFSET)
         self.drop_shadow.setColor(QColor(0, 0, 0))
         self.drop_shadow.setEnabled(False)
         self.minimap.setGraphicsEffect(self.drop_shadow)
 
-        self.editor.horizontalScrollBar().valueChanged.connect(self.update_drop_shadow)
+        self.editor.horizontalScrollBar().valueChanged.connect(
+            self.update_drop_shadow)
         self.editor.on_resized.connect(self.update_lines)
         self.editor.linesChanged.connect(self.update_lines)
 
@@ -205,10 +205,10 @@ class MiniMapBox(QFrame):
 
     def update_lines(self):
         row, col = self.editor.getCursorPosition()
-        width = self.editor.fontMetrics().boundingRect(self.editor.text(row)).width()
-        if (
-            width - self.editor.geometry().width()
-        ) * -1 < iconsts.MINIMAP_SHADOW_MIN_TEXT_WIDTH:
+        width = self.editor.fontMetrics().boundingRect(
+            self.editor.text(row)).width()
+        if (width - self.editor.geometry().width()
+            ) * -1 < iconsts.MINIMAP_SHADOW_MIN_TEXT_WIDTH:
             self.drop_shadow.setEnabled(True)
             self.can_shadow = True
 
@@ -217,14 +217,10 @@ class MiniMapBox(QFrame):
             self.can_shadow = False
 
             for row in range(self.editor.lines()):
-                width = (
-                    self.editor.fontMetrics()
-                    .boundingRect(self.editor.text(row))
-                    .width()
-                )
-                if (
-                    width - self.editor.geometry().width()
-                ) * -1 < iconsts.MINIMAP_SHADOW_MIN_TEXT_WIDTH:
+                width = (self.editor.fontMetrics().boundingRect(
+                    self.editor.text(row)).width())
+                if (width - self.editor.geometry().width()
+                    ) * -1 < iconsts.MINIMAP_SHADOW_MIN_TEXT_WIDTH:
                     self.drop_shadow.setEnabled(True)
                     self.can_shadow = True
                     break
@@ -232,11 +228,13 @@ class MiniMapBox(QFrame):
     def update_drop_shadow(self, value):
         if self.editor.horizontalScrollBar().maximum() - value <= 1:
             self.drop_shadow.setEnabled(False)
-        elif self.editor.horizontalScrollBar().value() <= 1 and self.can_shadow:
+        elif self.editor.horizontalScrollBar().value(
+        ) <= 1 and self.can_shadow:
             self.drop_shadow.setEnabled(True)
 
 
 class ScrollBar(QScrollBar):
+
     def __init__(self, editor, parent) -> None:
         super().__init__(parent)
         self.parent = parent
@@ -252,6 +250,7 @@ class ScrollBar(QScrollBar):
 
 
 class SliderArea(QFrame):
+
     def __init__(self, minimap):
         super().__init__(minimap)
         self.setObjectName("minimap-slider")
@@ -264,21 +263,20 @@ class SliderArea(QFrame):
 
     def change_transparency(self, bg: int):
         self.setStyleSheet(
-            "#minimap-slider{background-color:rgba(255,255,255,%d)}" % bg
-        )
+            "#minimap-slider{background-color:rgba(255,255,255,%d)}" % bg)
 
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         self.pressed = True
         self.setCursor(Qt.ClosedHandCursor)
         first_visible_line = self.minimap.editor.SendScintilla(
-            QsciScintilla.SCI_GETFIRSTVISIBLELINE
-        )
+            QsciScintilla.SCI_GETFIRSTVISIBLELINE)
         pos_parent = self.mapToParent(event.pos())
         position = self.minimap.SendScintilla(
-            QsciScintilla.SCI_POSITIONFROMPOINT, pos_parent.x(), pos_parent.y()
-        )
-        line = self.minimap.SendScintilla(QsciScintilla.SCI_LINEFROMPOSITION, position)
+            QsciScintilla.SCI_POSITIONFROMPOINT, pos_parent.x(),
+            pos_parent.y())
+        line = self.minimap.SendScintilla(QsciScintilla.SCI_LINEFROMPOSITION,
+                                          position)
         self.line_on_visible_area = (line - first_visible_line) + 1
 
     def mouseReleaseEvent(self, event):

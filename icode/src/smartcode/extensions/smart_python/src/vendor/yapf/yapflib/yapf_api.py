@@ -106,9 +106,8 @@ def FormatFile(
         reformatted_source = newline.join(line for line in lines) + newline
     if in_place:
         if original_source and original_source != reformatted_source:
-            file_resources.WriteReformattedCode(
-                filename, reformatted_source, encoding, in_place
-            )
+            file_resources.WriteReformattedCode(filename, reformatted_source,
+                                                encoding, in_place)
         return None, encoding, changed
 
     return reformatted_source, encoding, changed
@@ -169,14 +168,15 @@ def FormatCode(
 
     lines = _LineRangesToSet(lines)
     _MarkLinesToFormat(uwlines, lines)
-    reformatted_source = reformatter.Reformat(_SplitSemicolons(uwlines), verify, lines)
+    reformatted_source = reformatter.Reformat(_SplitSemicolons(uwlines),
+                                              verify, lines)
 
     if unformatted_source == reformatted_source:
         return "" if print_diff else reformatted_source, False
 
-    code_diff = _GetUnifiedDiff(
-        unformatted_source, reformatted_source, filename=filename
-    )
+    code_diff = _GetUnifiedDiff(unformatted_source,
+                                reformatted_source,
+                                filename=filename)
 
     if print_diff:
         return (
@@ -218,9 +218,10 @@ def ReadFile(filename, logger=None):
         encoding = file_resources.FileEncoding(filename)
 
         # Preserves line endings.
-        with py3compat.open_with_encoding(
-            filename, mode="r", encoding=encoding, newline=""
-        ) as fd:
+        with py3compat.open_with_encoding(filename,
+                                          mode="r",
+                                          encoding=encoding,
+                                          newline="") as fd:
             lines = fd.readlines()
 
         line_ending = file_resources.LineEnding(lines)
@@ -269,8 +270,7 @@ def _MarkLinesToFormat(uwlines, lines):
     if lines:
         for uwline in uwlines:
             uwline.disable = not lines.intersection(
-                range(uwline.lineno, uwline.last.lineno + 1)
-            )
+                range(uwline.lineno, uwline.last.lineno + 1))
 
     # Now go through the lines and disable any lines explicitly marked as
     # disabled.
@@ -282,30 +282,35 @@ def _MarkLinesToFormat(uwlines, lines):
                 index += 1
                 while index < len(uwlines):
                     uwline = uwlines[index]
-                    if uwline.is_comment and _EnableYAPF(uwline.first.value.strip()):
+                    if uwline.is_comment and _EnableYAPF(
+                            uwline.first.value.strip()):
                         if not re.search(
-                            DISABLE_PATTERN,
-                            uwline.first.value.strip().split("\n")[-1].strip(),
-                            re.IGNORECASE,
+                                DISABLE_PATTERN,
+                                uwline.first.value.strip().split("\n")
+                            [-1].strip(),
+                                re.IGNORECASE,
                         ):
                             break
                     uwline.disable = True
                     index += 1
-        elif re.search(DISABLE_PATTERN, uwline.last.value.strip(), re.IGNORECASE):
+        elif re.search(DISABLE_PATTERN, uwline.last.value.strip(),
+                       re.IGNORECASE):
             uwline.disable = True
         index += 1
 
 
 def _DisableYAPF(line):
-    return re.search(
-        DISABLE_PATTERN, line.split("\n")[0].strip(), re.IGNORECASE
-    ) or re.search(DISABLE_PATTERN, line.split("\n")[-1].strip(), re.IGNORECASE)
+    return re.search(DISABLE_PATTERN,
+                     line.split("\n")[0].strip(), re.IGNORECASE) or re.search(
+                         DISABLE_PATTERN,
+                         line.split("\n")[-1].strip(), re.IGNORECASE)
 
 
 def _EnableYAPF(line):
-    return re.search(
-        ENABLE_PATTERN, line.split("\n")[0].strip(), re.IGNORECASE
-    ) or re.search(ENABLE_PATTERN, line.split("\n")[-1].strip(), re.IGNORECASE)
+    return re.search(ENABLE_PATTERN,
+                     line.split("\n")[0].strip(), re.IGNORECASE) or re.search(
+                         ENABLE_PATTERN,
+                         line.split("\n")[-1].strip(), re.IGNORECASE)
 
 
 def _GetUnifiedDiff(before, after, filename="code"):
@@ -321,17 +326,13 @@ def _GetUnifiedDiff(before, after, filename="code"):
     """
     before = before.splitlines()
     after = after.splitlines()
-    return (
-        "\n".join(
-            difflib.unified_diff(
-                before,
-                after,
-                filename,
-                filename,
-                "(original)",
-                "(reformatted)",
-                lineterm="",
-            )
-        )
-        + "\n"
-    )
+    return ("\n".join(
+        difflib.unified_diff(
+            before,
+            after,
+            filename,
+            filename,
+            "(original)",
+            "(reformatted)",
+            lineterm="",
+        )) + "\n")

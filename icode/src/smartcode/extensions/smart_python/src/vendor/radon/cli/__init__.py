@@ -21,7 +21,6 @@ if sys.version_info[0] == 2:
 else:
     import configparser
 
-
 CONFIG_SECTION_NAME = "radon"
 
 
@@ -37,11 +36,17 @@ class FileConfig(object):
         if not self.file_cfg.has_option(CONFIG_SECTION_NAME, key):
             return default
         if type == int:
-            return self.file_cfg.getint(CONFIG_SECTION_NAME, key, fallback=default)
+            return self.file_cfg.getint(CONFIG_SECTION_NAME,
+                                        key,
+                                        fallback=default)
         if type == bool:
-            return self.file_cfg.getboolean(CONFIG_SECTION_NAME, key, fallback=default)
+            return self.file_cfg.getboolean(CONFIG_SECTION_NAME,
+                                            key,
+                                            fallback=default)
         else:
-            return self.file_cfg.get(CONFIG_SECTION_NAME, key, fallback=default)
+            return self.file_cfg.get(CONFIG_SECTION_NAME,
+                                     key,
+                                     fallback=default)
 
     @staticmethod
     def file_config():
@@ -62,24 +67,24 @@ program = Program(version=sys.modules["radon"].__version__)
 @program.command
 @program.arg("paths", nargs="+")
 def cc(
-    paths,
-    min=_cfg.get_value("cc_min", str, "A"),
-    max=_cfg.get_value("cc_max", str, "F"),
-    show_complexity=_cfg.get_value("show_complexity", bool, False),
-    average=_cfg.get_value("average", bool, False),
-    exclude=_cfg.get_value("exclude", str, None),
-    ignore=_cfg.get_value("ignore", str, None),
-    order=_cfg.get_value("order", str, "SCORE"),
-    json=False,
-    no_assert=_cfg.get_value("no_assert", bool, False),
-    show_closures=_cfg.get_value("show_closures", bool, False),
-    total_average=_cfg.get_value("total_average", bool, False),
-    xml=False,
-    md=False,
-    codeclimate=False,
-    output_file=_cfg.get_value("output_file", str, None),
-    include_ipynb=_cfg.get_value("include_ipynb", bool, False),
-    ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
+        paths,
+        min=_cfg.get_value("cc_min", str, "A"),
+        max=_cfg.get_value("cc_max", str, "F"),
+        show_complexity=_cfg.get_value("show_complexity", bool, False),
+        average=_cfg.get_value("average", bool, False),
+        exclude=_cfg.get_value("exclude", str, None),
+        ignore=_cfg.get_value("ignore", str, None),
+        order=_cfg.get_value("order", str, "SCORE"),
+        json=False,
+        no_assert=_cfg.get_value("no_assert", bool, False),
+        show_closures=_cfg.get_value("show_closures", bool, False),
+        total_average=_cfg.get_value("total_average", bool, False),
+        xml=False,
+        md=False,
+        codeclimate=False,
+        output_file=_cfg.get_value("output_file", str, None),
+        include_ipynb=_cfg.get_value("include_ipynb", bool, False),
+        ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
 ):
     """Analyze the given Python modules and compute Cyclomatic
     Complexity (CC).
@@ -145,14 +150,14 @@ def cc(
 @program.command
 @program.arg("paths", nargs="+")
 def raw(
-    paths,
-    exclude=_cfg.get_value("exclude", str, None),
-    ignore=_cfg.get_value("ignore", str, None),
-    summary=False,
-    json=False,
-    output_file=_cfg.get_value("output_file", str, None),
-    include_ipynb=_cfg.get_value("include_ipynb", bool, False),
-    ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
+        paths,
+        exclude=_cfg.get_value("exclude", str, None),
+        ignore=_cfg.get_value("ignore", str, None),
+        summary=False,
+        json=False,
+        output_file=_cfg.get_value("output_file", str, None),
+        include_ipynb=_cfg.get_value("include_ipynb", bool, False),
+        ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
 ):
     """Analyze the given Python modules and compute raw metrics.
 
@@ -185,18 +190,18 @@ def raw(
 @program.command
 @program.arg("paths", nargs="+")
 def mi(
-    paths,
-    min=_cfg.get_value("mi_min", str, "A"),
-    max=_cfg.get_value("mi_max", str, "C"),
-    multi=_cfg.get_value("multi", bool, True),
-    exclude=_cfg.get_value("exclude", str, None),
-    ignore=_cfg.get_value("ignore", str, None),
-    show=_cfg.get_value("show_mi", bool, False),
-    json=False,
-    sort=False,
-    output_file=_cfg.get_value("output_file", str, None),
-    include_ipynb=_cfg.get_value("include_ipynb", bool, False),
-    ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
+        paths,
+        min=_cfg.get_value("mi_min", str, "A"),
+        max=_cfg.get_value("mi_max", str, "C"),
+        multi=_cfg.get_value("multi", bool, True),
+        exclude=_cfg.get_value("exclude", str, None),
+        ignore=_cfg.get_value("ignore", str, None),
+        show=_cfg.get_value("show_mi", bool, False),
+        json=False,
+        sort=False,
+        output_file=_cfg.get_value("output_file", str, None),
+        include_ipynb=_cfg.get_value("include_ipynb", bool, False),
+        ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
 ):
     """Analyze the given Python modules and compute the Maintainability Index.
 
@@ -242,14 +247,14 @@ def mi(
 @program.command
 @program.arg("paths", nargs="+")
 def hal(
-    paths,
-    exclude=_cfg.get_value("exclude", str, None),
-    ignore=_cfg.get_value("ignore", str, None),
-    json=False,
-    functions=_cfg.get_value("functions", bool, False),
-    output_file=_cfg.get_value("output_file", str, None),
-    include_ipynb=_cfg.get_value("include_ipynb", bool, False),
-    ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
+        paths,
+        exclude=_cfg.get_value("exclude", str, None),
+        ignore=_cfg.get_value("ignore", str, None),
+        json=False,
+        functions=_cfg.get_value("functions", bool, False),
+        output_file=_cfg.get_value("output_file", str, None),
+        include_ipynb=_cfg.get_value("include_ipynb", bool, False),
+        ipynb_cells=_cfg.get_value("ipynb_cells", bool, False),
 ):
     """
     Analyze the given Python modules and compute their Halstead metrics.
@@ -340,9 +345,10 @@ def log_result(harvester, **kwargs):
     elif kwargs.get("xml"):
         log(harvester.as_xml(), noformat=True, **kwargs)
     elif kwargs.get("codeclimate"):
-        log_list(
-            harvester.as_codeclimate_issues(), delimiter="\0", noformat=True, **kwargs
-        )
+        log_list(harvester.as_codeclimate_issues(),
+                 delimiter="\0",
+                 noformat=True,
+                 **kwargs)
     elif kwargs.get("md"):
         log(harvester.as_md(), noformat=True, **kwargs)
     else:

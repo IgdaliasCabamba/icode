@@ -58,7 +58,8 @@ class Flake8Checker(object):
             if not self.no_assert:
                 return
             self.max_cc = 10
-        visitor = ComplexityVisitor.from_ast(self.tree, no_assert=self.no_assert)
+        visitor = ComplexityVisitor.from_ast(self.tree,
+                                             no_assert=self.no_assert)
 
         blocks = visitor.blocks
         if self.show_closures:

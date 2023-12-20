@@ -25,6 +25,7 @@ def _memoize_default(
     """
 
     def func(function):
+
         def wrapper(obj, *args, **kwargs):
             # TODO These checks are kind of ugly and slow.
             if inference_state_is_first_arg:
@@ -55,15 +56,16 @@ def _memoize_default(
 
 
 def inference_state_function_cache(default=_NO_DEFAULT):
+
     def decorator(func):
-        return _memoize_default(default=default, inference_state_is_first_arg=True)(
-            func
-        )
+        return _memoize_default(default=default,
+                                inference_state_is_first_arg=True)(func)
 
     return decorator
 
 
 def inference_state_method_cache(default=_NO_DEFAULT):
+
     def decorator(func):
         return _memoize_default(default=default)(func)
 
@@ -71,6 +73,7 @@ def inference_state_method_cache(default=_NO_DEFAULT):
 
 
 def inference_state_as_method_param_cache():
+
     def decorator(call):
         return _memoize_default(second_arg_is_inference_state=True)(call)
 
@@ -96,6 +99,7 @@ def inference_state_method_generator_cache():
     """
 
     def func(function):
+
         @wraps(function)
         def wrapper(obj, *args, **kwargs):
             cache = obj.inference_state.memoize_cache
@@ -118,7 +122,8 @@ def inference_state_method_generator_cache():
                 try:
                     next_element = cached_lst[i]
                     if next_element is _RECURSION_SENTINEL:
-                        debug.warning("Found a generator recursion for %s" % obj)
+                        debug.warning("Found a generator recursion for %s" %
+                                      obj)
                         # This means we have hit a recursion.
                         return
                 except IndexError:

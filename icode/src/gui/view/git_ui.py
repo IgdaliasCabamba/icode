@@ -24,6 +24,7 @@ from core.char_utils import get_unicon
 
 
 class GitMenu(QMenu):
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -68,9 +69,8 @@ class CommitTree(QTreeView):
             log = re.sub("\n", "", commit.message)
             if log.startswith(text) or text == "*":
 
-                commit_log = IStandardItem(
-                    self.icons.get_icon("log"), log, None, None, 0
-                )
+                commit_log = IStandardItem(self.icons.get_icon("log"), log,
+                                           None, None, 0)
                 commit_log.setForeground(QColor(255, 184, 71))
                 self.model.appendRow(commit_log)
 
@@ -78,15 +78,13 @@ class CommitTree(QTreeView):
                     name = re.sub("\n", "", e.name)
 
                     if e.type == 2:  # folder
-                        row = IStandardItem(
-                            self.icons.get_icon("folder"), name, None, None, 1
-                        )
+                        row = IStandardItem(self.icons.get_icon("folder"),
+                                            name, None, None, 1)
                         commit_log.appendRow(row)
 
                     else:
-                        row = IStandardItem(
-                            self.icons.get_icon("file"), name, None, None, 1
-                        )
+                        row = IStandardItem(self.icons.get_icon("file"), name,
+                                            None, None, 1)
                         commit_log.appendRow(row)
 
 
@@ -127,9 +125,8 @@ class StatusTree(QTreeView):
 
             self.model.clear()
 
-            self.repo_header = IStandardItem(
-                self.icons.get_icon("repository"), repo_name, None, None, 0
-            )
+            self.repo_header = IStandardItem(self.icons.get_icon("repository"),
+                                             repo_name, None, None, 0)
             self.repo_header.setCheckable(False)
             self.model.appendRow(self.repo_header)
 
@@ -227,7 +224,8 @@ class StatusTree(QTreeView):
             self.model.appendRow(self.ignored)
 
             for key, value in status_data.items():
-                row = IStandardItem(self.icons.get_icon("file"), key, None, None, 0)
+                row = IStandardItem(self.icons.get_icon("file"), key, None,
+                                    None, 0)
                 if value in {1, 2}:
                     self.unmodified.appendRow(row)
                     row.setForeground(QColor(63, 242, 105))
@@ -268,12 +266,14 @@ class StatusTree(QTreeView):
             """
             self.repo_header.setToolTip(repo_data)
 
-            self.on_count_changed.emit(total_count, unmodified_count, modified_count)
+            self.on_count_changed.emit(total_count, unmodified_count,
+                                       modified_count)
         except Exception as e:
             print("Source control error: ", e)
 
 
 class IGit(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -295,7 +295,8 @@ class IGit(QFrame):
         self.btn_repository.setMenu(self.repository_menu)
         self.btn_repository.setObjectName("source_control-header-button")
         self.btn_repository.setIcon(self.icons.get_icon("repository"))
-        self.btn_repository.clicked.connect(lambda: self.btn_repository.showMenu())
+        self.btn_repository.clicked.connect(
+            lambda: self.btn_repository.showMenu())
 
         self.lbl_total = HeaderLabel(self)
 
@@ -313,7 +314,8 @@ class IGit(QFrame):
         self.btn_clone_repository = QPushButton("Clone Repository")
 
         self.input_commit_log = InputHistory(self)
-        self.input_commit_log.setPlaceholderText("Type log to search, enter to commit")
+        self.input_commit_log.setPlaceholderText(
+            "Type log to search, enter to commit")
         self.input_commit_log.setVisible(False)
 
         self.commit_tree = CommitTree(self)

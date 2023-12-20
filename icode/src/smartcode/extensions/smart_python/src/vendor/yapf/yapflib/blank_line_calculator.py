@@ -31,32 +31,30 @@ _NO_BLANK_LINES = 1
 _ONE_BLANK_LINE = 2
 _TWO_BLANK_LINES = 3
 
-_PYTHON_STATEMENTS = frozenset(
-    {
-        "small_stmt",
-        "expr_stmt",
-        "print_stmt",
-        "del_stmt",
-        "pass_stmt",
-        "break_stmt",
-        "continue_stmt",
-        "return_stmt",
-        "raise_stmt",
-        "yield_stmt",
-        "import_stmt",
-        "global_stmt",
-        "exec_stmt",
-        "assert_stmt",
-        "if_stmt",
-        "while_stmt",
-        "for_stmt",
-        "try_stmt",
-        "with_stmt",
-        "nonlocal_stmt",
-        "async_stmt",
-        "simple_stmt",
-    }
-)
+_PYTHON_STATEMENTS = frozenset({
+    "small_stmt",
+    "expr_stmt",
+    "print_stmt",
+    "del_stmt",
+    "pass_stmt",
+    "break_stmt",
+    "continue_stmt",
+    "return_stmt",
+    "raise_stmt",
+    "yield_stmt",
+    "import_stmt",
+    "global_stmt",
+    "exec_stmt",
+    "assert_stmt",
+    "if_stmt",
+    "while_stmt",
+    "for_stmt",
+    "try_stmt",
+    "with_stmt",
+    "nonlocal_stmt",
+    "async_stmt",
+    "simple_stmt",
+})
 
 
 def CalculateBlankLines(tree):
@@ -87,10 +85,8 @@ class _BlankLineCalculator(pytree_visitor.PyTreeVisitor):
             self.last_comment_lineno = node.children[0].lineno
 
     def Visit_decorator(self, node):  # pylint: disable=invalid-name
-        if (
-            self.last_comment_lineno
-            and self.last_comment_lineno == node.children[0].lineno - 1
-        ):
+        if (self.last_comment_lineno
+                and self.last_comment_lineno == node.children[0].lineno - 1):
             _SetNumNewlines(node.children[0], _NO_BLANK_LINES)
         else:
             _SetNumNewlines(node.children[0], self._GetNumNewlines(node))
@@ -113,8 +109,7 @@ class _BlankLineCalculator(pytree_visitor.PyTreeVisitor):
         index = self._SetBlankLinesBetweenCommentAndClassFunc(node)
         if _AsyncFunction(node):
             index = self._SetBlankLinesBetweenCommentAndClassFunc(
-                node.prev_sibling.parent
-            )
+                node.prev_sibling.parent)
             _SetNumNewlines(node.children[0], None)
         else:
             index = self._SetBlankLinesBetweenCommentAndClassFunc(node)
@@ -159,13 +154,11 @@ class _BlankLineCalculator(pytree_visitor.PyTreeVisitor):
             # node as its only child.
             self.Visit(node.children[index].children[0])
             if not self.last_was_decorator:
-                _SetNumNewlines(node.children[index].children[0], _ONE_BLANK_LINE)
+                _SetNumNewlines(node.children[index].children[0],
+                                _ONE_BLANK_LINE)
             index += 1
-        if (
-            index
-            and node.children[index].lineno - 1
-            == node.children[index - 1].children[0].lineno
-        ):
+        if (index and node.children[index].lineno - 1
+                == node.children[index - 1].children[0].lineno):
             _SetNumNewlines(node.children[index], _NO_BLANK_LINES)
         else:
             if self.last_comment_lineno + 1 == node.children[index].lineno:
@@ -183,24 +176,20 @@ class _BlankLineCalculator(pytree_visitor.PyTreeVisitor):
         return _ONE_BLANK_LINE
 
     def _IsTopLevel(self, node):
-        return not (self.class_level or self.function_level) and _StartsInZerothColumn(
-            node
-        )
+        return not (self.class_level
+                    or self.function_level) and _StartsInZerothColumn(node)
 
 
 def _SetNumNewlines(node, num_newlines):
-    pytree_utils.SetNodeAnnotation(node, pytree_utils.Annotation.NEWLINES, num_newlines)
+    pytree_utils.SetNodeAnnotation(node, pytree_utils.Annotation.NEWLINES,
+                                   num_newlines)
 
 
 def _StartsInZerothColumn(node):
     return pytree_utils.FirstLeafNode(node).column == 0 or (
-        _AsyncFunction(node) and node.prev_sibling.column == 0
-    )
+        _AsyncFunction(node) and node.prev_sibling.column == 0)
 
 
 def _AsyncFunction(node):
-    return (
-        py3compat.PY3
-        and node.prev_sibling
-        and pytree_utils.NodeName(node.prev_sibling) == "ASYNC"
-    )
+    return (py3compat.PY3 and node.prev_sibling
+            and pytree_utils.NodeName(node.prev_sibling) == "ASYNC")

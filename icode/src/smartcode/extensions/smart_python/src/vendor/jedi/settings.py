@@ -77,7 +77,8 @@ if platform.system().lower() == "windows":
 elif platform.system().lower() == "darwin":
     _cache_directory = os.path.join("~", "Library", "Caches", "Jedi")
 else:
-    _cache_directory = os.path.join(os.getenv("XDG_CACHE_HOME") or "~/.cache", "jedi")
+    _cache_directory = os.path.join(
+        os.getenv("XDG_CACHE_HOME") or "~/.cache", "jedi")
 cache_directory = os.path.expanduser(_cache_directory)
 """
 The path where the cache is stored.

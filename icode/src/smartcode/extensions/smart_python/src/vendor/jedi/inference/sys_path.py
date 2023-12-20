@@ -40,16 +40,17 @@ def _paths_from_assignment(module_context, expr_stmt):
     because it will only affect Jedi in very random situations and by adding
     more paths than necessary, it usually benefits the general user.
     """
-    for assignee, operator in zip(expr_stmt.children[::2], expr_stmt.children[1::2]):
+    for assignee, operator in zip(expr_stmt.children[::2],
+                                  expr_stmt.children[1::2]):
         try:
             assert operator in ["=", "+="]
-            assert (
-                assignee.type in ("power", "atom_expr") and len(assignee.children) > 1
-            )
+            assert (assignee.type in ("power", "atom_expr")
+                    and len(assignee.children) > 1)
             c = assignee.children
             assert c[0].type == "name" and c[0].value == "sys"
             trailer = c[1]
-            assert trailer.children[0] == "." and trailer.children[1].value == "path"
+            assert trailer.children[0] == "." and trailer.children[
+                1].value == "path"
             # TODO Essentially we're not checking details on sys.path
             # manipulation. Both assigment of the sys.path and changing/adding
             # parts of the sys.path are the same: They get added to the end of
@@ -64,11 +65,13 @@ def _paths_from_assignment(module_context, expr_stmt):
         except AssertionError:
             continue
 
-        cn = ContextualizedNode(module_context.create_context(expr_stmt), expr_stmt)
+        cn = ContextualizedNode(module_context.create_context(expr_stmt),
+                                expr_stmt)
         for lazy_value in cn.infer().iterate(cn):
             for value in lazy_value.infer():
                 if is_string(value):
-                    abs_path = _abs_path(module_context, value.get_safe_value())
+                    abs_path = _abs_path(module_context,
+                                         value.get_safe_value())
                     if abs_path is not None:
                         yield abs_path
 
@@ -77,20 +80,17 @@ def _paths_from_list_modifications(module_context, trailer1, trailer2):
     """extract the path from either "sys.path.append" or "sys.path.insert" """
     # Guarantee that both are trailers, the first one a name and the second one
     # a function execution with at least one param.
-    if not (
-        trailer1.type == "trailer"
-        and trailer1.children[0] == "."
-        and trailer2.type == "trailer"
-        and trailer2.children[0] == "("
-        and len(trailer2.children) == 3
-    ):
+    if not (trailer1.type == "trailer" and trailer1.children[0] == "."
+            and trailer2.type == "trailer" and trailer2.children[0] == "("
+            and len(trailer2.children) == 3):
         return
 
     name = trailer1.children[1].value
     if name not in ["insert", "append"]:
         return
     arg = trailer2.children[1]
-    if name == "insert" and len(arg.children) in (3, 4):  # Possible trailing comma.
+    if name == "insert" and len(
+            arg.children) in (3, 4):  # Possible trailing comma.
         arg = arg.children[2]
 
     for value in module_context.create_context(arg).infer_node(arg):
@@ -113,11 +113,8 @@ def check_sys_path_modifications(module_context):
             power = name.parent.parent
             if power is not None and power.type in ("power", "atom_expr"):
                 c = power.children
-                if (
-                    c[0].type == "name"
-                    and c[0].value == "sys"
-                    and c[1].type == "trailer"
-                ):
+                if (c[0].type == "name" and c[0].value == "sys"
+                        and c[1].type == "trailer"):
                     n = c[1].children[1]
                     if n.type == "name" and n.value == "path":
                         yield name, power
@@ -135,8 +132,8 @@ def check_sys_path_modifications(module_context):
             expr_stmt = power.parent
             if len(power.children) >= 4:
                 added.extend(
-                    _paths_from_list_modifications(module_context, *power.children[2:4])
-                )
+                    _paths_from_list_modifications(module_context,
+                                                   *power.children[2:4]))
             elif expr_stmt is not None and expr_stmt.type == "expr_stmt":
                 added.extend(_paths_from_assignment(module_context, expr_stmt))
     return added
@@ -146,9 +143,8 @@ def discover_buildout_paths(inference_state, script_path):
     buildout_script_paths = set()
 
     for buildout_script_path in _get_buildout_script_paths(script_path):
-        for path in _get_paths_from_buildout_script(
-            inference_state, buildout_script_path
-        ):
+        for path in _get_paths_from_buildout_script(inference_state,
+                                                    buildout_script_path):
             buildout_script_paths.add(path)
             if len(buildout_script_paths) >= _BUILDOUT_PATH_INSERTION_LIMIT:
                 break
@@ -160,10 +156,10 @@ def _get_paths_from_buildout_script(inference_state, buildout_script_path):
     file_io = FileIO(str(buildout_script_path))
     try:
         module_node = inference_state.parse(
-            file_io=file_io, cache=True, cache_path=settings.cache_directory
-        )
+            file_io=file_io, cache=True, cache_path=settings.cache_directory)
     except IOError:
-        debug.warning("Error trying to read buildout_script: %s", buildout_script_path)
+        debug.warning("Error trying to read buildout_script: %s",
+                      buildout_script_path)
         return
 
     from jedi.inference.value import ModuleValue
@@ -173,7 +169,8 @@ def _get_paths_from_buildout_script(inference_state, buildout_script_path):
         module_node,
         file_io=file_io,
         string_names=None,
-        code_lines=get_cached_code_lines(inference_state.grammar, buildout_script_path),
+        code_lines=get_cached_code_lines(inference_state.grammar,
+                                         buildout_script_path),
     ).as_context()
     yield from check_sys_path_modifications(module_context)
 
@@ -253,7 +250,7 @@ def transform_path_to_dotted(sys_path, module_path):
         for p in sys_path:
             if str(module_path).startswith(p):
                 # Strip the trailing slash/backslash
-                rest = str(module_path)[len(p) :]
+                rest = str(module_path)[len(p):]
                 # On Windows a path can also use a slash.
                 if rest.startswith(os.path.sep) or rest.startswith("/"):
                     # Remove a slash in cases it's still there.

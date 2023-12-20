@@ -3,6 +3,7 @@ from rope.base.oi.type_hinting.resolvers import interfaces
 
 
 class Resolver(interfaces.IResolver):
+
     def __call__(self, hint, pyobject):
         """
         :param hint: For example "List[int]" or "(Foo, Bar) -> Baz" or simple "Foo"

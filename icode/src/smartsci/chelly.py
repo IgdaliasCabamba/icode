@@ -67,12 +67,16 @@ class EditorView(QFrame):
         elif self.content_type == "image":
             self.init_media_editor()
 
-        self.breadcrumb_controller1 = BreadcrumbController(self, self.editor_main)
-        self.breadcrumb_controller1.on_update_header.connect(self.update_breadcrumb)
+        self.breadcrumb_controller1 = BreadcrumbController(
+            self, self.editor_main)
+        self.breadcrumb_controller1.on_update_header.connect(
+            self.update_breadcrumb)
         self.breadcrumb_controller1.moveToThread(self.view_thread)
 
-        self.breadcrumb_controller2 = BreadcrumbController(self, self.editor_mirror)
-        self.breadcrumb_controller2.on_update_header.connect(self.update_breadcrumb)
+        self.breadcrumb_controller2 = BreadcrumbController(
+            self, self.editor_mirror)
+        self.breadcrumb_controller2.on_update_header.connect(
+            self.update_breadcrumb)
         self.breadcrumb_controller2.moveToThread(self.view_thread)
         self.view_thread.started.connect(self.run_schedule)
 
@@ -108,7 +112,8 @@ class EditorView(QFrame):
         self.layout.addWidget(self.div)
 
         self.drop_shadow = QGraphicsDropShadowEffect(self)
-        self.drop_shadow.setBlurRadius(iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
+        self.drop_shadow.setBlurRadius(
+            iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
         self.drop_shadow.setOffset(
             iconsts.BREADCRUMB_SHADOW_Y_OFFSET_STATE0,
             iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0,
@@ -123,10 +128,11 @@ class EditorView(QFrame):
         """Editor Main"""
         self.editor_main = Editor(self, self.file)
         self.editor_main.connector.auto_save_file.connect(self.file_saved)
-        self.editor_main.verticalScrollBar().valueChanged.connect(self.update_shadow)
+        self.editor_main.verticalScrollBar().valueChanged.connect(
+            self.update_shadow)
         self.editor_main.cursorPositionChanged.connect(
-            lambda: self.update_shadow(self.editor_main.verticalScrollBar().value())
-        )
+            lambda: self.update_shadow(self.editor_main.verticalScrollBar().
+                                       value()))
         self.editor_main.on_focused.connect(self.focused)
         self.editor_main.on_saved.connect(self.update_title)
         self.editor_main.idocument.on_changed.connect(self.update_code)
@@ -137,15 +143,15 @@ class EditorView(QFrame):
 
         self.div_main.addWidget(self.editor_main)
         self.div_main.addWidget(self.minimap_main)
-
         """Editor Mirror"""
 
         self.editor_mirror = Editor(self, self.file)
         self.editor_mirror.setDocument(self.editor_main.document())
-        self.editor_mirror.verticalScrollBar().valueChanged.connect(self.update_shadow)
+        self.editor_mirror.verticalScrollBar().valueChanged.connect(
+            self.update_shadow)
         self.editor_mirror.cursorPositionChanged.connect(
-            lambda: self.update_shadow(self.editor_mirror.verticalScrollBar().value())
-        )
+            lambda: self.update_shadow(self.editor_mirror.verticalScrollBar().
+                                       value()))
         self.editor_mirror.on_focused.connect(self.focused)
         self.editor_mirror.on_saved.connect(self.update_title)
         self.editor_mirror.idocument.on_changed.connect(self.update_code)
@@ -163,7 +169,6 @@ class EditorView(QFrame):
         """Editor Main"""
         self.editor_main = EditorMedia(self, self.file)
         self.div_main.addWidget(self.editor_main)
-
         """Editor Mirror"""
 
         self.editor_mirror = EditorMedia(self, self.file)
@@ -247,8 +252,7 @@ class EditorView(QFrame):
         if self.is_text:
             if value > 2:
                 self.drop_shadow.setBlurRadius(
-                    iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE1
-                )
+                    iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE1)
                 self.drop_shadow.setOffset(
                     iconsts.BREADCRUMB_SHADOW_Y_OFFSET_STATE1,
                     iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE1,
@@ -257,11 +261,9 @@ class EditorView(QFrame):
                 w = self.editor.minimap.size().width()
                 y_offset = self.size().width() - w - 200
                 self.drop_shadow.setBlurRadius(
-                    iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0
-                )
+                    iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
                 self.drop_shadow.setOffset(
-                    y_offset, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0
-                )
+                    y_offset, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0)
 
     @property
     def editor(self):
@@ -344,7 +346,8 @@ class EditorView(QFrame):
 
     def show_hide_breadcrumbs(self, state: bool = None):
         if state is None:
-            self.breadcrumbs_widget.setVisible(not self.breadcrumbs_widget.isVisible())
+            self.breadcrumbs_widget.setVisible(
+                not self.breadcrumbs_widget.isVisible())
         else:
             self.breadcrumbs_widget.setVisible(state)
 
@@ -398,8 +401,7 @@ class EditorView(QFrame):
                 code_editor.setCursorPosition(cursor[0], cursor[1])
                 code_editor.verticalScrollBar().setValue(scroll_v)
                 code_editor.horizontalScrollBar().setValue(scroll_h)
-                code_editor.setSelection(
-                    selection[0], selection[1], selection[2], selection[3]
-                )
+                code_editor.setSelection(selection[0], selection[1],
+                                         selection[2], selection[3])
         else:
             pass

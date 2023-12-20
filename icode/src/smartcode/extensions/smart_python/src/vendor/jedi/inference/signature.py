@@ -6,7 +6,9 @@ from jedi import parser_utils
 
 
 class _SignatureMixin:
+
     def to_string(self):
+
         def param_strings():
             is_positional = False
             is_kw_only = False
@@ -36,6 +38,7 @@ class _SignatureMixin:
 
 
 class AbstractSignature(_SignatureMixin):
+
     def __init__(self, value, is_bound=False):
         self.value = value
         self.is_bound = is_bound
@@ -71,6 +74,7 @@ class AbstractSignature(_SignatureMixin):
 
 
 class TreeSignature(AbstractSignature):
+
     def __init__(self, value, function_value=None, is_bound=False):
         super().__init__(value, is_bound)
         self._function_value = function_value or value
@@ -108,15 +112,12 @@ class TreeSignature(AbstractSignature):
         from jedi.inference.param import get_executed_param_names_and_issues
 
         executed_param_names, issues = get_executed_param_names_and_issues(
-            self._function_value, arguments
-        )
+            self._function_value, arguments)
         if issues:
             return False
 
-        matches = all(
-            executed_param_name.matches_signature()
-            for executed_param_name in executed_param_names
-        )
+        matches = all(executed_param_name.matches_signature()
+                      for executed_param_name in executed_param_names)
         if debug.enable_notice:
             tree_node = self._function_value.tree_node
             signature = parser_utils.get_signature(tree_node)
@@ -140,7 +141,12 @@ class TreeSignature(AbstractSignature):
 
 
 class BuiltinSignature(AbstractSignature):
-    def __init__(self, value, return_string, function_value=None, is_bound=False):
+
+    def __init__(self,
+                 value,
+                 return_string,
+                 function_value=None,
+                 is_bound=False):
         super().__init__(value, is_bound)
         self._return_string = return_string
         self.__function_value = function_value
@@ -156,12 +162,14 @@ class BuiltinSignature(AbstractSignature):
         return self.__function_value
 
     def bind(self, value):
-        return BuiltinSignature(
-            value, self._return_string, function_value=self.value, is_bound=True
-        )
+        return BuiltinSignature(value,
+                                self._return_string,
+                                function_value=self.value,
+                                is_bound=True)
 
 
 class SignatureWrapper(_SignatureMixin):
+
     def __init__(self, wrapped_signature):
         self._wrapped_signature = wrapped_signature
 

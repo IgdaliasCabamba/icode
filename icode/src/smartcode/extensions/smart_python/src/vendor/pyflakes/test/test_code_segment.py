@@ -69,8 +69,12 @@ class TestCodeSegments(TestCase):
         )
 
         scopes = checker.deadScopes
-        module_scopes = [scope for scope in scopes if scope.__class__ is ModuleScope]
-        class_scopes = [scope for scope in scopes if scope.__class__ is ClassScope]
+        module_scopes = [
+            scope for scope in scopes if scope.__class__ is ModuleScope
+        ]
+        class_scopes = [
+            scope for scope in scopes if scope.__class__ is ClassScope
+        ]
         function_scopes = [
             scope for scope in scopes if scope.__class__ is FunctionScope
         ]
@@ -114,7 +118,9 @@ class TestCodeSegments(TestCase):
         )
 
         scopes = checker.deadScopes
-        module_scopes = [scope for scope in scopes if scope.__class__ is ModuleScope]
+        module_scopes = [
+            scope for scope in scopes if scope.__class__ is ModuleScope
+        ]
         function_scopes = [
             scope for scope in scopes if scope.__class__ is FunctionScope
         ]

@@ -4,6 +4,7 @@ import smartlibs.mjson as ijson
 
 
 class Extender:
+
     def __init__(self) -> None:
         self.extensions = []
         self.running_extensions = []
@@ -44,6 +45,7 @@ class Extender:
 
 
 class Plugger(Extender):
+
     def __init__(self, application_core) -> None:
         super().__init__()
         self.application_core = application_core

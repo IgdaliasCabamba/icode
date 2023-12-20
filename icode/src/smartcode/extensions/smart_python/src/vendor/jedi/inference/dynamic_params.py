@@ -30,14 +30,15 @@ from jedi.inference.base_value import ValueSet, NO_VALUES
 from jedi.inference.references import get_module_contexts_containing_name
 from jedi.inference import recursion
 
-
 MAX_PARAM_SEARCHES = 20
 
 
 def _avoid_recursions(func):
+
     def wrapper(function_value, param_index):
         inf = function_value.inference_state
-        with recursion.execution_allowed(inf, function_value.tree_node) as allowed:
+        with recursion.execution_allowed(inf,
+                                         function_value.tree_node) as allowed:
             # We need to catch recursions that may occur, because an
             # anonymous functions can create an anonymous parameter that is
             # more or less self referencing.
@@ -89,11 +90,11 @@ def dynamic_param_lookup(function_value, param_index):
     debug.dbg("Dynamic param search in %s.", string_name, color="MAGENTA")
 
     module_context = function_value.get_root_context()
-    arguments_list = _search_function_arguments(module_context, funcdef, string_name)
+    arguments_list = _search_function_arguments(module_context, funcdef,
+                                                string_name)
     values = ValueSet.from_sets(
-        get_executed_param_names(function_value, arguments)[param_index].infer()
-        for arguments in arguments_list
-    )
+        get_executed_param_names(function_value, arguments)
+        [param_index].infer() for arguments in arguments_list)
     debug.dbg("Dynamic param result finished", color="MAGENTA")
     return values
 
@@ -127,7 +128,8 @@ def _search_function_arguments(module_context, funcdef, string_name):
         module_contexts = [module_context]
 
     for for_mod_context in module_contexts:
-        for name, trailer in _get_potential_nodes(for_mod_context, string_name):
+        for name, trailer in _get_potential_nodes(for_mod_context,
+                                                  string_name):
             i += 1
 
             # This is a simple way to stop Jedi's dynamic param recursion
@@ -137,9 +139,10 @@ def _search_function_arguments(module_context, funcdef, string_name):
                 return
 
             random_context = for_mod_context.create_context(name)
-            for arguments in _check_name_for_execution(
-                inference_state, random_context, compare_node, name, trailer
-            ):
+            for arguments in _check_name_for_execution(inference_state,
+                                                       random_context,
+                                                       compare_node, name,
+                                                       trailer):
                 found_arguments = True
                 yield arguments
 
@@ -174,7 +177,8 @@ def _get_potential_nodes(module_value, func_string_name):
             yield name, trailer
 
 
-def _check_name_for_execution(inference_state, context, compare_node, name, trailer):
+def _check_name_for_execution(inference_state, context, compare_node, name,
+                              trailer):
     from jedi.inference.value.function import BaseFunctionExecutionContext
 
     def create_args(value):
@@ -185,9 +189,9 @@ def _check_name_for_execution(inference_state, context, compare_node, name, trai
         from jedi.inference.value.instance import InstanceArguments
 
         if value.tree_node.type == "classdef":
-            created_instance = instance.TreeInstance(
-                inference_state, value.parent_context, value, args
-            )
+            created_instance = instance.TreeInstance(inference_state,
+                                                     value.parent_context,
+                                                     value, args)
             return InstanceArguments(created_instance, args)
         else:
             if value.is_bound_method():
@@ -198,10 +202,8 @@ def _check_name_for_execution(inference_state, context, compare_node, name, trai
         value_node = value.tree_node
         if compare_node == value_node:
             yield create_args(value)
-        elif (
-            isinstance(value.parent_context, BaseFunctionExecutionContext)
-            and compare_node.type == "funcdef"
-        ):
+        elif (isinstance(value.parent_context, BaseFunctionExecutionContext)
+              and compare_node.type == "funcdef"):
             # Here we're trying to find decorators by checking the first
             # parameter. It's not very generic though. Should find a better
             # solution that also applies to nested decorators.
@@ -214,11 +216,10 @@ def _check_name_for_execution(inference_state, context, compare_node, name, trai
                 module_context = context.get_root_context()
                 execution_context = value.as_context(create_args(value))
                 potential_nodes = _get_potential_nodes(
-                    module_context, param_names[0].string_name
-                )
+                    module_context, param_names[0].string_name)
                 for name, trailer in potential_nodes:
                     if value_node.start_pos < name.start_pos < value_node.end_pos:
                         random_context = execution_context.create_context(name)
                         yield from _check_name_for_execution(
-                            inference_state, random_context, compare_node, name, trailer
-                        )
+                            inference_state, random_context, compare_node,
+                            name, trailer)

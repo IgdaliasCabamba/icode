@@ -19,6 +19,7 @@ from rope.base.pyobjectsdef import PyModule, PyPackage
 
 
 class PyCore(object):
+
     def __init__(self, project):
         self.project = project
         self._init_resource_observer()
@@ -39,9 +40,9 @@ class PyCore(object):
     def _init_resource_observer(self):
         callback = self._invalidate_resource_cache
         observer = rope.base.resourceobserver.ResourceObserver(
-            changed=callback, moved=callback, removed=callback
-        )
-        self.observer = rope.base.resourceobserver.FilteredResourceObserver(observer)
+            changed=callback, moved=callback, removed=callback)
+        self.observer = rope.base.resourceobserver.FilteredResourceObserver(
+            observer)
         self.project.add_observer(self.observer)
 
     def _init_automatic_soa(self):
@@ -49,8 +50,7 @@ class PyCore(object):
             return
         callback = self._file_changed_for_soa
         observer = rope.base.resourceobserver.ResourceObserver(
-            changed=callback, moved=callback, removed=callback
-        )
+            changed=callback, moved=callback, removed=callback)
         self.project.add_observer(observer)
 
     @property
@@ -59,7 +59,8 @@ class PyCore(object):
         return self.project.prefs.get("automatic_soa", auto_soa)
 
     def _file_changed_for_soa(self, resource, new_resource=None):
-        old_contents = self.project.history.contents_before_current_change(resource)
+        old_contents = self.project.history.contents_before_current_change(
+            resource)
         if old_contents is not None:
             perform_soa_on_changed_scopes(self.project, resource, old_contents)
 
@@ -79,7 +80,7 @@ class PyCore(object):
         result = {}
         for extension in self.extension_modules:
             if extension.startswith(modname + "."):
-                name = extension[len(modname) + 1 :]
+                name = extension[len(modname) + 1:]
                 if "." not in name:
                     result[name] = self.builtin_module(extension)
         return result
@@ -146,10 +147,8 @@ class PyCore(object):
         return self.project.get_python_files()
 
     def _is_package(self, folder):
-        if (
-            folder.has_child("__init__.py")
-            and not folder.get_child("__init__.py").is_folder()
-        ):
+        if (folder.has_child("__init__.py")
+                and not folder.get_child("__init__.py").is_folder()):
             return True
         else:
             return False
@@ -179,9 +178,8 @@ class PyCore(object):
         receiver = self.object_info.doa_data_received
         if not perform_doa:
             receiver = None
-        runner = rope.base.oi.doa.PythonFileRunner(
-            self, resource, args, stdin, stdout, receiver
-        )
+        runner = rope.base.oi.doa.PythonFileRunner(self, resource, args, stdin,
+                                                   stdout, receiver)
         runner.add_finishing_observer(self.module_cache.forget_all_data)
         runner.run()
         return runner
@@ -213,14 +211,13 @@ class PyCore(object):
             followed_calls = self.project.prefs.get("soa_followed_calls", 0)
         pymodule = self.resource_to_pyobject(resource)
         self.module_cache.forget_all_data()
-        rope.base.oi.soa.analyze_module(
-            self, pymodule, should_analyze, search_subscopes, followed_calls
-        )
+        rope.base.oi.soa.analyze_module(self, pymodule, should_analyze,
+                                        search_subscopes, followed_calls)
 
     def get_classes(self, task_handle=taskhandle.NullTaskHandle()):
-        warnings.warn(
-            "`PyCore.get_classes()` is deprecated", DeprecationWarning, stacklevel=2
-        )
+        warnings.warn("`PyCore.get_classes()` is deprecated",
+                      DeprecationWarning,
+                      stacklevel=2)
         return []
 
     def __str__(self):
@@ -240,6 +237,7 @@ class PyCore(object):
 
 
 class _ModuleCache(object):
+
     def __init__(self, pycore):
         self.pycore = pycore
         self.module_map = {}
@@ -256,9 +254,13 @@ class _ModuleCache(object):
         if resource in self.module_map:
             return self.module_map[resource]
         if resource.is_folder():
-            result = PyPackage(self.pycore, resource, force_errors=force_errors)
+            result = PyPackage(self.pycore,
+                               resource,
+                               force_errors=force_errors)
         else:
-            result = PyModule(self.pycore, resource=resource, force_errors=force_errors)
+            result = PyModule(self.pycore,
+                              resource=resource,
+                              force_errors=force_errors)
             if result.has_errors:
                 return result
         self.module_map[resource] = result
@@ -274,6 +276,7 @@ class _ModuleCache(object):
 
 
 class _ExtensionCache(object):
+
     def __init__(self, pycore):
         self.pycore = pycore
         self.extensions = {}
@@ -311,6 +314,7 @@ def perform_soa_on_changed_scopes(project, resource, old_contents):
 
 
 class _TextChangeDetector(object):
+
     def __init__(self, old, new):
         self.old = old
         self.new = new
@@ -320,9 +324,8 @@ class _TextChangeDetector(object):
         differ = difflib.Differ()
         self.lines = []
         lineno = 0
-        for line in differ.compare(
-            self.old.splitlines(True), self.new.splitlines(True)
-        ):
+        for line in differ.compare(self.old.splitlines(True),
+                                   self.new.splitlines(True)):
             if line.startswith(" "):
                 lineno += 1
             elif line.startswith("-"):

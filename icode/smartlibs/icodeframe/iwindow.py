@@ -39,7 +39,8 @@ class WindowDragger(QWidget):
         if self._mouse_pressed:
             self.setCursor(Qt.ClosedHandCursor)
             self._window.on_btn_restore_clicked()
-            self._window.move(self._window_pos + (event.globalPos() - self._mouse_pos))
+            self._window.move(self._window_pos +
+                              (event.globalPos() - self._mouse_pos))
             if self._window.pos().y() < 0:
                 self._mouse_pressed = False
                 self.setCursor(Qt.ArrowCursor)
@@ -52,7 +53,9 @@ class WindowDragger(QWidget):
     def mouseDoubleClickEvent(self, event):
         self.double_clicked.emit()
 
+
 class ModernWindow(QWidget):
+
     def __init__(
         self,
         w: object,
@@ -105,8 +108,7 @@ class ModernWindow(QWidget):
         self.title_bar = WindowDragger(self, self.window_frame)
         self.title_bar.setObjectName("title-bar")
         self.title_bar.setSizePolicy(
-            QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        )
+            QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
 
         self.hbox_title = QHBoxLayout(self.title_bar)
         self.hbox_title.setContentsMargins(0, 0, 0, 0)
@@ -184,14 +186,12 @@ class ModernWindow(QWidget):
             self.hbox_title.addWidget(self.btn_maximize)
             self.hbox_title.addWidget(self.btn_close)
 
-        self.set_window_flags(
-            Qt.Window
-            | Qt.FramelessWindowHint
-            | Qt.WindowSystemMenuHint
-            | Qt.WindowCloseButtonHint
-            | Qt.WindowMinimizeButtonHint
-            | Qt.WindowMaximizeButtonHint
-        )
+        self.set_window_flags(Qt.Window
+                              | Qt.FramelessWindowHint
+                              | Qt.WindowSystemMenuHint
+                              | Qt.WindowCloseButtonHint
+                              | Qt.WindowMinimizeButtonHint
+                              | Qt.WindowMaximizeButtonHint)
 
         self.setStyleSheet(WINDOW_STYLESHEET)
 
@@ -363,7 +363,8 @@ class ModernWindow(QWidget):
                 self.setCursor(Qt.SizeVerCursor)
                 self.is_vertical_handler = True
 
-            elif w <= MIN_HORIZONTAL_HANDLER_DISTANCE or self.geometry().width() - w < MIN_HORIZONTAL_HANDLER_DISTANCE:
+            elif w <= MIN_HORIZONTAL_HANDLER_DISTANCE or self.geometry().width(
+            ) - w < MIN_HORIZONTAL_HANDLER_DISTANCE:
                 self.setCursor(Qt.SizeHorCursor)
                 self.is_horizontal_handler = True
 

@@ -37,14 +37,16 @@ RANK_CASES = [(score, _compute_cc_rank(score)) for score in range(-1, 100)]
 
 @pytest.mark.parametrize("score,expected_rank", RANK_CASES)
 def test_rank(score, expected_rank):
-    if hasattr(expected_rank, "__call__") and isinstance(expected_rank(), Exception):
+    if hasattr(expected_rank, "__call__") and isinstance(
+            expected_rank(), Exception):
         with pytest.raises(expected_rank):
             cc_rank(score)
     else:
         assert cc_rank(score) == expected_rank
 
 
-fun = lambda complexity: Function("randomname", 1, 4, 23, False, None, [], complexity)
+fun = lambda complexity: Function("randomname", 1, 4, 23, False, None, [],
+                                  complexity)
 cls = lambda complexity: Class("randomname_", 3, 21, 18, [], [], complexity)
 
 # This works with both the next two tests

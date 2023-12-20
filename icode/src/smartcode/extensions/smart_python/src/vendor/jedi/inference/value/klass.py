@@ -60,6 +60,7 @@ from jedi.plugins import plugin_manager
 
 
 class ClassName(TreeNameDefinition):
+
     def __init__(self, class_value, tree_name, name_context, apply_decorators):
         super().__init__(name_context, tree_name)
         self._apply_decorators = apply_decorators
@@ -70,15 +71,13 @@ class ClassName(TreeNameDefinition):
         # We're using a different value to infer, so we cannot call super().
         from jedi.inference.syntax_tree import tree_name_to_values
 
-        inferred = tree_name_to_values(
-            self.parent_context.inference_state, self.parent_context, self.tree_name
-        )
+        inferred = tree_name_to_values(self.parent_context.inference_state,
+                                       self.parent_context, self.tree_name)
 
         for result_value in inferred:
             if self._apply_decorators:
                 yield from result_value.py__get__(
-                    instance=None, class_value=self._class_value
-                )
+                    instance=None, class_value=self._class_value)
             else:
                 yield result_value
 
@@ -98,6 +97,7 @@ class ClassName(TreeNameDefinition):
 
 
 class ClassFilter(ParserTreeFilter):
+
     def __init__(
         self,
         class_value,
@@ -122,8 +122,7 @@ class ClassFilter(ParserTreeFilter):
                 tree_name=name,
                 name_context=self._node_context,
                 apply_decorators=not self._is_instance,
-            )
-            for name in names
+            ) for name in names
         ]
 
     def _equals_origin_scope(self):
@@ -146,18 +145,13 @@ class ClassFilter(ParserTreeFilter):
                 if annassign.type == "annassign":
                     # If there is an =, the variable is obviously also
                     # defined on the class.
-                    if (
-                        "ClassVar" not in annassign.children[1].get_code()
-                        and "=" not in annassign.children
-                    ):
+                    if ("ClassVar" not in annassign.children[1].get_code()
+                            and "=" not in annassign.children):
                         return False
 
         # Filter for name mangling of private variables like __foo
-        return (
-            not name.value.startswith("__")
-            or name.value.endswith("__")
-            or self._equals_origin_scope()
-        )
+        return (not name.value.startswith("__") or name.value.endswith("__")
+                or self._equals_origin_scope())
 
     def _filter(self, names):
         names = super()._filter(names)
@@ -165,6 +159,7 @@ class ClassFilter(ParserTreeFilter):
 
 
 class ClassMixin:
+
     def is_class(self):
         return True
 
@@ -178,9 +173,10 @@ class ClassMixin:
 
         if self.is_typeddict():
             return ValueSet([TypedDict(self)])
-        return ValueSet(
-            [TreeInstance(self.inference_state, self.parent_context, self, arguments)]
-        )
+        return ValueSet([
+            TreeInstance(self.inference_state, self.parent_context, self,
+                         arguments)
+        ])
 
     def py__class__(self):
         return compiled.builtin_from_name(self.inference_state, "type")
@@ -218,7 +214,8 @@ class ClassMixin:
                       File "<stdin>", line 1, in <module>
                     TypeError: int() takes at most 2 arguments (3 given)
                     """
-                    debug.warning("Super class of %s is not a class: %s", self, cls)
+                    debug.warning("Super class of %s is not a class: %s", self,
+                                  cls)
                 else:
                     for cls_new in mro_method():
                         if cls_new not in mro:
@@ -322,7 +319,8 @@ class ClassMixin:
         from jedi.inference.gradual.base import GenericClass
 
         if not index_value_set:
-            debug.warning("Class indexes inferred to nothing. Returning class instead")
+            debug.warning(
+                "Class indexes inferred to nothing. Returning class instead")
             return ValueSet([self])
         return ValueSet(
             GenericClass(
@@ -331,9 +329,7 @@ class ClassMixin:
                     context_of_index=contextualized_node.context,
                     index_value=index_value,
                 ),
-            )
-            for index_value in index_value_set
-        )
+            ) for index_value in index_value_set)
 
     def with_generics(self, generics_tuple):
         from jedi.inference.gradual.base import GenericClass
@@ -357,9 +353,10 @@ class ClassMixin:
                 yield type_var_dict.get(type_var.py__name__(), NO_VALUES)
 
         if type_var_dict:
-            return ValueSet(
-                [GenericClass(self, TupleGenericManager(tuple(remap_type_vars())))]
-            )
+            return ValueSet([
+                GenericClass(self,
+                             TupleGenericManager(tuple(remap_type_vars())))
+            ])
         return ValueSet({self})
 
 
@@ -390,9 +387,8 @@ class ClassValue(ClassMixin, FunctionAndClassBase, metaclass=CachedMetaClass):
         if arglist:
             from jedi.inference import arguments
 
-            return arguments.TreeArguments(
-                self.inference_state, self.parent_context, arglist
-            )
+            return arguments.TreeArguments(self.inference_state,
+                                           self.parent_context, arglist)
         return None
 
     @inference_state_method_cache(default=())
@@ -403,12 +399,13 @@ class ClassValue(ClassMixin, FunctionAndClassBase, metaclass=CachedMetaClass):
             if lst:
                 return lst
 
-        if self.py__name__() == "object" and self.parent_context.is_builtins_module():
+        if self.py__name__(
+        ) == "object" and self.parent_context.is_builtins_module():
             return []
         return [
             LazyKnownValues(
-                self.inference_state.builtins_module.py__getattribute__("object")
-            )
+                self.inference_state.builtins_module.py__getattribute__(
+                    "object"))
         ]
 
     @plugin_manager.decorate()
@@ -421,7 +418,8 @@ class ClassValue(ClassMixin, FunctionAndClassBase, metaclass=CachedMetaClass):
         args = self._get_bases_arguments()
         if args is not None:
             m = [value for key, value in args.unpack() if key == "metaclass"]
-            metaclasses = ValueSet.from_sets(lazy_value.infer() for lazy_value in m)
+            metaclasses = ValueSet.from_sets(lazy_value.infer()
+                                             for lazy_value in m)
             metaclasses = ValueSet(m for m in metaclasses if m.is_class())
             if metaclasses:
                 return metaclasses

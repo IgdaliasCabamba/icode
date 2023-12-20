@@ -21,6 +21,7 @@ from functools import partial
 
 
 class ItermBinsMenu(QMenu):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -41,12 +42,14 @@ class ItermBinsMenu(QMenu):
             if terminal["id"] == id_current:
                 action.setChecked(True)
 
-            action.triggered.connect(partial(self.parent.select_terminal, terminal))
+            action.triggered.connect(
+                partial(self.parent.select_terminal, terminal))
             self.addAction(action)
             group_mode.addAction(action)
 
 
 class TerminalBase(TerminalWidget):
+
     def __init__(self, parent, bin, color_map):
 
         super().__init__(
@@ -62,6 +65,7 @@ class TerminalBase(TerminalWidget):
 
 
 class Terminal(QFrame):
+
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
@@ -95,7 +99,8 @@ class Terminal(QFrame):
 
         self.term_header = QListWidget(self)
         self.term_header.itemClicked.connect(self.change_to_terminal)
-        self.term_header.currentRowChanged.connect(self.change_to_terminal_from_row)
+        self.term_header.currentRowChanged.connect(
+            self.change_to_terminal_from_row)
         self.term_header.setMaximumWidth(360)
 
         self.terminals_frame = QFrame(self)
@@ -135,7 +140,10 @@ class Terminal(QFrame):
             self.icons.get_icon("bash"),
             name,
             None,
-            {"widget": new_term, "index": self.term_index},
+            {
+                "widget": new_term,
+                "index": self.term_index
+            },
         )
         font = QFont()
         font.setPointSizeF(10.5)
@@ -166,8 +174,10 @@ class Terminal(QFrame):
         self.set_current_terminal(data)
 
     def listen_events(self):
-        self.parent.btn_new_terminal.clicked.connect(lambda: self.add_terminal())
-        self.parent.btn_remove_terminal.clicked.connect(lambda: self.remove_terminal())
+        self.parent.btn_new_terminal.clicked.connect(
+            lambda: self.add_terminal())
+        self.parent.btn_remove_terminal.clicked.connect(
+            lambda: self.remove_terminal())
 
     def init_terminals(self):
         terminals_api = icode_api.get_terminals()

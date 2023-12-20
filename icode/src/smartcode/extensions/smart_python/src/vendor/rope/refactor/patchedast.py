@@ -6,7 +6,6 @@ import warnings
 from rope.base import ast, codeanalyze, exceptions
 from rope.base.utils import pycompat
 
-
 try:
     basestring
 except NameError:
@@ -69,6 +68,7 @@ class MismatchedTokenError(exceptions.RopeError):
 
 
 class _PatchingASTWalker(object):
+
     def __init__(self, source, children=False):
         self.source = _Source(source)
         self.children = children
@@ -101,8 +101,8 @@ class _PatchingASTWalker(object):
         if hasattr(node, "region"):
             # ???: The same node was seen twice; what should we do?
             warnings.warn(
-                "Node <%s> has been already patched; please report!"
-                % node.__class__.__name__,
+                "Node <%s> has been already patched; please report!" %
+                node.__class__.__name__,
                 RuntimeWarning,
             )
             return
@@ -125,8 +125,7 @@ class _PatchingASTWalker(object):
             else:
                 if child is self.String:
                     region = self.source.consume_string(
-                        end=self._find_next_statement_start()
-                    )
+                        end=self._find_next_statement_start())
                 elif child is self.Number:
                     region = self.source.consume_number()
                 elif child == self.empty_tuple:
@@ -148,15 +147,15 @@ class _PatchingASTWalker(object):
                 elif child == self.exec_close_paren_or_space:
                     region = self.source.consume_exec_close_paren_or_space()
                 elif child == self.with_or_comma_context_manager:
-                    region = self.source.consume_with_or_comma_context_manager()
+                    region = self.source.consume_with_or_comma_context_manager(
+                    )
                 else:
                     if hasattr(ast, "JoinedStr") and isinstance(
-                        node, (ast.JoinedStr, ast.FormattedValue)
-                    ):
+                            node, (ast.JoinedStr, ast.FormattedValue)):
                         region = self.source.consume_joined_string(child)
                     else:
                         region = self.source.consume(child)
-                child = self.source[region[0] : region[1]]
+                child = self.source[region[0]:region[1]]
                 token_start = region[0]
             if not first_token:
                 formats.append(self.source[offset:token_start])
@@ -169,11 +168,12 @@ class _PatchingASTWalker(object):
                 children.append(child)
         start = self._handle_parens(children, start, formats)
         if eat_parens:
-            start = self._eat_surrounding_parens(children, suspected_start, start)
+            start = self._eat_surrounding_parens(children, suspected_start,
+                                                 start)
         if eat_spaces:
             if self.children:
                 children.appendleft(self.source[0:start])
-            end_spaces = self.source[self.source.offset :]
+            end_spaces = self.source[self.source.offset:]
             self.source.consume(end_spaces)
             if self.children:
                 children.append(end_spaces)
@@ -209,7 +209,7 @@ class _PatchingASTWalker(object):
             old_offset = self.source.offset
             start = index
             if self.children:
-                children.appendleft(self.source[start + 1 : old_start])
+                children.appendleft(self.source[start + 1:old_start])
                 children.appendleft("(")
             token_start, token_end = self.source.consume(")")
             if self.children:
@@ -246,7 +246,8 @@ class _PatchingASTWalker(object):
         for children in reversed(self.children_stack):
             for child in children:
                 if isinstance(child, ast.stmt):
-                    return child.col_offset + self.lines.get_line_start(child.lineno)
+                    return child.col_offset + self.lines.get_line_start(
+                        child.lineno)
         return len(self.source.source)
 
     _operators = {
@@ -320,12 +321,15 @@ class _PatchingASTWalker(object):
         self._handle(node, children)
 
     def _BoolOp(self, node):
-        self._handle(node, self._child_nodes(node.values, self._get_op(node.op)[0]))
+        self._handle(node,
+                     self._child_nodes(node.values,
+                                       self._get_op(node.op)[0]))
 
     def _Break(self, node):
         self._handle(node, ["break"])
 
     def _Call(self, node):
+
         def _arg_sort_key(node):
             if isinstance(node, ast.keyword):
                 return (node.value.lineno, node.value.col_offset)
@@ -418,30 +422,25 @@ class _PatchingASTWalker(object):
         self._handle(node, [self.String])
 
     def _JoinedStr(self, node):
+
         def start_quote_char():
-            possible_quotes = [
-                (self.source.source.find(q, start, end), q) for q in QUOTE_CHARS
-            ]
+            possible_quotes = [(self.source.source.find(q, start, end), q)
+                               for q in QUOTE_CHARS]
             quote_pos, quote_char = min(
-                (pos, q) for pos, q in possible_quotes if pos != -1
-            )
-            return self.source[start : quote_pos + len(quote_char)]
+                (pos, q) for pos, q in possible_quotes if pos != -1)
+            return self.source[start:quote_pos + len(quote_char)]
 
         def end_quote_char():
-            possible_quotes = [
-                (self.source.source.rfind(q, start, end), q)
-                for q in reversed(QUOTE_CHARS)
-            ]
+            possible_quotes = [(self.source.source.rfind(q, start, end), q)
+                               for q in reversed(QUOTE_CHARS)]
             _, quote_pos, quote_char = max(
-                (len(q), pos, q) for pos, q in possible_quotes if pos != -1
-            )
-            return self.source[end - len(quote_char) : end]
+                (len(q), pos, q) for pos, q in possible_quotes if pos != -1)
+            return self.source[end - len(quote_char):end]
 
         QUOTE_CHARS = ['"""', "'''", '"', "'"]
         offset = self.source.offset
         start, end = self.source.consume_string(
-            end=self._find_next_statement_start(),
-        )
+            end=self._find_next_statement_start(), )
         self.source.offset = offset
 
         children = []
@@ -572,7 +571,8 @@ class _PatchingASTWalker(object):
     def _arguments(self, node):
         children = []
         args = list(node.args)
-        defaults = [None] * (len(args) - len(node.defaults)) + list(node.defaults)
+        defaults = [None] * (len(args) - len(node.defaults)) + list(
+            node.defaults)
         for index, (arg, default) in enumerate(zip(args, defaults)):
             if index > 0:
                 children.append(",")
@@ -644,13 +644,14 @@ class _PatchingASTWalker(object):
         if not isinstance(node, ast.If):
             return False
         offset = self.lines.get_line_start(node.lineno) + node.col_offset
-        word = self.source[offset : offset + 4]
+        word = self.source[offset:offset + 4]
         # XXX: This is a bug; the offset does not point to the first
-        alt_word = self.source[offset - 5 : offset - 1]
+        alt_word = self.source[offset - 5:offset - 1]
         return "elif" in (word, alt_word)
 
     def _IfExp(self, node):
-        return self._handle(node, [node.body, "if", node.test, "else", node.orelse])
+        return self._handle(node,
+                            [node.body, "if", node.test, "else", node.orelse])
 
     def _Import(self, node):
         children = ["import"]
@@ -679,12 +680,12 @@ class _PatchingASTWalker(object):
 
     def _Set(self, node):
         if node.elts:
-            self._handle(node, ["{"] + self._child_nodes(node.elts, ",") + ["}"])
+            self._handle(node,
+                         ["{"] + self._child_nodes(node.elts, ",") + ["}"])
             return
         # Python doesn't have empty set literals
-        warnings.warn(
-            "Tried to handle empty <Set> literal; please report!", RuntimeWarning
-        )
+        warnings.warn("Tried to handle empty <Set> literal; please report!",
+                      RuntimeWarning)
         self._handle(node, ["set(", ")"])
 
     def _SetComp(self, node):
@@ -727,6 +728,7 @@ class _PatchingASTWalker(object):
         self._handle(node, children)
 
     def _Raise(self, node):
+
         def get_python3_raise_children(node):
             children = ["raise"]
             if node.exc:
@@ -792,13 +794,13 @@ class _PatchingASTWalker(object):
         not_empty_body = True
         if len(node.finalbody) == 1:
             if pycompat.PY2:
-                is_there_except_handler = isinstance(node.body[0], ast.TryExcept)
+                is_there_except_handler = isinstance(node.body[0],
+                                                     ast.TryExcept)
                 not_empty_body = not bool(len(node.body))
             elif pycompat.PY3:
                 try:
                     is_there_except_handler = isinstance(
-                        node.handlers[0], ast.ExceptHandler
-                    )
+                        node.handlers[0], ast.ExceptHandler)
                     not_empty_body = True
                 except IndexError:
                     pass
@@ -845,7 +847,9 @@ class _PatchingASTWalker(object):
 
     def _Tuple(self, node):
         if node.elts:
-            self._handle(node, self._child_nodes(node.elts, ","), eat_parens=True)
+            self._handle(node,
+                         self._child_nodes(node.elts, ","),
+                         eat_parens=True)
         else:
             self._handle(node, [self.empty_tuple])
 
@@ -884,7 +888,8 @@ class _PatchingASTWalker(object):
         if is_async:
             children.extend(["async"])
         for item in pycompat.get_ast_with_items(node):
-            children.extend([self.with_or_comma_context_manager, item.context_expr])
+            children.extend(
+                [self.with_or_comma_context_manager, item.context_expr])
             if item.optional_vars:
                 children.extend(["as", item.optional_vars])
         if pycompat.PY2 and COMMA_IN_WITH_PATTERN.search(self.source.source):
@@ -913,6 +918,7 @@ class _PatchingASTWalker(object):
 
 
 class _Source(object):
+
     def __init__(self, source):
         self.source = source
         self.offset = 0
@@ -926,9 +932,8 @@ class _Source(object):
                 else:
                     self._skip_comment()
         except (ValueError, TypeError) as e:
-            raise MismatchedTokenError(
-                "Token <%s> at %s cannot be matched" % (token, self._get_location())
-            )
+            raise MismatchedTokenError("Token <%s> at %s cannot be matched" %
+                                       (token, self._get_location()))
         self.offset = new_offset + len(token)
         return (new_offset, self.offset)
 
@@ -940,8 +945,10 @@ class _Source(object):
     def consume_string(self, end=None):
         if _Source._string_pattern is None:
             string_pattern = codeanalyze.get_string_pattern()
-            formatted_string_pattern = codeanalyze.get_formatted_string_pattern()
-            original = r"(?:%s)|(?:%s)" % (string_pattern, formatted_string_pattern)
+            formatted_string_pattern = codeanalyze.get_formatted_string_pattern(
+            )
+            original = r"(?:%s)|(?:%s)" % (string_pattern,
+                                           formatted_string_pattern)
             pattern = r"(%s)((\s|\\\n|#[^\n]*\n)*(%s))*" % (original, original)
             _Source._string_pattern = re.compile(pattern)
         repattern = _Source._string_pattern
@@ -1000,7 +1007,7 @@ class _Source(object):
         self.offset = self.source.index("\n", self.offset + 1)
 
     def _get_location(self):
-        lines = self.source[: self.offset].split("\n")
+        lines = self.source[:self.offset].split("\n")
         return (len(lines), len(lines[-1]))
 
     def _consume_pattern(self, repattern, end=None):
@@ -1017,7 +1024,7 @@ class _Source(object):
 
     def till_token(self, token):
         new_offset = self.source.index(token, self.offset)
-        return self[self.offset : new_offset]
+        return self[self.offset:new_offset]
 
     def rfind_token(self, token, start, end):
         index = start
@@ -1032,7 +1039,7 @@ class _Source(object):
                 return None
 
     def from_offset(self, offset):
-        return self[offset : self.offset]
+        return self[offset:self.offset]
 
     def find_backwards(self, pattern, offset):
         return self.source.rindex(pattern, 0, offset)

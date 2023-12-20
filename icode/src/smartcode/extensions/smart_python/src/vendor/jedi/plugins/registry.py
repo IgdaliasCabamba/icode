@@ -8,5 +8,4 @@ from jedi.plugins import pytest
 from jedi.plugins import django
 from jedi.plugins import plugin_manager
 
-
 plugin_manager.register(stdlib, flask, pytest, django)

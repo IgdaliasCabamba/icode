@@ -6,7 +6,6 @@ from radon.raw import *
 
 dedent = lambda code: textwrap.dedent(code).strip()
 
-
 FIND_CASES = [
     (
         """
@@ -458,7 +457,5 @@ def test_analyze(code, expected):
     else:
         result = analyze(code)
         assert result == Module(*expected)
-        assert (
-            result.loc
-            == result.blank + result.sloc + result.single_comments + result.multi
-        )
+        assert (result.loc == result.blank + result.sloc +
+                result.single_comments + result.multi)

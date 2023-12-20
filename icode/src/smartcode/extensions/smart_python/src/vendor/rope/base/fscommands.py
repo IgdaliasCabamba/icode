@@ -38,6 +38,7 @@ def create_fscommands(root):
 
 
 class FileSystemCommands(object):
+
     def create_file(self, path):
         open(path, "w").close()
 
@@ -66,6 +67,7 @@ class FileSystemCommands(object):
 
 
 class SubversionCommands(object):
+
     def __init__(self, *args):
         self.normal_actions = FileSystemCommands()
         import pysvn
@@ -94,6 +96,7 @@ class SubversionCommands(object):
 
 
 class MercurialCommands(object):
+
     def __init__(self, root):
         self.hg = self._import_mercurial()
         self.normal_actions = FileSystemCommands()
@@ -132,7 +135,11 @@ class MercurialCommands(object):
         self.normal_actions.create_folder(path)
 
     def move(self, path, new_location):
-        self.hg.commands.rename(self.ui, self.repo, path, new_location, after=False)
+        self.hg.commands.rename(self.ui,
+                                self.repo,
+                                path,
+                                new_location,
+                                after=False)
 
     def remove(self, path):
         self.hg.commands.remove(self.ui, self.repo, path)
@@ -145,6 +152,7 @@ class MercurialCommands(object):
 
 
 class GITCommands(object):
+
     def __init__(self, root):
         self.root = root
         self._do(["version"])
@@ -175,11 +183,12 @@ class GITCommands(object):
 
     def _in_dir(self, path):
         if path.startswith(self.root):
-            return path[len(self.root) + 1 :]
+            return path[len(self.root) + 1:]
         return self.root
 
 
 class DarcsCommands(object):
+
     def __init__(self, root):
         self.root = root
         self.normal_actions = FileSystemCommands()

@@ -30,8 +30,8 @@ class InputHistory(QLineEdit):
                     self.current_command_index += 1
                     try:
                         self.setText(
-                            self.commands_list[self.current_command_index * -1]
-                        )
+                            self.commands_list[self.current_command_index *
+                                               -1])
                     except IndexError:
                         self.setText(self.commands_list[0])
 
@@ -39,6 +39,7 @@ class InputHistory(QLineEdit):
             if self.current_command_index > 0:
                 self.current_command_index -= 1
                 try:
-                    self.setText(self.commands_list[self.current_command_index])
+                    self.setText(
+                        self.commands_list[self.current_command_index])
                 except IndexError:
                     self.setText(self.commands_list[-1])

@@ -37,7 +37,12 @@ class _ExtractRefactoring(object):
 
     kind_prefixes = {}
 
-    def __init__(self, project, resource, start_offset, end_offset, variable=False):
+    def __init__(self,
+                 project,
+                 resource,
+                 start_offset,
+                 end_offset,
+                 variable=False):
         self.project = project
         self.resource = resource
         self.start_offset = self._fix_start(resource.read(), start_offset)
@@ -53,7 +58,11 @@ class _ExtractRefactoring(object):
             offset -= 1
         return offset
 
-    def get_changes(self, extracted_name, similar=False, global_=False, kind=None):
+    def get_changes(self,
+                    extracted_name,
+                    similar=False,
+                    global_=False,
+                    kind=None):
         """Get the changes this refactoring makes
 
         :parameters:
@@ -112,6 +121,7 @@ class ExtractMethod(_ExtractRefactoring):
 
 
 class ExtractVariable(_ExtractRefactoring):
+
     def __init__(self, *args, **kwds):
         kwds = dict(kwds)
         kwds["variable"] = True
@@ -126,9 +136,8 @@ class ExtractVariable(_ExtractRefactoring):
 class _ExtractInfo(object):
     """Holds information about the extract to be performed"""
 
-    def __init__(
-        self, project, resource, start, end, new_name, variable, similar, make_global
-    ):
+    def __init__(self, project, resource, start, end, new_name, variable,
+                 similar, make_global):
         self.project = project
         self.resource = resource
         self.pymodule = project.get_pymodule(resource)
@@ -150,11 +159,9 @@ class _ExtractInfo(object):
         )
 
         start = self.logical_lines.logical_line_in(
-            self.lines.get_line_number(self.region[0])
-        )[0]
+            self.lines.get_line_number(self.region[0]))[0]
         end = self.logical_lines.logical_line_in(
-            self.lines.get_line_number(self.region[1])
-        )[1]
+            self.lines.get_line_number(self.region[1]))[1]
         self.region_lines = (start, end)
 
         self.lines_region = (
@@ -197,8 +204,7 @@ class _ExtractInfo(object):
     def one_line(self):
         return self.region != self.lines_region and (
             self.logical_lines.logical_line_in(self.region_lines[0])
-            == self.logical_lines.logical_line_in(self.region_lines[1])
-        )
+            == self.logical_lines.logical_line_in(self.region_lines[1]))
 
     @property
     def global_(self):
@@ -206,21 +212,24 @@ class _ExtractInfo(object):
 
     @property
     def method(self):
-        return self.scope.parent is not None and self.scope.parent.get_kind() == "Class"
+        return self.scope.parent is not None and self.scope.parent.get_kind(
+        ) == "Class"
 
     @property
     def indents(self):
-        return sourceutils.get_indents(self.pymodule.lines, self.region_lines[0])
+        return sourceutils.get_indents(self.pymodule.lines,
+                                       self.region_lines[0])
 
     @property
     def scope_indents(self):
         if self.global_:
             return 0
-        return sourceutils.get_indents(self.pymodule.lines, self.scope.get_start())
+        return sourceutils.get_indents(self.pymodule.lines,
+                                       self.scope.get_start())
 
     @property
     def extracted(self):
-        return self.source[self.region[0] : self.region[1]]
+        return self.source[self.region[0]:self.region[1]]
 
     _cached_parsed_extraced = None
 
@@ -246,8 +255,7 @@ class _ExtractInfo(object):
         """Does the extracted piece contains named expression/:= operator)"""
         if self._returning_named_expr is None:
             self._returning_named_expr = usefunction._namedexpr_last(
-                self._parsed_extracted
-            )
+                self._parsed_extracted)
         return self._returning_named_expr
 
 
@@ -265,6 +273,7 @@ class _ExtractCollector(object):
 
 
 class _ExtractPerformer(object):
+
     def __init__(self, info):
         self.info = info
         _ExceptionalConditionChecker()(self.info)
@@ -282,7 +291,8 @@ class _ExtractPerformer(object):
 
     def _replace_occurrences(self, content, extract_info):
         for match in extract_info.matches:
-            replacement = similarfinder.CodeTemplate(extract_info.replacement_pattern)
+            replacement = similarfinder.CodeTemplate(
+                extract_info.replacement_pattern)
             mapping = {}
             for name in replacement.get_names():
                 node = match.get_ast(name)
@@ -292,7 +302,8 @@ class _ExtractPerformer(object):
                 else:
                     mapping[name] = name
             region = match.get_region()
-            content.add_change(region[0], region[1], replacement.substitute(mapping))
+            content.add_change(region[0], region[1],
+                               replacement.substitute(mapping))
 
     def _collect_info(self):
         extract_collector = _ExtractCollector(self.info)
@@ -306,9 +317,8 @@ class _ExtractPerformer(object):
         finder = similarfinder.SimilarFinder(self.info.pymodule)
         matches = []
         for start, end in regions:
-            region_matches = finder.get_matches(
-                collector.body_pattern, collector.checks, start, end
-            )
+            region_matches = finder.get_matches(collector.body_pattern,
+                                                collector.checks, start, end)
             # Don't extract overlapping regions
             last_match_end = -1
             for region_match in region_matches:
@@ -322,9 +332,9 @@ class _ExtractPerformer(object):
 
     @staticmethod
     def _is_assignment(region_match):
-        return isinstance(
-            region_match.ast, (ast.Attribute, ast.Subscript)
-        ) and isinstance(region_match.ast.ctx, ast.Store)
+        return isinstance(region_match.ast,
+                          (ast.Attribute, ast.Subscript)) and isinstance(
+                              region_match.ast.ctx, ast.Store)
 
     def _where_to_search(self):
         if self.info.similar:
@@ -335,10 +345,8 @@ class _ExtractPerformer(object):
                 regions = []
                 method_kind = _get_function_kind(self.info.scope)
                 for scope in class_scope.get_scopes():
-                    if (
-                        method_kind == "method"
-                        and _get_function_kind(scope) != "method"
-                    ):
+                    if (method_kind == "method"
+                            and _get_function_kind(scope) != "method"):
                         continue
                     start = self.info.lines.get_line_start(scope.get_start())
                     end = self.info.lines.get_line_end(scope.get_end())
@@ -348,7 +356,9 @@ class _ExtractPerformer(object):
                 if self.info.variable:
                     return [self.info.scope_region]
                 else:
-                    return [self.info._get_scope_region(self.info.scope.parent)]
+                    return [
+                        self.info._get_scope_region(self.info.scope.parent)
+                    ]
         else:
             return [self.info.region]
 
@@ -376,6 +386,7 @@ class _ExtractPerformer(object):
 
 
 class _DefinitionLocationFinder(object):
+
     def __init__(self, info, matched_lines):
         self.info = info
         self.matched_lines = matched_lines
@@ -405,7 +416,8 @@ class _DefinitionLocationFinder(object):
 
     def find_indents(self):
         if self.info.variable and not self.info.make_global:
-            return sourceutils.get_indents(self.info.lines, self._get_before_line())
+            return sourceutils.get_indents(self.info.lines,
+                                           self._get_before_line())
         else:
             if self.info.global_ or self.info.make_global:
                 return 0
@@ -420,6 +432,7 @@ class _DefinitionLocationFinder(object):
 
 
 class _ExceptionalConditionChecker(object):
+
     def __call__(self, info):
         self.base_conditions(info)
         if info.one_line:
@@ -444,63 +457,58 @@ class _ExceptionalConditionChecker(object):
                 )
         except SyntaxError:
             raise RefactoringError(
-                "Extracted piece should contain complete statements."
-            )
+                "Extracted piece should contain complete statements.")
 
     def one_line_conditions(self, info):
         if self._is_region_on_a_word(info):
             raise RefactoringError("Should extract complete statements.")
         if info.variable and not info.one_line:
-            raise RefactoringError("Extract variable should not span multiple lines.")
+            raise RefactoringError(
+                "Extract variable should not span multiple lines.")
         if usefunction._named_expr_count(
-            info._parsed_extracted
-        ) - usefunction._namedexpr_last(info._parsed_extracted):
+                info._parsed_extracted) - usefunction._namedexpr_last(
+                    info._parsed_extracted):
             raise RefactoringError(
                 "Extracted piece cannot contain named expression (:= operator)."
             )
 
     def multi_line_conditions(self, info):
-        node = _parse_text(info.source[info.region[0] : info.region[1]])
+        node = _parse_text(info.source[info.region[0]:info.region[1]])
         count = usefunction._return_count(node)
         extracted = info.extracted
         if count > 1:
             raise RefactoringError(
-                "Extracted piece can have only one return statement."
-            )
+                "Extracted piece can have only one return statement.")
         if usefunction._yield_count(node):
-            raise RefactoringError("Extracted piece cannot have yield statements.")
-        if not hasattr(
-            ast, "PyCF_ALLOW_TOP_LEVEL_AWAIT"
-        ) and _AsyncStatementFinder.has_errors(extracted):
             raise RefactoringError(
-                "Extracted piece can only have async/await "
-                "statements if Rope is running on Python "
-                "3.8 or higher"
-            )
+                "Extracted piece cannot have yield statements.")
+        if not hasattr(ast, "PyCF_ALLOW_TOP_LEVEL_AWAIT"
+                       ) and _AsyncStatementFinder.has_errors(extracted):
+            raise RefactoringError("Extracted piece can only have async/await "
+                                   "statements if Rope is running on Python "
+                                   "3.8 or higher")
         if count == 1 and not usefunction._returns_last(node):
             raise RefactoringError("Return should be the last statement.")
         if info.region != info.lines_region:
             raise RefactoringError(
-                "Extracted piece should contain complete statements."
-            )
+                "Extracted piece should contain complete statements.")
 
     def _is_region_on_a_word(self, info):
-        if (
-            info.region[0] > 0
-            and self._is_on_a_word(info, info.region[0] - 1)
-            or self._is_on_a_word(info, info.region[1] - 1)
-        ):
+        if (info.region[0] > 0 and self._is_on_a_word(info, info.region[0] - 1)
+                or self._is_on_a_word(info, info.region[1] - 1)):
             return True
 
     def _is_on_a_word(self, info, offset):
         prev = info.source[offset]
-        if not (prev.isalnum() or prev == "_") or offset + 1 == len(info.source):
+        if not (prev.isalnum() or prev == "_") or offset + 1 == len(
+                info.source):
             return False
         next = info.source[offset + 1]
         return next.isalnum() or next == "_"
 
 
 class _ExtractMethodParts(object):
+
     def __init__(self, info):
         self.info = info
         self.info_collector = self._create_info_collector()
@@ -518,16 +526,15 @@ class _ExtractMethodParts(object):
         if self._extracting_staticmethod() or self._extracting_classmethod():
             if not self.info.method:
                 raise RefactoringError(
-                    "Cannot extract to staticmethod/classmethod outside class"
-                )
+                    "Cannot extract to staticmethod/classmethod outside class")
 
     def _extacting_from_staticmethod(self):
-        return (
-            self.info.method and _get_function_kind(self.info.scope) == "staticmethod"
-        )
+        return (self.info.method
+                and _get_function_kind(self.info.scope) == "staticmethod")
 
     def _extracting_from_classmethod(self):
-        return self.info.method and _get_function_kind(self.info.scope) == "classmethod"
+        return self.info.method and _get_function_kind(
+            self.info.scope) == "classmethod"
 
     def get_definition(self):
         if self.info.global_:
@@ -561,8 +568,7 @@ class _ExtractMethodParts(object):
         if self.info.method and not self.info.make_global:
             if _get_function_kind(self.info.scope) == "method":
                 class_name = similarfinder._pydefined_to_str(
-                    self.info.scope.parent.pyobject
-                )
+                    self.info.scope.parent.pyobject)
                 return {self._get_self_name(): "type=" + class_name}
         return {}
 
@@ -570,10 +576,10 @@ class _ExtractMethodParts(object):
         zero = self.info.scope.get_start() - 1
         start_line = self.info.region_lines[0] - zero
         end_line = self.info.region_lines[1] - zero
-        info_collector = _FunctionInformationCollector(
-            start_line, end_line, self.info.global_
-        )
-        body = self.info.source[self.info.scope_region[0] : self.info.scope_region[1]]
+        info_collector = _FunctionInformationCollector(start_line, end_line,
+                                                       self.info.global_)
+        body = self.info.source[self.info.scope_region[0]:self.info.
+                                scope_region[1]]
         node = _parse_text(body)
         ast.walk(node, info_collector)
         return info_collector
@@ -617,14 +623,13 @@ class _ExtractMethodParts(object):
             if self_name in args:
                 args.remove(self_name)
             args.insert(0, self_name)
-        return prefix + self.info.new_name + "(%s)" % self._get_comma_form(args)
+        return prefix + self.info.new_name + "(%s)" % self._get_comma_form(
+            args)
 
     def _extracting_method(self):
         return not self._extracting_staticmethod() and (
-            self.info.method
-            and not self.info.make_global
-            and _get_function_kind(self.info.scope) == "method"
-        )
+            self.info.method and not self.info.make_global
+            and _get_function_kind(self.info.scope) == "method")
 
     def _get_self_name(self):
         if self._extracting_classmethod():
@@ -648,7 +653,8 @@ class _ExtractMethodParts(object):
     def _get_function_call_prefix(self, args):
         prefix = ""
         if self.info.method and not self.info.make_global:
-            if self._extracting_staticmethod() or self._extracting_classmethod():
+            if self._extracting_staticmethod() or self._extracting_classmethod(
+            ):
                 prefix = self.info.scope.parent.pyobject.get_name() + "."
             else:
                 self_name = self._get_self_name()
@@ -664,7 +670,8 @@ class _ExtractMethodParts(object):
         args = self._find_function_arguments()
         returns = self._find_function_returns()
         call_prefix = ""
-        if returns and (not self.info.one_line or self.info.returning_named_expr):
+        if returns and (not self.info.one_line
+                        or self.info.returning_named_expr):
             assignment_operator = " := " if self.info.one_line else " = "
             call_prefix = self._get_comma_form(returns) + assignment_operator
         if self.info.returned:
@@ -675,26 +682,22 @@ class _ExtractMethodParts(object):
         # if not make_global, do not pass any global names; they are
         # all visible.
         if self.info.global_ and not self.info.make_global:
-            return list(
-                self.info_collector.read
-                & self.info_collector.postread
-                & self.info_collector.written
-            )
+            return list(self.info_collector.read
+                        & self.info_collector.postread
+                        & self.info_collector.written)
         if not self.info.one_line:
             result = self.info_collector.prewritten & self.info_collector.read
-            result |= (
-                self.info_collector.prewritten
-                & self.info_collector.postread
-                & (self.info_collector.maybe_written - self.info_collector.written)
-            )
+            result |= (self.info_collector.prewritten
+                       & self.info_collector.postread
+                       & (self.info_collector.maybe_written -
+                          self.info_collector.written))
             return list(result)
         start = self.info.region[0]
         if start == self.info.lines_region[0]:
             start = start + re.search("\\S", self.info.extracted).start()
-        function_definition = self.info.source[start : self.info.region[1]]
+        function_definition = self.info.source[start:self.info.region[1]]
         read = _VariableReadsAndWritesFinder.find_reads_for_one_liners(
-            function_definition
-        )
+            function_definition)
         return list(self.info_collector.prewritten.intersection(read))
 
     def _find_function_returns(self):
@@ -729,14 +732,12 @@ class _ExtractMethodParts(object):
     def _insert_globals(self, unindented_body):
         globals_in_body = self._get_globals_in_body(unindented_body)
         globals_ = self.info_collector.globals_ & (
-            self.info_collector.written | self.info_collector.maybe_written
-        )
+            self.info_collector.written | self.info_collector.maybe_written)
         globals_ = globals_ - globals_in_body
 
         if globals_:
-            unindented_body = "global {}\n{}".format(
-                ", ".join(globals_), unindented_body
-            )
+            unindented_body = "global {}\n{}".format(", ".join(globals_),
+                                                     unindented_body)
         return unindented_body
 
     @staticmethod
@@ -748,11 +749,13 @@ class _ExtractMethodParts(object):
 
 
 class _ExtractVariableParts(object):
+
     def __init__(self, info):
         self.info = info
 
     def get_definition(self):
-        result = self.info.new_name + " = " + _join_lines(self.info.extracted) + "\n"
+        result = self.info.new_name + " = " + _join_lines(
+            self.info.extracted) + "\n"
         return result
 
     def get_body_pattern(self):
@@ -766,6 +769,7 @@ class _ExtractVariableParts(object):
 
 
 class _FunctionInformationCollector(object):
+
     def __init__(self, start, end, is_global):
         self.start = start
         self.end = end
@@ -877,7 +881,8 @@ class _FunctionInformationCollector(object):
             self._handle_conditional_node(node)
 
     def _For(self, node):
-        with self._handle_loop_context(node), self._handle_conditional_context(node):
+        with self._handle_loop_context(node), self._handle_conditional_context(
+                node):
             # iter has to be checked before the target variables
             ast.walk(node.iter, self)
             ast.walk(node.target, self)
@@ -913,8 +918,7 @@ class _FunctionInformationCollector(object):
 
 def _get_argnames(arguments):
     result = [
-        pycompat.get_ast_arg_arg(node)
-        for node in arguments.args
+        pycompat.get_ast_arg_arg(node) for node in arguments.args
         if isinstance(node, pycompat.ast_arg_type)
     ]
     if arguments.vararg:
@@ -925,6 +929,7 @@ def _get_argnames(arguments):
 
 
 class _VariableReadsAndWritesFinder(object):
+
     def __init__(self):
         self.written = set()
         self.read = set()
@@ -965,6 +970,7 @@ class _VariableReadsAndWritesFinder(object):
 
 
 class _BaseErrorFinder(object):
+
     @classmethod
     def has_errors(cls, code):
         if code.strip() == "":
@@ -976,6 +982,7 @@ class _BaseErrorFinder(object):
 
 
 class _UnmatchedBreakOrContinueFinder(_BaseErrorFinder):
+
     def __init__(self):
         self.error = False
         self.loop_count = 0
@@ -1016,6 +1023,7 @@ class _UnmatchedBreakOrContinueFinder(_BaseErrorFinder):
 
 
 class _AsyncStatementFinder(_BaseErrorFinder):
+
     def __init__(self):
         self.error = False
 
@@ -1033,6 +1041,7 @@ class _AsyncStatementFinder(_BaseErrorFinder):
 
 
 class _GlobalFinder(object):
+
     def __init__(self):
         self.globals_ = OrderedSet()
 
@@ -1053,10 +1062,8 @@ def _parse_text(body):
         try:
             node = ast.parse("(" + body + ")")
         except SyntaxError:
-            node = ast.parse(
-                "async def __rope_placeholder__():\n"
-                + sourceutils.fix_indentation(body, 4)
-            )
+            node = ast.parse("async def __rope_placeholder__():\n" +
+                             sourceutils.fix_indentation(body, 4))
             node.body = node.body[0].body
     return node
 

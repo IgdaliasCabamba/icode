@@ -153,7 +153,11 @@ class ComplexityVisitor(CodeVisitor):
         otherwise to 0.
     """
 
-    def __init__(self, to_method=False, classname=None, off=True, no_assert=False):
+    def __init__(self,
+                 to_method=False,
+                 classname=None,
+                 off=True,
+                 no_assert=False):
         self.off = off
         self.complexity = 1 if off else 0
         self.functions = []
@@ -185,12 +189,8 @@ class ComplexityVisitor(CodeVisitor):
         """The total complexity. Computed adding up the visitor complexity, the
         functions complexity, and the classes complexity.
         """
-        return (
-            self.complexity
-            + self.functions_complexity
-            + self.classes_complexity
-            + (not self.off)
-        )
+        return (self.complexity + self.functions_complexity +
+                self.classes_complexity + (not self.off))
 
     @property
     def blocks(self):
@@ -300,16 +300,15 @@ class ComplexityVisitor(CodeVisitor):
         visitors_max_lines = [node.lineno]
         inner_classes = []
         for child in node.body:
-            visitor = ComplexityVisitor(
-                True, classname, off=False, no_assert=self.no_assert
-            )
+            visitor = ComplexityVisitor(True,
+                                        classname,
+                                        off=False,
+                                        no_assert=self.no_assert)
             visitor.visit(child)
             methods.extend(visitor.functions)
-            body_complexity += (
-                visitor.complexity
-                + visitor.functions_complexity
-                + len(visitor.functions)
-            )
+            body_complexity += (visitor.complexity +
+                                visitor.functions_complexity +
+                                len(visitor.functions))
             visitors_max_lines.append(visitor.max_line)
             inner_classes.extend(visitor.classes)
 
@@ -378,11 +377,12 @@ class HalsteadVisitor(CodeVisitor):
             self.operands += results[1]
             self.operators_seen.update(results[2])
             for operand in results[3]:
-                new_operand = getattr(
-                    operand, self.types.get(type(operand), ""), operand
-                )
+                new_operand = getattr(operand,
+                                      self.types.get(type(operand),
+                                                     ""), operand)
                 name = self.get_name(operand)
-                new_operand = getattr(operand, self.types.get(name, ""), operand)
+                new_operand = getattr(operand, self.types.get(name, ""),
+                                      operand)
 
                 self.operands_seen.add((self.context, new_operand))
             # Now dispatch to children
@@ -393,22 +393,22 @@ class HalsteadVisitor(CodeVisitor):
     @dispatch
     def visit_BinOp(self, node):
         """A binary operator."""
-        return (1, 2, (self.get_name(node.op),), (node.left, node.right))
+        return (1, 2, (self.get_name(node.op), ), (node.left, node.right))
 
     @dispatch
     def visit_UnaryOp(self, node):
         """A unary operator."""
-        return (1, 1, (self.get_name(node.op),), (node.operand,))
+        return (1, 1, (self.get_name(node.op), ), (node.operand, ))
 
     @dispatch
     def visit_BoolOp(self, node):
         """A boolean operator."""
-        return (1, len(node.values), (self.get_name(node.op),), node.values)
+        return (1, len(node.values), (self.get_name(node.op), ), node.values)
 
     @dispatch
     def visit_AugAssign(self, node):
         """An augmented assign (contains an operator)."""
-        return (1, 2, (self.get_name(node.op),), (node.target, node.value))
+        return (1, 2, (self.get_name(node.op), ), (node.target, node.value))
 
     @dispatch
     def visit_Compare(self, node):

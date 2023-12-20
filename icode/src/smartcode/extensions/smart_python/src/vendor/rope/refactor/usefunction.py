@@ -14,12 +14,11 @@ class UseFunction(object):
         if pyname is None:
             raise exceptions.RefactoringError("Unresolvable name selected")
         self.pyfunction = pyname.get_object()
-        if not isinstance(self.pyfunction, pyobjects.PyFunction) or not isinstance(
-            self.pyfunction.parent, pyobjects.PyModule
-        ):
+        if not isinstance(self.pyfunction,
+                          pyobjects.PyFunction) or not isinstance(
+                              self.pyfunction.parent, pyobjects.PyModule):
             raise exceptions.RefactoringError(
-                "Use function works for global functions, only."
-            )
+                "Use function works for global functions, only.")
         self.resource = self.pyfunction.get_module().get_resource()
         self._check_returns()
 
@@ -27,31 +26,31 @@ class UseFunction(object):
         node = self.pyfunction.get_ast()
         if _yield_count(node):
             raise exceptions.RefactoringError(
-                "Use function should not be used on generatorS."
-            )
+                "Use function should not be used on generatorS.")
         returns = _return_count(node)
         if returns > 1:
             raise exceptions.RefactoringError(
-                "usefunction: Function has more than one return statement."
-            )
+                "usefunction: Function has more than one return statement.")
         if returns == 1 and not _returns_last(node):
             raise exceptions.RefactoringError(
-                "usefunction: return should be the last statement."
-            )
+                "usefunction: return should be the last statement.")
 
-    def get_changes(self, resources=None, task_handle=taskhandle.NullTaskHandle()):
+    def get_changes(self,
+                    resources=None,
+                    task_handle=taskhandle.NullTaskHandle()):
         if resources is None:
             resources = self.project.get_python_files()
-        changes = change.ChangeSet("Using function <%s>" % self.pyfunction.get_name())
+        changes = change.ChangeSet("Using function <%s>" %
+                                   self.pyfunction.get_name())
         if self.resource in resources:
             newresources = list(resources)
             newresources.remove(self.resource)
         for c in self._restructure(newresources, task_handle).changes:
             changes.add_change(c)
         if self.resource in resources:
-            for c in self._restructure(
-                [self.resource], task_handle, others=False
-            ).changes:
+            for c in self._restructure([self.resource],
+                                       task_handle,
+                                       others=False).changes:
                 changes.add_change(c)
         return changes
 
@@ -69,10 +68,13 @@ class UseFunction(object):
         args_value = {"skip": (self.resource, body_region)}
         args = {"": args_value}
 
-        restructuring = restructure.Restructure(
-            self.project, pattern, goal, args=args, imports=imports
-        )
-        return restructuring.get_changes(resources=resources, task_handle=task_handle)
+        restructuring = restructure.Restructure(self.project,
+                                                pattern,
+                                                goal,
+                                                args=args,
+                                                imports=imports)
+        return restructuring.get_changes(resources=resources,
+                                         task_handle=task_handle)
 
     def _find_temps(self):
         return find_temps(self.project, self._get_body())
@@ -90,10 +92,11 @@ class UseFunction(object):
             if self._is_expression():
                 replacement = "${%s}" % self._rope_returned
             else:
-                replacement = "%s = ${%s}" % (self._rope_result, self._rope_returned)
-            body = restructure.replace(
-                body, "return ${%s}" % self._rope_returned, replacement
-            )
+                replacement = "%s = ${%s}" % (self._rope_result,
+                                              self._rope_returned)
+            body = restructure.replace(body,
+                                       "return ${%s}" % self._rope_returned,
+                                       replacement)
             wildcards.append(self._rope_result)
         return similarfinder.make_pattern(body, wildcards)
 
@@ -105,7 +108,8 @@ class UseFunction(object):
         function_name = self.pyfunction.get_name()
         if import_:
             function_name = self._module_name() + "." + function_name
-        goal = "%s(%s)" % (function_name, ", ".join(("${%s}" % p) for p in params))
+        goal = "%s(%s)" % (function_name, ", ".join(
+            ("${%s}" % p) for p in params))
         if self._does_return() and not self._is_expression():
             goal = "${%s} = %s" % (self._rope_result, goal)
         return goal
@@ -140,11 +144,8 @@ def _returns_last(node):
 def _namedexpr_last(node):
     if not hasattr(ast, "NamedExpr"):  # python<3.8
         return False
-    return (
-        bool(node.body)
-        and len(node.body) == 1
-        and isinstance(node.body[-1].value, ast.NamedExpr)
-    )
+    return (bool(node.body) and len(node.body) == 1
+            and isinstance(node.body[-1].value, ast.NamedExpr))
 
 
 def _yield_count(node):
@@ -166,6 +167,7 @@ def _named_expr_count(node):
 
 
 class _ReturnOrYieldFinder(object):
+
     def __init__(self):
         self.returns = 0
         self.named_expression = 0

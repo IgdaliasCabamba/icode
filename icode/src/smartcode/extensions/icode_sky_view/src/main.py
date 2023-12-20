@@ -2,6 +2,7 @@ from extension_api import *
 
 
 class Init(ModelApp):
+
     def __init__(self, data) -> None:
         super().__init__(data, "icode_sky_view")
         self._db = CacheManager(self.local_storage_to("cache", "data.idt"))

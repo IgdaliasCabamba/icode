@@ -7,6 +7,7 @@ from jedi.inference.base_value import ValueWrapper, ValueSet
 
 
 class Decoratee(ValueWrapper):
+
     def __init__(self, wrapped_value, original_value):
         super().__init__(wrapped_value)
         self._original_value = original_value
@@ -17,5 +18,4 @@ class Decoratee(ValueWrapper):
     def py__get__(self, instance, class_value):
         return ValueSet(
             Decoratee(v, self._original_value)
-            for v in self._wrapped_value.py__get__(instance, class_value)
-        )
+            for v in self._wrapped_value.py__get__(instance, class_value))

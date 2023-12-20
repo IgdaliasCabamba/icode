@@ -56,7 +56,11 @@ class SymbolExplorer(QFrame):
             self.icons.get_icon(symbol.type),
             str(symbol.name),
             f"line: {symbol.line_number}, level:{symbol.level}",
-            {"line": symbol.line_number, "name": symbol.name, "editor": editor},
+            {
+                "line": symbol.line_number,
+                "name": symbol.name,
+                "editor": editor
+            },
         )
         self.symbol_list.addItem(row)
 
@@ -98,9 +102,8 @@ class SymbolExplorer(QFrame):
                 height += self.symbol_list.sizeHintForRow(i)
 
         self.symbol_list.setFixedHeight(height + 10 if height < 500 else 500)
-        self.setFixedHeight(
-            self.symbol_input.size().height() + self.symbol_list.size().height() + 20
-        )
+        self.setFixedHeight(self.symbol_input.size().height() +
+                            self.symbol_list.size().height() + 20)
 
     def mirror_in_editor(self, item):
         editor = item.item_data["editor"]

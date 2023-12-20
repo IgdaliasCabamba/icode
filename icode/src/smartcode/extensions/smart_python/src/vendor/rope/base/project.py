@@ -17,6 +17,7 @@ except ImportError:
 
 
 class _Project(object):
+
     def __init__(self, fscommands):
         self.observers = []
         self.fscommands = fscommands
@@ -38,14 +39,14 @@ class _Project(object):
         path = self._get_resource_path(resource_name)
         if not os.path.exists(path):
             raise exceptions.ResourceNotFoundError(
-                "Resource <%s> does not exist" % resource_name
-            )
+                "Resource <%s> does not exist" % resource_name)
         elif os.path.isfile(path):
             return File(self, resource_name)
         elif os.path.isdir(path):
             return Folder(self, resource_name)
         else:
-            raise exceptions.ResourceNotFoundError("Unknown resource " + resource_name)
+            raise exceptions.ResourceNotFoundError("Unknown resource " +
+                                                   resource_name)
 
     def get_module(self, name, folder=None):
         """Returns a `PyObject` if the module was found."""
@@ -178,7 +179,9 @@ class _Project(object):
         return pycore.PyCore(self)
 
     def close(self):
-        warnings.warn("Cannot close a NoProject", DeprecationWarning, stacklevel=2)
+        warnings.warn("Cannot close a NoProject",
+                      DeprecationWarning,
+                      stacklevel=2)
 
     ropefolder = None
 
@@ -186,9 +189,11 @@ class _Project(object):
 class Project(_Project):
     """A Project containing files and folders"""
 
-    def __init__(
-        self, projectroot, fscommands=None, ropefolder=".ropeproject", **prefs
-    ):
+    def __init__(self,
+                 projectroot,
+                 fscommands=None,
+                 ropefolder=".ropeproject",
+                 **prefs):
         """A rope project
 
         :parameters:
@@ -209,7 +214,8 @@ class Project(_Project):
         if not os.path.exists(self._address):
             os.mkdir(self._address)
         elif not os.path.isdir(self._address):
-            raise exceptions.RopeError("Project root exists and" " is not a directory")
+            raise exceptions.RopeError("Project root exists and"
+                                       " is not a directory")
         if fscommands is None:
             fscommands = rope.base.fscommands.create_fscommands(self._address)
         super(Project, self).__init__(fscommands)
@@ -233,8 +239,7 @@ class Project(_Project):
     def get_python_files(self):
         """Returns all python files available in the project"""
         return [
-            resource
-            for resource in self.get_files()
+            resource for resource in self.get_files()
             if self.pycore.is_python_file(resource)
         ]
 
@@ -258,13 +263,11 @@ class Project(_Project):
         run_globals = {}
         if self.ropefolder is not None:
             config = self.get_file(self.ropefolder.path + "/config.py")
-            run_globals.update(
-                {
-                    "__name__": "__main__",
-                    "__builtins__": __builtins__,
-                    "__file__": config.real_path,
-                }
-            )
+            run_globals.update({
+                "__name__": "__main__",
+                "__builtins__": __builtins__,
+                "__file__": config.real_path,
+            })
             if config.exists():
                 config = self.ropefolder.get_child("config.py")
                 pycompat.execfile(config.real_path, run_globals)
@@ -352,12 +355,13 @@ def get_no_project():
 
 
 class _FileListCacher(object):
+
     def __init__(self, project):
         self.project = project
         self.files = None
         rawobserver = resourceobserver.ResourceObserver(
-            self._changed, self._invalid, self._invalid, self._invalid, self._invalid
-        )
+            self._changed, self._invalid, self._invalid, self._invalid,
+            self._invalid)
         self.project.add_observer(rawobserver)
 
     def get_files(self):
@@ -382,6 +386,7 @@ class _FileListCacher(object):
 
 
 class _DataFiles(object):
+
     def __init__(self, project):
         self.project = project
         self.hooks = []
@@ -489,13 +494,9 @@ def _find_module_in_folder(folder, modname):
         else:
             return None
     if module.is_folder():
-        if (
-            module.has_child(packages[-1])
-            and module.get_child(packages[-1]).is_folder()
-        ):
+        if (module.has_child(packages[-1])
+                and module.get_child(packages[-1]).is_folder()):
             return module.get_child(packages[-1])
-        elif (
-            module.has_child(packages[-1] + ".py")
-            and not module.get_child(packages[-1] + ".py").is_folder()
-        ):
+        elif (module.has_child(packages[-1] + ".py")
+              and not module.get_child(packages[-1] + ".py").is_folder()):
             return module.get_child(packages[-1] + ".py")

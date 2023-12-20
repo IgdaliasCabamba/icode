@@ -5,7 +5,10 @@ import pathlib
 
 
 class DataManager(QSettings):
-    def __init__(self, file_with_path: str, format=QSettings.IniFormat) -> None:
+
+    def __init__(self,
+                 file_with_path: str,
+                 format=QSettings.IniFormat) -> None:
         super().__init__(file_with_path, format)
         self.file_path = f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}{file_with_path}"
 
@@ -17,7 +20,9 @@ class DataManager(QSettings):
         else:
             self.setValue(key, [value])
 
-    def restore_from_list(self, key: str, pos: int = -1) -> Union[object, None]:
+    def restore_from_list(self,
+                          key: str,
+                          pos: int = -1) -> Union[object, None]:
         base_list = self.value(key)
         if isinstance(base_list, list):
             try:
@@ -38,7 +43,9 @@ class DataManager(QSettings):
         else:
             self.setValue(key, [value])
 
-    def restore_from_dict(self, key: str, pos: int = -1) -> Union[object, None]:
+    def restore_from_dict(self,
+                          key: str,
+                          pos: int = -1) -> Union[object, None]:
         base_list = self.value(key)
         if isinstance(base_list, list):
             try:
@@ -65,6 +72,7 @@ class DataManager(QSettings):
 
 
 class CacheManager(QSettings):
+
     def __init__(
         self,
         file_with_path: str,

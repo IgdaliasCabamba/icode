@@ -16,6 +16,7 @@ class Frameworks:
 
 
 def get_matcher(method_prefix=r'\.'):
+
     def methods(*items):
         return [method_prefix + x for x in items]
 
@@ -26,7 +27,8 @@ def get_matcher(method_prefix=r'\.'):
         prefixes += ['tearDown', 'setUp']
     if Frameworks.pytest:
         prefixes += ['test_.+', 'call', 'pytest_.*']
-        prefixes += methods('test_.+', 'runtest', 'run_test', 'set_up', 'setup', 'teardown', 'cases')
+        prefixes += methods('test_.+', 'runtest', 'run_test', 'set_up',
+                            'setup', 'teardown', 'cases')
     if Flags.ignore_underscored_methods:
         prefixes += methods('_.+')
     if Flags.ignore_underscored:

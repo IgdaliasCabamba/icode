@@ -27,6 +27,7 @@ class _BoundTypeVarName(AbstractNameDefinition):
         self._value_set = value_set
 
     def infer(self):
+
         def iter_():
             for value in self._value_set:
                 # Replace any with the constraints if they are there.
@@ -82,6 +83,7 @@ class _TypeVarFilter:
 
 
 class _AnnotatedClassContext(ClassContext):
+
     def get_filters(self, *args, **kwargs):
         filters = super().get_filters(*args, **kwargs)
         yield from filters
@@ -92,6 +94,7 @@ class _AnnotatedClassContext(ClassContext):
 
 
 class DefineGenericBaseClass(LazyValueWrapper):
+
     def __init__(self, generics_manager):
         self._generics_manager = generics_manager
 
@@ -125,13 +128,10 @@ class DefineGenericBaseClass(LazyValueWrapper):
             # cached results.
             return ValueSet([self])
 
-        return ValueSet(
-            [
-                self._create_instance_with_generics(
-                    TupleGenericManager(tuple(new_generics))
-                )
-            ]
-        )
+        return ValueSet([
+            self._create_instance_with_generics(
+                TupleGenericManager(tuple(new_generics)))
+        ])
 
     def is_same_class(self, other):
         if not isinstance(other, DefineGenericBaseClass):
@@ -159,10 +159,8 @@ class DefineGenericBaseClass(LazyValueWrapper):
                 # the whole `is_same_class` and `is_sub_class` matching is just
                 # not in the best shape.
                 for cls1 in class_set1.gather_annotation_classes()
-                for cls2 in class_set2.gather_annotation_classes()
-            )
-            for class_set1, class_set2 in zip(given_params1, given_params2)
-        )
+                for cls2 in class_set2.gather_annotation_classes())
+            for class_set1, class_set2 in zip(given_params1, given_params2))
 
     def __repr__(self):
         return "<%s: %s%s>" % (
@@ -203,7 +201,7 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
         return _TypeVarFilter(self.get_generics(), self.list_type_vars())
 
     def py__call__(self, arguments):
-        (instance,) = super().py__call__(arguments)
+        (instance, ) = super().py__call__(arguments)
         return ValueSet([_GenericInstanceWrapper(instance)])
 
     def _as_context(self):
@@ -238,8 +236,7 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
             annotation_generics = self.get_generics()
             if annotation_generics:
                 return annotation_generics[0].infer_type_vars(
-                    value_set.merge_types_of_iterate(),
-                )
+                    value_set.merge_types_of_iterate(), )
         else:
             # Note: we need to handle the MRO _in order_, so we need to extract
             # the elements from the set first, then handle them, even if we put
@@ -269,6 +266,7 @@ class GenericClass(DefineGenericBaseClass, ClassMixin):
 
 
 class _LazyGenericBaseClass:
+
     def __init__(self, class_value, lazy_base_class, generics_manager):
         self._class_value = class_value
         self._lazy_base_class = lazy_base_class
@@ -319,6 +317,7 @@ class _LazyGenericBaseClass:
 
 
 class _GenericInstanceWrapper(ValueWrapper):
+
     def py__stop_iteration_returns(self):
         for cls in self._wrapped_value.class_value.py__mro__():
             if cls.py__name__() == "Generator":
@@ -328,11 +327,13 @@ class _GenericInstanceWrapper(ValueWrapper):
                 except IndexError:
                     pass
             elif cls.py__name__() == "Iterator":
-                return ValueSet([builtin_from_name(self.inference_state, "None")])
+                return ValueSet(
+                    [builtin_from_name(self.inference_state, "None")])
         return self._wrapped_value.py__stop_iteration_returns()
 
     def get_type_hint(self, add_class_info=True):
-        return self._wrapped_value.class_value.get_type_hint(add_class_info=False)
+        return self._wrapped_value.class_value.get_type_hint(
+            add_class_info=False)
 
 
 class _PseudoTreeNameClass(Value):
@@ -359,6 +360,7 @@ class _PseudoTreeNameClass(Value):
     def get_filters(self, *args, **kwargs):
         # TODO this is obviously wrong. Is it though?
         class EmptyFilter(ClassFilter):
+
             def __init__(self):
                 pass
 
@@ -380,13 +382,14 @@ class _PseudoTreeNameClass(Value):
         return ValueName(self, self._tree_name)
 
     def get_qualified_names(self):
-        return (self._tree_name.value,)
+        return (self._tree_name.value, )
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__, self._tree_name.value)
 
 
 class BaseTypingValue(LazyValueWrapper):
+
     def __init__(self, parent_context, tree_name):
         self.inference_state = parent_context.inference_state
         self.parent_context = parent_context
@@ -404,6 +407,7 @@ class BaseTypingValue(LazyValueWrapper):
 
 
 class BaseTypingClassWithGenerics(DefineGenericBaseClass):
+
     def __init__(self, parent_context, tree_name, generics_manager):
         super().__init__(generics_manager)
         self.inference_state = parent_context.inference_state
@@ -422,7 +426,9 @@ class BaseTypingClassWithGenerics(DefineGenericBaseClass):
 
 
 class BaseTypingInstance(LazyValueWrapper):
-    def __init__(self, parent_context, class_value, tree_name, generics_manager):
+
+    def __init__(self, parent_context, class_value, tree_name,
+                 generics_manager):
         self.inference_state = class_value.inference_state
         self.parent_context = parent_context
         self._class_value = class_value
@@ -436,16 +442,15 @@ class BaseTypingInstance(LazyValueWrapper):
         return self._class_value
 
     def get_qualified_names(self):
-        return (self.py__name__(),)
+        return (self.py__name__(), )
 
     @property
     def name(self):
         return ValueName(self, self._tree_name)
 
     def _get_wrapped_value(self):
-        (object_,) = builtin_from_name(
-            self.inference_state, "object"
-        ).execute_annotation()
+        (object_, ) = builtin_from_name(self.inference_state,
+                                        "object").execute_annotation()
         return object_
 
     def __repr__(self):

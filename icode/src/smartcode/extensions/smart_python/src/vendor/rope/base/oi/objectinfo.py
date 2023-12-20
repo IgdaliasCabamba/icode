@@ -49,13 +49,15 @@ class ObjectInfoManager(object):
             resource = self.to_pyobject.path_to_resource(path)
             if resource is not None and resource.project == self.project:
                 files.append(resource)
-        self.observer = resourceobserver.FilteredResourceObserver(observer, files)
+        self.observer = resourceobserver.FilteredResourceObserver(
+            observer, files)
         self.objectdb.add_file_list_observer(_FileListObserver(self))
         self.project.add_observer(self.observer)
 
     def _resource_changed(self, resource):
         try:
-            self.objectdb.validate_file(self.to_textual.resource_to_path(resource))
+            self.objectdb.validate_file(
+                self.to_textual.resource_to_path(resource))
         except exceptions.ModuleSyntaxError:
             pass
 
@@ -88,14 +90,13 @@ class ObjectInfoManager(object):
         path, key = self._get_scope(pyobject)
         if path is not None:
             returned = self.objectdb.get_returned(
-                path, key, self._args_to_textual(pyobject, args)
-            )
+                path, key, self._args_to_textual(pyobject, args))
             if returned is not None:
                 return self.to_pyobject(returned)
 
     def _args_to_textual(self, pyfunction, args):
         parameters = list(pyfunction.get_param_names(special_args=False))
-        arguments = args.get_arguments(parameters)[: len(parameters)]
+        arguments = args.get_arguments(parameters)[:len(parameters)]
         textual_args = tuple([self.to_textual(arg) for arg in arguments])
         return textual_args
 
@@ -133,6 +134,7 @@ class ObjectInfoManager(object):
         return result
 
     def doa_data_received(self, data):
+
         def doi_to_normal(textual):
             pyobject = self.doi_to_pyobject(textual)
             return self.to_textual(pyobject)
@@ -146,7 +148,7 @@ class ObjectInfoManager(object):
     def function_called(self, pyfunction, params, returned=None):
         function_text = self.to_textual(pyfunction)
         params_text = tuple([self.to_textual(param) for param in params])
-        returned_text = ("unknown",)
+        returned_text = ("unknown", )
         if returned is not None:
             returned_text = self.to_textual(returned)
         self._save_data(function_text, params_text, returned_text)
@@ -163,7 +165,7 @@ class ObjectInfoManager(object):
             if result is not None:
                 return self.to_pyobject(result)
 
-    def _save_data(self, function, args, returned=("unknown",)):
+    def _save_data(self, function, args, returned=("unknown", )):
         self.objectdb.add_callinfo(function[1], function[2], args, returned)
 
     def _get_scope(self, pyobject):
@@ -188,6 +190,7 @@ class ObjectInfoManager(object):
 
 
 class TextualValidation(object):
+
     def __init__(self, to_pyobject):
         self.to_pyobject = to_pyobject
 
@@ -214,6 +217,7 @@ class TextualValidation(object):
 
 
 class _FileListObserver(object):
+
     def __init__(self, object_info):
         self.object_info = object_info
         self.observer = self.object_info.observer

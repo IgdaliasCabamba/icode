@@ -4,6 +4,7 @@ import smartlibs.mjson as ijson
 
 
 class Code:
+
     def __init__(self):
         pass
 

@@ -29,11 +29,13 @@ from jedi.inference.value.dynamic_arrays import check_array_additions
 
 
 class IterableMixin:
+
     def py__next__(self, contextualized_node=None):
         return self.py__iter__(contextualized_node)
 
     def py__stop_iteration_returns(self):
-        return ValueSet([compiled.builtin_from_name(self.inference_state, "None")])
+        return ValueSet(
+            [compiled.builtin_from_name(self.inference_state, "None")])
 
     # At the moment, safe values are simple values like "foo", 1 and not
     # lists/dicts. Therefore as a small speed optimization we can just do the
@@ -48,13 +50,12 @@ class GeneratorBase(LazyAttributeOverwrite, IterableMixin):
     array_type = None
 
     def _get_wrapped_value(self):
-        (instance,) = self._get_cls().execute_annotation()
+        (instance, ) = self._get_cls().execute_annotation()
         return instance
 
     def _get_cls(self):
-        (generator,) = self.inference_state.typing_module.py__getattribute__(
-            "Generator"
-        )
+        (generator,
+         ) = self.inference_state.typing_module.py__getattribute__("Generator")
         return generator
 
     def py__bool__(self):
@@ -67,12 +68,12 @@ class GeneratorBase(LazyAttributeOverwrite, IterableMixin):
     @publish_method("send")
     @publish_method("__next__")
     def _next(self, arguments):
-        return ValueSet.from_sets(
-            lazy_value.infer() for lazy_value in self.py__iter__()
-        )
+        return ValueSet.from_sets(lazy_value.infer()
+                                  for lazy_value in self.py__iter__())
 
     def py__stop_iteration_returns(self):
-        return ValueSet([compiled.builtin_from_name(self.inference_state, "None")])
+        return ValueSet(
+            [compiled.builtin_from_name(self.inference_state, "None")])
 
     @property
     def name(self):
@@ -103,7 +104,8 @@ class Generator(GeneratorBase):
         return self._func_execution_context.get_return_values()
 
     def __repr__(self):
-        return "<%s of %s>" % (type(self).__name__, self._func_execution_context)
+        return "<%s of %s>" % (type(self).__name__,
+                               self._func_execution_context)
 
 
 def comprehension_from_atom(inference_state, value, atom):
@@ -143,6 +145,7 @@ def comprehension_from_atom(inference_state, value, atom):
 
 
 class ComprehensionMixin:
+
     @inference_state_method_cache()
     def _get_comp_for_context(self, parent_context, comp_for):
         return CompForContext(parent_context, comp_for)
@@ -191,8 +194,10 @@ class ComprehensionMixin:
 
 
 class _DictMixin:
+
     def _get_generics(self):
-        return tuple(c_set.py__class__() for c_set in self.get_mapping_item_values())
+        return tuple(c_set.py__class__()
+                     for c_set in self.get_mapping_item_values())
 
 
 class Sequence(LazyAttributeOverwrite, IterableMixin):
@@ -203,7 +208,7 @@ class Sequence(LazyAttributeOverwrite, IterableMixin):
         return compiled.CompiledValueName(self, self.array_type)
 
     def _get_generics(self):
-        return (self.merge_types_of_iterate().py__class__(),)
+        return (self.merge_types_of_iterate().py__class__(), )
 
     @inference_state_method_cache(default=())
     def _cached_generics(self):
@@ -213,10 +218,10 @@ class Sequence(LazyAttributeOverwrite, IterableMixin):
         from jedi.inference.gradual.base import GenericClass
         from jedi.inference.gradual.generics import TupleGenericManager
 
-        klass = compiled.builtin_from_name(self.inference_state, self.array_type)
-        (c,) = GenericClass(
-            klass, TupleGenericManager(self._cached_generics())
-        ).execute_annotation()
+        klass = compiled.builtin_from_name(self.inference_state,
+                                           self.array_type)
+        (c, ) = GenericClass(klass, TupleGenericManager(
+            self._cached_generics())).execute_annotation()
         return c
 
     def py__bool__(self):
@@ -233,9 +238,9 @@ class Sequence(LazyAttributeOverwrite, IterableMixin):
 
 
 class _BaseComprehension(ComprehensionMixin):
-    def __init__(
-        self, inference_state, defining_context, sync_comp_for_node, entry_node
-    ):
+
+    def __init__(self, inference_state, defining_context, sync_comp_for_node,
+                 entry_node):
         assert sync_comp_for_node.type == "sync_comp_for"
         super().__init__(inference_state)
         self._defining_context = defining_context
@@ -320,10 +325,9 @@ class DictComprehension(ComprehensionMixin, Sequence, _DictKeyMixin):
     def _imitate_items(self, arguments):
         lazy_values = [
             LazyKnownValue(
-                FakeTuple(
-                    self.inference_state, [LazyKnownValues(key), LazyKnownValues(value)]
-                )
-            )
+                FakeTuple(self.inference_state,
+                          [LazyKnownValues(key),
+                           LazyKnownValues(value)]))
             for key, value in self._iterate()
         ]
 
@@ -373,7 +377,8 @@ class SequenceLiteralValue(Sequence):
             if node == ":" or node.type == "subscript":
                 # TODO this should probably use at least part of the code
                 #      of infer_subscript_list.
-                yield LazyKnownValue(Slice(self._defining_context, None, None, None))
+                yield LazyKnownValue(
+                    Slice(self._defining_context, None, None, None))
             else:
                 yield LazyTreeValue(self._defining_context, node)
         yield from check_array_additions(self._defining_context, self)
@@ -395,7 +400,8 @@ class SequenceLiteralValue(Sequence):
         if array_node.type == "testlist_comp":
             # filter out (for now) pep 448 single-star unpacking
             return [
-                value for value in array_node.children[::2] if value.type != "star_expr"
+                value for value in array_node.children[::2]
+                if value.type != "star_expr"
             ]
         elif array_node.type == "dictorsetmaker":
             kv = []
@@ -437,8 +443,7 @@ class SequenceLiteralValue(Sequence):
             for key in self._defining_context.infer_node(key_node):
                 if is_string(key):
                     yield key.get_safe_value(), LazyTreeValue(
-                        self._defining_context, value
-                    )
+                        self._defining_context, value)
 
     def __repr__(self):
         return "<%s of %s>" % (self.__class__.__name__, self.atom)
@@ -457,8 +462,7 @@ class DictLiteralValue(_DictMixin, SequenceLiteralValue, _DictKeyMixin):
     def py__simple_getitem__(self, index):
         """Here the index is an int/str. Raises IndexError/KeyError."""
         compiled_value_index = compiled.create_simple_object(
-            self.inference_state, index
-        )
+            self.inference_state, index)
         for key, value in self.get_tree_entries():
             for k in self._defining_context.infer_node(key):
                 for key_v in k.execute_operation(compiled_value_index, "=="):
@@ -495,25 +499,24 @@ class DictLiteralValue(_DictMixin, SequenceLiteralValue, _DictKeyMixin):
                         LazyTreeValue(self._defining_context, key_node),
                         LazyTreeValue(self._defining_context, value_node),
                     ),
-                )
-            )
-            for key_node, value_node in self.get_tree_entries()
+                )) for key_node, value_node in self.get_tree_entries()
         ]
 
         return ValueSet([FakeList(self.inference_state, lazy_values)])
 
     def _dict_values(self):
         return ValueSet.from_sets(
-            self._defining_context.infer_node(v) for k, v in self.get_tree_entries()
-        )
+            self._defining_context.infer_node(v)
+            for k, v in self.get_tree_entries())
 
     def _dict_keys(self):
         return ValueSet.from_sets(
-            self._defining_context.infer_node(k) for k, v in self.get_tree_entries()
-        )
+            self._defining_context.infer_node(k)
+            for k, v in self.get_tree_entries())
 
 
 class _FakeSequence(Sequence):
+
     def __init__(self, inference_state, lazy_value_list):
         """
         type should be one of "tuple", "list"
@@ -557,8 +560,7 @@ class FakeDict(_DictMixin, Sequence, _DictKeyMixin):
     def py__iter__(self, contextualized_node=None):
         for key in self._dct:
             yield LazyKnownValue(
-                compiled.create_simple_object(self.inference_state, key)
-            )
+                compiled.create_simple_object(self.inference_state, key))
 
     def py__simple_getitem__(self, index):
         with reraise_getitem_errors(KeyError, TypeError):
@@ -567,19 +569,18 @@ class FakeDict(_DictMixin, Sequence, _DictKeyMixin):
 
     @publish_method("values")
     def _values(self, arguments):
-        return ValueSet(
-            [FakeTuple(self.inference_state, [LazyKnownValues(self._dict_values())])]
-        )
+        return ValueSet([
+            FakeTuple(self.inference_state,
+                      [LazyKnownValues(self._dict_values())])
+        ])
 
     def _dict_values(self):
-        return ValueSet.from_sets(
-            lazy_value.infer() for lazy_value in self._dct.values()
-        )
+        return ValueSet.from_sets(lazy_value.infer()
+                                  for lazy_value in self._dct.values())
 
     def _dict_keys(self):
-        return ValueSet.from_sets(
-            lazy_value.infer() for lazy_value in self.py__iter__()
-        )
+        return ValueSet.from_sets(lazy_value.infer()
+                                  for lazy_value in self.py__iter__())
 
     def exact_key_items(self):
         return self._dct.items()
@@ -589,6 +590,7 @@ class FakeDict(_DictMixin, Sequence, _DictKeyMixin):
 
 
 class MergedArray(Sequence):
+
     def __init__(self, inference_state, arrays):
         super().__init__(inference_state)
         self.array_type = arrays[-1].array_type
@@ -599,9 +601,8 @@ class MergedArray(Sequence):
             yield from array.py__iter__()
 
     def py__simple_getitem__(self, index):
-        return ValueSet.from_sets(
-            lazy_value.infer() for lazy_value in self.py__iter__()
-        )
+        return ValueSet.from_sets(lazy_value.infer()
+                                  for lazy_value in self.py__iter__())
 
 
 def unpack_tuple_to_dict(context, types, exprlist):
@@ -613,10 +614,10 @@ def unpack_tuple_to_dict(context, types, exprlist):
     elif exprlist.type == "atom" and exprlist.children[0] in ("(", "["):
         return unpack_tuple_to_dict(context, types, exprlist.children[1])
     elif exprlist.type in (
-        "testlist",
-        "testlist_comp",
-        "exprlist",
-        "testlist_star_expr",
+            "testlist",
+            "testlist_comp",
+            "exprlist",
+            "testlist_star_expr",
     ):
         dct = {}
         parts = iter(exprlist.children[::2])
@@ -630,10 +631,12 @@ def unpack_tuple_to_dict(context, types, exprlist):
                     context,
                     "value-error-too-many-values",
                     part,
-                    message="ValueError: too many values to unpack (expected %s)" % n,
+                    message=
+                    "ValueError: too many values to unpack (expected %s)" % n,
                 )
             else:
-                dct.update(unpack_tuple_to_dict(context, lazy_value.infer(), part))
+                dct.update(
+                    unpack_tuple_to_dict(context, lazy_value.infer(), part))
         has_parts = next(parts, None)
         if types and has_parts is not None:
             analysis.add(
@@ -655,6 +658,7 @@ def unpack_tuple_to_dict(context, types, exprlist):
 
 
 class Slice(LazyValueWrapper):
+
     def __init__(self, python_context, start, stop, step):
         self.inference_state = python_context.inference_state
         self._context = python_context
@@ -664,8 +668,9 @@ class Slice(LazyValueWrapper):
         self._step = step
 
     def _get_wrapped_value(self):
-        value = compiled.builtin_from_name(self._context.inference_state, "slice")
-        (slice_value,) = value.execute_with_values()
+        value = compiled.builtin_from_name(self._context.inference_state,
+                                           "slice")
+        (slice_value, ) = value.execute_with_values()
         return slice_value
 
     def get_safe_value(self, default=sentinel):
@@ -684,7 +689,7 @@ class Slice(LazyValueWrapper):
                 # one type.  Otherwise we will return an empty slice object.
                 raise IndexError
 
-            (value,) = result
+            (value, ) = result
             return get_int_or_none(value)
 
         try:

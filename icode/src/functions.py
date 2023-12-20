@@ -127,9 +127,8 @@ class File(IO):
         search_subdirs=True,
     ):
 
-        found_files = self.find_files_with_text(
-            search_text, search_dir, case_sensitive, search_subdirs
-        )
+        found_files = self.find_files_with_text(search_text, search_dir,
+                                                case_sensitive, search_subdirs)
         if found_files == None:
             return []
 
@@ -148,9 +147,11 @@ class File(IO):
 
         return found_files
 
-    def find_files_by_name(
-        self, search_filename, search_dir, case_sensitive=False, search_subdirs=True
-    ):
+    def find_files_by_name(self,
+                           search_filename,
+                           search_dir,
+                           case_sensitive=False,
+                           search_subdirs=True):
         path = pathlib.Path(search_dir)
 
         if not path.is_dir():
@@ -214,9 +215,10 @@ class File(IO):
             ]
             for current_encoding in test_encodings:
                 try:
-                    file = open(
-                        file_with_path, "r", encoding=current_encoding, errors="strict"
-                    )
+                    file = open(file_with_path,
+                                "r",
+                                encoding=current_encoding,
+                                errors="strict")
 
                     for line in itertools.islice(file, 10):
                         line = line
@@ -254,7 +256,8 @@ class File(IO):
         binary_text = self.test_binary_file(file_with_path)
         if binary_text != None:
             cleaned_binary_text = binary_text.replace(b"\x00", b"")
-            return cleaned_binary_text.decode(encoding="utf-8", errors="replace")
+            return cleaned_binary_text.decode(encoding="utf-8",
+                                              errors="replace")
         else:
             test_encodings = [
                 "utf-8",
@@ -268,9 +271,10 @@ class File(IO):
             for current_encoding in test_encodings:
                 try:
 
-                    with open(
-                        file_with_path, "r", encoding=current_encoding, errors="strict"
-                    ) as file:
+                    with open(file_with_path,
+                              "r",
+                              encoding=current_encoding,
+                              errors="strict") as file:
 
                         text = file.read()
 
@@ -303,10 +307,13 @@ class File(IO):
     def write_to_file(self, text, file_with_path, encoding="utf-8"):
         try:
             if encoding != "utf-8":
-                byte_string = bytearray(text, encoding=encoding, errors="replace")
+                byte_string = bytearray(text,
+                                        encoding=encoding,
+                                        errors="replace")
                 text = codecs.decode(byte_string, encoding, "replace")
 
-            with open(file_with_path, "w", newline="", encoding=encoding) as file:
+            with open(file_with_path, "w", newline="",
+                      encoding=encoding) as file:
                 file.write(text)
                 file.close()
 
@@ -395,9 +402,9 @@ class Get:
         return text.replace(old_char, new_char)
 
     @staticmethod
-    def get_expanded_tab_text(
-        txt: str, tabWidth: int = iconsts.EXPANDED_TAB_WIDTH
-    ) -> str:
+    def get_expanded_tab_text(txt: str,
+                              tabWidth: int = iconsts.EXPANDED_TAB_WIDTH
+                              ) -> str:
         out = []
         for line in txt.split("\n"):
             try:
@@ -414,16 +421,20 @@ class Get:
 
     @staticmethod
     def get_tab_to_space(text, tab_count: int = 1, space_count: int = 4):
-        new_text = re.sub("\t{" + str(tab_count) + "}", " " * space_count, text)
+        new_text = re.sub("\t{" + str(tab_count) + "}", " " * space_count,
+                          text)
         return new_text
 
     @staticmethod
     def get_space_to_tab(text, space_count: int = 4, tab_count: int = 1):
-        new_text = re.sub("[ ]{" + str(space_count) + "}", "\t" * tab_count, text)
+        new_text = re.sub("[ ]{" + str(space_count) + "}", "\t" * tab_count,
+                          text)
         return new_text
 
     @staticmethod
-    def get_space_to_tab_in_file(filename, space_count: int = 4, tab_count: int = 1):
+    def get_space_to_tab_in_file(filename,
+                                 space_count: int = 4,
+                                 tab_count: int = 1):
         with open(filename, "r") as file:
             filedata = file.read()
 
@@ -435,7 +446,9 @@ class Get:
         return filedata
 
     @staticmethod
-    def get_tab_to_space_in_file(filename, tab_count: int = 1, space_count: int = 4):
+    def get_tab_to_space_in_file(filename,
+                                 tab_count: int = 1,
+                                 space_count: int = 4):
         with open(filename, "r") as file:
             filedata = file.read()
 
@@ -447,11 +460,13 @@ class Get:
         return filedata
 
     @staticmethod
-    def get_code_with_identation(code: str, old_char: str, new_char: str) -> str:
+    def get_code_with_identation(code: str, old_char: str,
+                                 new_char: str) -> str:
         return re.sub(old_char, new_char, code)
 
     @staticmethod
-    def get_file_with_identation(file: str, old_char: str, new_char: str) -> str:
+    def get_file_with_identation(file: str, old_char: str,
+                                 new_char: str) -> str:
         pass
 
     @staticmethod
@@ -590,9 +605,7 @@ class Get:
             return icon
 
         except Exception as e:
-            print(
-                f"{area} icon by name error: {e}",
-            )
+            print(f"{area} icon by name error: {e}", )
 
         return None
 
@@ -648,7 +661,9 @@ class Get:
 
     # TODO
     def get_smartcode_icons(self, area: str = "-") -> dict:
+
         class IconMaker:
+
             def __init__(self, icon_path: str, api: dict, area: str):
                 self.icon_path = icon_path
                 self.api = api
@@ -701,10 +716,14 @@ class Get:
 
 
 class Is:
+
     def __init__(self):
         pass
 
-    def is_widget_code_editor(self, widget, attr: str = "", value: str = None) -> bool:
+    def is_widget_code_editor(self,
+                              widget,
+                              attr: str = "",
+                              value: str = None) -> bool:
         if hasattr(widget, "objectName"):
             if widget.objectName() == "editor-frame":
                 if widget.is_text:

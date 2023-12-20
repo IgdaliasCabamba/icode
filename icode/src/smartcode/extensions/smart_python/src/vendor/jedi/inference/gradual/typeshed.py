@@ -15,9 +15,8 @@ from jedi.inference.value import ModuleValue
 
 _jedi_path = Path(__file__).parent.parent.parent
 TYPESHED_PATH = _jedi_path.joinpath("third_party", "typeshed")
-DJANGO_INIT_PATH = _jedi_path.joinpath(
-    "third_party", "django-stubs", "django-stubs", "__init__.pyi"
-)
+DJANGO_INIT_PATH = _jedi_path.joinpath("third_party", "django-stubs",
+                                       "django-stubs", "__init__.pyi")
 
 _IMPORT_MAP = dict(
     _collections="collections",
@@ -51,11 +50,13 @@ def _create_stub_map(directory_path_info):
             if os.path.isdir(path):
                 init = os.path.join(path, "__init__.pyi")
                 if os.path.isfile(init):
-                    yield entry, PathInfo(init, directory_path_info.is_third_party)
+                    yield entry, PathInfo(init,
+                                          directory_path_info.is_third_party)
             elif entry.endswith(".pyi") and os.path.isfile(path):
                 name = entry[:-4]
                 if name != "__init__":
-                    yield name, PathInfo(path, directory_path_info.is_third_party)
+                    yield name, PathInfo(path,
+                                         directory_path_info.is_third_party)
 
     # Create a dictionary from the tuple generator.
     return dict(generate())
@@ -69,12 +70,14 @@ def _get_typeshed_directories(version_info):
         for base_list_entry in base_list:
             match = re.match(r"(\d+)\.(\d+)$", base_list_entry)
             if match is not None:
-                if match.group(1) == "3" and int(match.group(2)) <= version_info.minor:
+                if match.group(1) == "3" and int(
+                        match.group(2)) <= version_info.minor:
                     check_version_list.append(base_list_entry)
 
         for check_version in check_version_list:
             is_third_party = base != "stdlib"
-            yield PathInfo(str(base_path.joinpath(check_version)), is_third_party)
+            yield PathInfo(str(base_path.joinpath(check_version)),
+                           is_third_party)
 
 
 _version_cache: Dict[Tuple[int, int], Mapping[str, PathInfo]] = {}
@@ -93,19 +96,19 @@ def _cache_stub_file_map(version_info):
         pass
 
     _version_cache[version] = file_set = _merge_create_stub_map(
-        _get_typeshed_directories(version_info)
-    )
+        _get_typeshed_directories(version_info))
     return file_set
 
 
 def import_module_decorator(func):
+
     @wraps(func)
-    def wrapper(
-        inference_state, import_names, parent_module_value, sys_path, prefer_stubs
-    ):
+    def wrapper(inference_state, import_names, parent_module_value, sys_path,
+                prefer_stubs):
         python_value_set = inference_state.module_cache.get(import_names)
         if python_value_set is None:
-            if parent_module_value is not None and parent_module_value.is_stub():
+            if parent_module_value is not None and parent_module_value.is_stub(
+            ):
                 parent_module_values = parent_module_value.non_stub_value_set
             else:
                 parent_module_values = [parent_module_value]
@@ -117,12 +120,11 @@ def import_module_decorator(func):
                 python_value_set = ValueSet.from_sets(
                     func(
                         inference_state,
-                        (n,),
+                        (n, ),
                         None,
                         sys_path,
                     )
-                    for n in ["posixpath", "ntpath", "macpath", "os2emxpath"]
-                )
+                    for n in ["posixpath", "ntpath", "macpath", "os2emxpath"])
             else:
                 python_value_set = ValueSet.from_sets(
                     func(
@@ -130,9 +132,7 @@ def import_module_decorator(func):
                         import_names,
                         p,
                         sys_path,
-                    )
-                    for p in parent_module_values
-                )
+                    ) for p in parent_module_values)
             inference_state.module_cache.add(import_names, python_value_set)
 
         if not prefer_stubs:
@@ -164,15 +164,15 @@ def try_to_load_stub_cached(inference_state, import_names, *args, **kwargs):
     # TODO is this needed? where are the exceptions coming from that make this
     # necessary? Just remove this line.
     inference_state.stub_module_cache[import_names] = None
-    inference_state.stub_module_cache[import_names] = result = _try_to_load_stub(
-        inference_state, import_names, *args, **kwargs
-    )
+    inference_state.stub_module_cache[
+        import_names] = result = _try_to_load_stub(inference_state,
+                                                   import_names, *args,
+                                                   **kwargs)
     return result
 
 
-def _try_to_load_stub(
-    inference_state, import_names, python_value_set, parent_module_value, sys_path
-):
+def _try_to_load_stub(inference_state, import_names, python_value_set,
+                      parent_module_value, sys_path):
     """
     Trying to load a stub for a set of import_names.
 
@@ -196,9 +196,8 @@ def _try_to_load_stub(
         # foo-stubs
         for p in sys_path:
             p = cast_path(p)
-            init = (
-                os.path.join(p, *import_names) + "-stubs" + os.path.sep + "__init__.pyi"
-            )
+            init = (os.path.join(p, *import_names) + "-stubs" + os.path.sep +
+                    "__init__.pyi")
             m = _try_to_load_stub_from_file(
                 inference_state,
                 python_value_set,
@@ -225,7 +224,9 @@ def _try_to_load_stub(
             file_path = method()
             file_paths = []
             if c.is_namespace():
-                file_paths = [os.path.join(p, "__init__.pyi") for p in c.py__path__()]
+                file_paths = [
+                    os.path.join(p, "__init__.pyi") for p in c.py__path__()
+                ]
             elif file_path is not None and file_path.suffix == ".py":
                 file_paths = [str(file_path) + "i"]
 
@@ -241,9 +242,8 @@ def _try_to_load_stub(
                     return m
 
     # 3. Try to load typeshed
-    m = _load_from_typeshed(
-        inference_state, python_value_set, parent_module_value, import_names
-    )
+    m = _load_from_typeshed(inference_state, python_value_set,
+                            parent_module_value, import_names)
     if m is not None:
         return m
 
@@ -252,7 +252,7 @@ def _try_to_load_stub(
         if parent_module_value is not None:
             check_path = parent_module_value.py__path__() or []
             # In case import_names
-            names_for_path = (import_names[-1],)
+            names_for_path = (import_names[-1], )
         else:
             check_path = sys_path
             names_for_path = import_names
@@ -272,9 +272,8 @@ def _try_to_load_stub(
     return None
 
 
-def _load_from_typeshed(
-    inference_state, python_value_set, parent_module_value, import_names
-):
+def _load_from_typeshed(inference_state, python_value_set, parent_module_value,
+                        import_names):
     import_name = import_names[-1]
     map_ = None
     if len(import_names) == 1:
@@ -291,12 +290,12 @@ def _load_from_typeshed(
         # sense, IMO, because stubs take preference, even if the original
         # library doesn't provide a module (it could be dynamic). ~dave
         map_ = _merge_create_stub_map(
-            [PathInfo(p, is_third_party=False) for p in paths]
-        )
+            [PathInfo(p, is_third_party=False) for p in paths])
 
     if map_ is not None:
         path_info = map_.get(import_name)
-        if path_info is not None and (not path_info.is_third_party or python_value_set):
+        if path_info is not None and (not path_info.is_third_party
+                                      or python_value_set):
             return _try_to_load_stub_from_file(
                 inference_state,
                 python_value_set,
@@ -305,9 +304,8 @@ def _load_from_typeshed(
             )
 
 
-def _try_to_load_stub_from_file(
-    inference_state, python_value_set, file_io, import_names
-):
+def _try_to_load_stub_from_file(inference_state, python_value_set, file_io,
+                                import_names):
     try:
         stub_module_node = parse_stub_module(inference_state, file_io)
     except OSError:
@@ -334,10 +332,9 @@ def parse_stub_module(inference_state, file_io):
     )
 
 
-def create_stub_module(
-    inference_state, grammar, python_value_set, stub_module_node, file_io, import_names
-):
-    if import_names == ("typing",):
+def create_stub_module(inference_state, grammar, python_value_set,
+                       stub_module_node, file_io, import_names):
+    if import_names == ("typing", ):
         module_cls = TypingModuleWrapper
     else:
         module_cls = StubModuleValue

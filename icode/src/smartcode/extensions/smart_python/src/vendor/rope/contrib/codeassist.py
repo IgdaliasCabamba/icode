@@ -39,9 +39,9 @@ def code_assist(
 
     """
     if templates is not None:
-        warnings.warn(
-            "Codeassist no longer supports templates", DeprecationWarning, stacklevel=2
-        )
+        warnings.warn("Codeassist no longer supports templates",
+                      DeprecationWarning,
+                      stacklevel=2)
     assist = _PythonCodeAssist(
         project,
         source_code,
@@ -67,8 +67,7 @@ def starting_offset(source_code, offset):
     """
     word_finder = worder.Worder(source_code, True)
     expression, starting, starting_offset = word_finder.get_splitted_primary_before(
-        offset
-    )
+        offset)
     return starting_offset
 
 
@@ -122,7 +121,11 @@ def get_calltip(
     return PyDocExtractor().get_calltip(pyobject, ignore_unknown, remove_self)
 
 
-def get_definition_location(project, source_code, offset, resource=None, maxfixes=1):
+def get_definition_location(project,
+                            source_code,
+                            offset,
+                            resource=None,
+                            maxfixes=1):
     """Return the definition location of the python name at `offset`
 
     Return a (`rope.base.resources.Resource`, lineno) tuple.  If no
@@ -187,9 +190,11 @@ def get_canonical_path(project, resource, offset):
     # Start with the name of the object we're interested in.
     names = []
     if isinstance(pyname, pynamesdef.ParameterName):
-        names = [(worder.get_name_at(pymod.get_resource(), offset), "PARAMETER")]
+        names = [(worder.get_name_at(pymod.get_resource(),
+                                     offset), "PARAMETER")]
     elif isinstance(pyname, pynamesdef.AssignedName):
-        names = [(worder.get_name_at(pymod.get_resource(), offset), "VARIABLE")]
+        names = [(worder.get_name_at(pymod.get_resource(),
+                                     offset), "VARIABLE")]
 
     # Collect scope names.
     while scope.parent:
@@ -267,14 +272,12 @@ class CompletionProposal(object):
             elif isinstance(pyobject, builtins.BuiltinClass):
                 return "class"
             elif isinstance(pyobject, builtins.BuiltinObject) or isinstance(
-                pyobject, builtins.BuiltinName
-            ):
+                    pyobject, builtins.BuiltinName):
                 return "instance"
         elif isinstance(pyname, pynames.ImportedModule):
             return "module"
         elif isinstance(pyname, pynames.ImportedName) or isinstance(
-            pyname, pynames.DefinedName
-        ):
+                pyname, pynames.DefinedName):
             pyobject = pyname.get_object()
             if isinstance(pyobject, pyobjects.AbstractFunction):
                 return "function"
@@ -286,8 +289,7 @@ class CompletionProposal(object):
         if isinstance(self.pyname, builtins.BuiltinName):
             return "builtin"
         if isinstance(self.pyname, pynames.ImportedModule) or isinstance(
-            self.pyname, pynames.ImportedName
-        ):
+                self.pyname, pynames.ImportedName):
             return "imported"
         return scope
 
@@ -305,9 +307,8 @@ class CompletionProposal(object):
 
     @property
     def kind(self):
-        warnings.warn(
-            "the proposal's `kind` property is deprecated, " "use `scope` instead"
-        )
+        warnings.warn("the proposal's `kind` property is deprecated, "
+                      "use `scope` instead")
         return self.scope
 
 
@@ -362,24 +363,28 @@ def starting_expression(source_code, offset):
     """Return the expression to complete"""
     word_finder = worder.Worder(source_code, True)
     expression, starting, starting_offset = word_finder.get_splitted_primary_before(
-        offset
-    )
+        offset)
     if expression:
         return expression + "." + starting
     return starting
 
 
 def default_templates():
-    warnings.warn(
-        "default_templates() is deprecated.", DeprecationWarning, stacklevel=2
-    )
+    warnings.warn("default_templates() is deprecated.",
+                  DeprecationWarning,
+                  stacklevel=2)
     return {}
 
 
 class _PythonCodeAssist(object):
-    def __init__(
-        self, project, source_code, offset, resource=None, maxfixes=1, later_locals=True
-    ):
+
+    def __init__(self,
+                 project,
+                 source_code,
+                 offset,
+                 resource=None,
+                 maxfixes=1,
+                 later_locals=True):
         self.project = project
         self.code = source_code
         self.resource = resource
@@ -396,9 +401,8 @@ class _PythonCodeAssist(object):
 
     def _find_starting_offset(self, source_code, offset):
         current_offset = offset - 1
-        while current_offset >= 0 and (
-            source_code[current_offset].isalnum() or source_code[current_offset] in "_"
-        ):
+        while current_offset >= 0 and (source_code[current_offset].isalnum()
+                                       or source_code[current_offset] in "_"):
             current_offset -= 1
         return current_offset + 1
 
@@ -419,15 +423,18 @@ class _PythonCodeAssist(object):
 
     def _dotted_completions(self, module_scope, holding_scope):
         result = {}
-        found_pyname = rope.base.evaluate.eval_str(holding_scope, self.expression)
+        found_pyname = rope.base.evaluate.eval_str(holding_scope,
+                                                   self.expression)
         if found_pyname is not None:
             element = found_pyname.get_object()
             compl_scope = "attribute"
-            if isinstance(element, (pyobjectsdef.PyModule, pyobjectsdef.PyPackage)):
+            if isinstance(element,
+                          (pyobjectsdef.PyModule, pyobjectsdef.PyPackage)):
                 compl_scope = "imported"
             for name, pyname in element.get_attributes().items():
                 if name.startswith(self.starting):
-                    result[name] = CompletionProposal(name, compl_scope, pyname)
+                    result[name] = CompletionProposal(name, compl_scope,
+                                                      pyname)
         return result
 
     def _undotted_completions(self, scope, result, lineno=None):
@@ -442,12 +449,10 @@ class _PythonCodeAssist(object):
                 compl_scope = "local"
                 if scope.get_kind() == "Module":
                     compl_scope = "global"
-                if (
-                    lineno is None
-                    or self.later_locals
-                    or not self._is_defined_after(scope, pyname, lineno)
-                ):
-                    result[name] = CompletionProposal(name, compl_scope, pyname)
+                if (lineno is None or self.later_locals
+                        or not self._is_defined_after(scope, pyname, lineno)):
+                    result[name] = CompletionProposal(name, compl_scope,
+                                                      pyname)
 
     def _from_import_completions(self, pymodule):
         module_name = self.word_finder.get_from_module(self.offset)
@@ -457,9 +462,9 @@ class _PythonCodeAssist(object):
         result = {}
         for name in pymodule:
             if name.startswith(self.starting):
-                result[name] = CompletionProposal(
-                    name, scope="global", pyname=pymodule[name]
-                )
+                result[name] = CompletionProposal(name,
+                                                  scope="global",
+                                                  pyname=pymodule[name])
         return result
 
     def _find_module(self, pymodule, module_name):
@@ -472,17 +477,14 @@ class _PythonCodeAssist(object):
     def _is_defined_after(self, scope, pyname, lineno):
         location = pyname.get_definition_location()
         if location is not None and location[1] is not None:
-            if (
-                location[0] == scope.pyobject.get_module()
-                and lineno <= location[1] <= scope.get_end()
-            ):
+            if (location[0] == scope.pyobject.get_module()
+                    and lineno <= location[1] <= scope.get_end()):
                 return True
 
     def _code_completions(self):
         lineno = self.code.count("\n", 0, self.offset) + 1
-        fixer = fixsyntax.FixSyntax(
-            self.project, self.code, self.resource, self.maxfixes
-        )
+        fixer = fixsyntax.FixSyntax(self.project, self.code, self.resource,
+                                    self.maxfixes)
         pymodule = fixer.get_pymodule()
         module_scope = pymodule.get_scope()
         code = pymodule.source_code
@@ -496,7 +498,8 @@ class _PythonCodeAssist(object):
         if self.expression.strip() != "":
             result.update(self._dotted_completions(module_scope, inner_scope))
         else:
-            result.update(self._keyword_parameters(module_scope.pyobject, inner_scope))
+            result.update(
+                self._keyword_parameters(module_scope.pyobject, inner_scope))
             self._undotted_completions(inner_scope, result, lineno=lineno)
         return result
 
@@ -506,7 +509,8 @@ class _PythonCodeAssist(object):
             return {}
         word_finder = worder.Worder(self.code, True)
         if word_finder.is_on_function_call_keyword(offset - 1):
-            function_parens = word_finder.find_parens_start_from_inside(offset - 1)
+            function_parens = word_finder.find_parens_start_from_inside(
+                offset - 1)
             primary = word_finder.get_primary_at(function_parens - 1)
             try:
                 function_pyname = rope.base.evaluate.eval_str(scope, primary)
@@ -516,20 +520,20 @@ class _PythonCodeAssist(object):
                 pyobject = function_pyname.get_object()
                 if isinstance(pyobject, pyobjects.AbstractFunction):
                     pass
-                elif (
-                    isinstance(pyobject, pyobjects.AbstractClass)
-                    and "__init__" in pyobject
-                ):
+                elif (isinstance(pyobject, pyobjects.AbstractClass)
+                      and "__init__" in pyobject):
                     pyobject = pyobject["__init__"].get_object()
                 elif "__call__" in pyobject:
                     pyobject = pyobject["__call__"].get_object()
                 if isinstance(pyobject, pyobjects.AbstractFunction):
                     param_names = []
-                    param_names.extend(pyobject.get_param_names(special_args=False))
+                    param_names.extend(
+                        pyobject.get_param_names(special_args=False))
                     result = {}
                     for name in param_names:
                         if name.startswith(self.starting):
-                            result[name + "="] = NamedParamProposal(name, pyobject)
+                            result[name + "="] = NamedParamProposal(
+                                name, pyobject)
                     return result
         return {}
 
@@ -552,7 +556,8 @@ class _ProposalSorter(object):
         self.scopepref = scopepref
         if typepref is None:
             typepref = ["class", "function", "instance", "module", None]
-        self.typerank = dict((type, index) for index, type in enumerate(typepref))
+        self.typerank = dict(
+            (type, index) for index, type in enumerate(typepref))
 
     def get_sorted_proposal_list(self):
         """Return a list of `CodeAssistProposal`"""
@@ -563,8 +568,7 @@ class _ProposalSorter(object):
         for scope in self.scopepref:
             scope_proposals = proposals.get(scope, [])
             scope_proposals = [
-                proposal
-                for proposal in scope_proposals
+                proposal for proposal in scope_proposals
                 if proposal.type in self.typerank
             ]
             scope_proposals.sort(key=self._proposal_key)
@@ -572,6 +576,7 @@ class _ProposalSorter(object):
         return result
 
     def _proposal_key(self, proposal1):
+
         def _underline_count(name):
             return sum(1 for c in name if c == "_")
 
@@ -588,6 +593,7 @@ class _ProposalSorter(object):
 
 
 class PyDocExtractor(object):
+
     def get_doc(self, pyobject):
         if isinstance(pyobject, pyobjects.AbstractFunction):
             return self._get_function_docstring(pyobject)
@@ -616,7 +622,8 @@ class PyDocExtractor(object):
     def _get_class_docstring(self, pyclass):
         contents = self._trim_docstring(pyclass.get_doc(), 2)
         supers = [super.get_name() for super in pyclass.get_superclasses()]
-        doc = "class %s(%s):\n\n" % (pyclass.get_name(), ", ".join(supers)) + contents
+        doc = "class %s(%s):\n\n" % (pyclass.get_name(),
+                                     ", ".join(supers)) + contents
 
         if "__init__" in pyclass:
             init = pyclass["__init__"].get_object()
@@ -628,16 +635,16 @@ class PyDocExtractor(object):
         functions = [pyfunction]
         if self._is_method(pyfunction):
             functions.extend(
-                self._get_super_methods(pyfunction.parent, pyfunction.get_name())
-            )
-        return "\n\n".join(
-            [self._get_single_function_docstring(function) for function in functions]
-        )
+                self._get_super_methods(pyfunction.parent,
+                                        pyfunction.get_name()))
+        return "\n\n".join([
+            self._get_single_function_docstring(function)
+            for function in functions
+        ])
 
     def _is_method(self, pyfunction):
         return isinstance(pyfunction, pyobjects.PyFunction) and isinstance(
-            pyfunction.parent, pyobjects.PyClass
-        )
+            pyfunction.parent, pyobjects.PyClass)
 
     def _get_single_function_docstring(self, pyfunction):
         signature = self._get_function_signature(pyfunction)
@@ -718,18 +725,22 @@ class PyDocExtractor(object):
 
 
 class TemplateProposal(CodeAssistProposal):
+
     def __init__(self, name, template):
-        warnings.warn(
-            "TemplateProposal is deprecated.", DeprecationWarning, stacklevel=2
-        )
+        warnings.warn("TemplateProposal is deprecated.",
+                      DeprecationWarning,
+                      stacklevel=2)
         super(TemplateProposal, self).__init__(name, "template")
         self.template = template
 
 
 class Template(object):
+
     def __init__(self, template):
         self.template = template
-        warnings.warn("Template is deprecated.", DeprecationWarning, stacklevel=2)
+        warnings.warn("Template is deprecated.",
+                      DeprecationWarning,
+                      stacklevel=2)
 
     def variables(self):
         return []

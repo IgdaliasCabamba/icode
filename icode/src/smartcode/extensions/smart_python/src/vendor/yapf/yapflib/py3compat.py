@@ -29,9 +29,7 @@ if PY3:
 
     import codecs
 
-    def open_with_encoding(
-        filename, mode, encoding, newline=""
-    ):  # pylint: disable=unused-argument
+    def open_with_encoding(filename, mode, encoding, newline=""):  # pylint: disable=unused-argument
         return codecs.open(filename, mode=mode, encoding=encoding)
 
     import functools
@@ -60,6 +58,7 @@ else:
 
     # Python 2.7 doesn't have a native LRU cache, so do nothing.
     def lru_cache(maxsize=128, typed=False):
+
         def fake_wrapper(user_function):
             return user_function
 
@@ -73,9 +72,7 @@ else:
 
     import ConfigParser as configparser
 
-    CONFIGPARSER_BOOLEAN_STATES = (
-        configparser.ConfigParser._boolean_states
-    )  # pylint: disable=protected-access
+    CONFIGPARSER_BOOLEAN_STATES = (configparser.ConfigParser._boolean_states)  # pylint: disable=protected-access
 
 
 def EncodeAndWriteToStdout(s, encoding="utf-8"):
@@ -135,5 +132,5 @@ def removeBOM(source):
     if PY3:
         bom = bom.decode("utf-8")
     if source.startswith(bom):
-        return source[len(bom) :]
+        return source[len(bom):]
     return source

@@ -9,7 +9,8 @@ from typing import Any, Callable, Iterator, TextIO, Union
 from isort._future import dataclass
 from isort.exceptions import UnsupportedEncoding
 
-_ENCODING_PATTERN = re.compile(rb"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)")
+_ENCODING_PATTERN = re.compile(
+    rb"^[ \t\f]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)")
 
 
 @dataclass(frozen=True)
@@ -19,9 +20,8 @@ class File:
     encoding: str
 
     @staticmethod
-    def detect_encoding(
-        filename: Union[str, Path], readline: Callable[[], bytes]
-    ) -> str:
+    def detect_encoding(filename: Union[str, Path],
+                        readline: Callable[[], bytes]) -> str:
         try:
             return tokenize.detect_encoding(readline)[0]
         except Exception:
@@ -30,11 +30,12 @@ class File:
     @staticmethod
     def from_contents(contents: str, filename: str) -> "File":
         encoding = File.detect_encoding(
-            filename, BytesIO(contents.encode("utf-8")).readline
-        )
+            filename,
+            BytesIO(contents.encode("utf-8")).readline)
         return File(  # type: ignore
-            stream=StringIO(contents), path=Path(filename).resolve(), encoding=encoding
-        )
+            stream=StringIO(contents),
+            path=Path(filename).resolve(),
+            encoding=encoding)
 
     @property
     def extension(self) -> str:
@@ -49,7 +50,10 @@ class File:
         try:
             encoding = File.detect_encoding(filename, buffer.readline)
             buffer.seek(0)
-            text = TextIOWrapper(buffer, encoding, line_buffering=True, newline="")
+            text = TextIOWrapper(buffer,
+                                 encoding,
+                                 line_buffering=True,
+                                 newline="")
             text.mode = "r"  # type: ignore
             return text
         except Exception:
@@ -63,14 +67,17 @@ class File:
         stream = None
         try:
             stream = File._open(file_path)
-            yield File(stream=stream, path=file_path, encoding=stream.encoding)  # type: ignore
+            yield File(stream=stream, path=file_path,
+                       encoding=stream.encoding)  # type: ignore
         finally:
             if stream is not None:
                 stream.close()
 
 
 class _EmptyIO(StringIO):
-    def write(self, *args: Any, **kwargs: Any) -> None:  # type: ignore # skipcq: PTC-W0049
+
+    def write(self, *args: Any,
+              **kwargs: Any) -> None:  # type: ignore # skipcq: PTC-W0049
         pass
 
 

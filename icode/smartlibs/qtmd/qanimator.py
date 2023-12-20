@@ -4,9 +4,11 @@ from PyQt5.QtCore import QSize
 
 
 class Animator(QLabel):
+
     def __init__(self, parent, animation=None) -> None:
         super().__init__(parent)
-        self.size_policy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.size_policy = QSizePolicy(QSizePolicy.Expanding,
+                                       QSizePolicy.Fixed)
         self.setSizePolicy(self.size_policy)
 
         self.animation = animation
@@ -18,7 +20,9 @@ class Animator(QLabel):
     def movie(self):
         return self._movie
 
-    def set_animation(self, animation_path: str = None, play: bool = True) -> None:
+    def set_animation(self,
+                      animation_path: str = None,
+                      play: bool = True) -> None:
         self.animation = animation_path
         self._movie = QMovie(self.animation)
         self.setMovie(self._movie)

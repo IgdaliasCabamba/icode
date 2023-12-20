@@ -21,8 +21,15 @@ except:
 
 # Default memory in case of memory file is empty
 MEMORY = {
-    "icode": {"editing": [], "paths": {"current-path": str(pathlib.Path.home())}},
-    "April": {"settings": {}},
+    "icode": {
+        "editing": [],
+        "paths": {
+            "current-path": str(pathlib.Path.home())
+        }
+    },
+    "April": {
+        "settings": {}
+    },
 }
 
 

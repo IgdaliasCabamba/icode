@@ -6,15 +6,16 @@ from PyQt5.QtCore import QEvent, Qt, QObject, pyqtSignal
 
 
 class TabRegister:
+
     def __init__(self, tab_data):
         self.data = tab_data
 
 
 class AltTabPressEater(QObject):
+
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress and (
-            event.key() == 16777217 or event.key() == 16777218
-        ):
+        if event.type() == QEvent.KeyPress and (event.key() == 16777217
+                                                or event.key() == 16777218):
             return True
         else:
             return QObject.eventFilter(self, obj, event)
@@ -84,9 +85,8 @@ class NoteBookEditor(MovableTabWidget):
 
     def open_last_closed_tab(self):
         if self.widget_list:
-            index = self.add_tab_and_get_index(
-                self.widget_list[-1].widget, self.widget_list[-1].title
-            )
+            index = self.add_tab_and_get_index(self.widget_list[-1].widget,
+                                               self.widget_list[-1].title)
             self.setTabIcon(index, self.widget_list[-1].icon)
             self.setTabToolTip(index, self.widget_list[-1].tooltip)
             self.setTabWhatsThis(index, self.widget_list[-1].whatsthis)
@@ -115,16 +115,14 @@ class NoteBookEditor(MovableTabWidget):
         for x in self.time_line:
             i = self.indexOf(x)
             data = self.get_tab_data(i)
-            self.navigation.append(
-                {
-                    "title": data.title,
-                    "tooltip": data.tooltip,
-                    "whatsthis": data.whatsthis,
-                    "widget": data.widget,
-                    "icon": data.icon,
-                    "index": i,
-                }
-            )
+            self.navigation.append({
+                "title": data.title,
+                "tooltip": data.tooltip,
+                "whatsthis": data.whatsthis,
+                "widget": data.widget,
+                "icon": data.icon,
+                "index": i,
+            })
 
     def tab_changed(self, idx):
         self.on_tab_changed.emit(idx)

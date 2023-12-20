@@ -14,7 +14,7 @@ try:
 except NameError:  # PY3
 
     str = str
-    string_types = (str,)
+    string_types = (str, )
     import builtins
 
     ast_arg_type = ast.arg
@@ -26,7 +26,7 @@ except NameError:  # PY3
 
     def get_ast_arg_arg(node):
         if isinstance(
-            node, string_types
+                node, string_types
         ):  # TODO: G21: Understand the Algorithm (Where it's used?)
             return node
         return node.arg
@@ -36,13 +36,15 @@ except NameError:  # PY3
 
 else:  # PY2
 
-    string_types = (basestring,)
+    string_types = (basestring, )
     builtins = __import__("__builtin__")
     ast_arg_type = ast.Name
     execfile = execfile
 
     def get_ast_arg_arg(node):
-        if isinstance(node, string_types):  # Python2 arguments.vararg, arguments.kwarg
+        if isinstance(
+                node,
+                string_types):  # Python2 arguments.vararg, arguments.kwarg
             return node
         return node.id
 

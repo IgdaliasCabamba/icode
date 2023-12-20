@@ -27,6 +27,7 @@ from .dev_tools_ui import NotesUi, TodosUi
 
 
 class SideBottom(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent = parent
@@ -68,16 +69,20 @@ class SideBottom(QFrame):
         self.problem_logs = ProblemLogs(self)
         self.terminal = Terminal(self)
 
-        self.add_widget(self.problem_logs, "PROBLEMS", [self.btn_clear_problems])
+        self.add_widget(self.problem_logs, "PROBLEMS",
+                        [self.btn_clear_problems])
         self.add_widget(
             self.terminal,
             "TERMINAL",
             [self.terminal_pick_area, self.btn_remove_terminal],
         )
 
-        self.notebook.cornerWidget().btn_close.clicked.connect(self.close_panel)
-        self.notebook.cornerWidget().btn_maximize.clicked.connect(self.maximize)
-        self.notebook.cornerWidget().btn_minimize.clicked.connect(self.minimize)
+        self.notebook.cornerWidget().btn_close.clicked.connect(
+            self.close_panel)
+        self.notebook.cornerWidget().btn_maximize.clicked.connect(
+            self.maximize)
+        self.notebook.cornerWidget().btn_minimize.clicked.connect(
+            self.minimize)
 
         self.layout.addWidget(self.notebook)
 
@@ -97,9 +102,11 @@ class SideBottom(QFrame):
         if not goto and current_widget is not None:
             self.notebook.setCurrentWidget(current_widget)
 
-    def add_widget(
-        self, widget: object, name: str, components: list = [], goto: bool = True
-    ):
+    def add_widget(self,
+                   widget: object,
+                   name: str,
+                   components: list = [],
+                   goto: bool = True):
         current_widget = None
         if self.notebook.count() > 0:
             current_widget = self.notebook.currentWidget()
@@ -136,6 +143,7 @@ class SideBottom(QFrame):
 
 
 class SideLeft(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.parent = parent
@@ -221,6 +229,7 @@ class SideLeft(QFrame):
 
 
 class SideRight(QFrame):
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
         self.setObjectName("side-right")

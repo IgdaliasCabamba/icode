@@ -20,9 +20,10 @@ class TestCase(unittest.TestCase):
         if kw.get("is_segment"):
             tree = tree.body[0]
             kw.pop("is_segment")
-        w = checker.Checker(
-            tree, file_tokens=file_tokens, withDoctest=self.withDoctest, **kw
-        )
+        w = checker.Checker(tree,
+                            file_tokens=file_tokens,
+                            withDoctest=self.withDoctest,
+                            **kw)
         outputs = [type(o) for o in w.messages]
         expectedOutputs = list(expectedOutputs)
         outputs.sort(key=lambda t: t.__name__)
@@ -36,8 +37,7 @@ for input:
 expected outputs:
 %r
 but got:
-%s"""
-            % (input, expectedOutputs, "\n".join([str(o) for o in w.messages])),
+%s""" % (input, expectedOutputs, "\n".join([str(o) for o in w.messages])),
         )
         return w
 
@@ -73,4 +73,5 @@ but got:
         def assertNotIn(self, member, container, msg=None):
             """Just like self.assertTrue(a not in b)."""
             if member in container:
-                self.fail(msg or "%r unexpectedly found in %r" % (member, container))
+                self.fail(msg or "%r unexpectedly found in %r" %
+                          (member, container))

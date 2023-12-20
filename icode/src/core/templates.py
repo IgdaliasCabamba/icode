@@ -4,6 +4,7 @@ from .char_utils import get_unicon
 
 
 class IndexRender:
+
     def __init__(self):
         self.icons = getfn.get_smartcode_icons("index")
         self.logo = f'image: url("{self.icons["logo"]}")'
@@ -148,6 +149,7 @@ class IndexRender:
 
 
 class AprilRender:
+
     def __init__(self):
         pass
 

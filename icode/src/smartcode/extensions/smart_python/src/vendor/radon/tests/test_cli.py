@@ -30,7 +30,7 @@ def func3(b=3, *args):
 
 
 def fake_to_terminal():
-    yield ("a", ("mystr",), {"error": True})
+    yield ("a", ("mystr", ), {"error": True})
     yield ("b", (), {})
     yield (("p1", "p2"), (), {"indent": 1})
 
@@ -68,14 +68,12 @@ def test_config_for():
 
 def test_config_converts_types(mocker):
     test_config = ConfigParser()
-    test_config.read_string(
-        """
+    test_config.read_string("""
         [radon]
         str_test = B
         int_test = 19
         bool_test = true
-        """
-    )
+        """)
     config_mock = mocker.patch("radon.cli.FileConfig.file_config")
     config_mock.return_value = test_config
 
@@ -135,9 +133,9 @@ def test_raw(mocker, log_mock):
             ipynb_cells=False,
         ),
     )
-    log_mock.assert_called_once_with(
-        mocker.sentinel.harvester, stream=sys.stdout, json=True
-    )
+    log_mock.assert_called_once_with(mocker.sentinel.harvester,
+                                     stream=sys.stdout,
+                                     json=True)
 
 
 def test_mi(mocker, log_mock):
@@ -160,9 +158,9 @@ def test_mi(mocker, log_mock):
             ipynb_cells=False,
         ),
     )
-    log_mock.assert_called_once_with(
-        mocker.sentinel.harvester, stream=sys.stdout, json=False
-    )
+    log_mock.assert_called_once_with(mocker.sentinel.harvester,
+                                     stream=sys.stdout,
+                                     json=False)
 
 
 def test_encoding(mocker, log_mock):
@@ -188,7 +186,8 @@ def test_encoding(mocker, log_mock):
     for h_class, cfg in mappings.items():
         for f in fnames:
             harvester = h_class([f], cfg)
-            assert not any(["error" in kw for msg, args, kw in harvester.to_terminal()])
+            assert not any(
+                ["error" in kw for msg, args, kw in harvester.to_terminal()])
 
 
 @pytest.fixture
@@ -202,14 +201,12 @@ def test_log(mocker, stdout_mock):
     cli.log("{0} + 1", 2)
     cli.log("{0} + 1", 2, noformat=True)
 
-    stdout_mock.assert_has_calls(
-        [
-            mocker.call("msg\n"),
-            mocker.call("    msg\n"),
-            mocker.call("2 + 1\n"),
-            mocker.call("{0} + 1\n"),
-        ]
-    )
+    stdout_mock.assert_has_calls([
+        mocker.call("msg\n"),
+        mocker.call("    msg\n"),
+        mocker.call("2 + 1\n"),
+        mocker.call("{0} + 1\n"),
+    ])
     assert stdout_mock.call_count == 4
 
 
@@ -263,16 +260,18 @@ def test_log_result(mocker, stdout_mock):
     cli.log_result(h)
     h.to_terminal.assert_called_once_with()
 
-    log_mock.assert_has_calls(
-        [
-            mocker.call(mocker.sentinel.json, json=True, noformat=True),
-            mocker.call(
-                mocker.sentinel.json, json=True, noformat=True, xml=True, md=True
-            ),
-            mocker.call(mocker.sentinel.xml, noformat=True, xml=True),
-            mocker.call(mocker.sentinel.md, noformat=True, md=True),
-            mocker.call("a", error=True),
-        ]
-    )
+    log_mock.assert_has_calls([
+        mocker.call(mocker.sentinel.json, json=True, noformat=True),
+        mocker.call(mocker.sentinel.json,
+                    json=True,
+                    noformat=True,
+                    xml=True,
+                    md=True),
+        mocker.call(mocker.sentinel.xml, noformat=True, xml=True),
+        mocker.call(mocker.sentinel.md, noformat=True, md=True),
+        mocker.call("a", error=True),
+    ])
     le_mock.assert_called_once_with("mystr", indent=1)
-    ll_mock.assert_has_calls([mocker.call(["b"]), mocker.call(("p1", "p2"), indent=1)])
+    ll_mock.assert_has_calls(
+        [mocker.call(["b"]),
+         mocker.call(("p1", "p2"), indent=1)])

@@ -43,7 +43,7 @@ def relative(root, path):
     if path == root:
         return ""
     if path.startswith(root + "/"):
-        return path[len(root) + 1 :]
+        return path[len(root) + 1:]
 
 
 def report_change(project, path, old_content):
@@ -58,7 +58,8 @@ def report_change(project, path, old_content):
     for observer in list(project.observers):
         observer.resource_changed(resource)
     if project.pycore.automatic_soa:
-        rope.base.pycore.perform_soa_on_changed_scopes(project, resource, old_content)
+        rope.base.pycore.perform_soa_on_changed_scopes(project, resource,
+                                                       old_content)
 
 
 def analyze_module(project, resource):
@@ -90,9 +91,10 @@ def get_string_module(project, code, resource=None, force_errors=False):
     ``ignore_syntax_errors`` project config.
 
     """
-    return pyobjectsdef.PyModule(
-        project.pycore, code, resource, force_errors=force_errors
-    )
+    return pyobjectsdef.PyModule(project.pycore,
+                                 code,
+                                 resource,
+                                 force_errors=force_errors)
 
 
 def get_string_scope(project, code, resource=None):
@@ -116,8 +118,7 @@ def modname(resource):
         source_folder = resource.parent
 
     while source_folder != source_folder.parent and source_folder.has_child(
-        "__init__.py"
-    ):
+            "__init__.py"):
         module_name = source_folder.name + "." + module_name
         source_folder = source_folder.parent
 

@@ -1,4 +1,5 @@
 class CategoryMixin(object):
+
     def __init__(self, **kwargs):
         super(CategoryMixin, self).__init__(**kwargs)
         self._categories = set()

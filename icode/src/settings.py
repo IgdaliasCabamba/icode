@@ -82,7 +82,6 @@ def save_window(window, app):
         if action.isChecked():
             qt_cache.setValue("toolbar_action", i)
             break
-
     """Save The Notebooks and Editors"""
 
     data = []
@@ -95,26 +94,22 @@ def save_window(window, app):
                 editor_state = widget.save_state()
                 tab_data = notebook["widget"].get_tab_data(i)
 
-                childs.append(
-                    {
-                        "editor": editor_state,
-                        "notebook": {
-                            "title": tab_data.title,
-                            "tooltip": tab_data.tooltip,
-                            "whatsthis": tab_data.whatsthis,
-                            "index": i,
-                        },
-                    }
-                )
+                childs.append({
+                    "editor": editor_state,
+                    "notebook": {
+                        "title": tab_data.title,
+                        "tooltip": tab_data.tooltip,
+                        "whatsthis": tab_data.whatsthis,
+                        "index": i,
+                    },
+                })
 
-        data.append(
-            {
-                "id": notebook["id"],
-                "ref": notebook["ref"],
-                "direction": iconsts.ORIENTATIONS[notebook["direction"]],
-                "childs": childs,
-            }
-        )
+        data.append({
+            "id": notebook["id"],
+            "ref": notebook["ref"],
+            "direction": iconsts.ORIENTATIONS[notebook["direction"]],
+            "childs": childs,
+        })
 
     MEMORY["icode"]["editing"] = data
     save_memory()
@@ -163,7 +158,8 @@ def restore_window(window, app, getfn):
             window.side_right.setVisible(False)
 
     if side_right_size is not None:
-        window.side_right.resize(side_right_size.width(), side_right_size.height())
+        window.side_right.resize(side_right_size.width(),
+                                 side_right_size.height())
 
     if div_main_state is not None:
         window.div_main.restoreState(div_main_state)
@@ -173,7 +169,6 @@ def restore_window(window, app, getfn):
 
     if toolbar_action is not None:
         window.tool_bar.actions_list[int(toolbar_action)].trigger()
-
     """Restore the Notebooks and Editors"""
 
     for item in MEMORY["icode"]["editing"]:
@@ -191,7 +186,8 @@ def restore_window(window, app, getfn):
                 notebook_parent = app.ui.notebooks[ref]
 
             if childs:
-                notebook = app.create_new_notebook(direction, notebook_parent, False)
+                notebook = app.create_new_notebook(direction, notebook_parent,
+                                                   False)
             else:
                 continue
 

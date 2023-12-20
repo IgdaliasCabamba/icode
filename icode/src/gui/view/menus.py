@@ -32,6 +32,7 @@ from functools import partial
 
 
 class IndentSizeMenu(QMenu):
+
     def __init__(self, parent=None) -> None:
         super().__init__(parent=parent)
         self.parent = parent
@@ -90,7 +91,8 @@ class OpenRecentSubMenu(QMenu):
     def build(self) -> None:
         self.setTitle("Open Recent")
 
-        self.open_last_closed_tab = QAction("Reopen Closed Editor\tCtrl+Shift+T")
+        self.open_last_closed_tab = QAction(
+            "Reopen Closed Editor\tCtrl+Shift+T")
         self.open_last_closed_tab.setShortcut("Ctrl+Shift+T")
 
         self.open_last_closed_tabs = QAction("Reopen Closed Editors")

@@ -13,7 +13,6 @@ else:
     colorama_unavailable = False
     colorama.init(strip=False)
 
-
 ADDED_LINE_PATTERN = re.compile(r"\+[^+]")
 REMOVED_LINE_PATTERN = re.compile(r"-[^-]")
 
@@ -31,7 +30,8 @@ def format_simplified(import_line: str) -> str:
 
 def format_natural(import_line: str) -> str:
     import_line = import_line.strip()
-    if not import_line.startswith("from ") and not import_line.startswith("import "):
+    if not import_line.startswith("from ") and not import_line.startswith(
+            "import "):
         if "." not in import_line:
             return f"import {import_line}"
         parts = import_line.split(".")
@@ -59,11 +59,8 @@ def show_unified_diff(
     """
     printer = create_terminal_printer(color_output, output)
     file_name = "" if file_path is None else str(file_path)
-    file_mtime = str(
-        datetime.now()
-        if file_path is None
-        else datetime.fromtimestamp(file_path.stat().st_mtime)
-    )
+    file_mtime = str(datetime.now() if file_path is None else datetime.
+                     fromtimestamp(file_path.stat().st_mtime))
     unified_diff_lines = unified_diff(
         file_input.splitlines(keepends=True),
         file_output.splitlines(keepends=True),
@@ -79,7 +76,8 @@ def show_unified_diff(
 def ask_whether_to_apply_changes_to_file(file_path: str) -> bool:
     answer = None
     while answer not in ("yes", "y", "no", "n", "quit", "q"):
-        answer = input(f"Apply suggested changes to '{file_path}' [y/n/q]? ")  # nosec
+        answer = input(
+            f"Apply suggested changes to '{file_path}' [y/n/q]? ")  # nosec
         answer = answer.lower()
         if answer in ("no", "n"):
             return False
@@ -89,7 +87,8 @@ def ask_whether_to_apply_changes_to_file(file_path: str) -> bool:
 
 
 def remove_whitespace(content: str, line_separator: str = "\n") -> str:
-    content = content.replace(line_separator, "").replace(" ", "").replace("\x0c", "")
+    content = content.replace(line_separator,
+                              "").replace(" ", "").replace("\x0c", "")
     return content
 
 
@@ -97,7 +96,10 @@ class BasicPrinter:
     ERROR = "ERROR"
     SUCCESS = "SUCCESS"
 
-    def __init__(self, error: str, success: str, output: Optional[TextIO] = None):
+    def __init__(self,
+                 error: str,
+                 success: str,
+                 output: Optional[TextIO] = None):
         self.output = output or sys.stdout
         self.success_message = success
         self.error_message = error
@@ -119,6 +121,7 @@ class BasicPrinter:
 
 
 class ColoramaPrinter(BasicPrinter):
+
     def __init__(self, error: str, success: str, output: Optional[TextIO]):
         super().__init__(error, success, output=output)
 
@@ -144,9 +147,10 @@ class ColoramaPrinter(BasicPrinter):
         self.output.write(self.style_text(line, style))
 
 
-def create_terminal_printer(
-    color: bool, output: Optional[TextIO] = None, error: str = "", success: str = ""
-) -> BasicPrinter:
+def create_terminal_printer(color: bool,
+                            output: Optional[TextIO] = None,
+                            error: str = "",
+                            success: str = "") -> BasicPrinter:
     if color and colorama_unavailable:
         no_colorama_message = (
             "\n"
@@ -154,13 +158,9 @@ def create_terminal_printer(
             "Reference: https://pypi.org/project/colorama/\n\n"
             "You can either install it separately on your system or as the colors extra "
             "for isort. Ex: \n\n"
-            "$ pip install isort[colors]\n"
-        )
+            "$ pip install isort[colors]\n")
         print(no_colorama_message, file=sys.stderr)
         sys.exit(1)
 
-    return (
-        ColoramaPrinter(error, success, output)
-        if color
-        else BasicPrinter(error, success, output)
-    )
+    return (ColoramaPrinter(error, success, output) if color else BasicPrinter(
+        error, success, output))

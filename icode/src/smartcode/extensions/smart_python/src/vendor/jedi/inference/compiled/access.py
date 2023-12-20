@@ -100,6 +100,7 @@ SignatureParam = namedtuple(
 
 
 def shorten_repr(func):
+
     def wrapper(self):
         r = func(self)
         if len(r) > 50:
@@ -128,9 +129,9 @@ def load_module(inference_state, dotted_name, sys_path):
     except Exception:
         # Since __import__ pretty much makes code execution possible, just
         # catch any error here and print it.
-        warnings.warn(
-            "Cannot import:\n%s" % traceback.format_exc(), UserWarning, stacklevel=2
-        )
+        warnings.warn("Cannot import:\n%s" % traceback.format_exc(),
+                      UserWarning,
+                      stacklevel=2)
         return None
     finally:
         sys.path = temp
@@ -142,6 +143,7 @@ def load_module(inference_state, dotted_name, sys_path):
 
 
 class AccessPath:
+
     def __init__(self, accesses):
         self.accesses = accesses
 
@@ -156,18 +158,15 @@ def get_api_type(obj):
         return "class"
     elif inspect.ismodule(obj):
         return "module"
-    elif (
-        inspect.isbuiltin(obj)
-        or inspect.ismethod(obj)
-        or inspect.ismethoddescriptor(obj)
-        or inspect.isfunction(obj)
-    ):
+    elif (inspect.isbuiltin(obj) or inspect.ismethod(obj)
+          or inspect.ismethoddescriptor(obj) or inspect.isfunction(obj)):
         return "function"
     # Everything else...
     return "instance"
 
 
 class DirectObjectAccess:
+
     def __init__(self, inference_state, obj):
         self._inference_state = inference_state
         self._obj = obj
@@ -195,8 +194,7 @@ class DirectObjectAccess:
 
     def py__name__(self):
         if not _is_class_instance(self._obj) or inspect.ismethoddescriptor(
-            self._obj
-        ):  # slots
+                self._obj):  # slots
             cls = self._obj
         else:
             try:
@@ -212,7 +210,8 @@ class DirectObjectAccess:
             return None
 
     def py__mro__accesses(self):
-        return tuple(self._create_access_path(cls) for cls in self._obj.__mro__[1:])
+        return tuple(
+            self._create_access_path(cls) for cls in self._obj.__mro__[1:])
 
     def py__getitem__all_values(self):
         if isinstance(self._obj, dict):
@@ -252,7 +251,8 @@ class DirectObjectAccess:
         paths = getattr(self._obj, "__path__", None)
         # Avoid some weird hacks that would just fail, because they cannot be
         # used by pickle.
-        if not isinstance(paths, list) or not all(isinstance(p, str) for p in paths):
+        if not isinstance(paths, list) or not all(
+                isinstance(p, str) for p in paths):
             return None
         return paths
 
@@ -289,6 +289,7 @@ class DirectObjectAccess:
         return inspect.ismethoddescriptor(self._obj)
 
     def get_qualified_names(self):
+
         def try_to_get_name(obj):
             return getattr(obj, "__qualname__", getattr(obj, "__name__", None))
 
@@ -333,7 +334,8 @@ class DirectObjectAccess:
         except AttributeError:
             return False, False
         else:
-            if is_get_descriptor and type(attr) not in ALLOWED_DESCRIPTOR_ACCESS:
+            if is_get_descriptor and type(
+                    attr) not in ALLOWED_DESCRIPTOR_ACCESS:
                 # In case of descriptors that have get methods we cannot return
                 # it's value, because that would mean code execution.
                 return True, True
@@ -385,10 +387,8 @@ class DirectObjectAccess:
         return [self._create_access(module), access]
 
     def get_safe_value(self):
-        if (
-            type(self._obj) in (bool, bytes, float, int, str, slice)
-            or self._obj is None
-        ):
+        if (type(self._obj) in (bool, bytes, float, int, str, slice)
+                or self._obj is None):
             return self._obj
         raise ValueError("Object is type %s and not simple" % type(self._obj))
 
@@ -401,6 +401,7 @@ class DirectObjectAccess:
         return None
 
     def get_key_paths(self):
+
         def iter_partial_keys():
             # We could use list(keys()), but that might take a lot more memory.
             for (i, k) in enumerate(self._obj.keys()):
@@ -414,11 +415,13 @@ class DirectObjectAccess:
 
     def get_access_path_tuples(self):
         accesses = [
-            create_access(self._inference_state, o) for o in self._get_objects_path()
+            create_access(self._inference_state, o)
+            for o in self._get_objects_path()
         ]
         return [(access.py__name__(), access) for access in accesses]
 
     def _get_objects_path(self):
+
         def get():
             obj = self._obj
             yield obj
@@ -490,8 +493,7 @@ class DirectObjectAccess:
                 annotation=self._create_access_path(p.annotation),
                 annotation_string=self._annotation_to_str(p.annotation),
                 kind_name=str(p.kind),
-            )
-            for p in self._get_signature().parameters.values()
+            ) for p in self._get_signature().parameters.values()
         ]
 
     def _get_signature(self):
@@ -528,7 +530,8 @@ class DirectObjectAccess:
         Used to return a couple of infos that are needed when accessing the sub
         objects of an objects
         """
-        tuples = dict((name, self.is_allowed_getattr(name)) for name in self.dir())
+        tuples = dict(
+            (name, self.is_allowed_getattr(name)) for name in self.dir())
         return self.needs_type_completions(), tuples
 
 
@@ -541,8 +544,5 @@ def _is_class_instance(obj):
     else:
         # The isinstance check for cls is just there so issubclass doesn't
         # raise an exception.
-        return (
-            cls != type
-            and isinstance(cls, type)
-            and not issubclass(cls, NOT_CLASS_TYPES)
-        )
+        return (cls != type and isinstance(cls, type)
+                and not issubclass(cls, NOT_CLASS_TYPES))

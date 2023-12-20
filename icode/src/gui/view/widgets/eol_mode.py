@@ -93,9 +93,8 @@ class EOLMode(QFrame):
                 height += self.eol_modes.sizeHintForRow(i)
 
         self.eol_modes.setFixedHeight(height + 10)
-        self.setFixedHeight(
-            self.input_edit.size().height() + self.eol_modes.size().height() + 20
-        )
+        self.setFixedHeight(self.input_edit.size().height() +
+                            self.eol_modes.size().height() + 20)
 
     def mirror_in_editor(self, item):
         for editor in self.api.current_editors:
@@ -106,9 +105,8 @@ class EOLMode(QFrame):
         if data:
             self.eol_modes.clear()
             for eol in data:
-                row = IListWidgetItem(
-                    eol["icon"], eol["name"].title(), None, {"object": eol["mode"]}
-                )
+                row = IListWidgetItem(eol["icon"], eol["name"].title(), None,
+                                      {"object": eol["mode"]})
                 self.eol_modes.addItem(row)
         self.update_size()
 

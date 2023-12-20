@@ -7,9 +7,12 @@ from .corners import GenericTabCorner
 
 
 class IListWidgetItem(QListWidgetItem):
-    def __init__(
-        self, icon: object, text: str, tooltip: str = None, item_data: dict = None
-    ) -> None:
+
+    def __init__(self,
+                 icon: object,
+                 text: str,
+                 tooltip: str = None,
+                 item_data: dict = None) -> None:
         super().__init__()
         self.setText(text)
         if icon is not None:
@@ -23,6 +26,7 @@ class IListWidgetItem(QListWidgetItem):
 
 
 class IStandardItem(QStandardItem):
+
     def __init__(
         self,
         icon: object,
@@ -45,6 +49,7 @@ class IStandardItem(QStandardItem):
 
 
 class IGenericNotebook(MovableTabWidget):
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent = parent

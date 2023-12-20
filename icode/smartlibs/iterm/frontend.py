@@ -76,14 +76,16 @@ class TerminalWidget(QWidget):
         self.zoom_in_command.activated.connect(self.zoom_in)
         self.zoom_out_command = QShortcut("Ctrl++", self)
         self.zoom_out_command.activated.connect(self.zoom_out)
-        
+
         self.last_font_size = 2
 
         self.foreground_color_map = {
-            int(key): str(value) for key, value in color_map["fg"].items()
+            int(key): str(value)
+            for key, value in color_map["fg"].items()
         }
         self.background_color_map = {
-            int(key): str(value) for key, value in color_map["bg"].items()
+            int(key): str(value)
+            for key, value in color_map["bg"].items()
         }
 
         self.parent().setTabOrder(self, self)
@@ -227,15 +229,15 @@ class TerminalWidget(QWidget):
     def resizeEvent(self, event):
         try:
             self._columns, self._rows = self._pixel2pos(
-                self.width() - self.scrollBar.width(), self.height()
-            )
+                self.width() - self.scrollBar.width(), self.height())
             if self._columns > 0 and self._rows > 0:
                 self._session.resize(self._columns, self._rows)
         except Exception as e:
             print("TerminalWidget: ", e)
 
         # Adjust the geometry of scrollbar to side right and 16px of width
-        self.scrollBar.setGeometry(QRect(self.width() - 16, 0, 16, self.height()))
+        self.scrollBar.setGeometry(
+            QRect(self.width() - 16, 0, 16, self.height()))
 
     def closeEvent(self, event):
         try:
@@ -310,7 +312,8 @@ class TerminalWidget(QWidget):
     def _update_cursor_rect(self):
         try:
             cx, cy = self._pos2pixel(self._cursor_col, self._cursor_row)
-            self._cursor_rect = QRect(cx, cy, self._char_width, self._char_height)
+            self._cursor_rect = QRect(cx, cy, self._char_width,
+                                      self._char_height)
         except Exception as e:
             print("TerminalWidget: ", e)
 
@@ -334,10 +337,8 @@ class TerminalWidget(QWidget):
         try:
             painter = QPainter(self)
             self._paint_screen(painter)
-            if (
-                self._cursor_rect is not None
-                and self.scrollBar.maximum() == self._history_index
-            ):
+            if (self._cursor_rect is not None
+                    and self.scrollBar.maximum() == self._history_index):
                 self._paint_cursor(painter)
             if self._selection:
                 self._paint_selection(painter)
@@ -397,9 +398,10 @@ class TerminalWidget(QWidget):
             painter_setPen(pen)
             y = 0
             text = []
-            viewscreen = (self._screen_history + self._screen)[
-                self._history_index : self._history_index + len(self._screen)
-            ]
+            viewscreen = (
+                self._screen_history +
+                self._screen)[self._history_index:self._history_index +
+                              len(self._screen)]
 
             for row, line in enumerate(viewscreen):
                 col = 0
@@ -408,7 +410,8 @@ class TerminalWidget(QWidget):
                     if isinstance(item, str):
                         x = col * char_width
                         length = len(item)
-                        rect = QRect(x, y, x + char_width * length, y + char_height)
+                        rect = QRect(x, y, x + char_width * length,
+                                     y + char_height)
                         painter_fillRect(rect, brush)
                         painter_drawText(rect, align, item)
                         col += length
@@ -419,14 +422,17 @@ class TerminalWidget(QWidget):
                             background_color_idx,
                             underline_flag,
                         ) = item
-                        foreground_color = foreground_color_map[foreground_color_idx]
-                        background_color = background_color_map[background_color_idx]
+                        foreground_color = foreground_color_map[
+                            foreground_color_idx]
+                        background_color = background_color_map[
+                            background_color_idx]
                         pen = QPen(QColor(foreground_color))
                         brush = QBrush(QColor(background_color))
                         painter_setPen(pen)
 
                 # Clear last column
-                rect = QRect(col * char_width, y, self.width(), y + char_height)
+                rect = QRect(col * char_width, y, self.width(),
+                             y + char_height)
                 brush = QBrush(QColor(background_color))
                 painter_fillRect(rect, brush)
 
@@ -453,9 +459,8 @@ class TerminalWidget(QWidget):
             painter.setBrush(brush)
             for (start_col, start_row, end_col, end_row) in self._selection:
                 x, y = self._pos2pixel(start_col, start_row)
-                width, height = self._pos2pixel(
-                    end_col - start_col, end_row - start_row
-                )
+                width, height = self._pos2pixel(end_col - start_col,
+                                                end_row - start_row)
                 rect = QRect(x, y, width, height)
                 painter.fillRect(rect, brush)
         except Exception as e:
@@ -468,7 +473,7 @@ class TerminalWidget(QWidget):
             if self.last_font_size <= 18:
                 font.setPixelSize(self.last_font_size + 2)
                 self.last_font_size += 2
-            
+
             self.setFont(font)
             self._reset()
         except Exception as e:
@@ -481,7 +486,7 @@ class TerminalWidget(QWidget):
             if self.last_font_size >= 2:
                 font.setPixelSize(self.last_font_size - 2)
                 self.last_font_size -= 2
-                
+
             self.setFont(font)
             self._reset()
         except Exception as e:
@@ -524,7 +529,8 @@ class TerminalWidget(QWidget):
         try:
             button = event.button()
             if button == Qt.RightButton:
-                ctx_event = QContextMenuEvent(QContextMenuEvent.Mouse, event.pos())
+                ctx_event = QContextMenuEvent(QContextMenuEvent.Mouse,
+                                              event.pos())
                 self.contextMenuEvent(ctx_event)
                 self._press_pos = None
             elif button == Qt.LeftButton:
@@ -607,7 +613,8 @@ class TerminalWidget(QWidget):
         try:
             if self._press_pos:
                 move_pos = event.pos()
-                self._selection = self._selection_rects(self._press_pos, move_pos)
+                self._selection = self._selection_rects(
+                    self._press_pos, move_pos)
 
                 sel = self.text_selection()
                 if DEBUG:
@@ -631,7 +638,7 @@ class TerminalWidget(QWidget):
             found_left = 0
             while start_col > 0:
                 char = line[start_col]
-                if not char.isalnum() and char not in ("_",):
+                if not char.isalnum() and char not in ("_", ):
                     found_left = 1
                     break
                 start_col -= 1
@@ -640,13 +647,12 @@ class TerminalWidget(QWidget):
             found_right = 0
             while end_col < self._columns:
                 char = line[end_col]
-                if not char.isalnum() and char not in ("_",):
+                if not char.isalnum() and char not in ("_", ):
                     found_right = 1
                     break
                 end_col += 1
-            self._selection = [
-                (start_col + found_left, row, end_col - found_right + 1, row + 1)
-            ]
+            self._selection = [(start_col + found_left, row,
+                                end_col - found_right + 1, row + 1)]
 
             sel = self.text_selection()
             if DEBUG:
@@ -666,7 +672,7 @@ class TerminalWidget(QWidget):
 
         except Exception as e:
             print("TerminalWidget: ", e)
-    
+
     def wheelEvent(self, event):
         if (event.modifiers() and Qt.ControlModifier):
             if event.angleDelta().y() < 0:

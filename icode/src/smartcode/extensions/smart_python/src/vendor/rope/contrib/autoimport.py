@@ -34,9 +34,9 @@ class AutoImport(object):
             self.names = {}
         project.data_files.add_write_hook(self._write)
         # XXX: using a filtered observer
-        observer = resourceobserver.ResourceObserver(
-            changed=self._changed, moved=self._moved, removed=self._removed
-        )
+        observer = resourceobserver.ResourceObserver(changed=self._changed,
+                                                     moved=self._moved,
+                                                     removed=self._removed)
         if observe:
             project.add_observer(observer)
 
@@ -87,9 +87,10 @@ class AutoImport(object):
                     pass
         return result
 
-    def generate_cache(
-        self, resources=None, underlined=None, task_handle=taskhandle.NullTaskHandle()
-    ):
+    def generate_cache(self,
+                       resources=None,
+                       underlined=None,
+                       task_handle=taskhandle.NullTaskHandle()):
         """Generate global name cache for project files
 
         If `resources` is a list of `rope.base.resource.File`, only
@@ -99,21 +100,20 @@ class AutoImport(object):
         """
         if resources is None:
             resources = self.project.get_python_files()
-        job_set = task_handle.create_jobset(
-            "Generating autoimport cache", len(resources)
-        )
+        job_set = task_handle.create_jobset("Generating autoimport cache",
+                                            len(resources))
         for file in resources:
             job_set.started_job("Working on <%s>" % file.path)
             self.update_resource(file, underlined)
             job_set.finished_job()
 
-    def generate_modules_cache(
-        self, modules, underlined=None, task_handle=taskhandle.NullTaskHandle()
-    ):
+    def generate_modules_cache(self,
+                               modules,
+                               underlined=None,
+                               task_handle=taskhandle.NullTaskHandle()):
         """Generate global name cache for modules listed in `modules`"""
         job_set = task_handle.create_jobset(
-            "Generating autoimport cache for modules", len(modules)
-        )
+            "Generating autoimport cache for modules", len(modules))
         for modname in modules:
             job_set.started_job("Working on <%s>" % modname)
             if modname.endswith(".*"):
@@ -138,13 +138,13 @@ class AutoImport(object):
         """Guess at what line the new import should be inserted"""
         match = re.search(r"^(def|class)\s+", code)
         if match is not None:
-            code = code[: match.start()]
+            code = code[:match.start()]
         try:
             pymodule = libutils.get_string_module(self.project, code)
         except exceptions.ModuleSyntaxError:
             return 1
         testmodname = "__rope_testmodule_rope"
-        importinfo = importutils.NormalImport(((testmodname, None),))
+        importinfo = importutils.NormalImport(((testmodname, None), ))
         module_imports = importutils.get_module_imports(self.project, pymodule)
         module_imports.add_import(importinfo)
         code = module_imports.get_changed_source()
