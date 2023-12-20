@@ -8,6 +8,7 @@ import os
 import importlib
 import distro
 from bin import utils
+from pathlib import Path
 
 IS_RUNNING = True
 IS_FINISHED = False
@@ -28,6 +29,11 @@ distro_name = distro.name().lower().replace(" ", "_")
 if distro_name in WAYLAND_DISTROS:
     ...
     #os.environ["QT_QPA_PLATFORM"]="wayland"
+
+
+os.environ["QTX_TERM_ROOT_PATH"] = root_path
+os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
+os.environ[r"QTWEBENGINE\_CHROMIUM\_FLAGS"]="--no-sandbox"
 
 
 def finish():

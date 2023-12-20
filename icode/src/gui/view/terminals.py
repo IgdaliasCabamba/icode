@@ -1,4 +1,3 @@
-# TODO: Refactor
 from core.system import SYS_NAME, end
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont
@@ -18,6 +17,8 @@ from .igui import IListWidgetItem
 from functions import getfn
 from core.code_api import icode_api
 from functools import partial
+
+import random
 
 
 class ItermBinsMenu(QMenu):
@@ -48,22 +49,6 @@ class ItermBinsMenu(QMenu):
             group_mode.addAction(action)
 
 
-class TerminalBase(TerminalWidget):
-
-    def __init__(self, parent, bin, color_map):
-
-        super().__init__(
-            parent=parent,
-            command=bin,
-            color_map=color_map,
-            font_name="Monospace",
-            font_size=16,
-        )
-        # self.setFocus()
-        self.setObjectName("terminal")
-        self.header_item = None
-
-
 class Terminal(QFrame):
 
     def __init__(self, parent):
@@ -72,12 +57,10 @@ class Terminal(QFrame):
         self.setObjectName("terminal-view")
         self.setStyleSheet("font-size:11pt")
         self.term_index = 0
+        self.PORT = lambda: random.randint(7000, 65530)
 
         bin = "/bin/bash"
         name = "Bash"
-        if SYS_NAME == "windows":
-            bin = "powershell.exe"
-            name = "PowerShell"
 
         self.current_terminal = {"name": name, "bin": bin}
 
@@ -134,12 +117,11 @@ class Terminal(QFrame):
         self._create_terminal(name, bin)
         self.term_index += 1
 
-    def _create_terminal(self, name, bin):
-        new_term = TerminalBase(self, bin, icode_api.get_terminal_color_map())
+    def _create_terminal(self, name, command):
+        new_term = TerminalWidget(self, command)
+        new_term.spawn(port = self.PORT())
         new_term_header = IListWidgetItem(
-            self.icons.get_icon("bash"),
-            name,
-            None,
+            self.icons.get_icon("bash"), name, None,
             {
                 "widget": new_term,
                 "index": self.term_index
@@ -153,6 +135,7 @@ class Terminal(QFrame):
         new_term.header_item = new_term_header
         self.terminals_layout.addWidget(new_term)
         self.terminals_layout.setCurrentWidget(new_term)
+        new_term.show()
 
     def _delete_terminal(self, index, row, widget):
         self.terminals_layout.takeAt(index)

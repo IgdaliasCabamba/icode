@@ -6,42 +6,57 @@ import click
 import rich
 import subprocess
 import tempfile
-
-from rich.prompt import Prompt
+import requests
+from rich.progress import Progress
 
 
 @click.group()
 def manage():
     pass
 
+show_alert = lambda: rich.print("[blue bold]Be sure that you are in icode home dir!")
 
 @manage.command('start')
 def start():
 
-    rich.print("[blue bold] Be sure that you are in icode home dir!")
+    show_alert()
 
-    rich.print("[yellow bold]Downloading pyuxterm owo")
+    url = "https://github.com/IgdaliasCabamba/Pyuxterm/releases/download/v0.1.1/pyuxterm"
+
+    output_file = "./icode/bin/pyuxterm"
+    
+    response = requests.get(url, stream=True)
+    file_size = int(response.headers.get('content-length', 0))
+
+    with Progress() as progress:
+        task = progress.add_task("[cyan]Downloading pyuxterm...", total=file_size)
+
+        with open(output_file, 'wb') as file:
+            for data in response.iter_content(chunk_size=1024):
+                file.write(data)
+                progress.update(task, advance=len(data))
 
     with tempfile.NamedTemporaryFile(mode='w+t') as tmp:
-        tmp.write(
-            "curl -o ./icode/bin/pyuxterm https://github.com/IgdaliasCabamba/Pyuxterm/releases/download/v0.1.1/pyuxterm"
-        )
+        tmp.write(f"chmod +x {output_file}")
         tmp.flush()
+
         process = subprocess.Popen(["bash", tmp.name], stdout=subprocess.PIPE)
         output, err = process.communicate()
 
+        rich.print(output.decode())
+        
         if err:
             rich.print("[red bold] an error occurred :(")
-
-        rich.print(output.decode())
-
-    rich.print("[green bold]Installed pyuxterm succefully :)")
+        
+        else:
+            rich.print("[green bold]Installed pyuxterm succefully :)")
 
 
 @manage.command('go')
 def go():
+    # run python app.py to sse error and warning logs
 
-    rich.print("[blue bold] Be sure that you are in icode home dir!")
+    show_alert()
 
     with tempfile.NamedTemporaryFile(mode='w+t') as tmp:
         tmp.write("source ./venv/bin/activate \n")
