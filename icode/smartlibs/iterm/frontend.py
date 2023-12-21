@@ -32,7 +32,7 @@ class TerminalWidget(QWebEngineView):
         
         self.port = port
 
-        command = [os.path.join(os.environ["QTX_TERM_ROOT_PATH"], "bin", "pyuxterm"), f"--command={self.command}", f"--port={self.port}"]
+        command = [os.path.join(os.environ["QTX_TERM_ROOT_PATH"], "bin", "pyuxterm"), f"--command={self.command}", f"--port={self.port}", "--theme=elemental"]
 
         self.backend = PyuxtermProcessThread(command)
         self.backend.on_ready.connect(self.loaded)
