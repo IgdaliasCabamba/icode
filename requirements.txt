@@ -25,6 +25,7 @@ hjson==3.1.0
 howdoi==2.0.20
 hyperlink==21.0.0
 idna==3.6
+importlib-metadata==7.0.0
 incremental==22.10.0
 ipykernel==6.27.1
 ipython==8.18.1
@@ -58,6 +59,8 @@ pyperclip==1.8.2
 PyQt5==5.15.10
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.13.0
+PyQtWebEngine==5.15.6
+PyQtWebEngine-Qt5==5.15.2
 pyquery==2.0.0
 python-dateutil==2.8.2
 pyzmq==25.1.2
@@ -73,7 +76,10 @@ six==1.16.0
 soupsieve==2.5
 stack-data==0.6.3
 terminaltables==3.1.10
+toml==0.10.2
+tomli==2.0.1
 tornado==6.4
+tqdm==4.66.1
 traitlets==5.14.0
 Tubes==0.2.1
 Twisted==23.10.0
@@ -84,4 +90,6 @@ wcwidth==0.2.12
 Werkzeug==3.0.1
 wikipedia==1.4.0
 wrapt==1.16.0
+yapf==0.40.2
+zipp==3.17.0
 zope.interface==6.1

@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import requests
 from rich.progress import Progress
-
+import toml
 
 @click.group()
 def manage():
@@ -21,7 +21,7 @@ def start():
 
     show_alert()
 
-    url = "https://github.com/IgdaliasCabamba/Pyuxterm/releases/download/v0.1.1/pyuxterm"
+    url = "https://github.com/IgdaliasCabamba/Pyuxterm/releases/download/v1.0.0/pyuxterm"
 
     output_file = "./icode/bin/pyuxterm"
     
@@ -69,6 +69,18 @@ def go():
             rich.print("[red bold] an error occurred :(")
 
         rich.print(output.decode())
+
+
+@manage.command('version')
+def go():
+    
+    show_alert()
+
+    with open("icode/bin/program.toml", "r") as f:
+        data = toml.load(f)
+        rich.print(f"[bold purple]\tBin version: [/]{data['bin_version']}")
+        rich.print(f"[bold purple]\tKernel version: [/]{data['kernel_version']}")
+        rich.print(f"[bold purple]\tFrameworks version: [/]{data['frameworks_version']}")
 
 
 if __name__ == '__main__':

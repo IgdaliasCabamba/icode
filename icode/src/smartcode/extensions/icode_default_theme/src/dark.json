@@ -15,39 +15,7 @@
 		"inprompt":["darkBlue"],
 		"outprompt":["darkRed"]
 	},
-	"terminal-styles":{
-		"fg":{	
-			"0": "#000",
-			"1": "#b00",
-			"2": "#3bb860",
-			"3": "#eded53",
-			"4": "#698cf5",
-			"5": "#f760f7",
-			"6": "#6af7f7",
-			"7": "#bbb",
-			"8": "#666",
-			"9": "#ff5454",
-			"10": "#72f772",
-			"11": "#f7f74f",
-			"12": "#5784f7",
-			"13": "#f760f7",
-			"14": "#000",
-			"15": "#fff"
-		},
-		"bg":{
-			"0": "transparent",
-			"1": "transparent",
-			"2": "transparent",
-			"3": "transparent",
-			"4": "transparent",
-			"5": "transparent",
-			"6": "transparent",
-			"7": "transparent",
-			"12": "transparent",
-			"14": "transparent",  
-			"15": "#fff"  
-		}
-	},
+	
 	"editor-styles":{
 		"color":"#ffffff",
 		"paper":"#1e1e1e",

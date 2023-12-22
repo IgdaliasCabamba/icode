@@ -118,7 +118,7 @@ class Terminal(QFrame):
         self.term_index += 1
 
     def _create_terminal(self, name, command):
-        new_term = TerminalWidget(self, command)
+        new_term = TerminalWidget(self, command, custom_theme=icode_api.get_terminal_theme())
         new_term.spawn(port = self.PORT())
         new_term_header = IListWidgetItem(
             self.icons.get_icon("bash"), name, None,
@@ -135,20 +135,19 @@ class Terminal(QFrame):
         new_term.header_item = new_term_header
         self.terminals_layout.addWidget(new_term)
         self.terminals_layout.setCurrentWidget(new_term)
-        new_term.show()
 
-    def _delete_terminal(self, index, row, widget):
+    def _delete_terminal(self, index, row, terminal:TerminalWidget):
         self.terminals_layout.takeAt(index)
         self.term_header.takeItem(row)
-        widget.stop()
+        terminal.terminate()
 
     def remove_terminal(self):
         if self.term_header.count() > 0:
-            widget = self.terminals_layout.currentWidget()
+            terminal:TerminalWidget = self.terminals_layout.currentWidget()
             index = self.terminals_layout.currentIndex()
-            item = widget.header_item
+            item = terminal.header_item
             row = self.term_header.row(item)
-            self._delete_terminal(index, row, widget)
+            self._delete_terminal(index, row, terminal)
 
     def set_current_terminal(self, data: dict) -> None:
         self.current_terminal = {"name": data["name"], "bin": data["bin"]}

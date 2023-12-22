@@ -7,7 +7,6 @@ faulthandler.enable()
 import os
 import importlib
 import distro
-from bin import utils
 from pathlib import Path
 
 IS_RUNNING = True
@@ -33,20 +32,13 @@ if distro_name in WAYLAND_DISTROS:
 
 os.environ["QTX_TERM_ROOT_PATH"] = root_path
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
-os.environ[r"QTWEBENGINE\_CHROMIUM\_FLAGS"]="--no-sandbox"
+os.system(r'export QTWEBENGINE\_CHROMIUM\_FLAGS="--no-sandbox"')
 
 
 def finish():
     global IS_FINISHED
     if not IS_FINISHED:
         IS_FINISHED = True
-        print(
-            utils.kernel_version,
-            utils.bin_version,
-            utils.frameworks_version,
-            main.version,
-        )
-
 
 main_path = os.getcwd()
 

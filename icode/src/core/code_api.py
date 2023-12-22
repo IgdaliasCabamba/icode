@@ -31,10 +31,13 @@ class Code:
     def get_terminal_emulators(self):
         return ijson.load(settings.TERMINALS_FILE)["emulators"]
 
-    def get_terminal_color_map(self):
-        data = self.get_theme_in_json()
-        if data:
-            return data["terminal-styles"]
+    def get_terminal_theme(self):
+        ext = settings.get_theme()
+        palette = settings.get_palette()
+        if ext:
+            return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{ext}{SYS_SEP}src{SYS_SEP}terminal_{palette}.theme.json"
+        
+        return None
 
     def get_drop_shadow_color(self):
         data = self.get_theme_in_json()
