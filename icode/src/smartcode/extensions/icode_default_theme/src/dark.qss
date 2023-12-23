@@ -68,7 +68,7 @@ QGithubButton QComboBox:hover {
 	border-radius:4px;
 }
 
-QToolTip {background: #2a2a2a;}
+QToolTip {background: #2a2a2a}
 
 QMenuBar {
     background-color: $contrast;
@@ -88,7 +88,7 @@ QMenuBar::item:hover {
 QMenu {
 	menu-scrollable: 1;
 	border:none;
-	background-color: $base2;  
+	background-color: $base2; 
 }
 QMenu::item {
     color:#cccccc;
@@ -127,7 +127,7 @@ QListView::item:hover{background: #2a2d2e;}
 
 QLineEdit,
 QTextEdit {
-    border-radius: 0;
+    border-radius: 4px;
     color:#eeeeee;
 }
 QLineEdit {
@@ -136,10 +136,11 @@ QLineEdit {
 }
 QPlainTextEdit,
 QTextEdit {
+    border-radius: 4px;
     background-color: $contrast2;
 }
 QPushButton {
-    border-radius: 0;
+    border-radius: 4px;
     color:#eeeeee;
     background-color: #0e639c;
     padding: 2px;
@@ -155,14 +156,16 @@ QToolBox::tab {
     border: none;
     color:#888888;
     font-size: 10pt;
+    border-radius: 4px;
 }
 QToolBox::tab:selected {
     color:#ffffff;
 	border: 1px solid $border;
     
 }
-QTabWidget::pane {border:none}
-QTabBar{border:none}
+QTabBar,
+QTabWidget::pane {border: none}
+
 QTabBar::tab {
     font-size: 10pt;
     background-color: #2d2d2d;
@@ -173,7 +176,6 @@ QTabBar::tab {
 QTabBar::tab:selected {
     background-color: $base;
     color:#ffffff;
-    border-top: 1px solid  $border;
 }
 QTabBar {qproperty-drawBase: 0;}
 QTabBar QToolButton {
@@ -184,16 +186,20 @@ QTabBar QToolButton {
 }
 QTabBar QToolButton::right-arrow {image: url("<get_app_icons_path>right-arrow-tab.png");}
 QTabBar QToolButton::left-arrow {image: url("<get_app_icons_path>left-arrow-tab.png");}
+
+NoteBookEditor QTabBar::tab{
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
 NoteBookEditor QTabBar::close-button {
     image: url("<get_app_icons_path>close-tab.png");
     border-radius:4px;
 }
 NoteBookEditor QTabBar::close-button:hover{background-color: rgba(180, 180, 180, 70);}
-NoteBookEditor QTabBar::tab:selected {border:none}
 
-QSplitter::handle {background-color:#252526}
-QSplitter::handle:horizontal {width: 2px}
-QSplitter::handle:vertical {height: 2px}
+QSplitter::handle {background-color: $contrast2}
+QSplitter::handle:horizontal {width: 1px}
+QSplitter::handle:vertical {height: 1px}
 QSplitter::handle:pressed {background-color:#00a2e8}
 
 QScrollBar:vertical {
@@ -316,6 +322,11 @@ QStatusBar QSizeGrip,
 
 /* Application Main Widgets*/
 
+#side-left,
+#side-right {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
 #side-right,
 #side-left {background-color: $base2;}
 #side-bottom {background-color: $base;}
@@ -328,8 +339,13 @@ QStatusBar QSizeGrip,
 #editor-widget,
 #finder_replacer {
     background:#252526;
-    border-radius:0
+    border-radius:0;
+    border-radius: 4px;
 }
+#card-lab{
+    border-radius: 4px;
+}
+
 #notify #main-area,
 #notify #main-frame,
 #notify #Header QPushButton,
@@ -361,10 +377,9 @@ QStatusBar QSizeGrip,
 #research-space #research-table #scroll-area QFrame,
 #card-lab {background:$contrast2}
 
-#notify,
-#April{
+#notify{
 	background:$mid;
-	border-radius:0
+	border-radius: 4px;
 }
 #april-ui, #april-ui #main-area, #april-ui #main-frame {
     border: none;
@@ -388,8 +403,7 @@ QStatusBar QSizeGrip,
 }
 #bottom-notebook QTabBar::tab:selected {
     color:#dddddd;
-    border-top: none;
-    border-bottom: 1px solid  #eeeeee;
+    border-bottom: 2px solid  $border;
 }
 
 #tab-corner-widget-bottom QPushButton,
@@ -409,7 +423,7 @@ QStatusBar QSizeGrip,
 }
 
 #notify,
-#notify QFrame{border-radius:0}
+#notify QFrame{border-radius: 4px;}
 
 #notify,
 #notify #Header {background: #303031}
@@ -419,7 +433,8 @@ QStatusBar QSizeGrip,
 /* Side Right */
 #research-space,
 #research-space QFrame,
-#research-space research-table{background-color: $base2;}
+#research-space {background-color: $base2;}
+#research-space #research-table {border-radius: 4px}
 
 /* Editor */
 #editor-frame,
@@ -478,3 +493,10 @@ Area
 #Area[style-bg=transparent],
 #Button[style-bg=transparent],
 #Frame[style-bg=transparent] {background-color: transparent}
+
+/* tmp */
+
+EditorView{
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;   
+}

@@ -1,5 +1,6 @@
 # from my other project at: https://github.com/IgdaliasCabamba/pyuxterm-qt-client/blob/main/app/src/terminal_frontend.py
 
+# TODO: move to thread propely
 import os
 
 import requests

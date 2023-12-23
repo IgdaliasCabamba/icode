@@ -58,7 +58,7 @@ def go():
 
     show_alert()
 
-    with tempfile.NamedTemporaryFile(mode='w+t') as tmp:
+    with tempfile.NamedTemporaryFile(mode='w+t') as tmp: 
         tmp.write("source ./venv/bin/activate \n")
         tmp.write("python icode/app.py")
         tmp.flush()

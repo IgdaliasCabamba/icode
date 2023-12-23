@@ -32,7 +32,7 @@ if distro_name in WAYLAND_DISTROS:
 
 os.environ["QTX_TERM_ROOT_PATH"] = root_path
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"]="1"
-os.system(r'export QTWEBENGINE\_CHROMIUM\_FLAGS="--no-sandbox"')
+os.system('export QTWEBENGINE\_CHROMIUM\_FLAGS="--no-sandbox"')
 
 
 def finish():
