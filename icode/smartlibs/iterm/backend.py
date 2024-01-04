@@ -1,10 +1,9 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QTextEdit
-from PyQt5.QtCore import QThread, pyqtSignal, Qt, QIODevice, QByteArray, QProcess
+import time
+from PyQt5.QtCore import pyqtSignal, QProcess
 
 import requests
 
-class PyuxtermProcessThread(QThread):
+class PyuxtermProcess(QProcess):
     finished = pyqtSignal()
     on_ready = pyqtSignal()
     output_ready = pyqtSignal(str)
@@ -22,21 +21,26 @@ class PyuxtermProcessThread(QThread):
             return None
     
 
-    def __init__(self, command):
+    def __init__(self, command, url):
         super().__init__()
         self.command = command
+        self.url = url
+        self.setProcessChannelMode(QProcess.MergedChannels)
         
-    def run(self):
+    def serve(self):
+        self.start(self.command[0], self.command[1:])
         
-        process = QProcess()
-        process.setProcessChannelMode(QProcess.MergedChannels)
-        process.start(self.command[0], self.command[1:])
+        tries = 1
+        while not self.is_serving(self.url):
+            time.sleep(5*tries)
+            tries += 1
+
         self.on_ready.emit()
 
-        while process.waitForReadyRead():
-            output = process.readAllStandardOutput().data().decode('utf-8')
+        while self.waitForReadyRead():
+            output = self.readAllStandardOutput().data().decode('utf-8')
             if output:
                 self.output_ready.emit(output.strip())
 
-        process.waitForFinished()
+        self.waitForFinished()
         self.finished.emit()
