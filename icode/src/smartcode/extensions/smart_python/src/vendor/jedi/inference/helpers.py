@@ -16,8 +16,8 @@ def is_stdlib_path(path):
     if "dist-packages" in parts or "site-packages" in parts:
         return False
 
-    base_path = os.path.join(sys.prefix, "lib", "python")
-    return bool(re.match(re.escape(base_path) + r"\d.\d", str(path)))
+    ROOT_PATH = os.path.join(sys.prefix, "lib", "python")
+    return bool(re.match(re.escape(ROOT_PATH) + r"\d.\d", str(path)))
 
 
 def deep_ast_copy(obj):

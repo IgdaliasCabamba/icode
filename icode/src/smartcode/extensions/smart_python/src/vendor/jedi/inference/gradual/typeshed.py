@@ -65,8 +65,8 @@ def _create_stub_map(directory_path_info):
 def _get_typeshed_directories(version_info):
     check_version_list = ["2and3", "3"]
     for base in ["stdlib", "third_party"]:
-        base_path = TYPESHED_PATH.joinpath(base)
-        base_list = os.listdir(base_path)
+        ROOT_PATH = TYPESHED_PATH.joinpath(base)
+        base_list = os.listdir(ROOT_PATH)
         for base_list_entry in base_list:
             match = re.match(r"(\d+)\.(\d+)$", base_list_entry)
             if match is not None:
@@ -76,7 +76,7 @@ def _get_typeshed_directories(version_info):
 
         for check_version in check_version_list:
             is_third_party = base != "stdlib"
-            yield PathInfo(str(base_path.joinpath(check_version)),
+            yield PathInfo(str(ROOT_PATH.joinpath(check_version)),
                            is_third_party)
 
 

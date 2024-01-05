@@ -1,19 +1,18 @@
 import os
 import platform
 import sys
+import pathlib
 
 PLATFORM = platform.system()
 SYS_NAME = PLATFORM.lower()
-SYS_SEP = os.sep
 
-BASE_PATH = os.getcwd()
+ROOT_PATH = os.getcwd()
 
+SMARTCODE_PATH = pathlib.Path(ROOT_PATH).joinpath("smartcode")
 
 def add_path(type: str, path: str) -> list:
     if type.startswith("extension"):
-        sys.path.append(BASE_PATH +
-                        f"{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}" +
-                        path)
+        sys.path.append(str(pathlib.Path(SMARTCODE_PATH).joinpath("extensions").joinpath(path)))
         return sys.path
 
 

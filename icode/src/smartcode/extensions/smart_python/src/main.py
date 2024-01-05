@@ -1,6 +1,6 @@
 from extension_api import *
 
-make_dirs([os.path.join(BASE_PATH, ".cache", "jedi")])
+make_dirs([os.path.join(ROOT_PATH, ".cache", "jedi")])
 
 export(path="smart_python.src")
 export(path="smart_python.src.vendor")

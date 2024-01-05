@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from PyQt5.QtCore import Qt
-from urllib3 import Retry
 import smartlibs.mjson as ijson
-from core.system import BASE_PATH, SYS_SEP
+from core.system import ROOT_PATH
 from data import qt_cache, DATA_FILE, TERMINALS_FILE, EDITOR_FILE
 import core.consts as iconsts
 from core.memory import *

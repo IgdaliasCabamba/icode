@@ -5,7 +5,7 @@ import threading
 import pathlib
 import os
 
-base_path = os.getcwd()
+ROOT_PATH = os.getcwd()
 
 
 def download(url, path):

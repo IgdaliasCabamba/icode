@@ -80,12 +80,12 @@ class Project:
     _environment = None
 
     @staticmethod
-    def _get_config_folder_path(base_path):
-        return base_path.joinpath(_CONFIG_FOLDER)
+    def _get_config_folder_path(ROOT_PATH):
+        return ROOT_PATH.joinpath(_CONFIG_FOLDER)
 
     @staticmethod
-    def _get_json_path(base_path):
-        return Project._get_config_folder_path(base_path).joinpath(
+    def _get_json_path(ROOT_PATH):
+        return Project._get_config_folder_path(ROOT_PATH).joinpath(
             "project.json")
 
     @classmethod

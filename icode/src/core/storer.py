@@ -1,4 +1,4 @@
-from .system import SYS_SEP, BASE_PATH
+from .system import ROOT_PATH
 from typing import Union
 from PyQt5.QtCore import QSettings
 import pathlib
@@ -10,7 +10,7 @@ class DataManager(QSettings):
                  file_with_path: str,
                  format=QSettings.IniFormat) -> None:
         super().__init__(file_with_path, format)
-        self.file_path = f"{BASE_PATH}{SYS_SEP}data{SYS_SEP}{file_with_path}"
+        self.file_path = pathlib.Path(ROOT_PATH).joinpath("data").joinpath(file_with_path)
 
     def save_to_list(self, value: object, key: str) -> None:
         base_list = self.value(key)

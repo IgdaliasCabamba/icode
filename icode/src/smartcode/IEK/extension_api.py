@@ -44,12 +44,15 @@ class BaseApi:
         pass
 
     def source_path(self, name: str = "src"):
-        return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}extensions{SYS_SEP}{self.ext_name}{SYS_SEP}{name}{SYS_SEP}"
+        return f"{(pathlib.Path(SMARTCODE_PATH)
+            .joinpath('extensions')
+            .joinpath(self.ext_name)
+            .joinpath(name))}{os.sep}"
 
     def path_object_to(self, prefix: str, path: str = "") -> object:
         if path != "":
             path = getfn.get_adjusted_path(path)
-        return pathlib.Path(f"{self.source_path(prefix)}{path}")
+        return str(pathlib.Path(f"{self.source_path(prefix)}{path}"))
 
     def path_to(self, prefix: str, path: str = "") -> str:
         if path != "":
@@ -58,11 +61,19 @@ class BaseApi:
 
     def local_storage_to(self, type: str, *names, make: bool = False) -> str:
         if type == "data":
-            return (BASE_PATH + SYS_SEP + "data" + SYS_SEP + "extensions" +
-                    SYS_SEP + self.ext_name + SYS_SEP + os.path.join(*names))
+            return (str(pathlib.Path(ROOT_PATH)
+            .joinpath("data")
+            .joinpath("extensions")
+            .joinpath(self.ext_name)
+            .joinpath(os.path.join(*names))))
+
         elif type == "cache":
-            return (BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "extensions" +
-                    SYS_SEP + self.ext_name + SYS_SEP + os.path.join(*names))
+
+            return str((pathlib.Path(ROOT_PATH)
+            .joinpath(".cache")
+            .joinpath("extensions")
+            .joinpath(self.ext_name)
+            .joinpath(os.path.join(*names))))
         else:
             if len(names) >= 2:
                 return self.path_to(names[0], names[1])
@@ -161,7 +172,11 @@ class ModelUi(QObject, BaseApi):
         return self.__qapp
 
     def icons_path_to(self, icons_to: str):
-        return f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{get_icons_package()}{SYS_SEP}{get_icons_theme()}{SYS_SEP}{icons_to}{SYS_SEP}"
+        return f"{(pathlib.Path(SMARTCODE_PATH)
+                   .joinpath('icons')
+                   .joinpath(get_icons_package())
+                   .joinpath(get_icons_theme())
+                   .joinpath(icons_to))}{os.sep}"
 
     def is_light(self) -> bool:
         if self.qpalette in {"light", "white", 1, "day"}:

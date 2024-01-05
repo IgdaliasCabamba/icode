@@ -9,7 +9,7 @@ import sys
 
 from PyQt5.QtGui import QColor, QFont, QIcon, QImage, QPixmap
 from shamanld import Shaman
-from core.system import BASE_PATH, SYS_NAME, SYS_SEP
+from core.system import ROOT_PATH, SYS_NAME
 from typing_extensions import ParamSpec
 
 import core.consts as iconsts
@@ -333,10 +333,10 @@ class Get:
 
     def update_apis(self):
         self.theme = (
-            f"{settings.get_icons_package()}{SYS_SEP}{settings.get_icons_theme()}"
+            f"{settings.get_icons_package()}{os.sep}{settings.get_icons_theme()}"
         )
         self.icon_path = (
-            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{self.theme}{SYS_SEP}"
+            f"{pathlib.Path(SMARTCODE_PATH).joinpath("icons").joinpath(self.theme)}{os.sep}"
         )
 
     def get_adjusted_path(self, path):
@@ -438,7 +438,7 @@ class Get:
         with open(filename, "r") as file:
             filedata = file.read()
 
-        filedata = self.space_to_tab(filedata, space_count, tab_count)
+        filedata = Get.get_space_to_tab(filedata, space_count, tab_count)
 
         with open(filename, "w") as file:
             file.write(filedata)
@@ -452,7 +452,7 @@ class Get:
         with open(filename, "r") as file:
             filedata = file.read()
 
-        filedata = self.tab_to_space(filedata, tab_count, space_count)
+        filedata = Get.get_tab_to_space(filedata, tab_count, space_count)
 
         with open(filename, "w") as file:
             file.write(filedata)
@@ -475,7 +475,7 @@ class Get:
 
     @staticmethod
     def get_root_path():
-        return BASE_PATH
+        return ROOT_PATH
 
     def get_full_path(self, relative_path):
         full_path = self.get_root_path() + relative_path
@@ -640,24 +640,21 @@ class Get:
             return self.get_any_icon_by_name("lexer", "none")
 
     def get_icon_api(self) -> None:
-        api_file = pathlib.Path(
-            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}{settings.get_icons_package()}{SYS_SEP}main.json"
-        )
+        api_file = (pathlib.Path(SMARTCODE_PATH)
+                    .joinpath("icons")
+                    .joinpath(settings.get_icons_package())
+                    .joinpath("main.json"))
         try:
             if api_file.is_file() and api_file.exists():
                 return ijson.load(api_file)
         except:
             return None
 
-    def get_default_icons(self, icon):
-        return (
-            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}{icon}"
-        )
+    def get_default_icons(self, icon) -> str:
+        return str(pathlib.Path(SMARTCODE_PATH).joinpath("icons").joinpath("icons").joinpath(icon))
 
     def get_app_icon(self) -> object:
-        return self.get_qicon(
-            f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}icons{SYS_SEP}icons{SYS_SEP}logo-min.svg"
-        )
+        return self.get_qicon(str(pathlib.Path(SMARTCODE_PATH).joinpath("icons").joinpath("icons").joinpath("logo-min.svg")))
 
     # TODO
     def get_smartcode_icons(self, area: str = "-") -> dict:

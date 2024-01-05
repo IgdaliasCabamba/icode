@@ -1,13 +1,13 @@
 import os
 import os.path
 import functions
-import data
+import pathlib
+from .system import SMARTCODE_PATH
 from PyQt5.QtGui import QFontDatabase
 
 
 def get_fonts_from_resources() -> list:
-    directory = functions.getfn.get_correct_path_join(
-        f"{data.smartcode_directory}fonts{data.SYS_SEP}")
+    directory = pathlib.Path(SMARTCODE_PATH).joinpath("fonts")
     font_file_list = []
     if directory:
         for root, dirs, files in os.walk(directory):

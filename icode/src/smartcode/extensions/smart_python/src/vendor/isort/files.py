@@ -14,9 +14,9 @@ def find(paths: Iterable[str], config: Config, skipped: List[str],
         if os.path.isdir(path):
             for dirpath, dirnames, filenames in os.walk(
                     path, topdown=True, followlinks=config.follow_links):
-                base_path = Path(dirpath)
+                ROOT_PATH = Path(dirpath)
                 for dirname in list(dirnames):
-                    full_path = base_path / dirname
+                    full_path = ROOT_PATH / dirname
                     resolved_path = full_path.resolve()
                     if config.is_skipped(full_path):
                         skipped.append(dirname)

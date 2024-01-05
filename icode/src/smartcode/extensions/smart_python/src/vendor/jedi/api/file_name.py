@@ -47,9 +47,9 @@ def complete_file_name(
             is_in_os_path_join = False
         else:
             string = to_be_added + string
-    base_path = os.path.join(inference_state.project.path, string)
+    ROOT_PATH = os.path.join(inference_state.project.path, string)
     try:
-        listed = sorted(os.scandir(base_path), key=lambda e: e.name)
+        listed = sorted(os.scandir(ROOT_PATH), key=lambda e: e.name)
         # OSError: [Errno 36] File name too long: '...'
     except (FileNotFoundError, OSError):
         return

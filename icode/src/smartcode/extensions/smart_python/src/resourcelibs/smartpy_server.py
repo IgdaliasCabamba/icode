@@ -24,7 +24,7 @@ class SmartPyLanguageServer(object):
 
     def define_jedi(self):
         importlib.reload(jedi)
-        cache_directory = os.path.join(BASE_PATH, ".cache", "jedi")
+        cache_directory = os.path.join(ROOT_PATH, ".cache", "jedi")
 
         if pathlib.Path(cache_directory).is_dir():
             jedi.settings.cache_directory = cache_directory

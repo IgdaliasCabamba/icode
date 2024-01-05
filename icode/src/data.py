@@ -1,44 +1,41 @@
-from core.system import SYS_SEP, BASE_PATH, SYS_NAME
+from core.system import SMARTCODE_PATH, ROOT_PATH, SYS_NAME
 import os
 from pathlib import Path
 import smartlibs.mjson as ijson
 from core.storer import CacheManager, DataManager
 
-user_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}user{SYS_SEP}user.idt")
+user_cache = CacheManager(str(Path(ROOT_PATH)
+                          .joinpath(".cache")
+                          .joinpath("user")
+                          .joinpath("user.idt")))
 
-editor_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}editors{SYS_SEP}cache.idt")
+editor_cache = CacheManager(str(Path(ROOT_PATH)
+                            .joinpath(".cache")
+                            .joinpath(".editors")
+                            .joinpath("cache.idt").as_posix()))
 
-april_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}cache.idt")
+april_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("april").joinpath("cache.idt").as_posix()))
 
-assistant_cache = CacheManager(
-    f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}april{SYS_SEP}bot.idt")
+qt_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("user").joinpath("cache.idt").as_posix()))
 
-qt_cache = CacheManager(BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "user" +
-                        SYS_SEP + "cache.idt")
+labels_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("labs").joinpath("labels.idt").as_posix()))
 
-labels_cache = CacheManager(BASE_PATH + SYS_SEP + ".cache" + SYS_SEP + "labs" +
-                            SYS_SEP + "labels.idt")
+DATA_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("settings.json")
+TERMINALS_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("terminals.json")
+EDITOR_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("editor.json")
 
-DATA_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}settings.json"
-TERMINALS_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}terminals.json"
-EDITOR_FILE = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}code{SYS_SEP}editor.json"
-
-note_file_path = f"{BASE_PATH}{SYS_SEP}.cache{SYS_SEP}labs{SYS_SEP}notes.txt"
-note_file_path_obj = Path(note_file_path)
+note_file_path = Path(ROOT_PATH).joinpath(".cache").joinpath("labs").joinpath("notes.txt")
 
 cache_directorys = [
-    os.path.join(BASE_PATH, ".cache", "labs"),
-    os.path.join(BASE_PATH, ".cache", "april"),
-    os.path.join(BASE_PATH, ".cache", "editors"),
-    os.path.join(BASE_PATH, ".cache", "extensions"),
-    os.path.join(BASE_PATH, "smartcode", "code"),
-    os.path.join(BASE_PATH, "smartcode", "data"),
-    os.path.join(BASE_PATH, "smartcode", "data", "user"),
-    os.path.join(BASE_PATH, "smartcode", "data", "memory"),
-    os.path.join(BASE_PATH, "smartcode", "data", "extensions"),
+    os.path.join(ROOT_PATH, ".cache", "labs"),
+    os.path.join(ROOT_PATH, ".cache", "april"),
+    os.path.join(ROOT_PATH, ".cache", "editors"),
+    os.path.join(ROOT_PATH, ".cache", "extensions"),
+    os.path.join(ROOT_PATH, "smartcode", "code"),
+    os.path.join(ROOT_PATH, "smartcode", "data"),
+    os.path.join(ROOT_PATH, "smartcode", "data", "user"),
+    os.path.join(ROOT_PATH, "smartcode", "data", "memory"),
+    os.path.join(ROOT_PATH, "smartcode", "data", "extensions"),
 ]
 
 
@@ -49,15 +46,13 @@ def build_app_dirs():
 
 
 def build_notes_file():
-    if not note_file_path_obj.exists() or not note_file_path_obj.is_file():
+    if not note_file_path.exists() or not note_file_path.is_file():
         with open(note_file_path, "x") as file:
             pass
 
 
 build_app_dirs()
 build_notes_file()
-
-smartcode_directory = f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}"
 
 
 def save_data():

@@ -5,7 +5,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QScrollArea, QSplitter, qApp
 
 import core.consts as iconsts
-from functions import BASE_PATH, SYS_SEP, getfn
+from functions import getfn
 from .utils import consts, parent_tab_widget
 from .menus import MenuBar, NMenuBar
 from .mainwidgets import SideBottom, SideLeft, SideRight

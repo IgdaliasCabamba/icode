@@ -59,8 +59,7 @@ def go():
     show_alert()
 
     with tempfile.NamedTemporaryFile(mode='w+t') as tmp: 
-        tmp.write("chmod +x ./icode/bin/enable-qtwebengine.sh \n")
-        tmp.write("./icode/bin/enable-qtwebengine.sh \n")
+        tmp.write('export QTWEBENGINE\_CHROMIUM\_FLAGS="--no-sandbox" \n')
         tmp.write("source ./venv/bin/activate \n")
         tmp.write("python icode/app.py")
         tmp.flush()

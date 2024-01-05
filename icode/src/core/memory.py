@@ -1,14 +1,13 @@
 import pickle
 import os
-from .system import BASE_PATH, SYS_SEP, make_dirs
+from .system import SMARTCODE_PATH, make_dirs
 import pathlib
 
-icode_data_file = (
-    f"{BASE_PATH}{SYS_SEP}smartcode{SYS_SEP}data{SYS_SEP}memory{SYS_SEP}data.idt"
-)
+icode_data_file = pathlib.Path(SMARTCODE_PATH).joinpath("data").joinpath("memory").joinpath("data.idt")
+
 need_dirs = [
-    os.path.join(BASE_PATH, "smartcode", "data"),
-    os.path.join(BASE_PATH, "smartcode", "data", "memory"),
+    pathlib.Path(SMARTCODE_PATH).joinpath("data"),
+    pathlib.Path(SMARTCODE_PATH).joinpath("data").joinpath("memory")
 ]
 make_dirs(need_dirs)
 

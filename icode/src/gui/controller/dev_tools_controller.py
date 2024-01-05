@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
 from data import note_file_path, labels_cache
 import pathlib
+import os
 from core import system
 from core.char_utils import get_unicon
 
@@ -89,7 +90,7 @@ class TodosController(QObject):
 
     def set_data(self, editor: object, file_name: str):
         if file_name is not None:
-            self.file_name = str(file_name).replace(system.SYS_SEP, "_")
+            self.file_name = str(file_name).replace(os.sep, "_")
         else:
             self.file_name = file_name
 
