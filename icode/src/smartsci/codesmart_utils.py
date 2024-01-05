@@ -23,17 +23,16 @@ class CoEditor(QObject):
         self.last_highlight_word = None
 
     def run(self):
-        if self.editor.parent.is_text:
-            self.editor.on_highlight_sel_request.connect(
-                self.highlight_selection)
-            self.editor.on_highlight_match_request.connect(
-                self.highlight_match)
-            self.editor.on_word_added.connect(
-                lambda: self.timer.singleShot(500, self.set_lexer_from_code))
-            self.editor.on_close_char.connect(self.close_char)
-            self.editor.on_intellisense.connect(self.intellisense_editor)
-            self.editor.on_clear_annotation.connect(
-                self.prepare_annotations_garbage)
+        self.editor.on_highlight_sel_request.connect(
+            self.highlight_selection)
+        self.editor.on_highlight_match_request.connect(
+            self.highlight_match)
+        self.editor.on_word_added.connect(
+            lambda: self.timer.singleShot(500, self.set_lexer_from_code))
+        self.editor.on_close_char.connect(self.close_char)
+        self.editor.on_intellisense.connect(self.intellisense_editor)
+        self.editor.on_clear_annotation.connect(
+            self.prepare_annotations_garbage)
 
     def close_char(self, char):
         row, col = self.editor.getCursorPosition()

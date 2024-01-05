@@ -33,16 +33,6 @@ class EditorView(QFrame):
         if self.file is not None:
             self.file_watcher.start_monitoring(str(self.file))
 
-            if is_binary(str(self.file)):
-
-                type = mimetypes.guess_type(str(self.file))
-                if isinstance(type, tuple):
-                    if isinstance(type[0], str):
-                        if type[0].split("/")[0] == "image":
-                            self.content_type = "image"
-            else:
-                self.content_type = "text"
-
         self.init_ui()
 
     def run_schedule(self):
@@ -61,11 +51,7 @@ class EditorView(QFrame):
         self.div_main = Div(self.div)
         self.div_mirror = Div(self.div)
 
-        if self.content_type == "text":
-            self.init_text_editor()
-
-        elif self.content_type == "image":
-            self.init_media_editor()
+        self.init_text_editor()
 
         self.breadcrumb_controller1 = BreadcrumbController(
             self, self.editor_main)
@@ -165,25 +151,6 @@ class EditorView(QFrame):
         self.editor_main.update_document()
         self.editor_mirror.update_document()
 
-    def init_media_editor(self):
-        """Editor Main"""
-        self.editor_main = EditorMedia(self, self.file)
-        self.div_main.addWidget(self.editor_main)
-        """Editor Mirror"""
-
-        self.editor_mirror = EditorMedia(self, self.file)
-        self.div_mirror.addWidget(self.editor_mirror)
-
-    @property
-    def is_text(self) -> bool:
-        if isinstance(self.editor_main, Editor):
-            return True
-        return False
-
-    def is_media(self) -> bool:
-        if isinstance(self.editor_main, EditorMedia):
-            return True
-        return False
 
     def update_breadcrumb(self, data: dict) -> None:
         text = False
@@ -224,15 +191,9 @@ class EditorView(QFrame):
         self.div.setOrientation(Qt.Vertical)
         self.div_mirror.show()
 
-        if self.is_media:
-            self.editor_mirror.player.load()
-
     def split_vertically(self):
         self.div.setOrientation(Qt.Horizontal)
         self.div_mirror.show()
-
-        if self.is_media:
-            self.editor_mirror.player.load()
 
     def join_in_group(self):
         self.div_mirror.hide()
@@ -240,30 +201,27 @@ class EditorView(QFrame):
     def focused(self, event, widget):
         self._editor = widget
         self.api.tab_focused(self, event)
-        if self.is_text:
-            self.update_shadow(self._editor.verticalScrollBar().value())
+        self.update_shadow(self._editor.verticalScrollBar().value())
 
     def resizeEvent(self, event) -> None:
         super().resizeEvent(event)
-        if self.is_text:
-            self.update_shadow(self._editor.verticalScrollBar().value())
+        self.update_shadow(self._editor.verticalScrollBar().value())
 
     def update_shadow(self, value):
-        if self.is_text:
-            if value > 2:
-                self.drop_shadow.setBlurRadius(
-                    iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE1)
-                self.drop_shadow.setOffset(
-                    iconsts.BREADCRUMB_SHADOW_Y_OFFSET_STATE1,
-                    iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE1,
-                )
-            else:
-                w = self.editor.minimap.size().width()
-                y_offset = self.size().width() - w - 200
-                self.drop_shadow.setBlurRadius(
-                    iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
-                self.drop_shadow.setOffset(
-                    y_offset, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0)
+        if value > 2:
+            self.drop_shadow.setBlurRadius(
+                iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE1)
+            self.drop_shadow.setOffset(
+                iconsts.BREADCRUMB_SHADOW_Y_OFFSET_STATE1,
+                iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE1,
+            )
+        else:
+            w = self.editor.minimap.size().width()
+            y_offset = self.size().width() - w - 200
+            self.drop_shadow.setBlurRadius(
+                iconsts.BREADCRUMB_SHADOW_BLURRADIUS_STATE0)
+            self.drop_shadow.setOffset(
+                y_offset, iconsts.BREADCRUMB_SHADOW_X_OFFSET_STATE0)
 
     @property
     def editor(self):
@@ -290,59 +248,52 @@ class EditorView(QFrame):
         self.on_tab_content_changed.emit({"widget": self, "data": data})
 
     def save_file(self):
-        if self.is_text:
-            if self.file is None:
-                home_dir = settings.ipwd()
-                file = QFileDialog.getSaveFileName(None, "Open file", home_dir)
-                if file[0]:
-                    self.file = file[0]
-                    settings.icwd(Path(self.file).parent)
+        if self.file is None:
+            home_dir = settings.ipwd()
+            file = QFileDialog.getSaveFileName(None, "Open file", home_dir)
+            if file[0]:
+                self.file = file[0]
+                settings.icwd(Path(self.file).parent)
 
-                    filefn.write_to_file(self.editor_main.text(), file[0])
-                    self.editor_main.save_file(self.file)
-                    self.editor_mirror.save_file(self.file)
-
-                    self.editor_main.define_lexer()
-                    self.editor_mirror.define_lexer()
-                    self.file_watcher.start_monitoring(str(self.file))
-            else:
-                filefn.write_to_file(self.editor_main.text(), self.file)
+                filefn.write_to_file(self.editor_main.text(), file[0])
                 self.editor_main.save_file(self.file)
                 self.editor_mirror.save_file(self.file)
+
+                self.editor_main.define_lexer()
+                self.editor_mirror.define_lexer()
+                self.file_watcher.start_monitoring(str(self.file))
+        else:
+            filefn.write_to_file(self.editor_main.text(), self.file)
+            self.editor_main.save_file(self.file)
+            self.editor_mirror.save_file(self.file)
 
     def file_saved(self):
-        if self.is_text:
-            if self.file is None:
-                self.save_file()
-
-            else:
-                self.editor_main.save_file(self.file)
-                self.editor_mirror.save_file(self.file)
-
-    def load_file(self):
-        if self.is_text:
-            try:
-                if self.file is not None:
-                    row1, col1 = self.editor_main.getCursorPosition()
-                    row2, col2 = self.editor_mirror.getCursorPosition()
-                    self.editor_main.set_text(filefn.read_file(self.file))
-                    self.editor_main.setCursorPosition(row1, col1)
-                    self.editor_mirror.setCursorPosition(row2, row2)
-                    self.save_file()
-            except:
-                pass
-
-    def make_deep_copy(self, editor):
-        if self.is_text:
-            self.file = editor.file
-            self.editor_main.file_path = self.file
-            self.editor_mirror.file_path = self.file
-            self.editor_main.clone_this_editor(editor.editor_main)
-            self.editor_mirror.clone_this_editor(editor.editor_mirror)
+        if self.file is None:
+            self.save_file()
 
         else:
-            self.editor_main.player.image = editor.editor_main.player.image
-            self.editor_main.player.load()
+            self.editor_main.save_file(self.file)
+            self.editor_mirror.save_file(self.file)
+
+    def load_file(self):
+        try:
+            if self.file is not None:
+                row1, col1 = self.editor_main.getCursorPosition()
+                row2, col2 = self.editor_mirror.getCursorPosition()
+                self.editor_main.set_text(filefn.read_file(self.file))
+                self.editor_main.setCursorPosition(row1, col1)
+                self.editor_mirror.setCursorPosition(row2, row2)
+                self.save_file()
+        except:
+            pass
+
+    def make_deep_copy(self, editor):
+        self.file = editor.file
+        self.editor_main.file_path = self.file
+        self.editor_mirror.file_path = self.file
+        self.editor_main.clone_this_editor(editor.editor_main)
+        self.editor_mirror.clone_this_editor(editor.editor_mirror)
+
 
     def show_hide_breadcrumbs(self, state: bool = None):
         if state is None:
@@ -360,48 +311,42 @@ class EditorView(QFrame):
     def save_state(self):
         content_path = str(self.file)
 
-        if self.is_text:
-            content = self.editor.text()
-            selection = self.editor.getSelection()
-            cursor_pos = self.editor.getCursorPosition()
-            lexer = self.editor.lexer_name
-            vbar = self.editor.verticalScrollBar().value()
-            hbar = self.editor.horizontalScrollBar().value()
-            if self.file is None:
-                content_path = None
+        content = self.editor.text()
+        selection = self.editor.getSelection()
+        cursor_pos = self.editor.getCursorPosition()
+        lexer = self.editor.lexer_name
+        vbar = self.editor.verticalScrollBar().value()
+        hbar = self.editor.horizontalScrollBar().value()
+        if self.file is None:
+            content_path = None
 
-            return {
-                "type": "text",
-                "path": content_path,
-                "text": content,
-                "selection": selection,
-                "cursor": cursor_pos,
-                "lexer": lexer,
-                "hbar": hbar,
-                "vbar": vbar,
-            }
-        elif self.is_media:
-            return {"type": "image", "lexer": "image", "path": content_path}
+        return {
+            "type": "text",
+            "path": content_path,
+            "text": content,
+            "selection": selection,
+            "cursor": cursor_pos,
+            "lexer": lexer,
+            "hbar": hbar,
+            "vbar": vbar,
+        }
 
     def restore_state(self, state):
-        if state["type"] == "text":
-            lexer_name = state["lexer"]
-            file = state["path"]
-            code = state["text"]
-            cursor = state["cursor"]
-            selection = state["selection"]
-            scroll_v = state["hbar"]
-            scroll_h = state["vbar"]
+        lexer_name = state["lexer"]
+        file = state["path"]
+        code = state["text"]
+        cursor = state["cursor"]
+        selection = state["selection"]
+        scroll_v = state["hbar"]
+        scroll_h = state["vbar"]
 
-            if file is None:
-                self.editor.set_text(code)
+        if file is None:
+            self.editor.set_text(code)
 
-            for code_editor in self.editors:
-                code_editor.set_lexer(getfn.get_lexer_from_name(lexer_name))
-                code_editor.setCursorPosition(cursor[0], cursor[1])
-                code_editor.verticalScrollBar().setValue(scroll_v)
-                code_editor.horizontalScrollBar().setValue(scroll_h)
-                code_editor.setSelection(selection[0], selection[1],
-                                         selection[2], selection[3])
-        else:
-            pass
+        for code_editor in self.editors:
+            code_editor.set_lexer(getfn.get_lexer_from_name(lexer_name))
+            code_editor.setCursorPosition(cursor[0], cursor[1])
+            code_editor.verticalScrollBar().setValue(scroll_v)
+            code_editor.horizontalScrollBar().setValue(scroll_h)
+            code_editor.setSelection(selection[0], selection[1],
+                                        selection[2], selection[3])

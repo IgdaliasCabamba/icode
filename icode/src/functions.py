@@ -723,9 +723,8 @@ class Is:
                               value: str = None) -> bool:
         if hasattr(widget, "objectName"):
             if widget.objectName() == "editor-frame":
-                if widget.is_text:
-                    if getattr(widget.editor, str(attr), None) == value:
-                        return widget
+                if getattr(widget.editor, str(attr), None) == value:
+                    return widget
         return False
 
 

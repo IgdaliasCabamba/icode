@@ -146,9 +146,9 @@ class MiniMap(QsciScintilla):
         scroll_value = self.editor.verticalScrollBar().value()
 
         if self.current_scroll_value < scroll_value:
-            self.editor.verticalScrollBar().setValue(scroll_value + los)
+            self.editor.verticalScrollBar().setValue(int(scroll_value + los))
         else:
-            self.editor.verticalScrollBar().setValue(scroll_value - los)
+            self.editor.verticalScrollBar().setValue(int(scroll_value - los))
 
     def wheelEvent(self, event):
         super().wheelEvent(event)

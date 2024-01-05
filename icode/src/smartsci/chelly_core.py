@@ -24,7 +24,6 @@ from functions import filefn, getfn
 from . import iconsts, get_unicon
 import settings
 import mimetypes
-from .media_viewer import *
 from binaryornot.check import is_binary
 
 
@@ -37,14 +36,10 @@ class BreadcrumbController(QObject):
         self.editor = editor
 
     def run(self):
-        if self.parent.is_text:
-            self.make_headers()
-            self.editor.on_text_changed.connect(self.text_changed)
-            self.editor.on_saved.connect(self.editor_saved)
-            self.editor.idocument.on_changed.connect(self.make_headers)
-
-        if self.parent.content_type == "image":
-            self.editor.player.on_image_clicked.connect(self.display_cords)
+        self.make_headers()
+        self.editor.on_text_changed.connect(self.text_changed)
+        self.editor.on_saved.connect(self.editor_saved)
+        self.editor.idocument.on_changed.connect(self.make_headers)
 
         self.parent.file_watcher.on_file_deleted.connect(self.file_deleted)
         self.parent.file_watcher.on_file_modified.connect(self.file_modified)
@@ -127,18 +122,6 @@ class BreadcrumbController(QObject):
             "last": True
         })
 
-    def display_cords(self, cords):
-        self.on_update_header.emit({
-            "text": f"X = {cords.x()}",
-            "widget": "code-first",
-            "last": False
-        })
-        self.on_update_header.emit({
-            "text": f"Y = {cords.y()}",
-            "widget": "code-second",
-            "last": True
-        })
-
 
 class Breadcrumbs(QFrame):
 
@@ -159,39 +142,30 @@ class Breadcrumbs(QFrame):
         self.spacing.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.breadcrumb0 = QPushButton(self)
-        self.breadcrumb0.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb0.setVisible(False)
 
         self.breadcrumb1 = QPushButton(self)
-        self.breadcrumb1.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb1.setVisible(False)
 
         self.breadcrumb2 = QPushButton(self)
-        self.breadcrumb2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb2.setVisible(False)
 
         self.breadcrumb3 = QPushButton(self)
-        self.breadcrumb3.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb3.setVisible(False)
 
         self.breadcrumb4 = QPushButton(self)
-        self.breadcrumb4.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb4.setVisible(False)
 
         self.breadcrumb00 = QPushButton(self)
-        self.breadcrumb00.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb00.setVisible(False)
 
         self.breadcrumb01 = QPushButton(self)
-        self.breadcrumb01.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb01.setVisible(False)
 
         self.breadcrumb02 = QPushButton(self)
-        self.breadcrumb02.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb02.setVisible(False)
 
         self.breadcrumb03 = QPushButton(self)
-        self.breadcrumb03.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.breadcrumb03.setVisible(False)
 
         self.file_info = QPushButton(self)
