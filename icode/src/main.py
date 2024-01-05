@@ -259,7 +259,7 @@ class App(Server):
         """Set the current editor and change icode current working dir in memory"""
         file = widget.file
         self.editor_widgets.set_current_editor(widget)
-        self.todos.set_data(widget, file)
+        
         if file is not None:
             settings.icwd(pathlib.Path(file).parent)
         self.on_current_editor_changed.emit(widget)

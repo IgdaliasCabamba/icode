@@ -281,12 +281,10 @@ class Server(QObject, Core):
     def init_controllers(self):
         self.ui.set_controller(self)
         self.assistant = AssistantController(self, self.ui.side_left.april)
-        self.notes = NotesController(self, self.ui.side_right.notes)
         self.file_explorer = FileExplorerController(self,
                                                     self.ui.side_left.explorer)
         self.git = GitController(self, self.ui.side_left.git)
         self.searcher = SearcherController(self, self.ui.side_left.searcher)
-        self.todos = TodosController(self, self.ui.side_right.todos)
 
     def notify(self, title, text, widgets):
         self.ui.notificator.new_notification(title, text, widgets)

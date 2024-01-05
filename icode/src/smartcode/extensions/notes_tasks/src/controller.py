@@ -1,10 +1,20 @@
 from PyQt5.QtCore import Qt, pyqtSignal, QThread, QObject
-from data import note_file_path, labels_cache
 import pathlib
 import os
-from core import system
+from core.system import ROOT_PATH
 from core.char_utils import get_unicon
+from core.storer import CacheManager, DataManager
 
+
+labels_cache = CacheManager(str(pathlib.Path(ROOT_PATH).joinpath(".cache").joinpath("labs").joinpath("labels.idt").as_posix()))
+note_file_path = pathlib.Path(ROOT_PATH).joinpath(".cache").joinpath("labs").joinpath("notes.txt")
+
+def build_notes_file():
+    if not note_file_path.exists() or not note_file_path.is_file():
+        with open(note_file_path, "x") as file:
+            pass
+
+build_notes_file()
 
 class NotesCore(QObject):
 
@@ -22,9 +32,8 @@ class NotesCore(QObject):
 
 class NotesController(QObject):
 
-    def __init__(self, application_core, view):
+    def __init__(self, view):
         super().__init__()
-        self.application_core = application_core
         self.view = view
 
         self.file = pathlib.Path(note_file_path)
@@ -47,9 +56,8 @@ class NotesController(QObject):
 
 class TodosController(QObject):
 
-    def __init__(self, application_core, view):
+    def __init__(self, view):
         super().__init__()
-        self.application_core = application_core
         self.view = view
 
         self.file_name = None

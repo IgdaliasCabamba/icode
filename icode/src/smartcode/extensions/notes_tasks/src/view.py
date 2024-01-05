@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
 )
 
 from PyQt5.QtGui import QColor
-from .igui import IListWidgetItem
+from gui.view.igui import IListWidgetItem
 from core.char_utils import get_unicon
 from core.code_api import icode_api
 

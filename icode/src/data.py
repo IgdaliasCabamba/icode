@@ -18,13 +18,10 @@ april_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("apri
 
 qt_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("user").joinpath("cache.idt").as_posix()))
 
-labels_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("labs").joinpath("labels.idt").as_posix()))
-
 DATA_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("settings.json")
 TERMINALS_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("terminals.json")
 EDITOR_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("editor.json")
 
-note_file_path = Path(ROOT_PATH).joinpath(".cache").joinpath("labs").joinpath("notes.txt")
 
 cache_directorys = [
     os.path.join(ROOT_PATH, ".cache", "labs"),
@@ -45,14 +42,7 @@ def build_app_dirs():
             os.makedirs(cache_directory)
 
 
-def build_notes_file():
-    if not note_file_path.exists() or not note_file_path.is_file():
-        with open(note_file_path, "x") as file:
-            pass
-
-
 build_app_dirs()
-build_notes_file()
 
 
 def save_data():

@@ -23,7 +23,6 @@ from .git_ui import IGit
 from .terminals import Terminal
 from .laboratory import Table, WorkSpace
 from .corners import BottomTabCorner
-from .dev_tools_ui import NotesUi, TodosUi
 
 
 class SideBottom(QFrame):
@@ -255,24 +254,6 @@ class SideRight(QFrame):
 
         self.spaces_manager = QStackedLayout()
         self.spaces_manager.setContentsMargins(0, 0, 0, 0)
-        self.btn_add_label = QPushButton("+")
-        self.btn_show_hide_labels = QPushButton("Show")
-
-        self.notes = NotesUi(self)
-        self.todos = TodosUi(self)
-
-        self.table_notes = Table(self, "Notes")
-
-        self.table_todos = Table(self, "Labels")
-        self.table_todos.add_header_widget(self.btn_show_hide_labels)
-        self.table_todos.add_header_widget(self.btn_add_label)
-
-        self.table_notes.add_widget(self.notes)
-        self.table_todos.add_widget(self.todos)
-        self.notes_work_space = WorkSpace("inotes", self)
-        self.notes_work_space.add_table(self.table_notes, 0, 0)
-        self.notes_work_space.add_table(self.table_todos, 1, 0)
-        self.add_space("inotes", self.notes_work_space)
 
         self.layout.addLayout(self.header_layout)
         self.layout.addLayout(self.spaces_manager)
