@@ -130,6 +130,7 @@ class TodosController(QObject):
             print(e)
 
     def show_hide_all(self):
+        #TODO: Fix hide all
         try:
             if self.is_showing:
                 self.is_showing = False
