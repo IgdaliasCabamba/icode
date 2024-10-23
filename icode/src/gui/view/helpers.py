@@ -46,10 +46,6 @@ class ToolBar(QToolBar):
         self.extensions.setCheckable(True)
         self.extensions.setToolTip("Icode marketplace, extends your editor")
 
-        self.april = QAction(self.icons.get_icon("april"), "", self)
-        self.april.setCheckable(True)
-        self.april.setToolTip("April, your assitent")
-
         self.config = QAction(self.icons.get_icon("config"), "", self)
         self.config.setCheckable(False)
         self.config.setToolTip("Settings")
@@ -66,7 +62,6 @@ class ToolBar(QToolBar):
         self.add_action(self.search)
         self.add_action(self.ilab)
         self.add_action(self.extensions)
-        self.add_action(self.april)
         self.add_action(self.igit)
         self.addWidget(self.spacing)
         self.add_action(self.config)

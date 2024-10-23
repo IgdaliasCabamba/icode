@@ -12,7 +12,6 @@ from PyQt5.QtWidgets import (
 from functions import getfn
 
 from smartlibs.qtmd import HeaderPushButton, QGithubButton
-from .assistant_ui import AssistantUi
 from .file_explorer_ui import FileExplorerUi
 from .igui import IGenericNotebook
 from .investigator_ui import SearcherUi
@@ -160,14 +159,12 @@ class SideLeft(QFrame):
         self.explorer = FileExplorerUi(self)
         self.searcher = SearcherUi(self)
         self.extender = ExtensionsUi(self)
-        self.april = AssistantUi(self)
         self.labs = Labs(self)
         self.git = IGit(self)
 
         self.layout.addWidget(self.explorer)
         self.layout.addWidget(self.searcher)
         self.layout.addWidget(self.extender)
-        self.layout.addWidget(self.april)
         self.layout.addWidget(self.labs)
         self.layout.addWidget(self.git)
         self.setVisible(False)
@@ -176,12 +173,6 @@ class SideLeft(QFrame):
         self.widget_list.append(widget)
         self.layout.addWidget(widget)
 
-    def do_april(self) -> None:
-        if self.isVisible() and self.layout.currentWidget() is self.april:
-            self.setVisible(False)
-        else:
-            self.setVisible(True)
-            self.layout.setCurrentWidget(self.april)
 
     def do_files(self) -> None:
         if self.isVisible() and self.layout.currentWidget() is self.explorer:
@@ -190,12 +181,14 @@ class SideLeft(QFrame):
             self.setVisible(True)
             self.layout.setCurrentWidget(self.explorer)
 
+
     def do_searchs(self) -> None:
         if self.isVisible() and self.layout.currentWidget() is self.searcher:
             self.setVisible(False)
         else:
             self.setVisible(True)
             self.layout.setCurrentWidget(self.searcher)
+
 
     def do_extensions(self) -> None:
         if self.isVisible() and self.layout.currentWidget() is self.extender:
@@ -204,6 +197,7 @@ class SideLeft(QFrame):
             self.setVisible(True)
             self.layout.setCurrentWidget(self.extender)
 
+
     def do_icode_labs(self) -> None:
         if self.isVisible() and self.layout.currentWidget() is self.labs:
             self.setVisible(False)
@@ -211,12 +205,14 @@ class SideLeft(QFrame):
             self.setVisible(True)
             self.layout.setCurrentWidget(self.labs)
 
+
     def do_igit(self) -> None:
         if self.isVisible() and self.layout.currentWidget() is self.git:
             self.setVisible(False)
         else:
             self.setVisible(True)
             self.layout.setCurrentWidget(self.git)
+
 
     def do_any_widget(self, widget: object) -> None:
         if widget in self.widget_list:

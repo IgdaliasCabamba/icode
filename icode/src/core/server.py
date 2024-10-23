@@ -57,7 +57,6 @@ class Core(object):
         self.tool_bar.search.triggered.connect(self.side_left.do_searchs)
         self.tool_bar.extensions.triggered.connect(
             self.side_left.do_extensions)
-        self.tool_bar.april.triggered.connect(self.side_left.do_april)
         self.tool_bar.ilab.triggered.connect(self.side_left.do_icode_labs)
         self.tool_bar.igit.triggered.connect(self.side_left.do_igit)
         self.tool_bar.config.triggered.connect(self.configure_icode)
@@ -280,7 +279,6 @@ class Server(QObject, Core):
 
     def init_controllers(self):
         self.ui.set_controller(self)
-        self.assistant = AssistantController(self, self.ui.side_left.april)
         self.file_explorer = FileExplorerController(self,
                                                     self.ui.side_left.explorer)
         self.git = GitController(self, self.ui.side_left.git)

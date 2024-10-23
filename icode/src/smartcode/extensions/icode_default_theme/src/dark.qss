@@ -354,7 +354,6 @@ QStatusBar QSizeGrip,
 #ilabs-notes,
 #searcher-header-button,
 #source_control-header-button,
-#assistant-header-button,
 #explorer-header-button,
 #extensions QFrame,
 #terminal-view QListWidget,
@@ -380,19 +379,6 @@ QStatusBar QSizeGrip,
 #notify{
 	background:$mid;
 	border-radius: 4px;
-}
-#april-ui, #april-ui #main-area, #april-ui #main-frame {
-    border: none;
-    background-color: transparent;
-}
-#april-ui #card-message #msg {
-    background-color:#2a2a2a;
-    border-radius: 7px;
-}
-#april-ui #card-message #btn-copy {
-    background-color: #0e639c;
-    color:#eee;
-    padding: 2px 5px 2px 5px;
 }
 
 #bottom-notebook QTabBar::tab {

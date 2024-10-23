@@ -14,7 +14,6 @@ from ..controller.widgets_controller import EditorWidgets
 from .code_notebook import NoteBookEditor
 from .splitter import ISplitter
 from .index import Index, Welcome
-from .assistant_ui import AssistantUi
 from .notificator import Notificator
 from .settings_ui import ConfigUi
 from smartlibs.icodeframe import iwindow
@@ -42,7 +41,6 @@ class MainWindow(QMainWindow):
         self.parent = parent
         self.last_focus = None
         self.editor_widgets = None
-        self.april = None
 
         self.qapp = qapp
         self.qapp.focusChanged.connect(self._app_focus_changed)

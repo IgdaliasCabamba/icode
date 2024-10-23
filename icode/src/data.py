@@ -14,8 +14,6 @@ editor_cache = CacheManager(str(Path(ROOT_PATH)
                             .joinpath(".editors")
                             .joinpath("cache.idt").as_posix()))
 
-april_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("april").joinpath("cache.idt").as_posix()))
-
 qt_cache = CacheManager(str(Path(ROOT_PATH).joinpath(".cache").joinpath("user").joinpath("cache.idt").as_posix()))
 
 DATA_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("settings.json")
@@ -25,7 +23,6 @@ EDITOR_FILE = Path(SMARTCODE_PATH).joinpath("code").joinpath("editor.json")
 
 cache_directorys = [
     os.path.join(ROOT_PATH, ".cache", "labs"),
-    os.path.join(ROOT_PATH, ".cache", "april"),
     os.path.join(ROOT_PATH, ".cache", "editors"),
     os.path.join(ROOT_PATH, ".cache", "extensions"),
     os.path.join(ROOT_PATH, "smartcode", "code"),

@@ -241,8 +241,6 @@ class ViewMenu(QMenu):
         self.addAction(self.search)
         self.extensions = QAction("Extensions", self)
         self.addAction(self.extensions)
-        self.april = QAction("April", self)
-        self.addAction(self.april)
         self.addSeparator()
         self.bottom = QAction("Side Bottom", self)
         self.addAction(self.bottom)

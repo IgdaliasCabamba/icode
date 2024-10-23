@@ -14,7 +14,6 @@ class App(Server):
         self.side_left = self.ui.side_left
         self.side_right = self.ui.side_right
         self.editor_widgets = self.ui.editor_widgets
-        self.april = self.ui.april
         self.styler = Styler(self, self.ui, self.qt_app)
         self.styler.beautify()
         self.init_controllers()
