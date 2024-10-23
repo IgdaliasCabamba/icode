@@ -336,7 +336,7 @@ class Get:
             f"{settings.get_icons_package()}{os.sep}{settings.get_icons_theme()}"
         )
         self.icon_path = (
-            f"{pathlib.Path(SMARTCODE_PATH).joinpath("icons").joinpath(self.theme)}{os.sep}"
+            f"{pathlib.Path(SMARTCODE_PATH).joinpath('icons').joinpath(self.theme)}{os.sep}"
         )
 
     def get_adjusted_path(self, path):

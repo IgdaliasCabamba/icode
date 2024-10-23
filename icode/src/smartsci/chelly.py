@@ -1,4 +1,5 @@
 from .chelly_core import *
+from smartlibs.eqscintilla import PanelPosition, EQsciPanelManager
 
 
 class EditorView(QFrame):
@@ -122,13 +123,14 @@ class EditorView(QFrame):
         self.editor_main.on_focused.connect(self.focused)
         self.editor_main.on_saved.connect(self.update_title)
         self.editor_main.idocument.on_changed.connect(self.update_code)
-        self.minimap_main = MiniMapBox(self.editor_main, self)
+        self.minimap_main = MiniMapBox(self.editor_main)
         self.editor_main.set_minimap(self.minimap_main)
+        self.panel_manager_main = EQsciPanelManager(self.editor_main)
+        self.panel_manager_main.append(self.minimap_main, PanelPosition.RIGHT)
 
         self.idocument = self.editor_main.idocument
 
         self.div_main.addWidget(self.editor_main)
-        self.div_main.addWidget(self.minimap_main)
         """Editor Mirror"""
 
         self.editor_mirror = Editor(self, self.file)
@@ -141,13 +143,14 @@ class EditorView(QFrame):
         self.editor_mirror.on_focused.connect(self.focused)
         self.editor_mirror.on_saved.connect(self.update_title)
         self.editor_mirror.idocument.on_changed.connect(self.update_code)
-        self.minimap_mirror = MiniMapBox(self.editor_mirror, self)
+        self.minimap_mirror = MiniMapBox(self.editor_mirror)
         self.editor_mirror.set_minimap(self.minimap_mirror)
+        self.panel_manager_mirror = EQsciPanelManager(self.editor_mirror)
+        self.panel_manager_mirror.append(self.minimap_mirror, PanelPosition.RIGHT)
 
         self.idocument_mirror = self.editor_mirror.idocument
 
         self.div_mirror.addWidget(self.editor_mirror)
-        self.div_mirror.addWidget(self.minimap_mirror)
         self.editor_main.update_document()
         self.editor_mirror.update_document()
 

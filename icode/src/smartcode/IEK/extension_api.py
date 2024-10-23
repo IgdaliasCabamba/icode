@@ -44,10 +44,7 @@ class BaseApi:
         pass
 
     def source_path(self, name: str = "src"):
-        return f"{(pathlib.Path(SMARTCODE_PATH)
-            .joinpath('extensions')
-            .joinpath(self.ext_name)
-            .joinpath(name))}{os.sep}"
+        return f"{(pathlib.Path(SMARTCODE_PATH).joinpath('extensions').joinpath(self.ext_name).joinpath(name))}{os.sep}"
 
     def path_object_to(self, prefix: str, path: str = "") -> object:
         if path != "":
@@ -172,11 +169,7 @@ class ModelUi(QObject, BaseApi):
         return self.__qapp
 
     def icons_path_to(self, icons_to: str):
-        return f"{(pathlib.Path(SMARTCODE_PATH)
-                   .joinpath('icons')
-                   .joinpath(get_icons_package())
-                   .joinpath(get_icons_theme())
-                   .joinpath(icons_to))}{os.sep}"
+        return f"{(pathlib.Path(SMARTCODE_PATH).joinpath('icons').joinpath(get_icons_package()).joinpath(get_icons_theme()).joinpath(icons_to))}{os.sep}"
 
     def is_light(self) -> bool:
         if self.qpalette in {"light", "white", 1, "day"}:

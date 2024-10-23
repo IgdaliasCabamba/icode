@@ -15,7 +15,8 @@ _UNICODE_ICONS = {
         "external_link": "\uf08e",
     },
     "fae": {
-        "bigger": "\ue285"
+        #"bigger": "\ue285"
+        "bigger": ">"
     },
     "nf": {
         "mdi-plus": "\uf914",

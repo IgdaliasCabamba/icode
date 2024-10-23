@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QColor
 from PyQt5.Qsci import *
 from . import iconsts
+from smartlibs.eqscintilla import Panel
 
 
 class MiniMap(QsciScintilla):
@@ -155,13 +156,13 @@ class MiniMap(QsciScintilla):
         self.editor.wheelEvent(event)
 
 
-class MiniMapBox(QFrame):
+class MiniMapBox(Panel):
 
-    def __init__(self, editor, parent) -> None:
-        super().__init__(parent)
+    def __init__(self, editor) -> None:
+        super().__init__(editor)
         self.setObjectName("minimap")
         self.editor = editor
-        self.parent = parent
+        self.parent = editor
         self.can_shadow = False
         self.init_ui()
 
