@@ -3,30 +3,6 @@ from .codesmart_core import *
 
 class Editor(EditorBase):
 
-    on_mouse_stoped = pyqtSignal(int, int, int)
-    on_mouse_moved = pyqtSignal(object)
-    on_mouse_pressed = pyqtSignal(object)
-    on_mouse_released = pyqtSignal(object)
-    on_cursor_pos_chnaged = pyqtSignal(int, int)
-    on_lines_changed = pyqtSignal(int)
-    on_selected = pyqtSignal(int, int, int, int)
-    on_highlight_sel_request = pyqtSignal(int, int, int, int, bool, str, int,
-                                          str)
-    on_highlight_match_request = pyqtSignal(int, int, bool, str, int, str)
-    on_focused = pyqtSignal(object, object)
-    on_resized = pyqtSignal(object)
-    on_style_changed = pyqtSignal(object)
-    on_lexer_changed = pyqtSignal(object)
-    on_word_added = pyqtSignal()
-    on_modify_key = pyqtSignal()
-    on_text_changed = pyqtSignal()
-    on_document_changed = pyqtSignal(object)
-    on_saved = pyqtSignal(str)
-    on_abcd_added = pyqtSignal()
-    on_complete = pyqtSignal(dict)
-    on_close_char = pyqtSignal(str)
-    on_intellisense = pyqtSignal(object, str)
-    on_clear_annotation = pyqtSignal(list, int, str)
 
     def __init__(self, parent: object, file=Union[str, None]) -> None:
         super().__init__(parent)
@@ -92,7 +68,6 @@ class Editor(EditorBase):
         self.coeditor.on_clear_indicator_range.connect(
             self.clear_indicator_range)
         self.coeditor.on_remove_annotations.connect(self.remove_annotations)
-        self.on_key_pressed.connect(self.key_press_event)
 
     @property
     def ide_mode(self) -> bool:
@@ -336,54 +311,13 @@ class Editor(EditorBase):
         if line not in self.folded_lines:
             self.folded_lines.append(line)
         self.display_annotation(line, mark, id, "on_fold")
-
-    def mouse_release_event(self, event: QMouseEvent) -> None:
-        self.on_mouse_released.emit(event)
-        for line in self.contractedFolds():
-            self.mark_fold(line, "...", 5)
-
-        for line in self.folded_lines:
-            if not line in self.contractedFolds():
-                self.folded_lines.remove(line)
-                self.clear_annotations_by_line("on_fold", line)
+        
 
     def mouse_press_event(self, event: QMouseEvent) -> None:
-        self.on_mouse_pressed.emit(event)
+        ...    
         # word = self.wordAtPoint(event.pos()).lower()
 
         # cmenu = QMenu(self)
         # newAct = cmenu.addAction("Foo")
         # openAct = cmenu.addAction("Bar")
         # action = cmenu.exec_(self.mapToGlobal(event.pos()))
-
-    def key_press_event(self, event: QKeyEvent) -> None:
-        key = event.key()
-        string = str(event.text())
-
-        if key in range(65, 90):
-            self.on_abcd_added.emit()
-
-        if string in self.pre_complete_keys or key in range(65, 90):
-            self.on_intellisense.emit(
-                self, string)  # it make icode more fast and responsive
-
-        if key in {32, 16777220}:
-            self.on_word_added.emit()
-
-        if key in {32, 16777217, 16777219, 16777220}:
-            self.on_modify_key.emit()
-
-        if string in self.closable_key_map.keys():
-            self.on_close_char.emit(string)
-
-    def mouse_move_event(self, event: QMouseEvent) -> None:
-        self.on_mouse_moved.emit(event)
-
-    def focus_in_event(self, event: QFocusEvent) -> None:
-        self.on_focused.emit(event, self)
-
-    def focus_out_event(self, event: QFocusEvent) -> None:
-        QToolTip.hideText()
-
-    def resize_event(self, event: QResizeEvent) -> None:
-        self.on_resized.emit(event)

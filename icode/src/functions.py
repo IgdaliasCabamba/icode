@@ -49,15 +49,6 @@ class IO:
             file = open(file_name, "w")
             file.close()
 
-    def remove_file(self, file_with_path):
-        return False
-
-    def read_file(self, file):
-        return file
-
-    def write_in_file(self, file):
-        return file
-
 
 class File(IO):
     """

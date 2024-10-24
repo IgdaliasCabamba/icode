@@ -156,7 +156,7 @@ class MiniMap(QsciScintilla):
         self.editor.wheelEvent(event)
 
 
-class MiniMapBox(Panel):
+class MiniMapPanel(Panel):
 
     def __init__(self, editor) -> None:
         super().__init__(editor)

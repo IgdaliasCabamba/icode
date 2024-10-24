@@ -16,6 +16,7 @@ class _BasePanelManager(QObject):
         self._left: int = -1
         self._right: int = -1
         self._bottom: int = -1
+        self._last_geometry = editor.geometry()
         self._panels: Dict[PanelPosition, Dict[str, Panel]] = {
             pos: {} for pos in PanelPosition.all_positions()
         }
@@ -276,7 +277,7 @@ class EQsciPanelManager(_PanelsSizeHelpers):
 
         self.editor.linesChanged.connect(self.update_viewport_margins)
         self.editor.SCN_UPDATEUI.connect(self._handle_update)
-        self.editor.SCN_PAINTED.connect(self._handle_update)
+        self.editor.on_resized.connect(self.refresh)
 
         self.editor.viewport().installEventFilter(self)
 
@@ -332,9 +333,13 @@ class EQsciPanelManager(_PanelsSizeHelpers):
                 return self._panels[zone][panel_name]
 
     def refresh(self) -> None:
-        self.resize_panels()
-        self._handle_update(self.editor.contentsRect(),
-                            0, force_update_margins=True)
+        new_geometry = self.editor.geometry()
+        if (self._last_geometry.width() != new_geometry.width()
+             or self._last_geometry.height() != new_geometry.height()):
+            self._last_geometry = new_geometry
+            self.resize_panels()
+            self._handle_update(self.editor.contentsRect(), 
+                                0, force_update_margins=True)
 
     def _handle_update(
         self, rect: object = None, delta_y: int = 0, force_update_margins: bool = True

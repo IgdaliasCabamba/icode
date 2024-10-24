@@ -315,15 +315,15 @@ class EditorBase(SmartScintilla):
         self.setIndicatorHoverStyle(QsciScintilla.ThinCompositionIndicator, 4)
         self.setIndicatorHoverForegroundColor(QColor("#5387e0"), 4)
 
-    def set_minimap(self, minimap: object) -> None:
-        self._minimap_box = minimap
-        self.minimap = minimap.minimap
-        self.scrollbar = minimap.scrollbar
+    def set_minimap(self, minimap_panel: object) -> None:
+        self._minimap_panel = minimap_panel
+        self.minimap = minimap_panel.minimap
+        self.scrollbar = minimap_panel.scrollbar
         self.build_doc_map()
 
     def set_minimap_visiblity(self, visiblity: bool):
         if self.minimap:
-            self._minimap_box.setVisible(visiblity)
+            self._minimap_panel.setVisible(visiblity)
 
     def set_mode(self, mode: int):
         if mode == 0:
@@ -500,19 +500,14 @@ class EditorBase(SmartScintilla):
                 self.update_document()
 
     def update_lines(self) -> None:
-        line_num = self.lines()
-        if line_num in range(0, 10):
-            self.setMarginWidth(0, "00")
-        elif line_num in range(10, 100):
-            self.setMarginWidth(0, "000")
-        elif line_num in range(100, 1000):
-            self.setMarginWidth(0, "0000")
-        elif line_num in range(1000, 10000):
-            self.setMarginWidth(0, "00000")
-        elif line_num in range(10000, 100000):
-            self.setMarginWidth(0, "000000")
-        else:
-            self.setMarginWidth(0, "00000000")
+        factor = 1
+        for i in range(0, 8):
+            if (self.lines()/(10**factor)) < 1:
+                break
+            factor += 1
+        
+        self.setMarginWidth(0, "0"*(factor+1))
+
 
     def go_to_line(self, lineno) -> None:
         if self.lines() >= lineno:
@@ -560,17 +555,39 @@ class EditorBase(SmartScintilla):
             self.minimap.fillIndicatorRange(line, column, until_line,
                                             until_column, indicator_id)
 
-    def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
-        super().mouseDoubleClickEvent(event)
-        # TODO
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         super().keyPressEvent(event)
-        self.on_key_pressed.emit(event)
+        key = event.key()
+        string = str(event.text())
+
+        if key in range(65, 90):
+            self.on_abcd_added.emit()
+
+        if string in self.pre_complete_keys or key in range(65, 90):
+            self.on_intellisense.emit(
+                self, string)  # it make icode more fast and responsive
+
+        if key in {32, 16777220}:
+            self.on_word_added.emit()
+
+        if key in {32, 16777217, 16777219, 16777220}:
+            self.on_modify_key.emit()
+
+        if string in self.closable_key_map.keys():
+            self.on_close_char.emit(string)    
+
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         super().mouseReleaseEvent(event)
-        self.mouse_release_event(event)
+        for line in self.contractedFolds():
+            self.mark_fold(line, "...", 5)
+
+        for line in self.folded_lines:
+            if not line in self.contractedFolds():
+                self.folded_lines.remove(line)
+                self.clear_annotations_by_line("on_fold", line)
+
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         last_row, last_col = self.getCursorPosition()
@@ -584,23 +601,11 @@ class EditorBase(SmartScintilla):
         else:
             self.remove_cursors()
 
-        self.mouse_press_event(event)
-
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
-        super().mouseMoveEvent(event)
-        self.mouse_move_event(event)
-
-    def focusInEvent(self, event: QFocusEvent) -> None:
-        super().focusInEvent(event)
-        self.focus_in_event(event)
 
     def focusOutEvent(self, event: QFocusEvent) -> None:
         super().focusOutEvent(event)
-        self.focus_out_event(event)
+        QToolTip.hideText()
 
-    def resizeEvent(self, event: QResizeEvent) -> None:
-        super().resizeEvent(event)
-        self.resize_event(event)
 
     def undid(self) -> None:
         can = self.SendScintilla(QsciScintilla.SCI_CANUNDO)

@@ -18,7 +18,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtGui import QColor
 from pathlib import Path
 from .codesmart import Editor, EditorBase
-from .codesmart_map import MiniMapBox
+from .codesmart_map import MiniMapPanel
 from .codesmart_core import IFile
 from functions import filefn, getfn
 from . import iconsts, get_unicon
