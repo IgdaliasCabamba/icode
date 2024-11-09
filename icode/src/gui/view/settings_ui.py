@@ -50,4 +50,4 @@ class ConfigUi(QFrame):
         self.lbl_status.setText("<strong style='color:green'>Saved</strong>")
     
     def change_status(self):
-        self.lbl_status.setText("<strong style='color:crimen'>Modified</strong>")
+        self.lbl_status.setText("<strong style='color:crimson'>Modified</strong>")
