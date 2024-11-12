@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from PyQt5.QtCore import Qt
 import smartlibs.mjson as ijson
@@ -208,6 +209,7 @@ def restore_window(window, app, getfn):
 
 def icwd(new_dir):
     MEMORY["icode"]["paths"]["current-path"] = str(new_dir)
+    os.chdir(new_dir)
 
 
 def ipwd():

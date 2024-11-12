@@ -114,7 +114,7 @@ class ModernWindow(QWidget):
         self.hbox_title.setContentsMargins(0, 0, 0, 0)
 
         self.lbl_title = QLabel("Title")
-        self.lbl_title.setObjectName("lbl_title")
+        self.lbl_title.setObjectName("lbl-title")
         self.lbl_title.setAlignment(Qt.AlignCenter)
 
         size_policy_buttons = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)

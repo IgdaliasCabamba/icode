@@ -89,6 +89,3 @@ class IDocument(QObject):
             "icon": self.icon,
             "first_line": self.first_line_text,
         }
-
-    def save_data(self):
-        pass
