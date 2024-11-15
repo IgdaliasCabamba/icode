@@ -334,11 +334,11 @@ class App(Server):
     def close_lab(self):
         self.side_right.setVisible(False)
 
-    def split_notebook_hor(self, widget: QWidget) -> None:
+    def split_notebook_horizontally(self, widget: QWidget) -> None:
         """Create a new notebook and split horizontally, like a vscode"""
         self.create_new_notebook(Qt.Horizontal, widget)
 
-    def split_notebook_ver(self, widget: QWidget) -> None:
+    def split_notebook_vertically(self, widget: QWidget) -> None:
         """Create a new notebook and split vertically, like a vscode"""
         self.create_new_notebook(Qt.Vertical, widget)
 
@@ -478,7 +478,7 @@ class App(Server):
         if copy:
             self.copy_editor(notebook, tab_data)
 
-        DIRS = {Qt.Vertical: consts.DOWN, Qt.Horizontal: consts.RIGHT}
+        DIRS = {Qt.Vertical: ISplitter.DOWN, Qt.Horizontal: ISplitter.RIGHT}
 
         self.ui.isplitter.add_notebook(notebook)
         self.ui.isplitter.splitAt(parent_notebook, DIRS[orientation], notebook)

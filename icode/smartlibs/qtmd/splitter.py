@@ -1,8 +1,7 @@
 from PyQt5.QtWidgets import QFrame, QSplitter, QFrame, QStackedLayout, QTabWidget
 from PyQt5.QtCore import Qt, pyqtSignal
 
-from smartlibs.qtmd import CategoryMixin
-from .utils import consts
+from . import CategoryMixin
 
 
 class Splitter(QSplitter):
@@ -49,7 +48,24 @@ class Splitter(QSplitter):
 
 
 class ISplitter(QFrame, CategoryMixin):
+    
+    UP = 0
 
+    DOWN = 1
+
+    LEFT = 2
+
+    RIGHT = 3
+
+    ORIENTATIONS = {
+        UP: Qt.Vertical,
+        DOWN: Qt.Vertical,
+        LEFT: Qt.Horizontal,
+        RIGHT: Qt.Horizontal,
+    }
+
+    MOVES = {UP: -1, DOWN: 1, LEFT: -1, RIGHT: 1}
+    
     SplitterClass = Splitter
     on_last_tab_closed = pyqtSignal()
 
@@ -85,14 +101,14 @@ class ISplitter(QFrame, CategoryMixin):
 
             idx = parent.indexOf(current_widget)
 
-        orientation = consts.ORIENTATIONS[direction]
+        orientation = ISplitter.ORIENTATIONS[direction]
         if parent.orientation() == orientation:
             oldsize = parent.sizes()
             if oldsize:
                 oldsize[idx] //= 2
                 oldsize.insert(idx, oldsize[idx])
 
-            if direction in (consts.DOWN, consts.RIGHT):
+            if direction in (ISplitter.DOWN, ISplitter.RIGHT):
                 idx += 1
 
             parent.insertWidget(idx, new_widget)
@@ -106,7 +122,7 @@ class ISplitter(QFrame, CategoryMixin):
 
             if current_widget:
                 oldsize = parent.sizes()
-                if direction in (consts.DOWN, consts.RIGHT):
+                if direction in (ISplitter.DOWN, ISplitter.RIGHT):
                     new_split.addWidget(current_widget)
                     parent.insertWidget(idx, new_split)
                     new_split.addWidget(new_widget)

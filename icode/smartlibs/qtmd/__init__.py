@@ -4,5 +4,6 @@ from .qgithubbutton import *
 from .qinputhistory import *
 from .qnotebook import *
 from .qscrolllabel import *
+from .splitter import *
 from .widgetcategory import *
 from .qroundprogressbar import *

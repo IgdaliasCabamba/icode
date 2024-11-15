@@ -126,9 +126,9 @@ class Core(object):
         notebook.cornerWidget().menu.join_in_group.triggered.connect(
             self.join_in_group)
         notebook.cornerWidget().btn_split.on_split_vertical.connect(
-            self.split_notebook_ver)
+            self.split_notebook_vertically)
         notebook.cornerWidget().btn_split.on_split_horizontal.connect(
-            self.split_notebook_hor)
+            self.split_notebook_horizontally)
 
     def build_components(self):
         if self.last_repository is not None:

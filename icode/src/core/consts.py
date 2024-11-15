@@ -52,13 +52,6 @@ CODE_PAGE_KOREAN_UNIFIED = 949
 CODE_PAGE_KOREAN_JOHAB = 1361
 
 
-class APRIL:
-    LOW = 0
-    FULL = 2
-    SMART = 3
-    CUSTOM = 999
-
-
 ORIENTATIONS = {
     0: Qt.Vertical,
     1: Qt.Vertical,

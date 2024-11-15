@@ -6,13 +6,13 @@ from PyQt5.QtWidgets import QDesktopWidget, QMainWindow, QScrollArea, QSplitter,
 
 import core.consts as iconsts
 from functions import getfn
-from .utils import consts, parent_tab_widget
+from .utils import parent_tab_widget
 from .menus import MenuBar, NMenuBar
 from .mainwidgets import SideBottom, SideLeft, SideRight
 from .helpers import StatusBar, ToolBar
 from ..controller.widgets_controller import EditorWidgets
 from .code_notebook import NoteBookEditor
-from .splitter import ISplitter
+from smartlibs.qtmd.splitter import ISplitter
 from .index import Index, Welcome
 from .notificator import Notificator
 from .settings_ui import ConfigUi
@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
         self._current_notebook.on_user_event.connect(self.set_notebook)
 
         self.isplitter.add_notebook(self._current_notebook)
-        self.isplitter.splitAt(None, consts.RIGHT, self._current_notebook)
+        self.isplitter.splitAt(None, ISplitter.RIGHT, self._current_notebook)
 
         self.scroll_area = QScrollArea(self)
 
