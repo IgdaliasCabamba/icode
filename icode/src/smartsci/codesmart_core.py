@@ -23,7 +23,7 @@ from functions import filefn, getfn
 from . import iconsts
 from .codesmart_utils import *
 from .idocument import IDocument
-from .imagesci import ImageScintilla
+from smartlibs.eqscintilla import EQscintilla
 from .lexers import *
 
 
@@ -52,6 +52,7 @@ class SmartAnnotation:
 
 
 class KeyBoard:
+    """Trying to extend the default qscintilla's keyboard shortcuts"""
 
     def __init__(self, editor):
         self.editor = editor
@@ -194,11 +195,10 @@ class Debugger(QObject):
             self._book_marks["break-points"].remove(line)
 
 
-class SmartScintilla(ImageScintilla):
+class SmartScintilla(EQscintilla):
 
     def __init__(self, parent: object) -> None:
         super().__init__(parent)
-        self.parent = parent
         self.code_completers = []
         self.development_environment_components = []
 
@@ -213,41 +213,11 @@ class SmartScintilla(ImageScintilla):
             run()
 
 
-class EditorTip(QFrame):
-
-    def __init__(self, parent: object) -> None:
-        super().__init__(parent)
-        self.parent = parent
-
-
 class EditorBase(SmartScintilla):
     abcd = {
-        "a",
-        "b",
-        "c",
-        "d",
-        "e",
-        "f",
-        "g",
-        "h",
-        "i",
-        "j",
-        "k",
-        "m",
-        "n",
-        "l",
-        "o",
-        "p",
-        "q",
-        "r",
-        "s",
-        "t",
-        "u",
-        "v",
-        "w",
-        "x",
-        "y",
-        "z",
+        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "m",
+        "n", "l", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+         "y", "z",
     }
     pre_complete_keys = {".", "(", "[", "{", ",", ";", " ", "_"}
     closable_key_map = {"(": ")", "[": "]", "{": "}", '"': '"', "'": "'"}
@@ -256,12 +226,10 @@ class EditorBase(SmartScintilla):
     def __init__(self, parent: object) -> None:
         super().__init__(parent)
         self.idocument = IDocument(self)
-        self.parent = parent
         self.icons = getfn.get_smartcode_icons("smartsci")
         self.keyboard = KeyBoard(self)
         self.debugger = Debugger(self)
         self.editable = True
-        self.info_image = False
         self.build()
 
     def build(self) -> None:
@@ -333,8 +301,6 @@ class EditorBase(SmartScintilla):
         else:
             self.editable = True
             self.setReadOnly(False)
-            if self.info_image:
-                self.delete_image(self.info_image)
 
     def update_editor_ui(self) -> None:
         self.scrollbar.update_position()
@@ -464,9 +430,7 @@ class EditorBase(SmartScintilla):
 
             if lexer != self._lexer:
                 self.set_lexer(lexer)
-
-            self.update_status_bar()
-            self.update_document()
+                
 
     def clear_lexer(self) -> None:
         if self.lexer() != None:
@@ -478,8 +442,10 @@ class EditorBase(SmartScintilla):
             self.SendScintilla(QsciScintilla.SCI_CLEARDOCUMENTSTYLE)
         self._lexer = None
 
+
     def jump_to_line(self, lineno: Union[int, None] = None) -> None:
         self.go_to_line(lineno)
+
 
     def set_lexer(self, lexer: object) -> None:
         if self.editable:
@@ -496,8 +462,7 @@ class EditorBase(SmartScintilla):
 
                 self.on_style_changed.emit(self)
                 self.on_lexer_changed.emit(self)
-                self.update_status_bar()
-                self.update_document()
+
 
     def update_lines(self) -> None:
         factor = 1
@@ -505,9 +470,8 @@ class EditorBase(SmartScintilla):
             if (self.lines()/(10**factor)) < 1:
                 break
             factor += 1
-        
-        self.setMarginWidth(0, "0"*(factor+1))
 
+        self.setMarginWidth(0, "0"*(factor+1))
 
     def go_to_line(self, lineno) -> None:
         if self.lines() >= lineno:
@@ -555,7 +519,6 @@ class EditorBase(SmartScintilla):
             self.minimap.fillIndicatorRange(line, column, until_line,
                                             until_column, indicator_id)
 
-
     def keyPressEvent(self, event: QKeyEvent) -> None:
         super().keyPressEvent(event)
         key = event.key()
@@ -575,8 +538,7 @@ class EditorBase(SmartScintilla):
             self.on_modify_key.emit()
 
         if string in self.closable_key_map.keys():
-            self.on_close_char.emit(string)    
-
+            self.on_close_char.emit(string)
 
     def mouseReleaseEvent(self, event: QMouseEvent) -> None:
         super().mouseReleaseEvent(event)
@@ -587,7 +549,6 @@ class EditorBase(SmartScintilla):
             if not line in self.contractedFolds():
                 self.folded_lines.remove(line)
                 self.clear_annotations_by_line("on_fold", line)
-
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         last_row, last_col = self.getCursorPosition()
@@ -601,11 +562,9 @@ class EditorBase(SmartScintilla):
         else:
             self.remove_cursors()
 
-
     def focusOutEvent(self, event: QFocusEvent) -> None:
         super().focusOutEvent(event)
         QToolTip.hideText()
-
 
     def undid(self) -> None:
         can = self.SendScintilla(QsciScintilla.SCI_CANUNDO)

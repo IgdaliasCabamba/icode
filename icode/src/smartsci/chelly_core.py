@@ -239,7 +239,6 @@ class Div(QSplitter):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName("editor-splitter")
-        self.parent = parent
         self.setStyleSheet(
             "QSplitter::handle:horizontal {width: 0px;}QSplitter::handle:vertical {height: 0px;}"
         )

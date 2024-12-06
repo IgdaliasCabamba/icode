@@ -196,10 +196,9 @@ class MainWindow(QMainWindow):
                 self._current_notebook = new.parent
                 self.on_tab_buffer_focused.emit(new)
 
-            if hasattr(new, "editor_view_parent"):
-                if hasattr(new.editor_view_parent, "notebook"):
-                    self.on_editor_changed.emit(new.editor_view_parent)
-                    self._current_notebook = new.editor_view_parent.notebook
+            if isinstance(new, Editor):
+                self.on_editor_changed.emit(new.parent().parent().parent())
+                self._current_notebook = new.parent().parent().parent().notebook
 
     def current_widget(self):
         return self.last_focus()

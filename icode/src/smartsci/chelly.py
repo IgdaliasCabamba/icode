@@ -17,7 +17,6 @@ class EditorView(QFrame):
         super().__init__(parent)
         self.setObjectName("editor-frame")
         self.api = api
-        self.parent = parent
         self.notebook = notebook
         self._title = None
         self.content_type = "text"

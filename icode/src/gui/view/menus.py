@@ -151,8 +151,6 @@ class HelpMenu(QMenu):
         self.tutorial_videos = QAction("Tutorial Videos", self)
         self.addAction(self.tutorial_videos)
         self.addSeparator()
-        self.join_twitter = QAction("Join Us on Twitter", self)
-        self.addAction(self.join_twitter)
         self.report_issue = QAction("Report Issue", self)
         self.addAction(self.report_issue)
         self.addSeparator()
@@ -373,8 +371,7 @@ class MenuBar(QMenu):
     """
 
     def __init__(self, parent=None) -> None:
-        super().__init__(parent=parent)
-        self.parent = parent
+        super().__init__(parent)
         self.init_ui()
 
     def init_ui(self) -> None:

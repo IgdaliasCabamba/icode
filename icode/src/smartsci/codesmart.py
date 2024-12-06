@@ -7,10 +7,8 @@ class Editor(EditorBase):
     def __init__(self, parent: object, file=Union[str, None]) -> None:
         super().__init__(parent)
         self.setObjectName("codesmart")
-        self.parent = parent
-        self.editor_view_parent = parent
-        self.menu = self.parent.parent.menu_bar
-        self.status_bar = self.parent.parent.status_bar
+        self.menu = self.parent().parent().menu_bar
+        self.status_bar = self.parent().parent().status_bar
         self.file_path = file
         self._lexer = None
         self.lexer_name = "none"
@@ -68,6 +66,8 @@ class Editor(EditorBase):
         self.coeditor.on_clear_indicator_range.connect(
             self.clear_indicator_range)
         self.coeditor.on_remove_annotations.connect(self.remove_annotations)
+        self.on_lexer_changed.connect(self.update_document)
+        self.on_lexer_changed.connect(self.update_status_bar)
 
     @property
     def ide_mode(self) -> bool:
@@ -102,8 +102,6 @@ class Editor(EditorBase):
             self.update_lines()
             self.define_lexer()
         except FileNotFoundError as e:
-            self.info_image = self.add_image(self.icons.get_path("no-data"),
-                                             (20, 5), (500, 500))
             self.set_mode(0)
             message = "File does not exist try to recreate pressing Ctrl+S"
             self.insertAt(message, 0, 0)
@@ -249,9 +247,6 @@ class Editor(EditorBase):
             self.annotations_data[event_to_remove].append(annotation)
             self._notes.append(annotation.annotation)
 
-    def update_header(self, data: dict) -> None:
-        self.editor_view_parent.update_breadcrumb(data)
-
     def update_title(self) -> None:
         if self.file_path is None:
             title = self.text(0).replace("\n", "")
@@ -306,6 +301,7 @@ class Editor(EditorBase):
         if self.minimap:
             self.minimap.setDocument(self.document())
             self.minimap.setLexer(self.lexer())
+
 
     def mark_fold(self, line, mark, id) -> None:
         if line not in self.folded_lines:
