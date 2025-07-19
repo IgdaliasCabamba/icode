@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import QFrame, QVBoxLayout, QPushButton, QHBoxLayout, QLabel, QSizePolicy
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QColor
 from functions import getfn
 from gui.view.code_viewer import GenericEditor
 from smartsci.lexers.lexerjson import JSONLexer
 from data import DATA_FILE
 from functions import filefn
+import hjson
 
 
 class ConfigUi(QFrame):
@@ -21,6 +22,7 @@ class ConfigUi(QFrame):
         self.vbox = QVBoxLayout(self)
         self.setLayout(self.vbox)
         hbox = QHBoxLayout()
+        self.timer = QTimer()
 
         self.settings_editor = GenericEditor(self)
         self.settings_editor.setCaretForegroundColor(QColor("gold"))
@@ -28,26 +30,26 @@ class ConfigUi(QFrame):
         
         self.settings_editor.set_lexer(JSONLexer(self.settings_editor))
         
-        self.btn_save_settings = QPushButton("Save settings")
-        self.btn_save_settings.clicked.connect(self.save_settings)
-        
-        self.lbl_status = QLabel("<strong style='color:cyan'>Unmodified</strong>", self)
-        self.lbl_status.setAlignment(Qt.AlignCenter)
-        
         self.vbox.addWidget(self.settings_editor)
-        self.vbox.addLayout(hbox)
-        hbox.addWidget(self.btn_save_settings)
-        hbox.addWidget(self.lbl_status)
         self.load_settings()
         
         self.settings_editor.textChanged.connect(self.change_status)
+        self.timer.timeout.connect(self.save_settings)
     
     def load_settings(self):
         self.settings_editor.set_text(filefn.read_file(DATA_FILE))
 
     def save_settings(self):
-        filefn.write_to_file(self.settings_editor.text(), DATA_FILE)
-        self.lbl_status.setText("<strong style='color:green'>Saved</strong>")
+        text = self.settings_editor.text()
+        try:
+            hjson.loads(text)
+        except Exception as e:
+            return
+        filefn.write_to_file(text, DATA_FILE)
+        self.timer.stop()
     
     def change_status(self):
-        self.lbl_status.setText("<strong style='color:crimson'>Modified</strong>")
+        if self.timer.isActive():
+            self.timer.stop()
+        
+        self.timer.start(3000)
