@@ -308,8 +308,8 @@ class Init(ModelApp):
         live_tips.on_add_indicator_range.connect(editor.add_indicator_range)
         live_tips.on_clear_indicator_range.connect(
             editor.clear_indicator_range)
-        live_tips.on_update_header.connect(editor.update_header)
-        ide_utils.on_update_header.connect(editor.update_header)
+        live_tips.on_update_header.connect(editor.parent().parent().parent().update_breadcrumb) # TODO: Fix this mess (Editor -> Div -> Qsplitter -> EditorView), Idiot young me, what a code smell!
+        ide_utils.on_update_header.connect(editor.parent().parent().parent().update_breadcrumb)
         ide_utils.on_tooltip_request.connect(editor.display_tooltip)
 
         editor.add_code_completer(autocomplete, autocomplete.run)
